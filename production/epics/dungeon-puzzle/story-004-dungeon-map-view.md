@@ -8,6 +8,7 @@
 > **Estimate**: M (5 hours)
 > **GDD**: design/gdd/dungeon-puzzle-mode.md (§3.1, §3.7, §5)
 > **TR**: TR-dungeon-001, TR-dungeon-007, TR-dungeon-009, TR-dungeon-011
+> **ADR**: ADR-0004, ADR-0009, ADR-0011, ADR-0012
 > **Blueprint**: DungeonScreen.jsx → DungeonMap (minus streak)
 
 ## Context

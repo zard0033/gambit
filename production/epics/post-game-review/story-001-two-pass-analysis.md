@@ -7,6 +7,8 @@
 > **Estimate**: L (6–8 hours — heaviest story in the project)
 > **Manifest Version**: 2026-05-29
 > **Last Updated**: 2026-05-30
+> **TR**: TR-post-game-review-001, TR-post-game-review-007
+> **ADR**: ADR-0001, ADR-0007
 
 ## Context
 

@@ -6,6 +6,8 @@
 > **Layer**: Foundation / Chess Engine
 > **Type**: Dependency upgrade + worker migration
 > **Governing ADR**: ADR-0001 (amended 2026-06-02)
+> **TR**: TR-chess-engine-001, TR-chess-engine-002
+> **ADR**: ADR-0001, ADR-0004, ADR-0007
 
 ## Context
 

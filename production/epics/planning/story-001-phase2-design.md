@@ -8,6 +8,8 @@
 > **Estimate**: M (4 hours)
 > **Manifest Version**: 2026-06-01
 > **Last Updated**: 2026-06-01
+> **TR**: N/A
+> **ADR**: N/A
 
 ## Context
 

@@ -2,7 +2,7 @@
 
 > **Status**: Draft
 > **Created**: 2026-05-27
-> **Last Updated**: 2026-05-28
+> **Last Updated**: 2026-06-15
 > **Source Concept**: [design/gdd/game-concept.md](./game-concept.md)
 
 ---
@@ -21,27 +21,27 @@ Lichess open-source components (chessground, stockfish.wasm, chess-openings) pro
 
 | # | System Name | Category | Priority | Status | Design Doc | Depends On |
 |---|-------------|----------|----------|--------|------------|------------|
-| 1 | Chess Board & Move System | Core | v0 | Approved (round 2, 2026-05-27) | [chess-board-and-move-system.md](./chess-board-and-move-system.md) ([review log](./reviews/chess-board-and-move-system-review-log.md)) | — |
-| 2 | Chess Engine Integration | Core | v0 | Approved (pending OQ#6 spike) | [chess-engine-integration.md](./chess-engine-integration.md) ([review log](./reviews/chess-engine-integration-review-log.md)) | — |
-| 3 | Opening Identification | Gameplay | v0 | Approved (2026-05-27) | [opening-identification.md](./opening-identification.md) | — |
-| 4 | Navigation & Routing | UI | v0 | Approved (2026-05-27) | [navigation-and-routing.md](./navigation-and-routing.md) | — |
-| 5 | Game Lifecycle | Gameplay | v0 | Approved (2026-05-27) | [game-lifecycle.md](./game-lifecycle.md) | Chess Board, Chess Engine |
-| 6 | Move Annotation Display | UI | v0 | Approved (2026-05-27) | [move-annotation-display.md](./move-annotation-display.md) ([review log](./reviews/move-annotation-display-review-log.md)) | Chess Board |
-| 7 | Post-Game Review | Gameplay | v0 | Approved (round 2, 2026-05-28) | [post-game-review.md](./post-game-review.md) ([review log](./reviews/post-game-review-review-log.md)) | Game Lifecycle, Chess Engine, Opening ID, Move Annotation |
-| 8 | Game Export / Share | Gameplay | v0 | Approved (2026-05-27) | [game-export-share.md](./game-export-share.md) | Game Lifecycle |
-| 8b | Opening Knowledge Cards | Gameplay | v0 | **Not Started** (added 2026-05-28 per Pillar 2 Option A) | — | Opening Identification, Post-Game Review |
-| 9 | Authentication | Persistence | MVP | Designed (combined with #11) | [supabase-integration.md](./supabase-integration.md) | — |
+| 1 | Chess Board & Move System | Core | v0 | Approved | [chess-board-and-move-system.md](./chess-board-and-move-system.md) ([review log](./reviews/chess-board-and-move-system-review-log.md)) | — |
+| 2 | Chess Engine Integration | Core | v0 | Approved | [chess-engine-integration.md](./chess-engine-integration.md) ([review log](./reviews/chess-engine-integration-review-log.md)) | — |
+| 3 | Opening Identification | Gameplay | v0 | Approved | [opening-identification.md](./opening-identification.md) | — |
+| 4 | Navigation & Routing | UI | v0 | Approved | [navigation-and-routing.md](./navigation-and-routing.md) | — |
+| 5 | Game Lifecycle | Gameplay | v0 | Approved | [game-lifecycle.md](./game-lifecycle.md) | Chess Board, Chess Engine |
+| 6 | Move Annotation Display | UI | v0 | Approved | [move-annotation-display.md](./move-annotation-display.md) ([review log](./reviews/move-annotation-display-review-log.md)) | Chess Board |
+| 7 | Post-Game Review | Gameplay | v0 | Approved | [post-game-review.md](./post-game-review.md) ([review log](./reviews/post-game-review-review-log.md)) | Game Lifecycle, Chess Engine, Opening ID, Move Annotation |
+| 8 | Game Export / Share | Gameplay | v0 | Approved | [game-export-share.md](./game-export-share.md) | Game Lifecycle |
+| 8b | Opening Knowledge Cards | Gameplay | v0 | Not Started | — | Opening Identification, Post-Game Review |
+| 9 | Authentication | Persistence | MVP | Designed | [supabase-integration.md](./supabase-integration.md) | — |
 | 10 | Difficulty System | Gameplay | MVP | Not Started | — | Chess Engine |
-| 11 | Data Sync (Supabase) | Persistence | MVP | Designed (combined with #9) | [supabase-integration.md](./supabase-integration.md) | Authentication |
-| 12 | Game History | Gameplay | MVP | **Approved (2026-06-01)** | [game-history.md](./game-history.md) ([review log](./reviews/game-history-review-log.md)) | Game Lifecycle, Data Sync |
+| 11 | Data Sync (Supabase) | Persistence | MVP | Designed | [supabase-integration.md](./supabase-integration.md) | Authentication |
+| 12 | Game History | Gameplay | MVP | Approved | [game-history.md](./game-history.md) ([review log](./reviews/game-history-review-log.md)) | Game Lifecycle, Data Sync |
 | 13 | Skill Scoring | Progression | MVP | Not Started | — | Post-Game Review, Data Sync |
 | 14 | Level Progression | Progression | MVP | Not Started | — | Skill Scoring, Difficulty System |
 | 15 | PWA Support | Meta | Polish | Not Started | — | — |
 | 16 | Audio System | Audio | Polish | Not Started | — | — |
 | 17 | Settings | UI | Polish | Not Started | — | Multiple |
-| 18 | Lesson System | Gameplay | Phase 2 | **In Design** (2026-06-01; static scripted, S12) | [lesson-system.md](./lesson-system.md) | Chess Board, Navigation & Routing |
-| 19 | Dungeon Puzzle Mode | Gameplay | Phase 2 | **Approved** (2026-06-05; static puzzles, no streak, S13) | [dungeon-puzzle-mode.md](./dungeon-puzzle-mode.md) ([review log](./reviews/dungeon-puzzle-mode-review-log.md)) | Chess Board, Navigation & Routing, Lesson System (pattern) |
-| 20 | Learning Loop (Concept Linking) | Gameplay (connective) | Phase 2 | **Approved (round 2, 2026-06-06)** (concept-tag bridges lesson↔puzzle↔game; realises ADR #4 / Pillar 2; D1 side-door practice mode) | [learning-loop.md](./learning-loop.md) ([review log](./reviews/learning-loop-review-log.md)) | Lesson System (#18), Dungeon Puzzle Mode (#19), Post-Game Review (#7) |
+| 18 | Lesson System | Gameplay | Phase 2 | In Design | [lesson-system.md](./lesson-system.md) | Chess Board, Navigation & Routing |
+| 19 | Dungeon Puzzle Mode | Gameplay | Phase 2 | Approved | [dungeon-puzzle-mode.md](./dungeon-puzzle-mode.md) ([review log](./reviews/dungeon-puzzle-mode-review-log.md)) | Chess Board, Navigation & Routing, Lesson System (pattern) |
+| 20 | Learning Loop (Concept Linking) | Gameplay (connective) | Phase 2 | Approved | [learning-loop.md](./learning-loop.md) ([review log](./reviews/learning-loop-review-log.md)) | Lesson System (#18), Dungeon Puzzle Mode (#19), Post-Game Review (#7) |
 
 ---
 

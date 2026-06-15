@@ -7,6 +7,8 @@
 > **Estimate**: S (2 hours)
 > **Manifest Version**: 2026-05-29
 > **Last Updated**: 2026-05-29
+> **TR**: TR-move-annotation-005
+> **ADR**: ADR-0006
 
 ## Context
 

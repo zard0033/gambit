@@ -8,6 +8,7 @@
 > **Estimate**: M (5 hours)
 > **GDD**: design/gdd/dungeon-puzzle-mode.md (§3.2, §3.3, §3.7)
 > **TR**: (content for) TR-dungeon-002…004; TR-dungeon-011 (Home entry)
+> **ADR**: ADR-0004, ADR-0009, ADR-0011, ADR-0012
 
 ## Context
 

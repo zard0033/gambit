@@ -8,6 +8,7 @@
 > **Estimate**: M
 > **GDD**: design/gdd/learning-loop.md (§3.2 D1, §4.2, §4.3; AC-2b)
 > **TR**: TR-ll-004
+> **ADR**: ADR-0004, ADR-0012
 
 ## Context
 

@@ -8,6 +8,8 @@
 > **Estimate**: S (4 hours)
 > **Manifest Version**: 2026-06-01
 > **Last Updated**: 2026-06-02
+> **TR**: pending /architecture-review
+> **ADR**: ADR-0001, ADR-0004, ADR-0007
 
 > **Deferral note (2026-06-02)**: Basic transitions are present (eval-bar width/colour
 > 120ms in `replay-analysis-overlay.vue`; control-bar opacity/colour). The full spec

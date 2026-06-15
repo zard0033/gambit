@@ -7,6 +7,8 @@
 > **Estimate**: M (4–5 hours)
 > **Manifest Version**: 2026-05-29
 > **Last Updated**: 2026-05-29
+> **TR**: TR-game-lifecycle-001, TR-game-lifecycle-002
+> **ADR**: ADR-0005
 
 ## Context
 

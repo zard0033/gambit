@@ -8,6 +8,7 @@
 > **Estimate**: S
 > **GDD**: design/gdd/learning-loop.md (§3.1, Appendix; AC-1 bidirectional clause)
 > **TR**: TR-ll-001
+> **ADR**: ADR-0004, ADR-0012
 
 ## Context
 

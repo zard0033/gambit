@@ -89,7 +89,7 @@ const NAV_ITEMS = [
     aria-label="主要導覽"
   >
     <div
-      class="pointer-events-auto rounded-full border border-white/[0.16] bg-[#142F28] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_10px_30px_rgba(0,0,0,0.45)]"
+      class="pointer-events-auto rounded-full border border-white/[0.16] bg-[linear-gradient(180deg,#1C3E34,#142F28)] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_10px_30px_rgba(0,0,0,0.45)]"
     >
       <div class="relative flex">
         <!-- Sliding jade indicator: one slot wide, translateX by activeIndex. -->
@@ -98,7 +98,7 @@ const NAV_ITEMS = [
           :class="activeIndex < 0 ? 'opacity-0' : 'opacity-100'"
           :style="{ transform: `translateX(${Math.max(activeIndex, 0) * 100}%)` }"
         >
-          <div class="mx-1 h-full rounded-full bg-primary" />
+          <div class="mx-1 h-full rounded-full bg-white/[0.13] border border-white/[0.28] shadow-[0_3px_10px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.25)]" />
         </div>
         <RouterLink
           v-for="item in NAV_ITEMS"

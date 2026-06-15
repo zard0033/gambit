@@ -7,6 +7,8 @@
 > **Estimate**: M (4–6 hours)
 > **Manifest Version**: 2026-05-29
 > **Last Updated**: 2026-05-29
+> **TR**: TR-chess-board-002
+> **ADR**: ADR-0006, ADR-0009
 
 ## Context
 

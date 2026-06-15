@@ -7,6 +7,8 @@
 > **Estimate**: S (2–3 hours)
 > **Manifest Version**: 2026-05-29
 > **Last Updated**: 2026-05-28
+> **TR**: TR-opening-id-001, TR-opening-id-002, TR-opening-id-003, TR-opening-id-004
+> **ADR**: ADR-0003
 
 ## Context
 

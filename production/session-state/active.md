@@ -1,7 +1,7 @@
 <!-- STATUS -->
-Epic: 課程頁完成流程改版 + dead-file 清理（2026-06-14，已 push）
-Feature: LessonView 完成頁去彈窗就地收尾 + 手機一頁顯示；孤兒檔/模板殘留清除（vitest 658）
-Task: 賽後檢討頁打磨待細列；header/招呼語/PWA 待實機複看
+Epic: UI 微調批（2026-06-15）
+Feature: 概念地圖緊湊化 redesign + nav 毛玻璃/圓角 + 課程/試煉細節
+Task: 本機改完未 push，待 Eason 拍板推版；賽後檢討頁打磨待細列
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 鐵則。歷史細節在 git log；詳盡規格在各 GDD / EPIC。
@@ -66,6 +66,18 @@ Task: 賽後檢討頁打磨待細列；header/招呼語/PWA 待實機複看
   **非結構保證**；它又接在核心 `onMove` 流程裡，移除＝拔掉 fallback。**升變無法只靠 vue-tsc/vitest 驗（要瀏覽器
   真走一步升變）**，故 2026-06-14 dead-file 清理時刻意不動，待能實機測升變時再移除並確認原生 reskin 完整接手。
 
+## ✅ Template Compliance Adoption（2026-06-15，已完成）
+
+> 計畫存 `docs/adoption-plan-2026-06-15.md`。
+
+- **BLOCKING 修復**：`design/gdd/systems-index.md` — 15 個 Status 欄清掉括號與 `**bold**`（`Approved (round 2, ...)` → `Approved`），`/gate-check`、`/create-stories`、`/architecture-review` 的 exact-match 恢復正常。
+- **HIGH 修復**：`.claude/docs/coordination-rules.md` — Opus 版本號 `claude-opus-4-6` → `claude-opus-4-8`（stale model ID 導致 model-tier skill 指向不存在版本）。
+- **MEDIUM 修復（story 全補完）**：71 個 story 全部掃完：
+  - TR 欄補齊：有 registry 的系統（chess-board / chess-engine / nav-routing / game-lifecycle / move-annotation / post-game-review / game-export / opening-id / opening-knowledge-cards / visual-identity / lesson-system）依 AC 配對正確 TR-ID；無 registry 的系統（game-history / game-replay / supabase / dungeon-puzzle / learning-loop）寫 `pending /architecture-review`。
+  - ADR 欄補齊：21 個缺 ADR 的 story 依 epic 目錄對應正確 ADR。
+  - AC 補齊：`technical-debt/story-001-tr-registry-update.md` 補 4 條 `- [ ]` checkbox。
+- **結果驗證**：掃完 71 stories — Missing TR: 0、Missing ADR: 0、Missing AC: 0。
+
 ## ✅ 全站 code review 修復批（2026-06-14 push）
 
 > workflow（gambit-fullsite-review，11 模組 + adversarial verify）出 53 findings → 修 **H2 + M19 + L16**，
@@ -107,6 +119,18 @@ Task: 賽後檢討頁打磨待細列；header/招呼語/PWA 待實機複看
 - **完成卡 redesign**：去掉「卡中卡」（cream 外框＋sage 內框）→ 單一卡、圓角統一去聊天缺角、隱藏 Neve header、徽章放大置中。
 - **手機版面**：一般步驟卡片貼齊棋盤下緣（`items-start`）、頭像收進卡片 header（拿掉外掛大頭像）；
   footer 按鈕改 `size="sm"`（原 `px-6` 預設害三鍵溢出卡片）。對話框打字 32→16ms、自動捲、釘頂 header（捲動不消失）。
+
+## 🚧 UI 微調批（2026-06-15，未 push）
+
+> 一連串 redesign 微調，涉 LessonView / HomeView / LearnView / ConceptMapView / DungeonMapView / app-nav。
+> 手機 390×844 Playwright 各頁實機看過（純 template/style，未動邏輯）。**本機改完，未 commit/push，待 Eason 拍板推版。**
+
+- **LessonView 完成卡**：scenario 不再溢出完成卡（`stepIndex===0 && !finished`）；總結改置中純文字（去 callout 框，避免搶戲）；動作鍵上下堆疊→左右並排；active 章節 done 課 badge「完成」→「複習」（去刪除線、`text-ink-muted`）。
+- **HomeView**：「開始新對局」卡 ChapterBadge → `Swords` 大浮水印 icon（`text-white/[0.07]`，右下溢出）。
+- **LearnView**：移除頂部 0/21 進度 header；章節卡統一樣式＝active/done/locked 同結構皆可展開收合（CSS grid `0fr→1fr` 動畫）；locked 章節可展開預覽（不可進入）；done 課「複習」可點回顧；active header 色 `surface-deep`→`surface-deep-2`（同 nav 太深修正）；章節 `1/8 ›` 計數從 `flex-col` 垂直堆疊→水平並排置中。
+- **ConceptMapView redesign**（`/redesign` 報告→Eason 拍板 **A 緊湊橫向卡**）：移除 DarkPanel 錨點卡（避免假可點）+ 整個 header；概念分 3 組（核心目標/戰術技巧/棋局原則）；卡片緊湊橫向化 112px→72px，硬幣徽章留、狀態改右側彩色圓點（已學綠/已練金）+ 頂部圖例、未學卡 `ChevronRight`「去學」指示；8 概念一屏覽完。清掉 orphan `.state` 樣式。
+- **DungeonMapView**：移除頂部「髒掉」的 distance haze 漸層；底部錨點計數 `solvedCount`→`currentPuzzle.order`（第一關 1/30，與主標「第 N 關」一致；全完成分支維持 solvedCount=30/30）。
+- **app-nav**：底部 pill 加漸層底 `linear-gradient(180deg,#1C3E34,#142F28)`（對齊 header 立體感）；active 指示器 `bg-primary` 實心→仿毛玻璃（`bg-white/[0.13]`+border+inset 高光，**不用 backdrop-blur**＝iOS 每幀重繪卡頓）；圓角對齊「課程/概念」switch（learn-tabs）＝三層 `rounded-full`（曾試 `rounded-[20px]` 後 Eason 拍板回 full）。
 
 ## 🚧 待辦 / 開放項
 

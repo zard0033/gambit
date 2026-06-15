@@ -8,6 +8,7 @@
 > **Estimate**: M (4 hours)
 > **GDD**: design/gdd/dungeon-puzzle-mode.md (Appendix: Puzzle Data Schema; §3.2, §4)
 > **TR**: TR-dungeon-010
+> **ADR**: ADR-0004, ADR-0009, ADR-0011, ADR-0012
 
 ## Context
 

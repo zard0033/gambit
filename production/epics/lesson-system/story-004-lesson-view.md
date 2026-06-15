@@ -8,6 +8,8 @@
 > **Estimate**: L (8 hours)
 > **Manifest Version**: 2026-06-01
 > **Last Updated**: 2026-06-01
+> **TR**: TR-lesson-system-004, TR-lesson-system-005, TR-lesson-system-006, TR-lesson-system-007, TR-lesson-system-010
+> **ADR**: ADR-0004, ADR-0009, ADR-0012
 
 ## Context
 

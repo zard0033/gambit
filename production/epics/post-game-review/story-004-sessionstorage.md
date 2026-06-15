@@ -7,6 +7,8 @@
 > **Estimate**: S (2 hours)
 > **Manifest Version**: 2026-05-29
 > **Last Updated**: 2026-05-28
+> **TR**: TR-post-game-review-005
+> **ADR**: ADR-0001, ADR-0007
 
 ## Context
 

@@ -8,6 +8,8 @@
 > **Estimate**: XS (2 hours)
 > **Manifest Version**: 2026-06-01
 > **Last Updated**: 2026-06-01
+> **TR**: N/A
+> **ADR**: N/A
 
 ## Context
 
@@ -17,6 +19,15 @@
 - Story references in epic assumed TR-IDs existed; registry was silent
 
 **Resolution**: Register all 8 Acceptance Criteria from the opening-knowledge-cards GDD as formal TR-IDs using the standard `TR-opening-knowledge-cards-NNN` format.
+
+---
+
+## Acceptance Criteria
+
+- [ ] **AC-01**: All 8 `TR-opening-knowledge-cards-NNN` IDs are registered in `docs/architecture/tr-registry.yaml` using the standard format.
+- [ ] **AC-02**: Each TR-ID maps one-to-one to an Acceptance Criterion from the opening-knowledge-cards GDD.
+- [ ] **AC-03**: All registered TR-IDs have `status: active` in the registry.
+- [ ] **AC-04**: `last_updated` in `tr-registry.yaml` is updated to reflect the change date.
 
 ---
 

@@ -7,6 +7,8 @@
 > **Estimate**: L (5–8 hours — roving tabindex + ARIA live regions is complex)
 > **Manifest Version**: 2026-05-29
 > **Last Updated**: 2026-05-28
+> **TR**: TR-chess-board-005
+> **ADR**: ADR-0006, ADR-0009
 
 ## Context
 

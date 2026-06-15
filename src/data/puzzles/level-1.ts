@@ -110,6 +110,7 @@ export const level1Puzzles: Puzzle[] = [
     brief: '他的王，被逼到了邊上。',
     fen: '7k/Q7/6K1/8/8/8/8/8 w - - 0 1',
     solution: [{ from: 'a7', to: 'h7' }],
+    acceptAnyMate: true,
     hint: '你的國王罩得住國王旁邊那一格嗎？',
     successText: '后橫掃到邊線將死，靠自己的國王撐腰，對手碰不得。把對方國王逼到牆角，再用有支援的后收尾。',
   },

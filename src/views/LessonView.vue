@@ -7,8 +7,9 @@ import MoveAnnotationDisplay from '@/components/move-annotation-display.vue'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { getLessonById, lessons } from '@/data/lessons'
-import { COACH } from '@/types/lesson'
-import type { LessonStep } from '@/types/lesson'
+import { COACH, LESSON_TIER_LABELS } from '@/types/lesson'
+import type { LessonStep, LessonTier } from '@/types/lesson'
+import { ChapterBadge } from '@/components/ui/gambit'
 import type { Annotation } from '@/modules/move-annotation/annotation-types'
 import type { MoveMadePayload } from '@/composables/use-chess-board'
 import type { Rect } from '@/utils/board-geometry'
@@ -21,6 +22,9 @@ import { puzzles } from '@/data/puzzles'
 import { getConceptById } from '@/data/concepts'
 import { candidates, practiceTarget } from '@/modules/learning-loop/recommend'
 import { LESSON_TO_PUZZLE_COUNT } from '@/config/learning-loop-tuning'
+
+const TIER_PIECE: Record<LessonTier, string> = { 1: 'bP', 2: 'bN', 3: 'bR', 4: 'bK' }
+const TIER_NUM: Record<LessonTier, string> = { 1: '一', 2: '二', 3: '三', 4: '四' }
 
 const route = useRoute()
 const router = useRouter()
@@ -193,7 +197,7 @@ function startTypewriter(text: string): void {
   const step = (): void => {
     displayedText.value = text.slice(0, i + 1)
     i++
-    if (i < text.length) typewriterTimer = setTimeout(step, 16)
+    if (i < text.length) typewriterTimer = setTimeout(step, 8)
   }
   step()
 }
@@ -399,7 +403,7 @@ function prev(): void {
           <div ref="coachScroll" class="coach-scroll min-h-0 flex-1 overflow-y-auto px-4 pb-4" :class="{ 'flex flex-col justify-center': finished }">
             <!-- Scenario (step 0 only) -->
             <p
-              v-if="stepIndex === 0 && lesson.scenario"
+              v-if="stepIndex === 0 && lesson.scenario && !finished"
               class="mb-3 border-l-2 border-primary/40 pl-3 font-lesson text-[15px] leading-relaxed text-ink-muted"
             >{{ lesson.scenario }}</p>
 
@@ -433,21 +437,53 @@ function prev(): void {
               <AlertDescription class="text-success">{{ currentStep.successText }}</AlertDescription>
             </Alert>
 
-            <!-- 課末收尾：單一卡內置中徽章 + 重點 takeaway + 練習邀請（去掉卡中卡的 sage 內框）。
-                 下一課／返回在底部動作列；金色保留給 footer CTA，這裡用 success 徽章表達「達成」。 -->
+            <!-- 課末收尾：證書感設計——章節勳章 + 金線框 + 課程名稱 + 重點摘要 + 練習邀請 -->
             <div
               v-if="finished"
               data-testid="lesson-completion"
-              class="lesson-complete flex flex-col items-center px-2 py-2 text-center"
+              class="lesson-complete flex flex-col items-center py-5 text-center"
             >
-              <span
-                class="flex h-16 w-16 items-center justify-center rounded-full bg-success text-success-fg shadow-[0_4px_14px_rgba(74,124,89,0.35)] ring-4 ring-success/15"
-                aria-hidden="true"
-              ><Check :size="32" :stroke-width="2.5" /></span>
-              <p class="mt-4 font-display text-xl font-bold text-ink">這一課完成了</p>
-              <p v-if="lesson.summary" class="mt-2 font-lesson text-base leading-relaxed text-ink-muted">{{ lesson.summary }}</p>
+              <!-- M2: 章節脈絡小標 -->
+              <p class="mb-4 font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">
+                第{{ TIER_NUM[lesson.tier] }}章 · {{ LESSON_TIER_LABELS[lesson.tier] }}
+              </p>
 
-              <div v-if="completionConcepts.length" class="mt-5 flex w-full flex-col gap-2">
+              <!-- H3: 金線分隔（上） -->
+              <div class="mb-5 flex w-full items-center gap-2 px-1" aria-hidden="true">
+                <div class="h-px flex-1 bg-gradient-to-r from-transparent to-gold/40" />
+                <span class="h-[5px] w-[5px] rotate-45 bg-gold/55" />
+                <div class="h-px flex-1 bg-gradient-to-l from-transparent to-gold/40" />
+              </div>
+
+              <!-- H1: 金邊勳章（章節棋子 + 綠色完成角標） -->
+              <div class="relative">
+                <div class="rounded-full shadow-[0_0_0_5px_rgba(248,181,0,0.18),0_0_28px_rgba(248,181,0,0.2)]">
+                  <ChapterBadge :piece="TIER_PIECE[lesson.tier]" :size="96" />
+                </div>
+                <span
+                  class="absolute -bottom-0.5 -right-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-success text-success-fg shadow-[0_2px_8px_rgba(0,0,0,0.18)] ring-2 ring-surface-card"
+                  aria-hidden="true"
+                ><Check :size="15" :stroke-width="2.5" /></span>
+              </div>
+
+              <!-- H2: 認定標語 + 課程名稱 -->
+              <p class="mt-3 font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-gold-dark">
+                · 課程完成 ·
+              </p>
+              <p class="mt-1 font-display text-xl font-bold text-ink">{{ lesson.title }}</p>
+
+              <!-- H3: 金線分隔（下） -->
+              <div class="my-4 flex w-full items-center gap-2 px-1" aria-hidden="true">
+                <div class="h-px flex-1 bg-gradient-to-r from-transparent to-gold/40" />
+                <span class="h-[5px] w-[5px] rotate-45 bg-gold/55" />
+                <div class="h-px flex-1 bg-gradient-to-l from-transparent to-gold/40" />
+              </div>
+
+              <!-- L1: 本課重點（置中純文字，不加框） -->
+              <p v-if="lesson.summary" class="w-full px-2 text-center font-lesson text-[15px] leading-relaxed text-ink-muted">{{ lesson.summary }}</p>
+
+              <!-- 練習邀請 -->
+              <div v-if="completionConcepts.length" class="mt-4 flex w-full flex-col gap-2">
                 <template v-for="c in completionConcepts" :key="c.id">
                   <button
                     v-if="c.hasPuzzles && c.targetId"
@@ -471,32 +507,23 @@ function prev(): void {
           <!-- 動作列：釘在氣泡底，永遠可見。上緣分隔線 + 漸層（暗示上方教練文字可捲）。 -->
           <div class="relative shrink-0 border-t border-line-subtle px-4 py-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-5 before:h-5 before:bg-gradient-to-t before:from-surface-card before:to-transparent">
             <div class="flex items-center gap-2">
-              <!-- 課末收尾：返回 + 繼續下一課（練習邀請在上方氣泡內容） -->
+              <!-- 課末收尾：金色主按鈕獨佔一行，次要動作改 ghost 文字連結 -->
               <template v-if="finished">
-                <template v-if="nextLesson">
+                <div class="flex w-full gap-2">
                   <Button
+                    v-if="nextLesson"
                     variant="secondary"
-                    size="sm" class="text-sm"
+                    class="flex-1 justify-center text-sm"
                     data-testid="lesson-completion-return"
                     @click="router.push(backTo)"
                   >{{ fromConcept ? '回概念地圖' : '回課程列表' }}</Button>
-                  <div class="flex-1" />
                   <Button
                     variant="gold"
-                    size="sm" class="text-sm"
+                    class="flex-1 justify-center text-sm"
                     data-testid="lesson-completion-next"
-                    @click="goToNextLesson"
-                  >繼續下一課 <ArrowRight :size="16" :stroke-width="1.8" /></Button>
-                </template>
-                <template v-else>
-                  <div class="flex-1" />
-                  <Button
-                    variant="gold"
-                    size="sm" class="text-sm"
-                    data-testid="lesson-completion-return"
-                    @click="router.push(backTo)"
-                  >{{ fromConcept ? '回概念地圖' : '回課程列表' }}</Button>
-                </template>
+                    @click="nextLesson ? goToNextLesson() : router.push(backTo)"
+                  >{{ nextLesson ? '繼續下一課' : (fromConcept ? '回概念地圖' : '回課程列表') }} <ArrowRight :size="16" :stroke-width="1.8" /></Button>
+                </div>
               </template>
 
               <!-- 走錯：只留 揭曉答案 + 重試（重試靠右為主行動），不顯示上一步／下一步 -->
@@ -574,13 +601,13 @@ function prev(): void {
 .coach-scroll::-webkit-scrollbar {
   display: none;
 }
-/* 完成收尾卡入場：opacity + translateY 落定（只動 transform/opacity，box-shadow 不做動畫）。 */
+/* 完成收尾卡入場：opacity + translateY + scale 彈出（spring 曲線，勳章有「落定感」）。 */
 @keyframes lesson-complete-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(14px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 .lesson-complete {
-  animation: lesson-complete-in 0.25s cubic-bezier(0, 0, 0.2, 1);
+  animation: lesson-complete-in 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 @media (prefers-reduced-motion: reduce) {
   .lesson-complete {

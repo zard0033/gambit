@@ -28,11 +28,11 @@ export const level2Puzzles: Puzzle[] = [
     title: '捉雙取城',
     prompt: '有子可吃。',
     brief: '他有兩顆子，誰也沒罩著誰。',
-    fen: '4k3/3r4/8/8/4N3/8/8/4K3 w - - 0 1',
+    fen: '4k3/7r/8/8/4N3/8/8/4K3 w - - 0 1',
     solution: [
       { from: 'e4', to: 'f6' },
       { from: 'e8', to: 'd8' },
-      { from: 'f6', to: 'd7' },
+      { from: 'f6', to: 'h7' },
     ],
     hint: '騎士能同時碰到兩個子嗎？',
     successText: '騎士跳到 f6 同時將軍又攻擊城堡——對手得先救王，你就用騎士換掉他的城堡，淨賺一子。騎士的捉雙最難防，因為牠的攻擊擋不住。',

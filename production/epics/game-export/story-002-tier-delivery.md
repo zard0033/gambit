@@ -7,6 +7,8 @@
 > **Estimate**: M (3–4 hours)
 > **Manifest Version**: 2026-05-29
 > **Last Updated**: 2026-05-28
+> **TR**: TR-game-export-002, TR-game-export-003
+> **ADR**: ADR-0005, ADR-0010
 
 ## Context
 

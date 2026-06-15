@@ -7,6 +7,8 @@
 > **Estimate**: S (1–2 hours)
 > **Manifest Version**: 2026-05-29
 > **Last Updated**: 2026-05-29
+> **TR**: TR-chess-engine-007
+> **ADR**: ADR-0001, ADR-0002, ADR-0007, ADR-0008
 
 ## Context
 

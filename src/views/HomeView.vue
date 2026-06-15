@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowRight, Target, BookOpen, Library } from 'lucide-vue-next'
+import { ArrowRight, Target, BookOpen, Library, Swords } from 'lucide-vue-next'
 import { lessons } from '@/data/lessons'
 import { LESSON_TIER_LABELS } from '@/types/lesson'
 import type { LessonTier } from '@/types/lesson'
@@ -108,18 +108,21 @@ function continueLearning() {
           <ChapterBadge :piece="resumeInfo.piece" :size="62" />
         </div>
       </DarkPanel>
-      <DarkPanel v-else class="cursor-pointer md:h-full md:flex md:flex-col md:justify-center" @click="startGame">
-        <div class="flex items-center gap-3.5">
-          <div class="flex-1 min-w-0">
-            <p class="font-sans text-[11px] font-bold tracking-[0.12em] text-gold">NEW GAME</p>
-            <p class="font-display font-bold text-[22px] text-ink-on-deep mt-1.5">開始新對局</p>
-            <p class="font-sans text-[13px] text-ink-on-deep-dim mt-1">自選強度與執子</p>
-            <Button variant="gold" size="sm" class="mt-3.5" @click.stop="startGame">
-              開始對局 <ArrowRight :size="18" />
-            </Button>
-          </div>
-          <ChapterBadge piece="bK" :size="62" />
+      <DarkPanel v-else class="relative cursor-pointer overflow-hidden md:h-full md:flex md:flex-col md:justify-center" @click="startGame">
+        <div class="relative z-10 flex-1 min-w-0">
+          <p class="font-sans text-[11px] font-bold tracking-[0.12em] text-gold">NEW GAME</p>
+          <p class="font-display font-bold text-[22px] text-ink-on-deep mt-1.5">開始新對局</p>
+          <p class="font-sans text-[13px] text-ink-on-deep-dim mt-1">自選強度與執子</p>
+          <Button variant="gold" size="sm" class="mt-3.5" @click.stop="startGame">
+            開始對局 <ArrowRight :size="18" />
+          </Button>
         </div>
+        <Swords
+          :size="110"
+          class="pointer-events-none absolute -right-4 -bottom-4 text-white/[0.07]"
+          :stroke-width="1.2"
+          aria-hidden="true"
+        />
       </DarkPanel>
 
       <!-- 繼續學習 — cream accent 卡。桌機隱藏外部小標，讓本卡與左 hero 頂底等高對齊

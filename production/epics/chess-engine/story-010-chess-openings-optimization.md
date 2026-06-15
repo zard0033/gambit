@@ -8,6 +8,8 @@
 > **Estimate**: S (2 hours)
 > **Manifest Version**: 2026-06-01
 > **Last Updated**: 2026-06-01
+> **TR**: pending /architecture-review
+> **ADR**: ADR-0001, ADR-0002, ADR-0007, ADR-0008
 
 ## Context
 

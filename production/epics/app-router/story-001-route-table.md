@@ -7,6 +7,8 @@
 > **Estimate**: S (2–3 hours)
 > **Manifest Version**: 2026-05-29
 > **Last Updated**: 2026-05-29
+> **TR**: TR-nav-routing-001, TR-nav-routing-004, TR-nav-routing-005
+> **ADR**: ADR-0004, ADR-0005
 
 ## Context
 

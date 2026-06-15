@@ -8,6 +8,8 @@
 > **Estimate**: S (4 hours)
 > **Manifest Version**: 2026-06-01
 > **Last Updated**: 2026-06-02
+> **TR**: pending /architecture-review
+> **ADR**: ADR-0001, ADR-0004, ADR-0007
 
 > **Completion note (2026-06-02)**: `game-replay-rating.vue` 已實作並整合進 ReplayView。
 > 補上 BLOCKING 單元測試 `tests/unit/components/game-replay-rating.test.ts`（6 tests：save / load /

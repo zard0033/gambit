@@ -7,6 +7,8 @@
 > **Estimate**: M (4–6 hours)
 > **Manifest Version**: 2026-05-29
 > **Last Updated**: 2026-05-29
+> **TR**: TR-visual-identity-001, TR-visual-identity-002
+> **ADR**: ADR-0009
 
 ## Context
 

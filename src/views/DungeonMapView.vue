@@ -174,13 +174,6 @@ function enter(node: MapNode): void {
           <path :d="climbedPath" fill="none" stroke="rgba(248,181,0,0.45)" stroke-width="3" stroke-dasharray="2 11" stroke-linecap="round" />
         </svg>
 
-        <!-- Distance haze — the climbing line softly recedes as it meets the header (試煉之峰) -->
-        <div
-          class="pointer-events-none absolute inset-x-0 top-0 z-10 h-[90px]"
-          aria-hidden="true"
-          style="background: linear-gradient(to top, transparent, rgba(22, 58, 47, 0.45) 60%, rgba(26, 74, 61, 0.7))"
-        />
-
         <!-- Floor thresholds -->
         <div
           v-for="band in layout.bands"
@@ -264,7 +257,7 @@ function enter(node: MapNode): void {
         <template v-if="currentPuzzle">
           <div class="min-w-0 flex-1">
             <p class="font-sans text-[10px] font-bold uppercase tracking-[0.1em] text-gold/70">
-              目前試煉 · {{ LEVEL_NAMES[currentPuzzle.level] }} · {{ progress.solvedCount }}/{{ progress.totalCount }}
+              目前試煉 · {{ LEVEL_NAMES[currentPuzzle.level] }} · {{ currentPuzzle.order }}/{{ progress.totalCount }}
             </p>
             <p class="truncate font-display text-[15px] font-bold leading-tight text-ink-on-deep">
               第 {{ currentPuzzle.order }} 關 · {{ currentPuzzle.title }}

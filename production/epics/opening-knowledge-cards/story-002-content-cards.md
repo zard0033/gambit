@@ -7,6 +7,8 @@
 > **Estimate**: S (3–4 hours)
 > **Manifest Version**: 2026-05-29
 > **Last Updated**: 2026-05-30
+> **TR**: TR-opening-knowledge-cards-007, TR-opening-knowledge-cards-008
+> **ADR**: ADR-0003
 
 ## Context
 
