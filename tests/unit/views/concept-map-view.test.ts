@@ -79,8 +79,8 @@ describe('ConceptMapView', () => {
     const forkTile = tileWithText(w, 'concept-tile-lit', '捉雙')
     // Assert: 已學 chip present, 已練 absent, no practice CTA.
     expect(forkTile).toBeTruthy()
-    expect(forkTile.find('.state-learned').exists()).toBe(true)
-    expect(forkTile.find('.state-practiced').exists()).toBe(false)
+    expect(forkTile.find('.legend-learned').exists()).toBe(true)
+    expect(forkTile.find('.legend-practiced').exists()).toBe(false)
     expect(forkTile.find('[data-testid="concept-practise-cta"]').exists()).toBe(false)
   })
 
@@ -92,7 +92,7 @@ describe('ConceptMapView', () => {
     const pinTile = tileWithText(w, 'concept-tile-lit', '牽制')
     // Assert: the side-door signal lights 已學.
     expect(pinTile).toBeTruthy()
-    expect(pinTile.find('.state-learned').exists()).toBe(true)
+    expect(pinTile.find('.legend-learned').exists()).toBe(true)
   })
 
   it('test_conceptMap_practicedConcept_showsBothChips', async () => {
@@ -104,8 +104,8 @@ describe('ConceptMapView', () => {
     const materialTile = tileWithText(w, 'concept-tile-lit', '子力')
     // Assert: both 已學 and 已練 chips.
     expect(materialTile).toBeTruthy()
-    expect(materialTile.find('.state-learned').exists()).toBe(true)
-    expect(materialTile.find('.state-practiced').exists()).toBe(true)
+    expect(materialTile.find('.legend-learned').exists()).toBe(true)
+    expect(materialTile.find('.legend-practiced').exists()).toBe(true)
   })
 
   it('test_conceptMap_lessonOnlyConcept_neverShowsPractisedOrUnmet', async () => {
@@ -116,8 +116,8 @@ describe('ConceptMapView', () => {
     const skewerTile = tileWithText(w, 'concept-tile-lit', '串擊')
     // Assert
     expect(skewerTile).toBeTruthy()
-    expect(skewerTile.find('.state-learned').exists()).toBe(true)
-    expect(skewerTile.find('.state-practiced').exists()).toBe(false)
+    expect(skewerTile.find('.legend-learned').exists()).toBe(true)
+    expect(skewerTile.find('.legend-practiced').exists()).toBe(false)
     expect(w.text()).not.toContain('未達成')
   })
 
