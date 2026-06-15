@@ -1,4 +1,4 @@
-import{k}from"./index-D9NxS6-V.js";import{S as K}from"./stockfish-worker-B_6uAhas.js";import{N as $,O as Z}from"./chess-board-CDcNKt49.js";/**
+import{k}from"./index-RnxyVuba.js";import{S as K}from"./stockfish-worker-B_6uAhas.js";import{N as $,O as Z}from"./chess-board-CDcNKt49.js";/**
  * @license lucide-vue-next v1.0.0 - ISC
  *
  * This source code is licensed under the ISC license.
