@@ -1,7 +1,7 @@
 <!-- STATUS -->
-Epic: UI 微調批（2026-06-15）
-Feature: 概念地圖緊湊化 redesign + nav 毛玻璃/圓角 + 課程/試煉細節
-Task: 本機改完未 push，待 Eason 拍板推版；賽後檢討頁打磨待細列
+Epic: 待規劃
+Feature: 賽後檢討頁打磨（待 Eason 細列）
+Task: 實機驗收累積項待確認
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 鐵則。歷史細節在 git log；詳盡規格在各 GDD / EPIC。
@@ -16,6 +16,7 @@ Task: 本機改完未 push，待 Eason 拍板推版；賽後檢討頁打磨待�
 - **學習迴圈 (#20)**：Phase A/B/C 完成（概念底層、雙向橋接課程↔試煉、概念地圖 `/learn/concepts`、
   賽後檢討的中立 opt-in 概念標記 v1＝mate + material）。**概念頁已改版＝「熟悉度地圖 + 按戰術切入學習」
   雙職，可側門跳學鎖住的戰術（不污染線性進度）；側門已學雲端同步（`lesson_side_learned` 表已套用）。**
+  ⚠️ **2026-06-15 方向重定：「概念→課程側門」決定廢除，概念改做「課程加深版」深化頁（見待辦首條）。下方雙向橋接的橋接 CTA 已部分拆除。**
 - **game-replay (#S10)**：QA APPROVED；S10-05 動畫 polish 已 deferred；剩 iPhone 實機。
 - **訪客模式 local-first + 續玩對局**：done+push（`170abf0`）。訪客完局讀本地 queue、登入 flush 同步；Resume 每步存 local／離開推雲／登入 last-write-wins。**程式已 push，剩實機驗收（見待辦）**。
 - **測試**：vue-tsc 0、vitest **664 passed**。
@@ -120,10 +121,10 @@ Task: 本機改完未 push，待 Eason 拍板推版；賽後檢討頁打磨待�
 - **手機版面**：一般步驟卡片貼齊棋盤下緣（`items-start`）、頭像收進卡片 header（拿掉外掛大頭像）；
   footer 按鈕改 `size="sm"`（原 `px-6` 預設害三鍵溢出卡片）。對話框打字 32→16ms、自動捲、釘頂 header（捲動不消失）。
 
-## 🚧 UI 微調批（2026-06-15，未 push）
+## ✅ UI 微調批（2026-06-15，已 push `c312a0e`）
 
 > 一連串 redesign 微調，涉 LessonView / HomeView / LearnView / ConceptMapView / DungeonMapView / app-nav。
-> 手機 390×844 Playwright 各頁實機看過（純 template/style，未動邏輯）。**本機改完，未 commit/push，待 Eason 拍板推版。**
+> 手機 390×844 Playwright 各頁實機看過（純 template/style，未動邏輯）。
 
 - **LessonView 完成卡**：scenario 不再溢出完成卡（`stepIndex===0 && !finished`）；總結改置中純文字（去 callout 框，避免搶戲）；動作鍵上下堆疊→左右並排；active 章節 done 課 badge「完成」→「複習」（去刪除線、`text-ink-muted`）。
 - **HomeView**：「開始新對局」卡 ChapterBadge → `Swords` 大浮水印 icon（`text-white/[0.07]`，右下溢出）。
@@ -134,6 +135,11 @@ Task: 本機改完未 push，待 Eason 拍板推版；賽後檢討頁打磨待�
 
 ## 🚧 待辦 / 開放項
 
+- 🆕 **概念側門廢除 + 概念深化頁（2026-06-15 規劃定案，明天做整包）**：方向重定——Eason 覺得「試煉/課程/概念交互連結」實際做出來不是想要的，決定**廢除「概念→課程側門」**（`ConceptMapView` 點戰術卡 `?from=concept` alias 到課程）。概念不該是課程的別名，要變成**「針對單一戰術主題的深化＝課程加深版」**：概念有自己的 `steps`（同一戰術多個變化局面 A/B/C，舉一反三），共享 LessonView 渲染器但吃不同資料來源。
+  - **為何整包做、今天不拆**：若只拆側門，概念地圖戰術卡點下去無歸宿（破洞）。拆側門 + 建概念深化頁要一起做，概念地圖才不會留中間破碎狀態。
+  - **牽連（拆時要一併處理）**：`LessonView` 的 `fromConcept` 全分支、`lesson-progress` 的 `markSideLearned`/side-learned 集合、`concept-progress` store、`data-sync` 的 `lesson_side_learned` 雲端同步、概念地圖「已學/已練」雙色點的資料來源。
+  - **保留**：賽後檢討的 signpost（`ReviewView:433` `?from=lesson` → 試煉 practice）＝真實對局局面導到相關題，有意義，不動。
+  - **今天已做**：移除課程完成卡的「練習邀請」CTA（`completionConcepts`/`practise`/相關 import，vue-tsc 0）。
 - **migration**：`in_progress_game` 已確認套用（2026-06-12 查 `to_regclass` 有表）。Supabase 6 張表全到位，無待套 migration。
 - ~~**push 後待 iPhone 實機驗收（累積）**~~ **2026-06-14 實機過一輪，大致 PASS**：Google 登入 OK、PWA 有擋、訪客 OK、續玩 OK、升變 OK、易位 OK、殘留綠格 OK、試煉全 OK、換頁效能 OK。剩兩個 issue（見下）。
 - ✅ **PWA 冷啟動登入閃爍（已修，已 push）**：root cause＝`main.ts` 沒 `await router.isReady()` 就 mount，而 `HomeView` 是同步元件、`initAuth()` 又延到 App `onMounted` 才跑 → 初始導航在 session 未定時先 render home，guard 解析完才重導 sign-in（閃首頁→sign-in）。修法：`main.ts` mount 前先 `useAuthStore().initAuth()`（不 await，交給 guard 內 isAuthLoading watch）+ `router.isReady().then(mount)`，畫面一次到位；`App.vue` 移除 onMounted 的 initAuth、`watch(userId)` 加 `immediate:true`（避免登入態 mount 漏跑 reconcile）。加 regression `test_landingGate_homeRoute_noFlag_redirectsToSignIn`。vue-tsc 0、vitest **665**。**待 Eason iPhone 實機複看冷啟動不再閃**。

@@ -16,12 +16,6 @@ import type { Rect } from '@/utils/board-geometry'
 import { useBoardFit } from '@/composables/use-board-fit'
 import { useReducedMotion } from '@/composables/use-reduced-motion'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
-import { useDungeonProgressStore } from '@/stores/dungeon-progress'
-import { useConceptProgressStore } from '@/stores/concept-progress'
-import { puzzles } from '@/data/puzzles'
-import { getConceptById } from '@/data/concepts'
-import { candidates, practiceTarget } from '@/modules/learning-loop/recommend'
-import { LESSON_TO_PUZZLE_COUNT } from '@/config/learning-loop-tuning'
 
 const TIER_PIECE: Record<LessonTier, string> = { 1: 'bP', 2: 'bN', 3: 'bR', 4: 'bK' }
 const TIER_NUM: Record<LessonTier, string> = { 1: '一', 2: '二', 3: '三', 4: '四' }
@@ -29,8 +23,6 @@ const TIER_NUM: Record<LessonTier, string> = { 1: '一', 2: '二', 3: '三', 4: 
 const route = useRoute()
 const router = useRouter()
 const progress = useLessonProgressStore()
-const dungeonProgress = useDungeonProgressStore()
-const conceptProgress = useConceptProgressStore()
 
 const lesson = getLessonById(route.params.lessonId as string)
 
@@ -249,28 +241,6 @@ function complete(): void {
   nextTick().then(scrollCoachToBottom)
 }
 
-// A puzzle counts as practised whether cleared in the dungeon or from a prior lesson CTA.
-function isPuzzleSolved(id: string): boolean {
-  return dungeonProgress.isSolved(id) || conceptProgress.isPracticeSolved(id)
-}
-
-/**
- * One completion-card row per concept the lesson teaches (capped for readability). Concepts with
- * drill puzzles get a CTA into practice mode; concepts with none get a calm "即將加入" hint (EC-1).
- */
-const completionConcepts = computed(() => {
-  const ids = lesson?.concepts ?? []
-  return ids.slice(0, LESSON_TO_PUZZLE_COUNT).map((id) => {
-    const meta = getConceptById(id)
-    const hasPuzzles = candidates(id, puzzles).length > 0
-    const target = hasPuzzles ? practiceTarget(id, puzzles, isPuzzleSolved) : null
-    return { id, label: meta?.label ?? id, hasPuzzles, targetId: target?.id ?? null }
-  })
-})
-
-function practise(targetId: string): void {
-  router.push(`/dungeon/${targetId}?from=lesson`)
-}
 
 // 繼續下一課（從課程正常路徑進入時才顯示，概念側門不顯示）
 const nextLesson = computed(() => {
@@ -482,25 +452,6 @@ function prev(): void {
               <!-- L1: 本課重點（置中純文字，不加框） -->
               <p v-if="lesson.summary" class="w-full px-2 text-center font-lesson text-[15px] leading-relaxed text-ink-muted">{{ lesson.summary }}</p>
 
-              <!-- 練習邀請 -->
-              <div v-if="completionConcepts.length" class="mt-4 flex w-full flex-col gap-2">
-                <template v-for="c in completionConcepts" :key="c.id">
-                  <button
-                    v-if="c.hasPuzzles && c.targetId"
-                    type="button"
-                    data-testid="lesson-practice-cta"
-                    class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[12px] border border-line-subtle bg-surface-base px-4 py-2.5 font-sans text-sm font-semibold text-ink transition-colors hover:bg-surface-hover active:scale-95"
-                    @click="practise(c.targetId)"
-                  >
-                    想趁熱練幾題「{{ c.label }}」嗎？ <ArrowRight :size="16" />
-                  </button>
-                  <p
-                    v-else
-                    data-testid="lesson-practice-hint"
-                    class="w-full rounded-[10px] bg-black/[0.04] px-4 py-2.5 text-center font-sans text-sm text-ink-muted"
-                  >「{{ c.label }}」的試煉即將加入</p>
-                </template>
-              </div>
             </div>
           </div>
 
