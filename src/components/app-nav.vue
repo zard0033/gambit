@@ -29,7 +29,7 @@ const NAV_ITEMS = [
 <template>
   <!-- Top app bar — 純色深青瓷（取代木紋照片底），頂端微光 sheen -->
   <header
-    class="sticky top-0 z-30 border-b border-white/[0.06] bg-[linear-gradient(180deg,#1E5043_0%,#183E35_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+    class="sticky top-0 z-30 border-b border-white/6 bg-[linear-gradient(180deg,#1E5043_0%,#183E35_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
   >
     <div class="max-w-6xl mx-auto flex items-center gap-1 px-4 h-14">
       <!-- 品牌字標：金徽（國王剪影）+ Cinzel GAMBIT wordmark -->
@@ -40,7 +40,7 @@ const NAV_ITEMS = [
           aria-hidden="true"
           class="h-[18px] w-auto drop-shadow-[0_0_8px_rgba(248,181,0,0.35)]"
         />
-        <span class="font-brand font-black text-lg tracking-[0.04em] text-ink-on-deep translate-y-[1px]">GAMBIT</span>
+        <span class="font-brand font-black text-lg tracking-[0.04em] text-ink-on-deep translate-y-px">GAMBIT</span>
       </RouterLink>
 
       <!-- Desktop primary nav (mobile uses the bottom bar) -->
@@ -49,8 +49,8 @@ const NAV_ITEMS = [
           v-for="item in NAV_ITEMS"
           :key="item.to"
           :to="item.to"
-          class="flex items-center gap-2 px-3.5 h-9 rounded-full text-sm font-medium text-ink-on-deep-dim hover:text-ink-on-deep hover:bg-white/[0.08] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-          active-class="!text-white !font-bold bg-primary"
+          class="flex items-center gap-2 px-3.5 h-9 rounded-full text-sm font-medium text-ink-on-deep-dim hover:text-ink-on-deep hover:bg-white/8 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
+          active-class="text-white! font-bold! bg-primary"
         >
           <component :is="item.icon" :size="16" :stroke-width="1.8" aria-hidden="true" />
           {{ item.label }}
@@ -63,8 +63,8 @@ const NAV_ITEMS = [
       <RouterLink
         v-if="!authStore.userId"
         to="/sign-in"
-        class="flex items-center min-h-[44px] px-4 rounded-full text-sm font-medium text-ink-on-deep-dim hover:text-ink-on-deep hover:bg-white/[0.08] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-        active-class="!text-ink-on-deep"
+        class="flex items-center min-h-[44px] px-4 rounded-full text-sm font-medium text-ink-on-deep-dim hover:text-ink-on-deep hover:bg-white/8 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
+        active-class="text-ink-on-deep!"
       >
         登入
       </RouterLink>
@@ -72,8 +72,8 @@ const NAV_ITEMS = [
         v-else
         to="/profile"
         aria-label="我的"
-        class="flex items-center justify-center h-11 w-11 rounded-full text-ink-on-deep-dim hover:text-ink-on-deep hover:bg-white/[0.08] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-        active-class="!text-white bg-primary"
+        class="flex items-center justify-center h-11 w-11 rounded-full text-ink-on-deep-dim hover:text-ink-on-deep hover:bg-white/8 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
+        active-class="text-white! bg-primary"
       >
         <CircleUserRound :size="20" :stroke-width="1.8" aria-hidden="true" />
       </RouterLink>
@@ -81,7 +81,7 @@ const NAV_ITEMS = [
   </header>
 
   <!-- Mobile bottom nav — floating jade pill. Equal-width tabs with a single jade indicator that
-       slides (translateX) between them; the active tab shows its label. Solid jade (no backdrop-blur:
+       slides (translateX) between them; the active tab shows its label. Solid jade (no backdrop-blur-sm:
        on iOS the blur repaints every frame and stutters). pointer-events-none wrapper so taps beside
        the pill still reach content. -->
   <nav
@@ -89,7 +89,7 @@ const NAV_ITEMS = [
     aria-label="主要導覽"
   >
     <div
-      class="pointer-events-auto rounded-full border border-white/[0.16] bg-[linear-gradient(180deg,#1C3E34,#142F28)] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_10px_30px_rgba(0,0,0,0.45)]"
+      class="pointer-events-auto rounded-full border border-white/16 bg-[linear-gradient(180deg,#1C3E34,#142F28)] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_10px_30px_rgba(0,0,0,0.45)]"
     >
       <div class="relative flex">
         <!-- Sliding jade indicator: one slot wide, translateX by activeIndex. -->
@@ -98,7 +98,7 @@ const NAV_ITEMS = [
           :class="activeIndex < 0 ? 'opacity-0' : 'opacity-100'"
           :style="{ transform: `translateX(${Math.max(activeIndex, 0) * 100}%)` }"
         >
-          <div class="mx-1 h-full rounded-full bg-white/[0.13] border border-white/[0.28] shadow-[0_3px_10px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.25)]" />
+          <div class="mx-1 h-full rounded-full bg-white/13 border border-white/[0.28] shadow-[0_3px_10px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.25)]" />
         </div>
         <RouterLink
           v-for="item in NAV_ITEMS"
@@ -106,7 +106,7 @@ const NAV_ITEMS = [
           :to="item.to"
           :aria-label="item.label"
           :aria-current="isActive(item.to) ? 'page' : undefined"
-          class="relative z-10 flex h-11 flex-1 items-center justify-center gap-1.5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+          class="relative z-10 flex h-11 flex-1 items-center justify-center gap-1.5 rounded-full transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
           :class="isActive(item.to) ? 'text-white' : 'text-ink-on-deep-dim'"
         >
           <component :is="item.icon" :size="23" :stroke-width="1.8" aria-hidden="true" />

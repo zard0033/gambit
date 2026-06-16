@@ -98,12 +98,12 @@ function handleRow(row: MenuRow) {
       </div>
 
       <!-- 戰績 strip -->
-      <div class="flex overflow-hidden rounded-[10px] border border-white/[0.06] bg-black/20">
+      <div class="flex overflow-hidden rounded-[10px] border border-white/6 bg-black/20">
         <div
           v-for="(s, i) in stats"
           :key="s.label"
           class="flex-1 py-2.5 text-center"
-          :class="i < stats.length - 1 && 'border-r border-white/[0.08]'"
+          :class="i < stats.length - 1 && 'border-r border-white/8'"
         >
           <div class="font-num text-lg font-bold leading-none text-ink-on-deep">{{ s.val }}</div>
           <div class="mt-1 font-sans text-[10px] text-ink-on-deep-dim">{{ s.label }}</div>
@@ -115,7 +115,7 @@ function handleRow(row: MenuRow) {
     <button
       v-if="isGuest"
       type="button"
-      class="mx-[18px] mt-4 flex w-[calc(100%-36px)] items-center gap-3 rounded-[14px] border border-gold/40 bg-gold/[0.08] px-4 py-3.5 text-left transition-colors hover:bg-gold/[0.14] active:scale-[0.99]"
+      class="mx-[18px] mt-4 flex w-[calc(100%-36px)] items-center gap-3 rounded-[14px] border border-gold/40 bg-gold/8 px-4 py-3.5 text-left transition-colors hover:bg-gold/[0.14] active:scale-[0.99]"
       @click="router.push('/sign-in')"
     >
       <span class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-gold/20 text-gold">

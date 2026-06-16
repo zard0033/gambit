@@ -271,7 +271,7 @@ function prev(): void {
       <button
         type="button"
         :aria-label="fromConcept ? '返回概念' : '返回課程清單'"
-        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-white/[0.08] text-ink-on-deep transition-colors hover:bg-white/[0.14] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold active:scale-95"
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-white/8 text-ink-on-deep transition-colors hover:bg-white/[0.14] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold active:scale-95"
         @click="router.push(backTo)"
       ><ArrowLeft :size="20" :stroke-width="1.8" /></button>
       <h1 class="flex-1 truncate font-display text-lg font-bold text-ink-on-deep" tabindex="-1">{{ lesson.title }}</h1>
@@ -354,7 +354,7 @@ function prev(): void {
 
       <!-- Coach bubble:暖色對話框浮在 jade。氣泡自身 flex column——上半教練文字可捲、下半動作列釘在
            氣泡底（手機/桌機統一，按鈕永遠可見、不被捲走）。底部 safe-area 留白防 iPhone 圓角吃按鈕。 -->
-      <div class="flex min-h-0 flex-1 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-1 lg:w-[26rem] lg:flex-none lg:px-0 lg:pb-0 lg:pt-0" :class="finished ? 'items-center' : 'items-start'">
+      <div class="flex min-h-0 flex-1 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-1 lg:w-104 lg:flex-none lg:px-0 lg:pb-0 lg:pt-0" :class="finished ? 'items-center' : 'items-start'">
         <div
           class="flex max-h-full min-h-0 min-w-0 flex-1 flex-col rounded-[18px] bg-surface-card shadow-[0_6px_20px_rgba(8,24,18,0.28)]"
         >
@@ -420,9 +420,9 @@ function prev(): void {
 
               <!-- H3: 金線分隔（上） -->
               <div class="mb-5 flex w-full items-center gap-2 px-1" aria-hidden="true">
-                <div class="h-px flex-1 bg-gradient-to-r from-transparent to-gold/40" />
+                <div class="h-px flex-1 bg-linear-to-r from-transparent to-gold/40" />
                 <span class="h-[5px] w-[5px] rotate-45 bg-gold/55" />
-                <div class="h-px flex-1 bg-gradient-to-l from-transparent to-gold/40" />
+                <div class="h-px flex-1 bg-linear-to-l from-transparent to-gold/40" />
               </div>
 
               <!-- H1: 金邊勳章（章節棋子 + 綠色完成角標） -->
@@ -444,9 +444,9 @@ function prev(): void {
 
               <!-- H3: 金線分隔（下） -->
               <div class="my-4 flex w-full items-center gap-2 px-1" aria-hidden="true">
-                <div class="h-px flex-1 bg-gradient-to-r from-transparent to-gold/40" />
+                <div class="h-px flex-1 bg-linear-to-r from-transparent to-gold/40" />
                 <span class="h-[5px] w-[5px] rotate-45 bg-gold/55" />
-                <div class="h-px flex-1 bg-gradient-to-l from-transparent to-gold/40" />
+                <div class="h-px flex-1 bg-linear-to-l from-transparent to-gold/40" />
               </div>
 
               <!-- L1: 本課重點（置中純文字，不加框） -->
@@ -456,7 +456,7 @@ function prev(): void {
           </div>
 
           <!-- 動作列：釘在氣泡底，永遠可見。上緣分隔線 + 漸層（暗示上方教練文字可捲）。 -->
-          <div class="relative shrink-0 border-t border-line-subtle px-4 py-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-5 before:h-5 before:bg-gradient-to-t before:from-surface-card before:to-transparent">
+          <div class="relative shrink-0 border-t border-line-subtle px-4 py-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-5 before:h-5 before:bg-linear-to-t before:from-surface-card before:to-transparent">
             <div class="flex items-center gap-2">
               <!-- 課末收尾：金色主按鈕獨佔一行，次要動作改 ghost 文字連結 -->
               <template v-if="finished">

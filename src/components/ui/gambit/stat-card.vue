@@ -10,7 +10,7 @@ defineProps<{ icon: Component; label?: string; value: string; locked?: boolean }
        只留 icon + 「即將推出」並垂直置中對齊一般卡的數字+文字區。 -->
   <div
     class="relative flex flex-col text-center rounded-card bg-surface-card
-           border border-line border-t-white/[0.68] border-b-line-subtle
+           border border-line border-t-white/68 border-b-line-subtle
            shadow-[0_4px_12px_rgba(61,34,16,0.08),0_1px_3px_rgba(61,34,16,0.05),inset_0_1px_0_rgba(255,255,255,0.5)]
            px-2.5 py-3"
     :class="locked && 'opacity-55'"

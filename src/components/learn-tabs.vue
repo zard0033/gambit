@@ -29,13 +29,13 @@ const indicatorPos = computed(() => props.progress ?? props.activeIndex)
       class="pointer-events-none absolute inset-y-1 left-1 w-[calc((100%-0.5rem)/2)]"
       :style="{ transform: `translateX(${Math.min(1, Math.max(0, indicatorPos)) * 100}%)` }"
     >
-      <div class="h-full rounded-full bg-surface-card shadow-[0_2px_6px_rgba(61,34,16,0.2)] ring-1 ring-black/[0.04]" />
+      <div class="h-full rounded-full bg-surface-card shadow-[0_2px_6px_rgba(61,34,16,0.2)] ring-1 ring-black/4" />
     </div>
     <button
       v-for="(t, i) in tabs"
       :key="t.label"
       type="button"
-      class="relative z-10 flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-full py-2 font-sans text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+      class="relative z-10 flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-full py-2 font-sans text-sm font-bold transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
       :class="i === activeIndex ? 'text-primary-dark' : 'text-ink-muted'"
       :aria-current="i === activeIndex ? 'page' : undefined"
       @click="emit('select', i)"

@@ -121,7 +121,7 @@ const maskStyle = (piece: string) => ({
     <!-- 概念分組：核心目標 / 戰術技巧 / 棋局原則 -->
     <div class="flex flex-col gap-4 px-[14px] pt-1">
       <section v-for="group in conceptsByGroup" :key="group.key">
-        <p class="mb-2 font-sans text-[11px] font-bold uppercase tracking-[0.1em] text-ink-faint">{{ group.label }}</p>
+        <p class="mb-2 font-sans text-[11px] font-bold uppercase tracking-widest text-ink-faint">{{ group.label }}</p>
         <div class="grid grid-cols-2 gap-2 lg:grid-cols-4">
           <button
             v-for="v in group.items"
@@ -129,7 +129,7 @@ const maskStyle = (piece: string) => ({
             type="button"
             :data-testid="v.lit ? 'concept-tile-lit' : 'concept-tile-dormant'"
             :data-concept="v.id"
-            class="glass-panel relative flex min-h-[72px] flex-row items-center gap-3 overflow-hidden rounded-2xl p-3 text-left transition-colors hover:bg-white/[0.14] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            class="glass-panel relative flex min-h-[72px] flex-row items-center gap-3 overflow-hidden rounded-2xl p-3 text-left transition-colors hover:bg-white/[0.14] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
             :aria-label="`學習「${v.label}」`"
             @click="learnConcept(v)"
           >

@@ -32,7 +32,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: number[]] }>()
     <SliderThumb
       v-for="(_, i) in modelValue ?? [0]"
       :key="i"
-      class="relative block h-4 w-4 rounded-full border-2 border-primary bg-surface-card shadow-button transition-colors before:absolute before:-inset-3.5 before:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
+      class="relative block h-4 w-4 rounded-full border-2 border-primary bg-surface-card shadow-button transition-colors before:absolute before:-inset-3.5 before:content-[''] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
     />
   </SliderRoot>
 </template>

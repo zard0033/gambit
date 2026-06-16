@@ -93,7 +93,7 @@ watch(() => props.gameId, () => {
         id="replay-notes"
         v-model="notes"
         maxlength="200"
-        class="w-full rounded-card border border-line bg-surface-base px-3 py-2 font-sans text-sm text-ink placeholder:text-ink-faint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+        class="w-full rounded-card border border-line bg-surface-base px-3 py-2 font-sans text-sm text-ink placeholder:text-ink-faint focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
         placeholder="例如：第 15 手可以守得更好…"
         rows="3"
         @blur="onNotesBlur"

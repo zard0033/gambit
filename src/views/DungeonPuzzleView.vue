@@ -278,7 +278,7 @@ function goNext(): void {
             <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-gold bg-gold/15" aria-hidden="true">
               <Check :size="14" :stroke-width="3" class="text-gold" />
             </span>
-            <b class="font-display text-base font-bold tracking-[0.05em] text-[#F5D070]">
+            <b class="font-display text-base font-bold tracking-wider text-[#F5D070]">
               {{ (isPractice ? hintUsed : progress.wasHintUsed(puzzle.id)) ? '看了提示，完成' : '試煉達成' }}
             </b>
           </div>
@@ -321,11 +321,11 @@ function goNext(): void {
 
         <!-- ===== Footer ===== -->
         <!-- 達成：practice mode → 單一「回課程」；dungeon mode → 回地圖（次要）+ 下一題（金 CTA）-->
-        <div v-if="pz.phase.value === 'solved'" class="mt-3.5 flex items-center gap-2 border-t border-white/[0.08] pt-3">
+        <div v-if="pz.phase.value === 'solved'" class="mt-3.5 flex items-center gap-2 border-t border-white/8 pt-3">
           <template v-if="isPractice">
             <button
               type="button"
-              class="inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-light to-gold px-5 font-sans text-sm font-bold text-gold-ink shadow-[0_2px_12px_rgba(248,181,0,0.4)] active:scale-95"
+              class="inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-full bg-linear-to-b from-gold-light to-gold px-5 font-sans text-sm font-bold text-gold-ink shadow-[0_2px_12px_rgba(248,181,0,0.4)] active:scale-95"
               @click="goNext"
             >
               <ArrowLeft :size="16" :stroke-width="1.8" /> 回課程
@@ -334,7 +334,7 @@ function goNext(): void {
           <template v-else>
             <button
               type="button"
-              class="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] px-4 font-sans text-[13px] font-semibold text-ink-on-deep active:scale-[0.98]"
+              class="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-white/15 bg-white/6 px-4 font-sans text-[13px] font-semibold text-ink-on-deep active:scale-[0.98]"
               @click="router.push('/dungeon')"
             >
               <ArrowLeft :size="15" :stroke-width="1.8" /> 回地圖
@@ -342,7 +342,7 @@ function goNext(): void {
             <div class="flex-1" />
             <button
               type="button"
-              class="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-gradient-to-b from-gold-light to-gold px-5 font-sans text-sm font-bold text-gold-ink shadow-[0_2px_12px_rgba(248,181,0,0.4)] active:scale-95"
+              class="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-linear-to-b from-gold-light to-gold px-5 font-sans text-sm font-bold text-gold-ink shadow-[0_2px_12px_rgba(248,181,0,0.4)] active:scale-95"
               @click="goNext"
             >
               {{ nextPuzzle ? '下一題' : '回到地圖' }} <ArrowRight :size="16" />
@@ -351,10 +351,10 @@ function goNext(): void {
         </div>
 
         <!-- 解題：提示（低調收進卡內）+ 概念複習連結 -->
-        <div v-else class="mt-3.5 flex items-center justify-between border-t border-white/[0.08] pt-3">
+        <div v-else class="mt-3.5 flex items-center justify-between border-t border-white/8 pt-3">
           <button
             type="button"
-            class="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-gold/25 bg-gold/[0.08] px-3.5 font-sans text-[13px] font-semibold text-[#F5D070] active:scale-[0.98]"
+            class="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-gold/25 bg-gold/8 px-3.5 font-sans text-[13px] font-semibold text-[#F5D070] active:scale-[0.98]"
             @click="showHint"
           >
             <Lightbulb :size="15" :stroke-width="1.8" /> {{ hintLabel }}
