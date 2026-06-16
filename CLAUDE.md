@@ -23,6 +23,7 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 - **Chess Engine**: Stockfish 18 Lite (single-threaded WASM, NNUE embedded) — `stockfish@18.0.7` (nmrugg/stockfish.js); files in `public/stockfish/stockfish-18-lite-single.{js,wasm}`
 - **Chess Rules**: chess.js (bundled with vue3-chessboard)
 - **Opening Database**: chess-openings (lichess open source)
+- **PGN Viewer**: @lichess-org/pgn-viewer (lichess open source) — game replay UI
 - **Cloud Backend**: Supabase (PostgreSQL + Auth with Google OAuth)
 - **Deployment**: GitHub Pages
 - **Testing**: Vitest (unit) + Playwright (E2E)
@@ -58,7 +59,6 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 
 ### Phase 2 Reserved (not yet integrated)
 
-- **PGN Viewer**: pgn-viewer (lichess open source) — for game replay UI
 - **AI Explanation**: Claude API (Anthropic) — natural language move explanations
 - **Backend Functions**: Supabase Edge Functions — protect Claude API key
 

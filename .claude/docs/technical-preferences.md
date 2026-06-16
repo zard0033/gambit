@@ -70,26 +70,32 @@
 
 | Package | Purpose | Source |
 |---------|---------|--------|
-| `vue` ^3.x | Frontend framework | vuejs.org |
-| `vue-router` ^4.x | Multi-screen routing | Vue official |
-| `pinia` ^2.x | State management | Vue official |
-| `typescript` ^5.x | Programming language | Microsoft |
-| `vite` ^5.x | Dev server + bundler | Community |
+| `vue` ^3.5.x | Frontend framework | vuejs.org |
+| `vue-router` ^5.x | Multi-screen routing | Vue official |
+| `pinia` ^3.x | State management | Vue official |
+| `typescript` ^6.x | Programming language | Microsoft |
+| `vite` ^8.x | Dev server + bundler | Community |
 | `vite-plugin-pwa` ^0.x | PWA support for iPhone Home Screen | Community |
-| `tailwindcss` ^3.x | Utility-first CSS | Community |
+| `tailwindcss` ^4.x | Utility-first CSS | Community |
 | `vue3-chessboard` ^1.x | Chess board Vue component (wraps chessground) | qwerty084 |
 | `chess.js` | Chess rules (bundled with vue3-chessboard) | Community |
 | `stockfish@18.0.7` (WASM) | Chess engine — Stockfish 18 Lite single-threaded, NNUE embedded (~7.3MB, no external net, no COOP/COEP); serves play+review+replay | nmrugg/stockfish.js |
 | `chess-openings` | Opening name database | lichess |
+| `@lichess-org/pgn-viewer` ^2.x | Game replay viewer | lichess |
 | `@supabase/supabase-js` ^2.x | Cloud database + Auth client | Supabase |
-| `vitest` ^1.x | Unit test framework | Community |
+| `reka-ui` ^2.x | Headless UI primitives (shadcn pattern) | reka-ui.com |
+| `lucide-vue-next` ^1.x | Icon library (Lucide line icons) | lucide.dev |
+| `class-variance-authority` ^0.x | Variant-based class composition | Community |
+| `clsx` ^2.x | Conditional class name utility | Community |
+| `tailwind-merge` ^3.x | Tailwind class conflict resolution | Community |
+| `tailwindcss-animate` ^1.x | Animation utilities for Tailwind | Community |
+| `vitest` ^4.x | Unit test framework | Community |
 | `@playwright/test` ^1.x | E2E test framework | Microsoft |
 
 ### Phase 2 (planned, not yet added)
 
 | Package | Purpose | Source |
 |---------|---------|--------|
-| `@lichess-org/pgn-viewer` | Game replay viewer | lichess |
 | `@anthropic-ai/sdk` | Claude API client (server-side) | Anthropic |
 
 > **Guardrail**: Do NOT add Phase 2 libraries until Phase 1 MVP is shipped and
