@@ -28,14 +28,17 @@ const ENTRIES_4: SeedEntry[] = [
   { id: 'e1', type: 'onset', sourceRefId: 'onset', volume: null, templateId: 'onset.1', params: {}, body: 'PEEK-ENTRY-1', createdAt: T1 },
   { id: 'e2', type: 'arrival', sourceRefId: 'stage-1', volume: '卷一規則', templateId: 'arrival.1', params: {}, body: 'PEEK-ENTRY-2', createdAt: T2 },
   { id: 'e3', type: 'solace', sourceRefId: 'game-1', volume: null, templateId: 'solace.1', params: {}, body: 'PEEK-ENTRY-3', createdAt: T3 },
-  { id: 'e4', type: 'solace', sourceRefId: 'game-2', volume: null, templateId: 'solace.1', params: {}, body: 'PEEK-ENTRY-4-HIDDEN', createdAt: T4 },
+  { id: 'e4', type: 'solace', sourceRefId: 'game-2', volume: null, templateId: 'solace.1', params: {}, body: 'PEEK-ENTRY-4', createdAt: T4 },
 ]
 
+// addInitScript runs on EVERY navigation. lastSeenAt is only seeded when absent so
+// markSeen()'s write survives a re-open (otherwise the second goto re-seeds T_OLD and
+// the unread marker never clears). entries re-seed harmlessly (same value each time).
 async function openHome(page: Page, opts: { entries?: SeedEntry[]; lastSeenAt?: number } = {}): Promise<void> {
   await page.addInitScript(({ entries, lastSeenAt, eKey, lKey }) => {
     sessionStorage.setItem('gambit:guest-entry', '1')
     if (entries) localStorage.setItem(eKey, JSON.stringify(entries))
-    if (lastSeenAt !== undefined) localStorage.setItem(lKey, String(lastSeenAt))
+    if (lastSeenAt !== undefined && localStorage.getItem(lKey) === null) localStorage.setItem(lKey, String(lastSeenAt))
   }, { entries: opts.entries ?? null, lastSeenAt: opts.lastSeenAt, eKey: ENTRIES_KEY, lKey: STORAGE_KEY })
   await page.goto('/', { waitUntil: 'domcontentloaded' })
 }
@@ -44,7 +47,7 @@ async function openJournal(page: Page, opts: { entries?: SeedEntry[]; lastSeenAt
   await page.addInitScript(({ entries, lastSeenAt, eKey, lKey }) => {
     sessionStorage.setItem('gambit:guest-entry', '1')
     if (entries) localStorage.setItem(eKey, JSON.stringify(entries))
-    if (lastSeenAt !== undefined) localStorage.setItem(lKey, String(lastSeenAt))
+    if (lastSeenAt !== undefined && localStorage.getItem(lKey) === null) localStorage.setItem(lKey, String(lastSeenAt))
   }, { entries: opts.entries ?? null, lastSeenAt: opts.lastSeenAt, eKey: ENTRIES_KEY, lKey: STORAGE_KEY })
   await page.goto('/journal', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { name: '棋誌' })).toBeVisible()
@@ -52,16 +55,16 @@ async function openJournal(page: Page, opts: { entries?: SeedEntry[]; lastSeenAt
 
 test.describe('Journal peek (story-005)', () => {
   test('test_home_peek_shows_at_most_three_newest_entries', async ({ page }) => {
-    // Arrange: 4 entries seeded (HOMEPAGE_PEEK_COUNT=3 → 4th should NOT appear)
+    // Arrange: 4 entries seeded (HOMEPAGE_PEEK_COUNT=3 → only 3 appear)
     await openHome(page, { entries: ENTRIES_4, lastSeenAt: T_OLD })
 
     // Act: wait for peek to render (journal.load() is async)
     const peek = page.locator('[data-testid="journal-peek-entry"]')
     await expect(peek).toHaveCount(3)
 
-    // The 3 newest appear; PEEK-ENTRY-1 (T1, oldest) is excluded
+    // peek = newest 3 (T4,T3,T2); the onset (e1, pinned last) is excluded.
     const texts = await peek.allTextContents()
-    expect(texts.some((t) => t.includes('PEEK-ENTRY-4-HIDDEN'))).toBe(false)
+    expect(texts.some((t) => t.includes('PEEK-ENTRY-4'))).toBe(true)
     expect(texts.some((t) => t.includes('PEEK-ENTRY-1'))).toBe(false)
   })
 
