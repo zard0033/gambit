@@ -24,9 +24,10 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'chess-board': ['vue3-chessboard', 'chessground', 'chess.js'],
-          'chess-openings': ['chess-openings'],
+        // 函式形式（vite 8 / rolldown 只支援函式，不支援物件 map）。維持原本分塊。
+        manualChunks(id: string) {
+          if (/[\\/]node_modules[\\/](vue3-chessboard|chessground|chess\.js)[\\/]/.test(id)) return 'chess-board'
+          if (/[\\/]node_modules[\\/]chess-openings[\\/]/.test(id)) return 'chess-openings'
         },
       },
     },
