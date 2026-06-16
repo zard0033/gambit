@@ -59,6 +59,10 @@
   CI 用 `grepInvert @spike`（見 `playwright.config.ts`）排除，所以 CI 不慢。
   **本機驗證改用** `npx playwright test --grep-invert @spike`（＝CI 等效、快），
   或只跑相關 spec（例：改了 router → `npx playwright test journal-view spa-deep-link`）。
+- **npm 11（Node 26 內建）`allow-scripts` 警告非錯誤**：npm 11 預設攔截依賴的 postinstall
+  script，`npm install` 會跳 `npm warn allow-scripts stockfish / vue-demi …`。本專案**無害、不用 approve**：
+  Stockfish WASM 已 committed 在 `public/stockfish/`（非靠 postinstall 產生）、vue-demi 自偵 Vue 3。
+  CI 在 Node 26 全綠已證實。看到此警告不要以為壞了。
 
 ## Forbidden Patterns
 
