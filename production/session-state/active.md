@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: Phase 2 — 課程長在你自己的棋上（賽後檢討）
-Task: **Phase 1 棋誌 epic 全部上線**（CI 綠、部署站 200）。本 session：**賽後檢討棋盤從 FEN 字串換成真棋盤（PgnViewer）＋全 app 棋盤統一 Wood12+Gioco（含 PgnViewer）**——vue-tsc 0 / vitest 730 綠 / 畫面實測 OK，**尚未 push**。下一步＝Phase 2「重點回播」redesign。
+Task: **Phase 1 棋誌 epic 全部上線**（CI 綠、部署站 200）。賽後檢討棋盤已從 FEN 字串換成真棋盤（PgnViewer）＋全 app 棋盤統一 Wood12+Gioco——**已 push（commit `e99d706`）**。**下一步＝Phase 2「重點回播」redesign，design-first：先做可點 demo → 拍板 → GDD → stories → 實作**（提案＋待定決策見下方待辦）。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 還沒固化的 in-flight 決策。**長期鐵則/技術參考一律在 CLAUDE.md 體系**（見下方「接手必讀」），這裡不複述；已完成施工細節在 git。
@@ -50,13 +50,12 @@ Task: **Phase 1 棋誌 epic 全部上線**（CI 綠、部署站 200）。本 ses
 
 ## 🚧 待辦 / 開放項
 
-### 未 push（本 session 改動，待 Eason 確認後 push）
-
-- 賽後檢討 FEN→PgnViewer 真棋盤（`ReviewView.vue` + signpost 測試補 stub）；`board-theme.css` 加 `body` 前綴出強度，讓 PgnViewer 也吃 Wood12+Gioco；鐵則文件重整（CLAUDE.md 體系 ← active.md）。vue-tsc 0 / vitest 730 綠 / 畫面實測 OK。
-
 ### Phase 2（深化方向）
 
 - 🆕 **賽後檢討「重點回播」redesign**（Eason 構想＝Phase 2 ① 的 UX）：不逐手翻，只 **highlight 3-5 個關鍵時刻**（重用既有 cpLoss/最大轉折/`classify()`＝篩選+呈現非新邏輯，且只看關鍵手＝更平靜、對上「寧少勿濫」）。每時刻顯示**戰術名 + 你的步 vs 最佳步差異**，Neve **模板 per mistake-concept** 解釋（零 AI）；v2＝任意局面自由解釋（AI/BYOK，最後）。**咬合**：每個被點出的時刻＝一筆棋誌（②/③），review＝②蘇格拉底教學。⚠️ 大改 `ReviewView` 互動模型，依鐵則先 `/design-review`→拍板→才施工。
+  - **可重用料（現成在 `ReviewView.vue` / `modules/learning-loop`）**：`computeCpLoss`、`biggestSwingCursor`、`classify()`（已產 concept）、`mistakeSignposts`、`selectMistakeSignposts`。棋盤＝剛上線的 `PgnViewer`。
+  - **本 session 已提案、待 Eason 拍板的決策**：① 時刻怎麼選（推薦：玩家手依 deep cpLoss 排序、取有 concept 或大 swing 的前 3-5；是否也放 1 個「漂亮的一手」②未定）② 逐手瀏覽（推薦保留為次要 toggle，不丟現有 nav）③ Neve 講解＝每 mistake-concept 一個模板「我看到你想…，這裡…更好，因為…」④ eval bar / 棋譜列在重點回播模式收掉（平靜），逐手模式才出現 ⑤ 棋誌咬合先做 UI、寫入留一張 story。
+  - **下一步（接手就做）**：刻一個**可點 HTML demo**（真實一盤的關鍵時刻 + Neve 模板文案）給 Eason 看版面/節奏 → 拍板 → 寫進 `design/gdd/post-game-review.md`（或新 GDD）→ `/design-review` → 切 stories → 實作。
 - **概念側門廢除 + 概念深化頁**：廢除「概念→課程側門」（`ConceptMapView` 戰術卡 `?from=concept` alias 到課程），概念改成「單一戰術主題的深化＝課程加深版」（自有 `steps`、共享 LessonView 渲染器吃不同資料）。**整包做**（只拆側門會留破洞）。牽連 `LessonView` `fromConcept` 分支、`lesson-progress` `markSideLearned`、`concept-progress` store、`data-sync` `lesson_side_learned`、概念地圖雙色點。**保留**賽後檢討 signpost（`ReviewView` `?from=lesson`→試煉）。**已做**：移除課程完成卡練習邀請 CTA。
 
 ### 待 Eason iPhone 實機複看（皆已修/已 push）
