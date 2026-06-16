@@ -54,6 +54,11 @@
   - Review data parsing
   - Skill scoring formulas
   - Supabase data sync
+- **本機跑 E2E 不要用無參數的 `npx playwright test`**：完整套件含 `@spike` 重 spec
+  （`depth-22-spike` 跑 Stockfish 到 depth 22、`memory-budget-spike` 記憶體壓測），本機會卡好幾分鐘像當機。
+  CI 用 `grepInvert @spike`（見 `playwright.config.ts`）排除，所以 CI 不慢。
+  **本機驗證改用** `npx playwright test --grep-invert @spike`（＝CI 等效、快），
+  或只跑相關 spec（例：改了 router → `npx playwright test journal-view spa-deep-link`）。
 
 ## Forbidden Patterns
 
