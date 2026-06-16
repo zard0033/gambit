@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: Phase 1 — 棋誌（Neve 記憶的可見載體）
-Task: design-review✅→ADR-0013 Accepted✅→7 stories✅→migration live✅。001~007 全實作。**004 全覽UI✅＋005 peek+未讀✅完成**（005：HomeView 棋誌 StatCard 解鎖＋peek 列表 HOMEPAGE_PEEK_COUNT=3＋淡玉未讀點，MCP 瀏覽器驗 6 項 AC 全過）。**Phase 1 棋誌 epic 全部完成**。⚠️ 整包 journal 001~007＋Node 26 升級**尚未 commit/push**，待 Eason 確認 scope。注意：006 動 App.vue userId watch，push 前跑完整 E2E（CI 含 Stockfish spec）
+Task: **Phase 1 棋誌 epic 全部完成且已上線**（001~007＋004 全覽UI＋005 peek/未讀，全 push、CI 綠、部署站 200）。**技術棧已全面升級到最新且 CI 綠**：Tailwind 4／Vite 8／Vitest 4／vue-router 5／Pinia 3／TS 6／@types/node 25／jsdom 29／**Node 26**（本機 fnm + CI node-version 一致），`npm audit` 0 vulnerabilities。下一步＝Phase 2（課程長在你自己的棋上／賽後檢討棋盤 UI），見下方待辦。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 鐵則。已完成施工的細節在 git 提交，不在此複述。
@@ -46,8 +46,8 @@ Task: design-review✅→ADR-0013 Accepted✅→7 stories✅→migration live✅
   - cream 紙頁卡（紙紋＋暖陰影）＋逐張一次性漸顯。
   - 文件已同步：`journal.md` R7/UI 改時間軸、story-004 AC、navigation-and-routing route 表。
 - **驗證**：vue-tsc 0／vitest 730 綠／`journal-view`+`spa-deep-link` E2E 16 綠（chromium+webkit）。完整含 Stockfish 的 E2E 太慢沒本機跑，**CI 會跑**（config retries:2）。
-- **⚠️ 尚未 commit/push**：整個 journal Phase 1 epic（含 001~007 資料層）都還在 working tree，待 Eason 確認 commit scope 後 `git push origin main`。
-- **🔜 下一個＝story-005**（首頁 peek＋未讀）：HomeView「總覽」區的 `即將推出`（Library icon）locked 卡＝預留棋誌格；露最近 `HOMEPAGE_PEEK_COUNT=3` 筆＋未讀 watermark（`chess:journal:lastSeenAt`，二元/非金/僅棋誌內）；點入 `/journal`。**這是棋誌在 app 內的入口**（004 完成後 /journal 仍只能打 URL）。
+- **✅ 已 commit/push 上線**：整個 journal Phase 1 epic（001~007＋004＋005）已在 main、CI 綠、部署站 200。
+- **✅ story-005 已完成**（首頁 peek＋未讀）：HomeView 棋誌 StatCard 解鎖＋peek 列表 `HOMEPAGE_PEEK_COUNT=3`＋淡玉未讀點（`chess:journal:lastSeenAt`，二元/非金/僅棋誌內）；點入 `/journal`＝棋誌在 app 內的入口。
 - **⚠️ push 前注意**：006 動了 `src/App.vue` userId watch（登入時序）——本機已跑 spa-deep-link（landing gate/auth 路徑）綠；完整 E2E 靠 CI。
 - ⚠️ **以下舊筆記已被 2026-06-16 design-review 取代，僅留作脈絡**（現況以上方為準）：原本規劃「事件當下捕捉、≤1 筆、v1=①②④」——design-review 發現 ①② 上游欄位不存在＋iOS 無可靠 app-close，故 **v1 改為 onset/arrival/solace（全可從持久狀態推導）、cap=3**，①②③⑥ 全 Phase 2。
 - 已更新：systems-index #21、journal review-log、tr-registry（TR-journal-001~007）、epics/index、supabase/README。
@@ -68,7 +68,7 @@ Task: design-review✅→ADR-0013 Accepted✅→7 stories✅→migration live✅
 ## 現況（產品已全線可用）
 
 - **核心動線**：對局 → 賽後檢討 → 課程 / 試煉，Google OAuth 登入 + 跨裝置同步。全部已 push。
-- **測試**：vue-tsc 0、vitest **665 passed**。Supabase 6 張表全到位，**無待套 migration**。
+- **測試**：vue-tsc 0、vitest **730 passed**。Supabase 6 張表全到位，**無待套 migration**。
 - **已完成里程碑**（細節在 git 提交）：試煉道場 #19、學習迴圈 #20（A/B/C）、課程四階 21 課、
   UI Redesign Phase 0–4、登入遷移 Google OAuth、訪客模式 local-first + 續玩、全站 code review 修復批、
   棋理內容修復批、課程頁完成流程改版、UI 微調批、Template Compliance、dead-file 稽核、PWA 冷啟動閃爍修復。
