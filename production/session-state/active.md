@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: Phase 1 — 棋誌（Neve 記憶的可見載體）
-Task: design-review✅→ADR-0013 Accepted✅→7 stories✅→migration live✅。001/002/003/006/007 已實作。**004 全覽UI 完成✅**（時間軸 IA＋月份收合＋Inspira beam 暖象牙燭光＋紙頁卡；vue-tsc 0／vitest 730 綠／journal+spa-deep-link E2E 16 綠）。剩 005 peek+未讀（與 Eason 一起做）。注意：006 動 App.vue userId watch，push 前跑完整 E2E（CI 含 Stockfish spec）
+Task: design-review✅→ADR-0013 Accepted✅→7 stories✅→migration live✅。001~007 全實作。**004 全覽UI✅＋005 peek+未讀✅完成**（005：HomeView 棋誌 StatCard 解鎖＋peek 列表 HOMEPAGE_PEEK_COUNT=3＋淡玉未讀點，MCP 瀏覽器驗 6 項 AC 全過）。**Phase 1 棋誌 epic 全部完成**。⚠️ 整包 journal 001~007＋Node 26 升級**尚未 commit/push**，待 Eason 確認 scope。注意：006 動 App.vue userId watch，push 前跑完整 E2E（CI 含 Stockfish spec）
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 鐵則。已完成施工的細節在 git 提交，不在此複述。
@@ -113,6 +113,14 @@ Task: design-review✅→ADR-0013 Accepted✅→7 stories✅→migration live✅
 ---
 
 ## 🔑 鐵則 / 技術參考
+
+### ⚠️ Node 26 升級（2026-06-16，接手必讀）
+- **CI 已升 Node 22→26**（`tests.yml`/`deploy.yml`/CLAUDE.md）。Eason 家裡電腦已升 26；**公司電腦仍 Node 22**。
+- **換機器 / git pull 後必做**：`npm install`（package-lock 變了，連 `@tailwindcss/postcss` 等技術棧升級的 lock 一起；不重裝 dev server 起不來）。
+- **Node 26 vitest 相容 shim**：`tests/setup-node26-compat.ts`（vitest.config 已 `setupFiles` 指向它）。
+  - **為何需要**：Node 26 把 `localStorage` 加進原生 globals（實驗性 Web Storage），但無 `--localstorage-file` 時它是 getter-only 的 undefined，happy-dom 用 plain assignment 覆寫會在 strict mode 靜默失敗 → 全測試 localStorage=undefined 而紅。shim 在 happy-dom init 後補裝可用的 InMemoryStorage（key 為 own enumerable，使 `Object.keys(localStorage)` 正常）。
+  - **對 Node 22 安全**：shim 是條件式（`if typeof localStorage === 'undefined'`），Node 22 happy-dom 正常注入 localStorage → shim 跳過 → no-op。故公司電腦 22 pull 後測試照綠，不需特別動作（仍建議升 26 對齊 CI）。
+  - ⚠️ shim 在 Node 22 的 no-op 行為尚未實機驗證（開發機是 26）；公司電腦首次 `npm run test:unit` 若異常回報。
 
 - **Push guardrail**：`git push origin main`，**絕不 bare `git push`**（origin=你的 fork、upstream=模板）。
   push 前先列 commit message 等 Eason 確認。

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowRight, Target, BookOpen, Library, Swords } from 'lucide-vue-next'
 import { lessons } from '@/data/lessons'
@@ -9,6 +9,9 @@ import { useLessonProgressStore } from '@/stores/lesson-progress'
 import { useDungeonProgressStore } from '@/stores/dungeon-progress'
 import { useUiStore } from '@/stores/ui-store'
 import { useResumeGameStore } from '@/stores/resume-game'
+import { useJournalStore } from '@/stores/journal'
+import { HOMEPAGE_PEEK_COUNT } from '@/config/journal-config'
+import { getLastSeenAt, isUnread } from '@/lib/journal/unread'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { DarkPanel, ChapterBadge, StatCard, SectionLabel, ProgressBar } from '@/components/ui/gambit'
@@ -18,6 +21,11 @@ const progress = useLessonProgressStore()
 const dungeon = useDungeonProgressStore()
 const uiStore = useUiStore()
 const resume = useResumeGameStore()
+const journal = useJournalStore()
+
+// 未讀水位：在 mount 前捕捉，使 peek 的未讀點在本次渲染穩定。
+const lastSeenAt = getLastSeenAt()
+const peekEntries = computed(() => journal.recent(HOMEPAGE_PEEK_COUNT))
 
 // 續玩對局（續玩對局）：有進行中對局時，hero 卡換成「繼續對局」。
 const resumeInfo = computed(() => {
@@ -62,6 +70,10 @@ function continueGame() {
 function continueLearning() {
   router.push(nextLesson.value ? `/learn/${nextLesson.value.id}` : '/learn')
 }
+
+onMounted(() => {
+  journal.load()
+})
 </script>
 
 <template>
@@ -182,7 +194,34 @@ function continueLearning() {
           :value="`${dungeon.solvedCount}/${dungeon.totalCount}`"
         />
       </RouterLink>
-      <StatCard :icon="Library" value="即將推出" locked />
+      <RouterLink to="/journal" class="block rounded-card focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold" aria-label="棋誌">
+        <StatCard
+          :icon="Library"
+          label="棋誌"
+          :value="journal.entries.length > 0 ? String(journal.entries.length) : '—'"
+        />
+      </RouterLink>
     </div>
+    <!-- 棋誌 peek（總覽下方，露最近 HOMEPAGE_PEEK_COUNT 筆；有新筆才顯示此區塊） -->
+    <template v-if="peekEntries.length > 0">
+      <SectionLabel class="mt-5">棋誌</SectionLabel>
+      <div class="space-y-2">
+        <RouterLink
+          v-for="entry in peekEntries"
+          :key="entry.id"
+          to="/journal"
+          class="flex min-h-[44px] items-center gap-2.5 rounded-card border border-line/40 bg-surface-card px-3 py-2.5 hover:border-line transition-colors"
+          data-testid="journal-peek-entry"
+        >
+          <span
+            v-if="isUnread(entry, lastSeenAt)"
+            class="h-1.5 w-1.5 flex-shrink-0 self-start mt-[7px] rounded-full bg-[#7EBEA5]/60"
+            data-testid="unread-dot"
+            aria-hidden="true"
+          />
+          <p class="flex-1 font-lesson text-[13.5px] leading-[1.65] text-ink-muted line-clamp-2">{{ entry.body }}</p>
+        </RouterLink>
+      </div>
+    </template>
   </div>
 </template>

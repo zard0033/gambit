@@ -18,6 +18,7 @@ export default defineConfig({
   },
   test: {
     globals: true,
+    setupFiles: ['tests/setup-node26-compat.ts'],
     include: ['tests/unit/**/*.test.ts', 'tests/integration/**/*.test.ts', 'tests/smoke/**/*.test.ts'],
     exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**'],
     reporters: ['default'],

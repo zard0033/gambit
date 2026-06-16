@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { ArrowLeft, ChevronDown, ChevronRight } from 'lucide-vue-next'
 import { useJournalStore } from '@/stores/journal'
 import type { JournalEntry } from '@/types/journal'
+import { getLastSeenAt, isUnread, markSeen } from '@/lib/journal/unread'
 import JournalLamp from '@/components/journal/JournalLamp.vue'
 import JournalEntryCard from '@/components/journal/JournalEntryCard.vue'
 
@@ -12,6 +13,10 @@ const journal = useJournalStore()
 
 // 空狀態固定字串（Neve 語氣，無 emoji）— assert 相等用。
 const EMPTY_STATE_COPY = '還沒有什麼好寫的。先下一盤吧。'
+
+// 未讀水位：在此 visit mount 前捕捉，保持本次渲染穩定。mount 後 markSeen() 更新 localStorage，
+// 下次開啟時 getLastSeenAt() 才讀到新值，使 marker 在本次可見一次後消失。
+const lastSeenAt = getLastSeenAt()
 
 const greeting = computed(() => {
   const h = new Date().getHours()
@@ -79,6 +84,7 @@ function goBack(): void {
 
 onMounted(async () => {
   await journal.load()
+  markSeen()
 })
 </script>
 
@@ -127,7 +133,7 @@ onMounted(async () => {
             <span class="h-px flex-1 bg-white/10" aria-hidden="true" />
           </button>
           <div v-if="isExpanded(group.key)" class="mt-3 space-y-4">
-            <JournalEntryCard v-for="it in group.entries" :key="it.entry.id" :entry="it.entry" :index="it.index" />
+            <JournalEntryCard v-for="it in group.entries" :key="it.entry.id" :entry="it.entry" :index="it.index" :unread="isUnread(it.entry, lastSeenAt)" />
           </div>
         </section>
       </div>

@@ -28,15 +28,15 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 - **Deployment**: GitHub Pages
 - **Testing**: Vitest (unit) + Playwright (E2E)
 - **Version Control**: Git with trunk-based development
-- **Node Runtime**: 22+ (CI 與本機開發必須一致)
+- **Node Runtime**: 26+ (CI 與本機開發必須一致)
 
 > **Note**: This project does NOT use a traditional game engine (Godot/Unity/Unreal).
 > Engine-specialist agents are not applicable. Use web/TypeScript-focused review.
 
-> **CI Node 版本鎖 22，勿降回 20**：`src/lib/supabase.ts` 在 import 時即
+> **CI Node 版本鎖 26，勿降回 20**：`src/lib/supabase.ts` 在 import 時即
 > `createClient()`，Supabase RealtimeClient 需要 WebSocket。Node < 22 無原生
-> WebSocket，會在測試載入階段（import supabase 的 suite）直接拋錯使 CI 失敗，
-> 但本機 Node 22 看不出來。降版本前先改成裝 `ws` 並注入 transport。
+> WebSocket，會在測試載入階段（import supabase 的 suite）直接拋錯使 CI 失敗。
+> 降版本前先改成裝 `ws` 並注入 transport。
 
 > **部署 base path 護欄**：站台部署在 GitHub Pages 子路徑 `/gambit/`
 > （CI 以 `VITE_BASE_URL` 注入）。**寫在 JS / inline-style 的資產路徑**——

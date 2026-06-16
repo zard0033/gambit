@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import type { JournalEntry, Volume } from '@/types/journal'
 
-const props = withDefaults(defineProps<{ entry: JournalEntry; index?: number }>(), { index: 0 })
+const props = withDefaults(defineProps<{ entry: JournalEntry; index?: number; unread?: boolean }>(), { index: 0, unread: false })
 
 // 抵達筆＝旅程章節里程碑：卡上加一條章節小標（時間軸 IA 下，卷只當里程碑、不當歸屬桶）。
 const VOLUME_LABEL: Record<Volume, string> = {
@@ -29,7 +29,9 @@ const riseDelay = computed(() => `${Math.min(props.index * 70, 320)}ms`)
     >
       <span class="h-px w-6 bg-primary-dark/30" aria-hidden="true" />{{ milestone }}<span class="h-px w-6 bg-primary-dark/30" aria-hidden="true" />
     </div>
-    <p class="mb-1.5 font-num text-[12.5px] tracking-[0.04em] text-ink-faint">{{ dateLabel }}</p>
+    <p class="mb-1.5 flex items-center gap-1.5 font-num text-[12.5px] tracking-[0.04em] text-ink-faint">
+      <span v-if="unread" class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#7EBEA5]/60" data-testid="journal-unread-dot" aria-hidden="true" />{{ dateLabel }}
+    </p>
     <p class="journal-body font-lesson text-[17px] leading-[1.9] text-ink">{{ entry.body }}</p>
   </article>
 </template>
