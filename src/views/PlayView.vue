@@ -278,7 +278,7 @@ if (isDev) {
       <!-- framed board (wooden tray) + GAME_OVER overlay; scales by viewport height, capped so the
            adjacent panel still fits (no overlap / overflow). -->
       <div
-        class="relative w-full shrink-0 max-w-[min(92vw,28rem)] rounded-[12px] bg-[linear-gradient(160deg,#6f4b30,#523722)] p-3 ring-1 ring-black/30 shadow-[0_12px_32px_rgba(10,30,24,0.45),inset_0_1px_0_rgba(255,228,194,0.20),inset_0_-2px_6px_rgba(0,0,0,0.38)] md:w-[min(74vh,calc(100vw_-_26rem),56rem)] md:max-w-none"
+        class="relative w-full shrink-0 max-w-[min(92vw,28rem)] rounded-[12px] bg-[linear-gradient(160deg,#6f4b30,#523722)] p-3 ring-1 ring-black/30 shadow-[0_12px_32px_rgba(10,30,24,0.45),inset_0_1px_0_rgba(255,228,194,0.20),inset_0_-2px_6px_rgba(0,0,0,0.38)] md:w-[min(74vh,calc(100vw-26rem),56rem)] md:max-w-none"
       >
         <ChessBoard
           :fen="fen"
@@ -302,7 +302,7 @@ if (isDev) {
           <!-- 完局結果（inline，取代蓋棋盤彈窗）：結果 + 原因 + 再來一局／複盤 -->
           <div
             v-if="phase === 'GAME_OVER'"
-            class="mb-3 rounded-[10px] border border-white/10 bg-white/[0.05] p-3.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+            class="mb-3 rounded-[10px] border border-white/10 bg-white/5 p-3.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
           >
             <p class="font-display text-xl font-bold" :class="playerWon ? 'text-gold' : 'text-ink-on-deep'">{{ resultLabel }}</p>
             <p class="mt-1.5 font-sans text-[13px] leading-relaxed text-ink-on-deep-dim">{{ outcomeBlurb }}</p>
@@ -322,7 +322,7 @@ if (isDev) {
                輪到你以金色 indicator 強調（Gambit 金＝focus/reward）；AI 思考時左段換成呼吸點。 -->
           <div
             v-if="phase !== 'GAME_OVER'"
-            class="mb-3 flex items-center gap-1.5 whitespace-nowrap rounded-[10px] border border-white/10 bg-white/[0.05] px-3 py-2 text-[14px] tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+            class="mb-3 flex items-center gap-1.5 whitespace-nowrap rounded-[10px] border border-white/10 bg-white/5 px-3 py-2 text-[14px] tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
           >
             <template v-if="phase === 'PLAYER_TURN'">
               <span
@@ -356,7 +356,7 @@ if (isDev) {
             <p class="border-b border-white/10 px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-wider text-ink-on-deep-dim">棋譜</p>
             <div
               ref="moveScroll"
-              class="max-h-[9rem] overflow-y-auto p-2.5 font-num text-[14px] leading-relaxed tabular-nums text-ink-on-deep md:max-h-[12rem]"
+              class="max-h-36 overflow-y-auto p-2.5 font-num text-[14px] leading-relaxed tabular-nums text-ink-on-deep md:max-h-48"
             >
               <p v-if="!movePairs.length" class="text-ink-on-deep-dim">尚無棋步</p>
               <div
@@ -375,13 +375,13 @@ if (isDev) {
           <div v-if="phase !== 'GAME_OVER'" class="mt-3 flex gap-2">
             <button
               type="button"
-              class="min-h-[44px] flex-1 rounded-btn border border-white/10 bg-white/[0.06] text-sm font-semibold text-ink-on-deep transition-colors hover:bg-white/[0.10] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:pointer-events-none disabled:opacity-40"
+              class="min-h-[44px] flex-1 rounded-btn border border-white/10 bg-white/6 text-sm font-semibold text-ink-on-deep transition-colors hover:bg-white/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold disabled:pointer-events-none disabled:opacity-40"
               :disabled="!canUndo"
               @click="confirmAction = 'undo'"
             >悔棋</button>
             <button
               type="button"
-              class="min-h-[44px] flex-1 rounded-btn border border-danger/50 bg-danger/15 text-sm font-semibold text-[#EC9C84] transition-colors hover:bg-danger/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:pointer-events-none disabled:opacity-40"
+              class="min-h-[44px] flex-1 rounded-btn border border-danger/50 bg-danger/15 text-sm font-semibold text-[#EC9C84] transition-colors hover:bg-danger/25 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold disabled:pointer-events-none disabled:opacity-40"
               :disabled="!canResign"
               @click="confirmAction = 'resign'"
             >投降</button>
@@ -395,7 +395,7 @@ if (isDev) {
     <div
       v-if="confirmAction"
       ref="confirmOverlay"
-      class="game-over-overlay fixed inset-0 z-[60] flex items-center justify-center bg-ink/60 p-4"
+      class="game-over-overlay fixed inset-0 z-60 flex items-center justify-center bg-ink/60 p-4"
       role="dialog"
       aria-modal="true"
       tabindex="-1"

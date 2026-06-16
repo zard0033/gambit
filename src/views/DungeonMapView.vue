@@ -182,9 +182,9 @@ function enter(node: MapNode): void {
           :style="{ top: `${band.y - 9}px` }"
         >
           <span class="h-px flex-1" style="background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent)" />
-          <span class="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 backdrop-blur-[8px]">
+          <span class="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 backdrop-blur-sm">
             <span class="font-num text-[13px] text-ink-on-deep">{{ LEVEL_NAMES[band.level] }}</span>
-            <span class="text-[9px] font-bold uppercase tracking-[0.1em] text-ink-on-deep-dim">Lv {{ band.level }}</span>
+            <span class="text-[9px] font-bold uppercase tracking-widest text-ink-on-deep-dim">Lv {{ band.level }}</span>
             <span class="font-num text-[11px] text-ink-on-deep-dim">{{ band.solved }}/{{ band.total }}</span>
           </span>
           <span class="h-px flex-1" style="background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent)" />
@@ -198,7 +198,7 @@ function enter(node: MapNode): void {
             :disabled="node.state === 'locked'"
             :aria-current="node.state === 'current' ? 'step' : undefined"
             :aria-label="`${node.puzzle.title}（${node.state === 'done' ? '已完成' : node.state === 'current' ? '進行中' : '未解鎖'}）`"
-            class="absolute z-[2] flex items-center justify-center rounded-full transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-surface-dungeon"
+            class="absolute z-2 flex items-center justify-center rounded-full transition-transform active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-surface-dungeon"
             :style="{
               left: `${node.x - node.size / 2}px`,
               top: `${node.y - node.size / 2}px`,
@@ -227,7 +227,7 @@ function enter(node: MapNode): void {
 
           <!-- Label (centred under the coin) -->
           <div
-            class="absolute z-[2] -translate-x-1/2 whitespace-nowrap text-center"
+            class="absolute z-2 -translate-x-1/2 whitespace-nowrap text-center"
             :style="{ left: `${node.x}px`, top: `${node.y + node.size / 2 + 5}px`, opacity: node.opacity }"
           >
             <p
@@ -250,13 +250,13 @@ function enter(node: MapNode): void {
         class="mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-white/[0.14] bg-[linear-gradient(160deg,#1E5043,#15392F)] px-3.5 py-3 shadow-[0_10px_30px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.12)]"
       >
         <span
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold/[0.12] text-gold ring-1 ring-gold/25"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold/12 text-gold ring-1 ring-gold/25"
           aria-hidden="true"
         ><Target :size="18" :stroke-width="1.8" /></span>
 
         <template v-if="currentPuzzle">
           <div class="min-w-0 flex-1">
-            <p class="font-sans text-[10px] font-bold uppercase tracking-[0.1em] text-gold/70">
+            <p class="font-sans text-[10px] font-bold uppercase tracking-widest text-gold/70">
               目前試煉 · {{ LEVEL_NAMES[currentPuzzle.level] }} · {{ currentPuzzle.order }}/{{ progress.totalCount }}
             </p>
             <p class="truncate font-display text-[15px] font-bold leading-tight text-ink-on-deep">
@@ -265,7 +265,7 @@ function enter(node: MapNode): void {
           </div>
           <button
             type="button"
-            class="flex min-h-[44px] shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-gradient-to-b from-gold-light to-gold px-4 font-sans text-sm font-bold text-gold-ink shadow-[0_2px_12px_rgba(248,181,0,0.45)] transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-surface-dungeon"
+            class="flex min-h-[44px] shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-linear-to-b from-gold-light to-gold px-4 font-sans text-sm font-bold text-gold-ink shadow-[0_2px_12px_rgba(248,181,0,0.45)] transition-transform active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-surface-dungeon"
             @click="router.push(`/dungeon/${currentPuzzle.id}`)"
           >
             進入試煉 <ArrowRight :size="15" />
@@ -273,7 +273,7 @@ function enter(node: MapNode): void {
         </template>
 
         <div v-else class="min-w-0 flex-1">
-          <p class="font-sans text-[10px] font-bold uppercase tracking-[0.1em] text-gold/70">
+          <p class="font-sans text-[10px] font-bold uppercase tracking-widest text-gold/70">
             登頂 · {{ progress.solvedCount }}/{{ progress.totalCount }}
           </p>
           <p class="font-display text-[15px] font-bold leading-tight text-ink-on-deep">試煉全數完成</p>

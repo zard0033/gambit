@@ -1,8 +1,210 @@
-@import './fonts.css';
+@import './fonts.css' layer(base);
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@plugin 'tailwindcss-animate';
+
+@theme {
+  --font-sans:
+    Sarasa UI TC, PingFang TC, PingFang SC, Noto Sans CJK TC, Noto Sans TC,
+    Microsoft JhengHei, Microsoft YaHei, ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-display:
+    BIZ UDPMincho, Noto Serif TC, PingFang TC, Songti TC, Microsoft JhengHei,
+    ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-lesson:
+    LXGW WenKai TC, Noto Serif TC, PingFang TC, Songti TC, Microsoft JhengHei,
+    ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-num:
+    'Cubic 11', Sarasa UI TC, ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, 'Liberation Mono', 'Courier New', monospace;
+  --font-brand: Cinzel, BIZ UDPMincho, Noto Serif TC, serif;
+
+  --color-surface-base: #faf6f0;
+  --color-surface-card: #fcf9f3;
+  --color-surface-raised: #f4ead8;
+  --color-surface-hover: #efe4d2;
+  --color-surface-deep: #103029;
+  --color-surface-deep-2: #18443a;
+  --color-surface-dungeon: #0b211b;
+  --color-surface-dungeon-2: #0e2a22;
+
+  --color-line: #e0d3bd;
+  --color-line-subtle: #ece1cd;
+  --color-line-strong: #cdb999;
+
+  --color-ink: #3d2210;
+  --color-ink-muted: #7a5c44;
+  --color-ink-faint: #a88c76;
+  --color-ink-on-deep: #e7f1ec;
+  --color-ink-on-deep-dim: #9bbdb1;
+
+  --color-primary: #1c7059;
+  --color-primary-dark: #155747;
+  --color-primary-soft: #cfe9e0;
+  --color-primary-fg: #ffffff;
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-success: #4a7c59;
+  --color-success-dark: #3a6447;
+  --color-success-light: #eef4ee;
+  --color-success-fg: #fcf9f3;
+  --color-success-on-deep: #7fd4a8;
+
+  --color-danger: #b8533a;
+  --color-danger-dark: #9a4330;
+  --color-danger-light: #f9efe9;
+  --color-danger-fg: #fcf9f3;
+  --color-danger-on-deep: #e08e79;
+
+  --color-hint: #c9872e;
+  --color-hint-dark: #aa6f20;
+  --color-hint-light: #faf2e2;
+  --color-hint-ring: #e3c186;
+  --color-hint-fg: #3d2210;
+
+  --color-gold: #f8b500;
+  --color-gold-light: #ffc94d;
+  --color-gold-dark: #8f6200;
+  --color-gold-ink: #3a2408;
+
+  --color-map-tile-top: #46c7a3;
+  --color-map-tile-face: #1f9e7a;
+  --color-map-tile-socket: #0f6e54;
+  --color-map-tile-lock-top: #ebe2d2;
+  --color-map-tile-lock-face: #d8cdb9;
+  --color-map-tile-lock-socket: #b5a790;
+
+  --color-map-trail: #f8b500;
+  --color-map-trail-base: #d4c5a2;
+
+  --color-nav-bg: #103029;
+  --color-nav-text: #e7f1ec;
+  --color-nav-dim: #9bbdb1;
+  --color-nav-active-bg: #18443a;
+  --color-nav-active: #ffffff;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --shadow-card:
+    0 1px 2px rgba(61, 34, 16, 0.04), 0 4px 14px rgba(61, 34, 16, 0.06);
+  --shadow-card-hover:
+    0 2px 4px rgba(61, 34, 16, 0.06), 0 10px 24px rgba(61, 34, 16, 0.1);
+  --shadow-button: 0 1px 2px rgba(61, 34, 16, 0.1);
+
+  --radius-btn: 0.5rem;
+  --radius-card: 0.75rem;
+  --radius-lg-card: 1rem;
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --text-display: 2.75rem;
+  --text-display--line-height: 1.15;
+  --text-display--letter-spacing: -0.01em;
+  --text-display-sm: 2rem;
+  --text-display-sm--line-height: 1.2;
+  --text-display-sm--letter-spacing: -0.01em;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility btn {
+  /* Refined, dignified depth — soft shadow + subtle 1px press (no cartoon bottom edge). */
+  @apply inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-btn
+           font-medium leading-none transition-all duration-150 select-none
+           focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary
+           focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base;
+  &:active {
+    @apply translate-y-px;
+  }
+  &:disabled {
+    @apply opacity-40 cursor-not-allowed;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    @apply transition-none;
+    &:active {
+      @apply translate-y-0;
+    }
+  }
+}
+
+@utility btn-primary {
+  @apply bg-primary text-primary-fg shadow-button hover:bg-primary-dark;
+}
+
+@utility btn-secondary {
+  @apply bg-surface-card text-ink border border-line hover:bg-surface-hover;
+}
+
+@utility btn-ghost {
+  @apply text-ink hover:bg-surface-hover;
+}
+
+@utility btn-danger {
+  @apply bg-danger text-danger-fg shadow-button hover:bg-danger-dark;
+}
+
+@utility card {
+  @apply bg-surface-card border border-line rounded-card shadow-card;
+}
+
+@utility glass-panel {
+  /* Gambit signature glass — frosted panel for deep/jade zones (turn badges, info panels,
+     puzzle cards). Full spec: translucent white fill + blur + hairline + top sheen + warm
+     outer shadow. Not an animation, so unaffected by prefers-reduced-motion. */
+  @apply rounded-card border border-white/16 backdrop-blur-[10px];
+  background-color: rgba(255, 255, 255, 0.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 6px 20px rgba(10, 30, 24, 0.3);
+}
+
+@utility card-interactive {
+  @apply card transition-shadow duration-200 hover:shadow-card-hover;
+  @media (prefers-reduced-motion: reduce) {
+    @apply transition-none;
+  }
+}
 
 @layer base {
   /* shadcn-vue semantic tokens — HSL triplets mapped to the existing warm palette
@@ -32,13 +234,13 @@
 
   body {
     background-color: #faf6f0;
-    font-family: theme('fontFamily.sans');
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: theme('colors.ink.DEFAULT');
+    color: var(--color-ink);
   }
   .font-display {
-    font-family: theme('fontFamily.display');
+    font-family: var(--font-display);
   }
   /* Tailwind 對 `num` key 產出空的 `.font-num {}`（其餘 font-* 正常），導致 Cubic 11
      全站退回 Sarasa。比照 .font-display 手動補上，用顯式字串避開該生成 bug。 */
@@ -50,58 +252,5 @@
      are never reached by keyboard Tab, so the focus ring is just visual noise. */
   [tabindex='-1']:focus {
     outline: none;
-  }
-}
-
-@layer components {
-  /* Refined, dignified depth — soft shadow + subtle 1px press (no cartoon bottom edge). */
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-btn
-           font-medium leading-none transition-all duration-150 select-none
-           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary
-           focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base;
-  }
-  .btn:active {
-    @apply translate-y-px;
-  }
-  .btn:disabled {
-    @apply opacity-40 cursor-not-allowed;
-  }
-  .btn-primary {
-    @apply bg-primary text-primary-fg shadow-button hover:bg-primary-dark;
-  }
-  .btn-secondary {
-    @apply bg-surface-card text-ink border border-line hover:bg-surface-hover;
-  }
-  .btn-ghost {
-    @apply text-ink hover:bg-surface-hover;
-  }
-  .btn-danger {
-    @apply bg-danger text-danger-fg shadow-button hover:bg-danger-dark;
-  }
-  .card {
-    @apply bg-surface-card border border-line rounded-card shadow-card;
-  }
-  /* Gambit signature glass — frosted panel for deep/jade zones (turn badges, info panels,
-     puzzle cards). Full spec: translucent white fill + blur + hairline + top sheen + warm
-     outer shadow. Not an animation, so unaffected by prefers-reduced-motion. */
-  .glass-panel {
-    @apply rounded-card border border-white/[0.16] backdrop-blur-[10px];
-    background-color: rgba(255, 255, 255, 0.07);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      0 6px 20px rgba(10, 30, 24, 0.3);
-  }
-  .card-interactive {
-    @apply card transition-shadow duration-200 hover:shadow-card-hover;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .btn,
-    .card-interactive {
-      @apply transition-none;
-    }
-    .btn:active {
-      @apply translate-y-0;
-    }
   }
 }

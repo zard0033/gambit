@@ -110,7 +110,7 @@ function toggleChapter(c: Chapter): void {
               />
             </span>
             <div class="min-w-0 flex-1">
-              <p class="mb-0.5 font-sans text-[10px] font-bold uppercase tracking-[0.1em]"
+              <p class="mb-0.5 font-sans text-[10px] font-bold uppercase tracking-widest"
                 :class="chapterStatus(c) === 'active' ? 'text-gold' : 'text-ink-faint'"
               >第{{ TIER_NUM[c.tier] }}章</p>
               <p class="font-display text-[15px] font-bold leading-tight"
@@ -157,9 +157,9 @@ function toggleChapter(c: Chapter): void {
                 v-for="(l, i) in c.lessons"
                 :key="l.id"
                 type="button"
-                class="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold"
+                class="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold"
                 :class="[
-                  i < c.lessons.length - 1 && 'border-b border-black/[0.04]',
+                  i < c.lessons.length - 1 && 'border-b border-black/4',
                   lessonState(l) === 'current' && 'bg-[linear-gradient(90deg,#FAF2DC,#FDF9EE)]',
                   lessonState(l) === 'locked' ? 'cursor-default' : 'hover:bg-surface-hover',
                 ]"
@@ -196,8 +196,8 @@ function toggleChapter(c: Chapter): void {
                 v-for="(l, i) in c.lessons"
                 :key="l.id"
                 type="button"
-                class="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold"
-                :class="i < c.lessons.length - 1 && 'border-b border-black/[0.04]'"
+                class="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left transition-colors hover:bg-surface-hover focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold"
+                :class="i < c.lessons.length - 1 && 'border-b border-black/4'"
                 @click="openLesson(l)"
               >
                 <span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-primary-soft">
@@ -213,7 +213,7 @@ function toggleChapter(c: Chapter): void {
                 v-for="(l, i) in c.lessons"
                 :key="l.id"
                 class="flex items-center gap-2.5 px-3.5 py-2.5"
-                :class="i < c.lessons.length - 1 && 'border-b border-black/[0.04]'"
+                :class="i < c.lessons.length - 1 && 'border-b border-black/4'"
               >
                 <span class="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-surface-raised">
                   <Lock :size="9" class="text-ink-faint" :stroke-width="2.5" />

@@ -132,10 +132,10 @@ describe('ResizeObserver lifecycle — AC-1', () => {
   it('test_resizeObserver_observeCalledWithBoardElement', () => {
     // Arrange — mock ResizeObserver (no DOM needed)
     const observeSpy = vi.fn()
-    const MockResizeObserver = vi.fn(() => ({
-      observe: observeSpy,
-      disconnect: vi.fn(),
-    }))
+    // 用一般函式（非箭頭）當實作，才能被 `new` 建構（vitest 4 嚴格化）。
+    const MockResizeObserver = vi.fn(function () {
+      return { observe: observeSpy, disconnect: vi.fn() }
+    })
 
     // Act — simulate the mount logic (use a plain object as stand-in for HTMLElement)
     const fakeBoardEl = {} as HTMLElement
@@ -149,10 +149,9 @@ describe('ResizeObserver lifecycle — AC-1', () => {
   it('test_resizeObserver_disconnectCalledOnUnmount', () => {
     // Arrange
     const disconnectSpy = vi.fn()
-    const MockResizeObserver = vi.fn(() => ({
-      observe: vi.fn(),
-      disconnect: disconnectSpy,
-    }))
+    const MockResizeObserver = vi.fn(function () {
+      return { observe: vi.fn(), disconnect: disconnectSpy }
+    })
 
     // Act — simulate component mount + unmount
     const observer = new (MockResizeObserver as unknown as typeof ResizeObserver)(() => {})

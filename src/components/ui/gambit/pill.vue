@@ -6,7 +6,7 @@ const TONES = {
   deep: 'bg-surface-deep text-ink-on-deep-dim',
   cream: 'bg-surface-card text-ink-muted border border-line',
   hint: 'bg-hint-light text-hint',
-  glass: 'glass-panel !rounded-full text-ink-on-deep-dim',
+  glass: 'glass-panel rounded-full! text-ink-on-deep-dim',
 } as const
 </script>
 

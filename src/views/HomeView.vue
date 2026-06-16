@@ -84,15 +84,15 @@ function continueLearning() {
         <div class="flex items-center gap-3.5">
           <div class="flex-1 min-w-0">
             <!-- 進行中狀態 pill（取代 NEW GAME 的金色 eyebrow，一眼區隔出「存著的對局」；靜態點守平靜鐵則） -->
-            <span class="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.08] px-2.5 py-1 font-sans text-[11px] font-medium text-ink-on-deep-dim">
+            <span class="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/8 px-2.5 py-1 font-sans text-[11px] font-medium text-ink-on-deep-dim">
               <span class="h-1.5 w-1.5 rounded-full bg-[#7EBEA5]" aria-hidden="true" />進行中
             </span>
             <p class="font-display font-bold text-[22px] text-ink-on-deep mt-2">繼續對局</p>
             <!-- 重點資訊改成可掃讀的 stat chips：手數 / 執色 / 強度 -->
             <div class="mt-2 flex flex-wrap gap-1.5">
-              <span class="inline-flex items-center rounded-md border border-white/10 bg-white/[0.06] px-2 py-0.5 font-num text-[12px] tabular-nums text-ink-on-deep">第 {{ resumeInfo.moveCount }} 手</span>
-              <span class="inline-flex items-center rounded-md border border-white/10 bg-white/[0.06] px-2 py-0.5 font-num text-[12px] text-ink-on-deep">執{{ resumeInfo.colorLabel }}</span>
-              <span class="inline-flex items-center rounded-md border border-white/10 bg-white/[0.06] px-2 py-0.5 font-num text-[12px] tabular-nums text-ink-on-deep">Lv.{{ resumeInfo.level }}</span>
+              <span class="inline-flex items-center rounded-md border border-white/10 bg-white/6 px-2 py-0.5 font-num text-[12px] tabular-nums text-ink-on-deep">第 {{ resumeInfo.moveCount }} 手</span>
+              <span class="inline-flex items-center rounded-md border border-white/10 bg-white/6 px-2 py-0.5 font-num text-[12px] text-ink-on-deep">執{{ resumeInfo.colorLabel }}</span>
+              <span class="inline-flex items-center rounded-md border border-white/10 bg-white/6 px-2 py-0.5 font-num text-[12px] tabular-nums text-ink-on-deep">Lv.{{ resumeInfo.level }}</span>
             </div>
             <div class="mt-3.5 flex items-center gap-3">
               <Button variant="gold" size="sm" @click.stop="continueGame">
@@ -168,14 +168,14 @@ function continueLearning() {
     <!-- 總覽（全寬） -->
     <SectionLabel>總覽</SectionLabel>
     <div class="grid grid-cols-3 gap-2.5">
-      <RouterLink to="/learn" class="block rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold" aria-label="學習進度">
+      <RouterLink to="/learn" class="block rounded-card focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold" aria-label="學習進度">
         <StatCard
           :icon="BookOpen"
           label="學習進度"
           :value="`${progress.completedCount}/${progress.totalCount}`"
         />
       </RouterLink>
-      <RouterLink to="/dungeon" class="block rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold" aria-label="試煉">
+      <RouterLink to="/dungeon" class="block rounded-card focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold" aria-label="試煉">
         <StatCard
           :icon="Target"
           label="試煉"

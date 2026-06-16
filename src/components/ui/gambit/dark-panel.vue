@@ -9,7 +9,7 @@ defineProps<{ noPad?: boolean; accentLeft?: boolean }>()
   <div
     class="relative overflow-hidden rounded-[14px]
            bg-[linear-gradient(160deg,#2A6654_0%,#1E4D3E_55%,#1A4238_100%)]
-           border-t border-t-white/[0.18] border-l border-l-white/10 border-r border-r-black/15 border-b border-b-black/25
+           border-t border-t-white/18 border-l border-l-white/10 border-r border-r-black/15 border-b border-b-black/25
            shadow-[0_6px_20px_rgba(10,30,24,0.40),0_2px_6px_rgba(10,30,24,0.22)]"
     :class="noPad ? 'p-0' : 'px-[15px] py-[14px]'"
   >
@@ -21,6 +21,6 @@ defineProps<{ noPad?: boolean; accentLeft?: boolean }>()
       v-if="accentLeft"
       class="pointer-events-none absolute inset-y-0 left-0 w-1 bg-[linear-gradient(to_bottom,#FFC94D,#F8B500)]"
     />
-    <div class="relative z-[1]"><slot /></div>
+    <div class="relative z-1"><slot /></div>
   </div>
 </template>

@@ -37,7 +37,7 @@ function continueAsGuest() {
         <button
           type="button"
           :disabled="authStore.isAuthLoading"
-          class="flex min-h-[48px] w-full items-center justify-center gap-2.5 rounded-[13px] border border-white/[0.20] bg-white/[0.10] px-4 font-sans text-base font-medium text-ink-on-deep shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-sm transition-[background-color,transform,opacity] duration-150 hover:bg-white/[0.16] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:opacity-60 motion-safe:active:scale-[0.98]"
+          class="flex min-h-[48px] w-full items-center justify-center gap-2.5 rounded-[13px] border border-white/20 bg-white/10 px-4 font-sans text-base font-medium text-ink-on-deep shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-xs transition-[background-color,transform,opacity] duration-150 hover:bg-white/16 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-gold disabled:opacity-60 motion-safe:active:scale-[0.98]"
           @click="authStore.signInWithGoogle()"
         >
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
@@ -60,7 +60,7 @@ function continueAsGuest() {
         </div>
         <button
           type="button"
-          class="flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-[13px] border border-white/[0.16] font-sans text-sm text-ink-on-deep transition-colors hover:bg-white/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+          class="flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-[13px] border border-white/16 font-sans text-sm text-ink-on-deep transition-colors hover:bg-white/6 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
           @click="continueAsGuest"
         >
           以訪客身分繼續 <ArrowRight :size="15" />
