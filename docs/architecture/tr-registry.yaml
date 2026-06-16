@@ -516,3 +516,52 @@ requirements:
     created: 2026-06-01
     revised: ""
     status: active
+  - id: TR-journal-001
+    system: journal
+    gdd: design/gdd/journal.md
+    requirement: "Append-only journal_entries table (RLS user_id=auth.uid()); useDataSyncStore.loadJournalEntries/appendJournalEntry (event-key ON CONFLICT user_id,source_ref_id); useJournalStore load/merge cloud∪local desc (ADR-0013; AC-order基礎, AC-guest-reconcile基礎)"
+    created: 2026-06-16
+    revised: ""
+    status: active
+  - id: TR-journal-002
+    system: journal
+    gdd: design/gdd/journal.md
+    requirement: "Settle engine: F1 gates (onset/arrival/solace) + F2 topN by priority (onset5>arrival3>solace2), SESSION_ENTRY_CAP=3 per session, lazy idempotent evaluate from persistent state (AC-onset-1/2, AC-arrival-1/2/3, AC-solace-1/2, AC-priority-1/2/3)"
+    created: 2026-06-16
+    revised: ""
+    status: active
+  - id: TR-journal-003
+    system: journal
+    gdd: design/gdd/journal.md
+    requirement: "Zero-AI render(template_id,params)→immutable body (≥5 variants/pen); persona lint: no emoji, CJK piece-terms only (后/城堡/騎士/主教/國王/兵), CJK not italic; solace forbidden-token (no criticism/eval numbers) (AC-tone-lint, AC-solace-3)"
+    created: 2026-06-16
+    revised: ""
+    status: active
+  - id: TR-journal-004
+    system: journal
+    gdd: design/gdd/journal.md
+    requirement: "Journal overview UI: /journal route + desc timeline + volume grouping + onset pinned bottom + no edit/delete + Neve empty state + reduced-motion static (AC-order, AC-no-edit, AC-empty-state, AC-reduced-motion)"
+    created: 2026-06-16
+    revised: ""
+    status: active
+  - id: TR-journal-005
+    system: journal
+    gdd: design/gdd/journal.md
+    requirement: "Homepage peek (HOMEPAGE_PEEK_COUNT, HomeView-owned) + device-local journalLastSeenAt unread watermark (binary, non-gold, journal-view-only, clears on view) (AC-unread)"
+    created: 2026-06-16
+    revised: ""
+    status: active
+  - id: TR-journal-006
+    system: journal
+    gdd: design/gdd/journal.md
+    requirement: "Guest→login reconcile: localStorage entries union to cloud on SIGNED_IN, dedup on source_ref_id, no duplicate, no loss, offline queue (AC-guest-reconcile)"
+    created: 2026-06-16
+    revised: ""
+    status: active
+  - id: TR-journal-007
+    system: journal
+    gdd: design/gdd/journal.md
+    requirement: "ADR-0013 Accepted gate: apply 0013 migration to live DB (Dashboard SQL Editor), verify anon REST (200 [] / 401 42501), flip ADR-0013 Proposed→Accepted (unblocks TR-journal-002..006)"
+    created: 2026-06-16
+    revised: ""
+    status: active

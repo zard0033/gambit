@@ -40,3 +40,15 @@ CREATE POLICY "Users access own rows" ON public.<table> USING (user_id = auth.ui
 Postgres applies the omitted `WITH CHECK` from `USING`, so this also gates INSERT to
 own rows — no separate insert policy needed. Row existence = the monotonic fact
 (completed / solved); reconciliation is a union, so local and cloud never conflict.
+
+## Tables (applied to live DB)
+
+| Table | Migration | Notes |
+|-------|-----------|-------|
+| `game_sessions` | 20260821000000 | completed games (PGN + metadata) |
+| `skill_scores` | 20260821000001 | append-only skill snapshot per game |
+| `lesson_progress` | 20260822000000 | `(user_id, lesson_id)` completed set |
+| `dungeon_progress` | 20260823000000 | puzzle solved set |
+| `lesson_side_learned` | 20260824000000 | concept side-door learned set |
+| `in_progress_game` | 20260825000000 | resume-in-progress game |
+| `journal_entries` | 20260826000000 | **棋誌** (ADR-0013) — append-only Neve entries. **Idempotency is event-level `UNIQUE(user_id, source_ref_id)`** (NOT row-UUID — that does not survive guest→login reconcile). `type` is `text` (NOT enum) so Phase 2 pens need no migration. Applied + RLS-verified 2026-06-16. |

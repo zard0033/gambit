@@ -348,6 +348,7 @@ Game History computations are display transformations only — no balance math o
 | ------ | --------------- | ------------- |
 | **Skill Scoring (#13)** | Soft (future) | History list may show per-game skill delta in a later sprint; not in v0 scope |
 | **Level Progression (#14)** | Indirect (future) | Does not read from Game History directly |
+| **Journal — 棋誌 (#21)** | Soft (Phase 1 diff) | Reads the completed-game result sequence to derive a losing streak for the ⑤ solace journal entry. Read-only; Journal degrades gracefully (⑤ simply never fires) if unavailable. See `design/gdd/journal.md` |
 
 ### Bidirectional Consistency Notes
 

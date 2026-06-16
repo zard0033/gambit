@@ -130,6 +130,10 @@ See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 | 配色、字型、風格、動效曲線、微互動、設計原則、圖表/chart | `ui-ux-pro-max` | **只當顧問**出想法；採用前對齊 Gambit（見鐵則 1） |
 | Landing、行銷頁、品牌頁、logo 頁、簡報頁、HTML demo、獨立頁 | `web-design-engineer` | 僅限**全新獨立頁**；不碰 App 內既有畫面 |
 
+> **UI 工具參考（動 UI／選元件前先讀——否則這些檔放在 `production/` 裡 AI 不會自己找到）**：
+> 元件框架選/評 → `production/tooling-ui-frameworks.md`（結論：整包框架一律不裝，走現有 reka-ui shadcn 模式）；
+> 氛圍／動畫元件 → `production/tooling-inspira-ui.md`（採用 Inspira UI＝copy-paste 單一元件＋剝 juice＋CSS 優先）。
+>
 > 全面提升流程：`redesign` 找問題 → triage（砍掉違反 Gambit / 沒壞的）→ `frontend-ui-engineering` 施工 →
 > 卡關時 `ui-ux-pro-max` 補深度。`web-design-engineer` 留給品牌頁等獨立頁。
 

@@ -35,6 +35,12 @@
 | [dungeon-puzzle](dungeon-puzzle/EPIC.md) | Feature (Phase 2) | DungeonMapView + DungeonPuzzleView + useDungeonProgressStore + use-dungeon-puzzle | dungeon-puzzle-mode.md | ADR-0005 (no new ADR for v0) | 6 stories (S13) | **In Design** (GDD Approved 2026-06-05；無 streak；待實作) |
 | [learning-loop](learning-loop/EPIC.md) | Feature (Phase 2 connective) | concept SoT + 3 bridges (lesson↔puzzle↔game) + Concept Map | learning-loop.md | ADR-0012 | Phase A: 4 stories (S14)；B–D 待排 | **GDD Approved (round 2, 2026-06-06)**；Phase A stories 已開（S14-01…04）；D1 側門練習；待實作 |
 
+## Phase 1 Differentiation Epics
+
+| Epic | Layer | Module | GDD | TR-IDs | ADR Coverage | Stories | Status |
+|------|-------|--------|-----|--------|--------------|---------|--------|
+| [journal](journal/EPIC.md) | Phase 1 (diff) | useJournalStore + journal_entries + JournalView + HomeView peek | journal.md (v1: onset/arrival/solace) | 7 (TR-journal-001…007) | ADR-0013 (**Accepted** 2026-06-16) + ADR-0011 + ADR-0005 | 7 stories | **story-007 done (table live + RLS verified); 001–006 Ready to implement** |
+
 ## Process Epics
 
 | Epic | Purpose | Stories |

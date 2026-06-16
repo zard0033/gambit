@@ -56,6 +56,7 @@ The one moment the system steps forward is also in service of calm: if the playe
 | `/` | `home` | `HomeView` | v0 | none | Start-a-game screen. Eager-loaded (entry point). |
 | `/play` | `play` | `PlayView` | v0 | `beforeRouteLeave` (in-game confirm) + `beforeunload` | The active game. Owns the board + Game Lifecycle UI. The only guarded route in v0. |
 | `/review` | `review` | `ReviewView` | v0 | redirect-to-home if no game in memory | Post-Game Review of the just-finished game (held in store, not persisted). No game → redirect Home. |
+| `/journal` | `journal` | `JournalView` | Phase 1 (差異化) | none | 棋誌全覽（Neve 記憶載體）。`fullBleed`（無 app chrome、無 tab bar）；頁內「返回」回首頁。訪客可達。進入點＝首頁 peek（story-005）。 |
 | `/:pathMatch(.*)*` | `not-found` | `NotFoundView` | v0 | none | Catch-all. Renders calm 404 + "Back to Home". |
 | `/history` | `history` | *(reserved)* | MVP | TBD | **Reserved — not registered in v0.** Game History list. Needs Data Sync + Game History GDD. |
 | `/history/:gameId` | `game-detail` | *(reserved)* | MVP | TBD | **Reserved.** Re-watch / re-review a specific past game by ID. Deep-linkable + shareable across devices. |

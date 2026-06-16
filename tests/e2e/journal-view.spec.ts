@@ -1,0 +1,105 @@
+import { test, expect, type Page } from '@playwright/test'
+
+// Story-004 棋誌全覽 UI. Seeds the guest local-first journal (`chess:journal:entries`) so the
+// view renders without a logged-in cloud, and opts into guest browsing so the landing gate
+// lets /journal through.
+
+const EMPTY_STATE_COPY = '還沒有什麼好寫的。先下一盤吧。'
+
+interface SeedEntry {
+  id: string
+  type: 'onset' | 'arrival' | 'solace'
+  sourceRefId: string
+  volume: string | null
+  templateId: string
+  params: Record<string, string>
+  body: string
+  createdAt: number
+}
+
+// onset@t1 < arrival@t2 < solace@t3 → timeline desc renders solace, arrival, …, onset last.
+const T1 = 1_000_000
+const T2 = 2_000_000
+const T3 = 3_000_000
+
+const SEED: SeedEntry[] = [
+  { id: 'e-onset', type: 'onset', sourceRefId: 'onset', volume: null, templateId: 'onset.1', params: {}, body: 'SEED-ONSET 我是 Neve。', createdAt: T1 },
+  { id: 'e-arrival', type: 'arrival', sourceRefId: 'stage-1', volume: '卷一規則', templateId: 'arrival.1', params: {}, body: 'SEED-ARRIVAL 你看懂了盤面。', createdAt: T2 },
+  { id: 'e-solace', type: 'solace', sourceRefId: 'game-1', volume: '卷二戰術', templateId: 'solace.1', params: {}, body: 'SEED-SOLACE 今天輸了，但你撐得更久。', createdAt: T3 },
+]
+
+async function openJournal(page: Page, opts: { seed?: SeedEntry[] } = {}): Promise<void> {
+  await page.addInitScript((seed) => {
+    sessionStorage.setItem('gambit:guest-entry', '1')
+    if (seed) localStorage.setItem('chess:journal:entries', JSON.stringify(seed))
+  }, opts.seed ?? null)
+  await page.goto('/journal', { waitUntil: 'domcontentloaded' })
+  await expect(page.getByRole('heading', { name: '棋誌' })).toBeVisible()
+}
+
+test.describe('Journal overview (/journal)', () => {
+  test('test_journal_order_renders_desc_with_onset_last', async ({ page }) => {
+    await openJournal(page, { seed: SEED })
+
+    const bodies = page.locator('.journal-body')
+    await expect(bodies).toHaveCount(3)
+    const texts = await bodies.allTextContents()
+    expect(texts[0]).toContain('SEED-SOLACE')
+    expect(texts[1]).toContain('SEED-ARRIVAL')
+    expect(texts[2]).toContain('SEED-ONSET') // onset pinned at the bottom
+  })
+
+  test('test_journal_empty_state_shows_fixed_neve_copy', async ({ page }) => {
+    await openJournal(page) // no seed → zero entries
+
+    await expect(page.locator('.journal-body')).toHaveCount(0)
+    await expect(page.getByText(EMPTY_STATE_COPY, { exact: true })).toBeVisible()
+    // no emoji in the empty copy
+    expect(/\p{Extended_Pictographic}/u.test(EMPTY_STATE_COPY)).toBe(false)
+  })
+
+  test('test_journal_has_no_edit_or_delete_control', async ({ page }) => {
+    await openJournal(page, { seed: SEED })
+
+    await expect(page.getByRole('button', { name: /edit|delete|編輯|刪除|移除/i })).toHaveCount(0)
+    expect(await page.locator('[contenteditable="true"]').count()).toBe(0)
+    expect(await page.locator('input, textarea').count()).toBe(0)
+  })
+
+  test('test_journal_reduced_motion_no_animation_on_entry_cards', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await openJournal(page, { seed: SEED })
+
+    // The cumulative-visual nodes are the entry cards (they carry the one-shot rise animation).
+    const running = await page.locator('.journal-card').evaluateAll((nodes) =>
+      nodes.reduce((sum, n) => sum + n.getAnimations().length, 0),
+    )
+    expect(running).toBe(0)
+  })
+
+  test('test_journal_older_months_collapse_and_expand_on_click', async ({ page }) => {
+    const mk = (y: number, m: number, d: number) => new Date(y, m - 1, d, 12).getTime()
+    const multi: SeedEntry[] = [
+      { id: 'new2', type: 'solace', sourceRefId: 'g2', volume: '卷二戰術', templateId: 'solace.1', params: {}, body: 'NEWEST-2', createdAt: mk(2026, 6, 16) },
+      { id: 'new1', type: 'arrival', sourceRefId: 's2', volume: '卷二戰術', templateId: 'arrival.1', params: {}, body: 'NEWEST-1', createdAt: mk(2026, 6, 2) },
+      { id: 'old', type: 'arrival', sourceRefId: 's1', volume: '卷一規則', templateId: 'arrival.2', params: {}, body: 'OLDER-1', createdAt: mk(2026, 5, 10) },
+    ]
+    await openJournal(page, { seed: multi })
+
+    // Newest month expanded (2 cards); the older month is collapsed (a "篇" affordance, 0 cards).
+    await expect(page.locator('.journal-card')).toHaveCount(2)
+    const olderHeader = page.getByRole('button', { name: /篇/ }).first()
+    await expect(olderHeader).toBeVisible()
+
+    // Expanding the older month reveals its entry.
+    await olderHeader.click()
+    await expect(page.locator('.journal-card')).toHaveCount(3)
+  })
+
+  test('test_journal_cjk_body_is_not_italic', async ({ page }) => {
+    await openJournal(page, { seed: SEED })
+
+    const style = await page.locator('.journal-body').first().evaluate((n) => getComputedStyle(n).fontStyle)
+    expect(style).not.toBe('italic')
+  })
+})

@@ -6,6 +6,7 @@ import { useDataSyncStore } from '@/stores/data-sync'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
 import { useDungeonProgressStore } from '@/stores/dungeon-progress'
 import { useResumeGameStore } from '@/stores/resume-game'
+import { useJournalStore } from '@/stores/journal'
 import { useUiStore } from '@/stores/ui-store'
 import type { PendingGame } from '@/stores/ui-store'
 import AppNav from '@/components/app-nav.vue'
@@ -16,6 +17,7 @@ const dataSyncStore = useDataSyncStore()
 const lessonProgressStore = useLessonProgressStore()
 const dungeonProgressStore = useDungeonProgressStore()
 const resumeGameStore = useResumeGameStore()
+const journalStore = useJournalStore()
 const uiStore = useUiStore()
 const route = useRoute()
 const router = useRouter()
@@ -70,6 +72,7 @@ watch(() => authStore.userId, (userId) => {
     lessonProgressStore.reconcileOnLogin()
     dungeonProgressStore.reconcileOnLogin()
     resumeGameStore.reconcileOnLogin()
+    journalStore.reconcileOnLogin()
   }
 }, { immediate: true })
 

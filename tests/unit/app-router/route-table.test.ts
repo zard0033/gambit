@@ -10,7 +10,7 @@ describe('route-table', () => {
 
   it('test_routeTable_containsExactlyExpectedRoutes', () => {
     const paths = routes.map((r) => r.path)
-    expect(paths).toEqual(['/', '/play', '/learn', '/learn/concepts', '/learn/:lessonId', '/dungeon', '/dungeon/:puzzleId', '/review', '/history', '/replay/:gameId', '/profile', '/sign-in', '/:pathMatch(.*)*'])
+    expect(paths).toEqual(['/', '/play', '/learn', '/learn/concepts', '/learn/:lessonId', '/dungeon', '/dungeon/:puzzleId', '/review', '/history', '/journal', '/replay/:gameId', '/profile', '/sign-in', '/:pathMatch(.*)*'])
   })
 
   it('test_routeTable_playRoute_componentIsFunction', () => {

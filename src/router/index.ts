@@ -16,6 +16,7 @@ export const routes = [
   { path: '/dungeon/:puzzleId', name: 'puzzle',     component: () => import('@/views/DungeonPuzzleView.vue'), meta: { fullBleed: true } },
   { path: '/review',          name: 'review',    component: () => import('@/views/ReviewView.vue') },
   { path: '/history',         name: 'history',   component: () => import('@/views/HistoryView.vue') },
+  { path: '/journal',         name: 'journal',   component: () => import('@/views/JournalView.vue'), meta: { fullBleed: true } },
   { path: '/replay/:gameId',  name: 'replay',    component: () => import('@/views/ReplayView.vue') },
   { path: '/profile',         name: 'profile',   component: () => import('@/views/ProfileView.vue') },
   { path: '/sign-in',         name: 'sign-in',   component: () => import('@/views/SignInView.vue'), meta: { fullBleed: true } },

@@ -42,6 +42,7 @@ Lichess open-source components (chessground, stockfish.wasm, chess-openings) pro
 | 18 | Lesson System | Gameplay | Phase 2 | In Design | [lesson-system.md](./lesson-system.md) | Chess Board, Navigation & Routing |
 | 19 | Dungeon Puzzle Mode | Gameplay | Phase 2 | Approved | [dungeon-puzzle-mode.md](./dungeon-puzzle-mode.md) ([review log](./reviews/dungeon-puzzle-mode-review-log.md)) | Chess Board, Navigation & Routing, Lesson System (pattern) |
 | 20 | Learning Loop (Concept Linking) | Gameplay (connective) | Phase 2 | Approved | [learning-loop.md](./learning-loop.md) ([review log](./reviews/learning-loop-review-log.md)) | Lesson System (#18), Dungeon Puzzle Mode (#19), Post-Game Review (#7) |
+| 21 | Journal (棋誌) | Gameplay (differentiation) | Phase 1 (diff) | Designed (v1: onset/arrival/solace) | [journal.md](./journal.md) ([review log](./reviews/journal-review-log.md)) | Lesson System (#18), Game History (#12), Data Sync (#11); Post-Game Review (#7) → Phase 2 only |
 
 ---
 
@@ -174,7 +175,7 @@ None found. The Level Progression → Difficulty System link is one-way: Level r
 
 | Metric | Count |
 |--------|-------|
-| Total systems identified | 20 (#20 Learning Loop / Concept Linking added 2026-06-06, Phase 2 connective) |
+| Total systems identified | 21 (#21 Journal / 棋誌 added 2026-06-16, Phase 1 differentiation) |
 | Design docs started | 12 (#8b Opening Knowledge Cards skeleton; #9+#11 combined; #12 Game History 2026-06-01) |
 | Design docs reviewed | 8 |
 | Design docs approved | 8 |
