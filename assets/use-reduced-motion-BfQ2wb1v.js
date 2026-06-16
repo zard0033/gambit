@@ -1,1 +1,0 @@
-import{G as d,I as r,O as a}from"./chess-board-CDcNKt49.js";function i(){const n=a(!1);let e=null;function t(o){n.value=o.matches}return d(()=>{typeof window>"u"||(e=window.matchMedia("(prefers-reduced-motion: reduce)"),n.value=e.matches,e.addEventListener("change",t))}),r(()=>{e==null||e.removeEventListener("change",t)}),{prefersReducedMotion:n}}export{i as u};

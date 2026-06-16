@@ -1,0 +1,1 @@
+var e=`/gambit/stockfish/stockfish-18-lite-single.js`;export{e as t};
