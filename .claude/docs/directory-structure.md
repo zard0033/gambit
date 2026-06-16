@@ -13,6 +13,11 @@
 ├── tools/                       # Build and pipeline tools (ci, build, asset-pipeline)
 ├── prototypes/                  # Throwaway prototypes (isolated from src/)
 └── production/                  # Production management (sprints, milestones, releases)
-    ├── session-state/           # Ephemeral session state (active.md — gitignored)
+    ├── session-state/           # active.md — handoff snapshot (TRACKED in git on purpose)
     └── session-logs/            # Session audit trail (gitignored)
 ```
+
+> **active.md is intentionally version-controlled** (not gitignored as the upstream template
+> assumes). This is a solo, multi-machine setup (home + work computer); committing the handoff
+> snapshot lets `git pull` carry "where we are / what's next" across machines. It is still a
+> *whiteboard* — durable rules/guardrails live in CLAUDE.md and its `@`-included docs, never here.

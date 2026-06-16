@@ -9,6 +9,7 @@
 - **Verification-driven development**: Write tests first when adding gameplay systems.
   For UI changes, verify with screenshots. Compare expected output to actual output
   before marking work complete. Every implementation should have a way to prove it works.
+- **截圖 / 暫存檔**：測試截圖與暫存產物寫到子目錄、測完自清，**不留在專案根目錄**。
 
 # Design Document Standards
 

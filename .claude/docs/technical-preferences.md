@@ -63,6 +63,38 @@
   script，`npm install` 會跳 `npm warn allow-scripts stockfish / vue-demi …`。本專案**無害、不用 approve**：
   Stockfish WASM 已 committed 在 `public/stockfish/`（非靠 postinstall 產生）、vue-demi 自偵 Vue 3。
   CI 在 Node 26 全綠已證實。看到此警告不要以為壞了。
+- **Node 26 vitest localStorage shim（`tests/setup-node26-compat.ts`，vitest.config 已 `setupFiles` 指向）**：
+  Node 26 把 `localStorage` 加進原生 globals（實驗性 Web Storage），但無 `--localstorage-file` 時它是
+  getter-only 的 undefined，happy-dom 用 plain assignment 覆寫在 strict mode 會靜默失敗 → 全測試
+  `localStorage=undefined` 而紅。shim 在 happy-dom init 後**條件式**（`if typeof localStorage === 'undefined'`）
+  補裝可用的 InMemoryStorage（key 為 own enumerable，使 `Object.keys` 正常）。對 Node 22 是 no-op
+  （happy-dom 已正常注入 → shim 跳過），公司電腦 22 pull 後測試照綠、不需動作（建議仍升 26 對齊 CI）。
+- **chessground 合成事件測不到**：B5 試煉互動（log 累積、inline 達成、答錯滑回、換步不 remount、
+  揭曉箭頭走子後消失）等靠 chessground 合成事件的行為，Playwright 難自動觸發 → 靠 vue-tsc 0 ＋ unit
+  ＋邏輯正確性保證，需部署後實機點一輪確認。
+
+## Board / chessground gotchas（vue3-chessboard，動棋盤幾何/易位/標註前先讀）
+
+- **容器寬對齊 8 倍數**：否則 chessground 把 cg-board floor 成 8n 偏移。用 `useBoardFit`
+  ResizeObserver 解、套 `.board-fit`。
+- **overlay 定位**（標註/箭頭/check ring/座標）用**真實 cg-board 尺寸 ＋ 相對 cg-wrap 原點**，非 cg-wrap 寬。
+- **易位**：chess.js 只收 `e1→g1/c1`，城堡格手勢要 remap 成 king 兩格目標；`events.select(key)` 偵測選子觸發城堡提示。
+- **座標自繪**在木框（chessground `coordinates:false`）。
+- **不可用 `max-w` 依高度硬縮棋盤**（高度被內部 pin、會壓成非正方）；要省空間改縮周邊（合併列、棋譜上限）。
+  Tailwind arbitrary calc 內 `-` 兩側要底線：`calc(100dvh_-_Nrem)`。
+- **桌機棋盤過大 root cause**：vue3-chessboard `.main-wrap` 被釘 `width:700px`。解＝board wrapper 加 `board-fit`
+  ＋ scoped `.board-fit :deep(.main-wrap){width:100%!important;max-width:100%!important;height:auto!important}`。
+  PlayView/Review/Replay 遇過大套同一 fix。
+- **annotation 高亮/箭頭 vs 格子 2–4px 偏移**（polish 後續）：MoveAnnotationDisplay 用 cg-wrap（536px）算格子，
+  但實際 cg-board 531.2px、左偏 ~5px → 改用 `elements.board` 尺寸＋原點。牽涉全站箭頭/標註，需獨立驗證。
+
+## Deferred Cleanups（刻意保留、勿移除）
+
+- **自訂升變 fallback**：`components/promotion-dialog.vue` ＋ `chess-board.vue` 的 `pendingPromotion`/
+  `handlePromotionSelect`/`handlePromotionCancel`/`isPromotionMove` 分支。「死」靠 vue3-chessboard runtime
+  而非結構保證，又接在核心 `onMove`，移除＝拔 fallback。升變無法只靠 vue-tsc/vitest 驗（要瀏覽器真走一步
+  升變），故待能實機測升變再移除。
+- **`recommend.ts` 的 `recommended()`**：有測試/文件、與 candidates/practiceTarget 成套的保留 API，刻意不刪。
 
 ## Forbidden Patterns
 

@@ -7,7 +7,8 @@
 
 ## 鐵則（全程不可違反）
 
-- 棋盤/棋子/標註/eval 為上游所有 → 只在外層 wrapper 加框/陰影，不碰 `cg-*`、`board-theme.css` 像素。
+- 棋盤/棋子＝全 app 統一 Wood12 + Gioco Wood（`board-theme.css`，含 PgnViewer）；標註/eval 維持上游中性、不染金。
+  redesign 範圍內**不在頁面層碰 `cg-*`**，盤面主題只在 `board-theme.css` 一處改（見 CLAUDE.md 鐵則）。
 - 金色僅 focus/reward 的 fill/indicator，**絕不當內文**；內文金限 `#8F6200` 大字；陰影暖棕非純黑。
 - 動效 150–300ms，僅 transform/opacity；尊重 `prefers-reduced-motion`。
 - 觸控 ≥44×44px；內文最小 16px；notation 用 Cubic（`font-num`）tabular。

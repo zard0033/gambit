@@ -1,11 +1,25 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
+import { defineComponent, h } from 'vue'
 import { setActivePinia, createPinia } from 'pinia'
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 vi.mock('@/lib/supabase', () => ({
   supabase: { auth: { getSession: vi.fn(), onAuthStateChange: vi.fn() }, from: vi.fn() },
+}))
+
+// Stub the real board — the lichess pgn-viewer ESM subpath fails to resolve under vitest,
+// and this suite pins the signpost contract, not the board. (Same approach as replay-view.test.ts.)
+vi.mock('@/components/pgn-viewer.vue', () => ({
+  default: defineComponent({
+    name: 'PgnViewer',
+    emits: ['move-selected'],
+    setup(_props, { expose }) {
+      expose({ toPly: vi.fn(), setBestArrow: vi.fn(), getCurrentPly: () => 0 })
+      return () => h('div', { class: 'pgn-stub' })
+    },
+  }),
 }))
 
 import ReviewView from '@/views/ReviewView.vue'

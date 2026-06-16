@@ -57,6 +57,10 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 > 真的匹配要教的概念。2026-06-14 一次審出 10 處「合法但棋理錯」（假將殺、升變送子變和棋、
 > 加防守者範例、釘后概念不成立等），全數 chess.js 驗證後才修。
 
+> **內容授權護欄**：lichess 題庫位置／解法＝CC0，可商用直接採；lila／chessops／Learn 課文
+> ＝copyleft（**禁抄**），教學文一律繁中 clean-room 自寫；棋子 Gioco Wood＝CC BY-NC-SA 4.0
+> （已在 `public/CREDITS.md` 標註）、棋盤 Wood12＝CC0。引入任何外部內容前先確認授權。
+
 ### Phase 2 Reserved (not yet integrated)
 
 - **AI Explanation**: Claude API (Anthropic) — natural language move explanations
@@ -110,7 +114,13 @@ See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 - **Icon**：Lucide line icons 單一字族；**絕不用 emoji 當功能 icon**。
 - **導覽**：底部 tab 為主導覽；頂部 header 只放品牌 + 設定齒輪。
 - **動效**：150–300ms，只動 transform / opacity（box-shadow 動畫禁止）；尊重 `prefers-reduced-motion`。
-- **觸控目標 ≥ 44×44px**。棋盤 / 棋子 / 標註 / eval 為上游所有，**不重新上色**。
+- **觸控目標 ≥ 44×44px**。
+- **棋盤 / 棋子**：全 app 統一 **Wood12 木紋盤 + Gioco Wood 棋子**（`src/assets/board-theme.css`，main.ts 全域載入）。
+  此主題**必須套到所有 chessground**——對局／課程／試煉的 vue3-chessboard，以及回放／複盤的 lichess PgnViewer
+  （後者自帶 `lichess-pgn-viewer.css`、同強度選擇器會蓋過我們，故 board-theme 選擇器加 `body` 前綴出強度）。
+  新增任何用棋盤的頁，確認它吃到此主題（別讓 lichess 預設深色盤漏出來）。
+- **標註 / eval 維持上游中性語意，不重新上色**：箭頭／高亮用 chessground 既有 brush，eval 不染品牌金
+  （金只給 focus / reward）。
 - **繁中語氣**：成熟、平靜、低壓力，稱呼「你」；無 streak / timer / leaderboard。
 - **西洋棋用語**：棋子一律用「后 / 城堡 / 騎士 / 主教 / 國王 / 兵」。**這是西洋棋，禁用象棋的「車 / 馬 / 象」**（rook=城堡、knight=騎士、bishop=主教）。課程標題如「城堡與主教」「騎士與后」即為準則。
 

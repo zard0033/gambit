@@ -12,9 +12,11 @@ import type { ChessConcept } from '@/types/concept'
 import { useReviewEngine } from '@/modules/chess-engine/review-engine'
 import { identifyOpening } from '@/modules/opening-id/opening-index'
 import type { OpeningResult } from '@/modules/opening-id/opening-index'
-import type { Annotation, EvaluationInput } from '@/modules/move-annotation/annotation-types'
+import type { EvaluationInput } from '@/modules/move-annotation/annotation-types'
 import { ArrowLeft, ChevronLeft, ChevronRight, Zap } from 'lucide-vue-next'
 import MoveAnnotationDisplay from '@/components/move-annotation-display.vue'
+import PgnViewer from '@/components/pgn-viewer.vue'
+import { buildPgn } from '@/modules/game-export/assembler'
 import OpeningKnowledgeCard from '@/components/opening-knowledge-card.vue'
 import { useDataSyncStore } from '@/stores/data-sync'
 import { Button } from '@/components/ui/button'
@@ -30,7 +32,22 @@ const engine = useReviewEngine()
 const syncStatus = computed(() => dataSyncStore.syncStatus)
 
 const openingResult = ref<OpeningResult | null>(null)
-const boardPlaceholderRef = ref<HTMLElement | null>(null)
+const boardWrapperRef = ref<HTMLElement | null>(null)
+const pgnRef = ref<InstanceType<typeof PgnViewer> | null>(null)
+
+const pgn = computed<string>(() => {
+  const game = gameStore.completedGame
+  if (!game) return ''
+  try {
+    return buildPgn(game)
+  } catch {
+    return ''
+  }
+})
+
+const orientation = computed<'white' | 'black'>(
+  () => gameStore.completedGame?.playerColor ?? 'white',
+)
 
 // ---- Opening header (Rule 25, AC-8, AC-9, AC-10) ----
 
@@ -140,24 +157,25 @@ const isMobile = ref(_mq?.matches ?? false)
 function _onMqChange(e: MediaQueryListEvent) { isMobile.value = e.matches }
 if (_mq) _mq.addEventListener('change', _onMqChange)
 
-const currentAnnotations = computed<Annotation[]>(() => {
-  const i = review.cursor.value
-  const result = review.analysisResults.value[i]
-  if (!result) return []
-
-  const annotations: Annotation[] = []
-  const best = result.bestMove
-  if (best && best.length >= 4) {
-    annotations.push({ kind: 'arrow', role: 'bestMove', from: best.slice(0, 2), to: best.slice(2, 4) })
-  }
-
-  const played = gameStore.completedGame?.moves[i]
-  if (played && played.length >= 4 && played.slice(0, 4).toLowerCase() !== best?.slice(0, 4).toLowerCase()) {
-    annotations.push({ kind: 'arrow', role: 'playedMove', from: played.slice(0, 2), to: played.slice(2, 4) })
-  }
-
-  return annotations
+// The board's best-move arrow is drawn by chessground (via PgnViewer), not the SVG overlay —
+// the played move is already shown by the board's own last-move highlight.
+const currentBestUci = computed<string | null>(() => {
+  const best = review.analysisResults.value[review.cursor.value]?.bestMove
+  return best && best.length >= 4 ? best : null
 })
+
+// review.cursor is the single source of truth; mirror it onto the pgn-viewer board.
+function syncBoard(): void {
+  pgnRef.value?.toPly(review.cursor.value)
+  pgnRef.value?.setBestArrow(currentBestUci.value)
+}
+watch(() => review.cursor.value, syncBoard)
+watch(currentBestUci, (uci) => pgnRef.value?.setBestArrow(uci))
+
+// User clicked a move in the pgn-viewer move list → move our cursor there.
+function onMoveSelected(): void {
+  review.goTo(pgnRef.value?.getCurrentPly() ?? 0)
+}
 
 const currentEvaluation = computed<EvaluationInput | null>(() => {
   const i = review.cursor.value
@@ -165,10 +183,6 @@ const currentEvaluation = computed<EvaluationInput | null>(() => {
   if (!result) return null
   return { evalCp: result.evalCp, evalMate: result.evalMate, sideToMove: i % 2 === 0 ? 'w' : 'b' }
 })
-
-const displayAnnotations = computed<Annotation[]>(() =>
-  isMobile.value ? currentAnnotations.value.filter(a => a.role === 'bestMove') : currentAnnotations.value,
-)
 
 const displayEvaluation = computed<EvaluationInput | null>(() =>
   isMobile.value ? null : currentEvaluation.value,
@@ -321,15 +335,23 @@ function handleExit(): void {
       {{ progressLabel }}
     </div>
 
-    <!-- Board placeholder (FEN display) -->
-    <div ref="boardPlaceholderRef" class="w-full max-w-md bg-surface-hover rounded p-4 mb-3 text-center font-mono text-xs text-ink-muted break-all relative">
-      {{ review.currentFen.value }}
-      <!-- MoveAnnotationDisplay — mobile calm: < 768px shows bestMove arrow only, no eval bar -->
+    <!-- Real board (PgnViewer = lichess chessground) + eval-bar overlay.
+         Board + best-move arrow come from chessground; the SVG overlay supplies only the
+         eval bar (desktop). Mobile calm: displayEvaluation is null < 768px → no eval bar. -->
+    <div ref="boardWrapperRef" class="relative w-full max-w-md mb-3">
+      <PgnViewer
+        ref="pgnRef"
+        :pgn="pgn"
+        :orientation="orientation"
+        :keyboard-to-move="false"
+        :show-controls="false"
+        @move-selected="onMoveSelected"
+      />
       <MoveAnnotationDisplay
-        :annotations="displayAnnotations"
+        :annotations="[]"
         :evaluation="displayEvaluation"
         :square-to-rect="() => null"
-        :board-ref="boardPlaceholderRef"
+        :board-ref="boardWrapperRef"
       />
     </div>
 
