@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="noir">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gambit · 墨跡 + 暖 noir 探索 v6</title>
+<style>
+  /* ponytail: demo 用系統襯線替身，實作會吃 repo 真字 (BIZ UDPMincho / 文楷) */
+  :root {
+    --font-mincho: "Yu Mincho","Noto Serif CJK TC","Noto Serif TC","Songti TC",serif;
+    --font-sans: "Microsoft JhengHei","PingFang TC","Noto Sans TC",sans-serif;
+    --font-kai: "DFKai-SB","Kaiti TC","LXGW WenKai TC",serif;
+  }
+  [data-theme="cream"] {
+    --bg:#FAF6F0; --card:#FCF9F3; --raised:#F4EAD8; --line:#E0D3BD;
+    --ink:#3D2210; --ink-muted:#7A5C44; --ink-faint:#A88C76;
+    --jade:#1C7059; --jade-fg:#fff;
+    --gold:#F8B500; --gold-light:#FFD777; --gold-text:#8F6200; --bronze:#8F6200;
+    --brush:#2A1C12;
+    --neve-panel:#103029;   /* Neve 對話框深錨：cream 主題用 deep-jade（在 jade+奶油+金 palette 內） */
+    --reward-filter:url(#ink-wash) drop-shadow(0 3px 8px rgba(61,34,16,.10));  /* 淺色：暖棕抬起陰影，不用金暈避免斷層 */
+    --swatch-border:rgba(61,34,16,.14);
+  }
+  [data-theme="noir"] {
+    --bg:#101012; --card:#1B1A1D; --raised:#232227; --line:rgba(255,255,255,.09);
+    --ink:#ECE6DA; --ink-muted:#A39C8E; --ink-faint:#6E6A61;
+    --jade:#2E8C70; --jade-fg:#06140F;
+    --gold:#F8B500; --gold-light:#FFD777; --gold-text:#FFC94D; --bronze:#B08D57;
+    --brush:#ECE6DA;
+    --neve-panel:#ECE6DA;   /* noir 主題：對話框＝白墨紙（深底上的亮錨） */
+    --reward-filter:url(#ink-wash) drop-shadow(0 0 9px rgba(248,181,0,.14));   /* 深色：收細的金暈 */
+    --swatch-border:rgba(255,255,255,.12);
+  }
+
+  * { box-sizing:border-box; }
+  body {
+    margin:0; padding:0 0 80px; background:var(--bg); color:var(--ink);
+    font-family:var(--font-sans); -webkit-font-smoothing:antialiased;
+    transition:background .35s ease, color .35s ease;
+  }
+  .wrap { max-width:720px; margin:0 auto; padding:0 20px; }
+
+  header {
+    position:sticky; top:0; z-index:5; background:var(--bg);
+    border-bottom:1px solid var(--line); padding:16px 0;
+  }
+  header .wrap { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .brand { font-family:var(--font-mincho); font-weight:700; font-size:19px; letter-spacing:.04em; }
+  .brand small { display:block; font-family:var(--font-sans); font-weight:400; font-size:12px; color:var(--ink-muted); letter-spacing:0; margin-top:2px; }
+  .toggle { display:flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; }
+  .toggle button {
+    appearance:none; border:0; cursor:pointer; padding:9px 16px; min-height:40px;
+    font-family:var(--font-sans); font-size:13px; background:transparent; color:var(--ink-muted);
+  }
+  .toggle button[aria-pressed="true"] { background:var(--jade); color:var(--jade-fg); }
+
+  section { padding:40px 0 8px; }
+  .eyebrow { font-size:12px; letter-spacing:.14em; color:var(--ink-faint); text-transform:uppercase; margin:0 0 18px; }
+
+  /* ---- 多筆毛墨筆（純向量圓頭筆觸，瀏覽器抗鋸齒；JS 生成毛束）---- */
+  h2.mincho { font-family:var(--font-mincho); font-weight:700; font-size:26px; margin:0; line-height:1.2; }
+  .ink-brush { display:block; color:var(--brush); margin-top:8px; filter:blur(.35px); }
+  .ink-brush path { fill:currentColor; stroke:none; }
+
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px; margin-top:18px; }
+  .card h3 { font-family:var(--font-mincho); font-weight:700; font-size:19px; margin:0 0 2px; }
+  .card p.kai { font-family:var(--font-kai); font-size:16px; line-height:1.75; color:var(--ink-muted); margin:12px 0 0; }
+  .btn { appearance:none; border:0; cursor:pointer; margin-top:18px; min-height:44px; padding:0 20px;
+    border-radius:8px; font-family:var(--font-sans); font-size:15px; background:var(--jade); color:var(--jade-fg); }
+
+  .divider-demo { display:grid; gap:22px; margin-top:18px; }
+  .hairline { height:1px; background:var(--line); }
+  .ink-divider { display:block; height:12px; color:var(--brush); opacity:.92; filter:blur(.35px); }
+  .ink-divider path { fill:currentColor; stroke:none; }
+  .divider-label { font-size:12px; color:var(--ink-faint); margin-bottom:6px; }
+
+  /* ---- 棋憶 / reward（特規：金墨暈開 ink bloom · 循環）---- */
+  .reward {
+    position:relative; overflow:visible; padding:30px 26px; margin-top:18px; text-align:center;
+  }
+  /* 有機墨團面板（deckle ink-wash）＋ 跟著形狀的金色暈光 */
+  .reward .panel { position:absolute; inset:0; width:100%; height:100%; color:var(--raised); z-index:0;
+    filter:var(--reward-filter); }
+  .reward .panel rect { fill:currentColor; }
+  .reward .splatter { position:absolute; inset:0; width:100%; height:100%; color:var(--gold); pointer-events:none; z-index:1; }
+  .reward .splatter circle { fill:currentColor; transform-box:fill-box; transform-origin:center;
+    animation:fleck ease-in-out infinite; }
+  @keyframes fleck { 0%,100% { opacity:.28; transform:scale(.85); } 50% { opacity:.8; transform:scale(1.12); } }
+  .reward .tag { position:relative; font-family:var(--font-sans); font-size:12px; letter-spacing:.18em; color:var(--gold-text); }
+  .reward .big { position:relative; font-family:var(--font-mincho); font-weight:700; font-size:24px; margin:8px 0 0; color:var(--ink); }
+  .reward .sub { position:relative; font-family:var(--font-kai); font-size:15px; color:var(--ink-muted); margin:8px 0 0; }
+  .coin { position:relative; z-index:1; display:inline-block; margin-top:16px; width:48px; height:48px; color:var(--gold); }
+  .coin path { fill:currentColor; }
+  @media (prefers-reduced-motion:reduce) { .reward .splatter circle { animation:none; opacity:.4; } }
+
+  /* ---- Neve 對話框：形狀分工——日常乾淨圓角卡 / 特殊有機墨團；皆實墨配色（反白文字）---- */
+  .neve { position:relative; margin-top:14px; }
+  .neve .body { position:relative; padding:18px 24px; }
+  .neve .head { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .neve .av { position:relative; width:40px; height:40px; flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center; }
+  .neve .av .fog-c { position:absolute; inset:0; width:100%; height:100%; color:var(--bg); opacity:.5; }
+  .neve .av .fog-c circle { fill:currentColor; }
+  .neve .av .n { position:relative; font-family:var(--font-kai); font-size:20px; color:var(--bg); }   /* 頭像字首＝文楷 */
+  .neve .name { font-family:var(--font-sans); font-size:12px; letter-spacing:.1em; color:var(--bg); opacity:.55; }
+  .neve .quote { font-family:var(--font-kai); font-size:17px; line-height:1.8; margin:0; color:var(--bg); }
+  .neve-label { font-size:12px; color:var(--ink-faint); margin:0 0 6px; }
+  /* 日常：實墨 + 乾淨圓角（與全站卡片同幾何）→ 形狀融入 */
+  .neve-daily { background:var(--neve-panel); border-radius:14px; }
+  /* 特殊時刻：實墨 + 有機墨團輪廓（deckle ink-wash）→ 稀有才出現 */
+  .neve-special .fog { position:absolute; inset:0; width:100%; height:100%; color:var(--neve-panel); opacity:.92; }
+  .neve-special .fog rect { fill:currentColor; }
+
+  .swatches { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; margin-top:18px; }
+  .sw { border:1px solid var(--swatch-border); border-radius:10px; overflow:hidden; font-size:11px; }
+  .sw .chip { height:46px; }
+  .sw .meta { padding:6px 8px; background:var(--card); }
+  .sw .meta b { display:block; font-weight:600; }
+  .sw .meta span { color:var(--ink-muted); }
+
+  .note { font-size:13px; line-height:1.7; color:var(--ink-muted); margin-top:18px; }
+  .note b { color:var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- 只剩兩個濾鏡：金幣實心墨邊 + 柔霧（對話框/頭像/墨暈）。墨筆改純向量毛束、不再用濾鏡 -->
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <filter id="ink" x="-30%" y="-90%" width="160%" height="280%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.012 0.016" numOctaves="4" seed="7" result="c"/>
+    <feDisplacementMap in="SourceGraphic" in2="c" scale="5" result="w"/>
+    <feGaussianBlur in="w" stdDeviation="0.3"/>
+  </filter>
+  <filter id="ink-wash" x="-30%" y="-40%" width="160%" height="180%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves="4" seed="3" result="c"/>
+    <feDisplacementMap in="SourceGraphic" in2="c" scale="10" result="w"/>
+    <feGaussianBlur in="w" stdDeviation="0.9"/>
+  </filter>
+</svg>
+
+<header>
+  <div class="wrap">
+    <div class="brand">GAMBIT<small>墨跡 + 暖 noir 探索 · v6</small></div>
+    <div class="toggle" role="group" aria-label="主題切換">
+      <button data-set="cream" aria-pressed="false">奶油</button>
+      <button data-set="noir" aria-pressed="true">暖 noir</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section>
+    <p class="eyebrow">A · 墨跡標題底線（多筆毛 · 純向量）</p>
+    <h2 class="mincho">城堡與主教</h2>
+    <svg class="ink-brush" width="164" height="16" viewBox="0 0 164 16" data-w="164" data-h="16" data-n="11" data-seed="7"></svg>
+  </section>
+
+  <section>
+    <p class="eyebrow">B · 課程卡片</p>
+    <div class="card">
+      <h3>騎士的迂迴</h3>
+      <svg class="ink-brush" width="104" height="13" viewBox="0 0 104 13" data-w="104" data-h="13" data-n="9" data-seed="3"></svg>
+      <p class="kai">騎士不走直線。它繞過擋路的兵，從你想不到的角度落點——這一課，我們看它怎麼把「慢」變成「到得了」。</p>
+      <button class="btn">開始這一課</button>
+    </div>
+    <p class="neve-label" style="margin-top:16px">noir 主按鈕候選（切 noir 看；金維持只給 reward）：</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" style="background:#2E8C70">現用 #2E8C70</button>
+      <button class="btn" style="background:#247760">深穩 #247760</button>
+      <button class="btn" style="background:#1C6450">最沉 #1C6450</button>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">C · 分隔：髮絲線 → 乾筆墨痕</p>
+    <div class="divider-demo">
+      <div>
+        <div class="divider-label">現在（hairline）</div>
+        <div class="hairline"></div>
+      </div>
+      <div>
+        <div class="divider-label">墨痕（ink · 連續乾筆掃尾）</div>
+        <svg class="ink-divider" width="100%" height="12" viewBox="0 0 680 12" preserveAspectRatio="none" data-w="680" data-h="12" data-mt="0.26" data-seed="5"></svg>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">D · 棋憶 / reward 時刻（特規：金墨暈開 · 無限循環）</p>
+    <div class="reward">
+      <svg class="panel" viewBox="0 0 680 190" preserveAspectRatio="none"><rect x="10" y="10" width="660" height="170" rx="30"/></svg>
+      <svg class="splatter" viewBox="0 0 680 200" preserveAspectRatio="xMidYMid slice" filter="url(#ink)"></svg>
+      <div class="tag">這一局的重點時刻</div>
+      <div class="big">冷靜的一手 · d3</div>
+      <div class="sub">你沒有急著吃回去，先把國王收好——這正是這盤棋最安靜也最關鍵的選擇。</div>
+      <svg class="coin" viewBox="0 0 48 48" filter="url(#ink)">
+        <path d="M19,11 C28,8 37,13 38,22 C39,30 33,36 26,37 C22,37.6 18,40 16,38.5 C18.5,36 18,32.5 17,30 C12,26.5 11,18 19,11 Z"/>
+      </svg>
+    </div>
+    <p class="note" style="margin-top:10px">墨點乾淨不加效；周圍＝v1 金墨飛濺（散落金墨點 + 緩慢呼吸），跟頓點同一墨語言、非發光粒子。reward 為<b>特規時刻</b>准無限循環；尊重 <code>prefers-reduced-motion</code>（關動畫則靜態）。</p>
+  </section>
+
+  <section>
+    <p class="eyebrow">E · Neve 對話框（形狀分工：日常乾淨 / 特殊墨團）</p>
+
+    <p class="neve-label">日常 Neve：實墨配色 + 乾淨圓角（與全站卡片同幾何，墨味靠文楷 + 反白 + 頭像）</p>
+    <div class="neve neve-daily">
+      <div class="body">
+        <div class="head">
+          <span class="av">
+            <svg class="fog-c" viewBox="0 0 40 40" filter="url(#ink-wash)"><circle cx="20" cy="20" r="17"/></svg>
+            <span class="n">N</span>
+          </span>
+          <span class="name">NEVE</span>
+        </div>
+        <div class="quote">我注意到你最近在中局願意多等一步了。不急著進攻，也是一種強。</div>
+      </div>
+    </div>
+
+    <p class="neve-label" style="margin-top:18px">特殊時刻（reward / 棋憶總結 / 里程碑）：實墨 + 有機墨團輪廓 — 稀有才出現</p>
+    <div class="neve neve-special">
+      <svg class="fog" viewBox="0 0 520 116" preserveAspectRatio="none" filter="url(#ink-wash)"><rect x="8" y="8" width="504" height="100" rx="28"/></svg>
+      <div class="body">
+        <div class="head">
+          <span class="av">
+            <svg class="fog-c" viewBox="0 0 40 40" filter="url(#ink-wash)"><circle cx="20" cy="20" r="17"/></svg>
+            <span class="n">N</span>
+          </span>
+          <span class="name">NEVE</span>
+        </div>
+        <div class="quote">這一個月，你在殘局的耐心明顯長出來了。我會記得的。</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">F · 暖 noir 色票</p>
+    <div class="swatches" id="swatches"></div>
+    <p class="note"><b>原則</b>：墨負責結構與質感（底線/分隔/外框），金只給 reward/focus，兩者不混。墨在奶油上是暖黑、在 noir 上是暖白（白翼感）。日常介面回歸平靜；reward／棋憶等<b>特規時刻</b>才准無限循環氛圍動態（已寫進 tooling 鐵則）。</p>
+  </section>
+
+</main>
+
+<script>
+  const root = document.documentElement;
+
+  // 變寬度墨筆：單一筆畫但寬度隨運筆變化（中段飽滿高斯峰、起筆有肉、末段漸細並乾筆律動散開、
+  // 中軸微起伏）→ 有運筆痕跡；純向量輪廓 = 無鋸齒。
+  function buildBrush(svg) {
+    const w = +svg.dataset.w, h = +svg.dataset.h, sd = +svg.dataset.seed || 1, mt = +svg.dataset.mt || 0.42;
+    const x0 = 2.5, x1 = w - 2.5, K = 46, maxT = h * mt;
+    const cy = u => h / 2 + Math.sin(u * 5.2 + sd) * (h * 0.06) + (u - 0.5) * (h * 0.05);   // 起伏 + 微傾
+    const thick = u => {
+      const peak = 0.5 * Math.exp(-Math.pow((u - 0.30) / 0.40, 2)) + 0.18;   // 高斯峰偏左 + 底（抬高）
+      const dry = u > 0.5 ? (0.62 + 0.38 * Math.sin(u * 34 + sd * 3)) : 1;    // 末段飛白律動
+      const tip = u > 0.82 ? (0.4 + 0.6 * Math.max(0, 1 - (u - 0.82) / 0.18)) : 1; // 收筆漸細（不細到消失）
+      return Math.max(0.6, maxT * peak * dry * tip);
+    };
+    const r = v => v.toFixed(1);
+    let d = '';
+    for (let i = 0; i <= K; i++) { const u = i / K, x = x0 + (x1 - x0) * u, y = cy(u), t = thick(u) / 2; d += (i ? 'L' : 'M') + r(x) + ',' + r(y - t) + ' '; }
+    for (let i = K; i >= 0; i--) { const u = i / K, x = x0 + (x1 - x0) * u, y = cy(u), t = thick(u) / 2; d += 'L' + r(x) + ',' + r(y + t) + ' '; }
+    svg.innerHTML = '<path d="' + d + 'Z"/>';
+  }
+  document.querySelectorAll('svg.ink-brush[data-w], svg.ink-divider[data-w]').forEach(buildBrush);
+
+  // 金墨飛濺：固定偽隨機散佈（每次載入一致），實際量測文字/墨點 box 後避開，緩慢呼吸
+  function seedSplatter() {
+    const reward = document.querySelector('.reward');
+    const svg = reward && reward.querySelector('.splatter');
+    if (!svg) return;
+    const pr = reward.getBoundingClientRect();
+    const W = pr.width, H = pr.height;
+    if (!W || !H) return;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);            // viewBox = 面板像素，1:1 不失真
+    svg.setAttribute('preserveAspectRatio', 'none');
+    const pad = 4;
+    const ex = Array.from(reward.querySelectorAll('.tag,.big,.sub,.coin')).map(el => {
+      const r = el.getBoundingClientRect();
+      return { x0: r.left - pr.left - pad, y0: r.top - pr.top - pad, x1: r.right - pr.left + pad, y1: r.bottom - pr.top + pad };
+    });
+    const hit = (x, y) => ex.some(e => x > e.x0 && x < e.x1 && y > e.y0 && y < e.y1);
+    const frac = k => { const v = Math.abs(Math.sin(k * 12.9898)) * 43758.5453; return v - Math.floor(v); };
+    // 抖動網格：每格放一點（避開文字/墨點/邊緣），剩下的自然填滿所有非文字空隙 → 整片均勻
+    const mx = 14, my = 11, cols = 9, rows = 5, cw = W / cols, ch = H / rows;
+    const pts = [];
+    let i = 0;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      i++;
+      const x = (c + 0.5) * cw + (frac(i) - 0.5) * cw * 0.6;
+      const y = (r + 0.5) * ch + (frac(i * 1.7 + 3) - 0.5) * ch * 0.6;
+      if (x < mx || x > W - mx || y < my || y > H - my) continue;
+      if (hit(x, y)) continue;
+      pts.push({ x, y, i });
+    }
+    // 整片均勻後，再「均勻」抽掉 N 顆（不破壞分佈）
+    const drop = 10, drops = new Set();
+    if (pts.length > drop) for (let d = 0; d < drop; d++) drops.add(Math.floor((d + 0.5) * pts.length / drop));
+    let out = '';
+    pts.forEach((p, idx) => {
+      if (drops.has(idx)) return;
+      const rad = (1.7 + frac(p.i * 3.1) * 2.0).toFixed(1);
+      const dur = (4.5 + frac(p.i * 2.3) * 3.5).toFixed(1);
+      const del = (frac(p.i * 1.13) * 4).toFixed(1);
+      out += `<circle cx="${p.x.toFixed(0)}" cy="${p.y.toFixed(0)}" r="${rad}" style="animation-duration:${dur}s;animation-delay:${del}s"/>`;
+    });
+    svg.innerHTML = out;
+  }
+  seedSplatter();
+  window.addEventListener('load', seedSplatter);
+  window.addEventListener('resize', seedSplatter);
+
+  document.querySelectorAll('.toggle button').forEach(b => {
+    b.addEventListener('click', () => {
+      const set = b.dataset.set;
+      root.dataset.theme = set;
+      document.querySelectorAll('.toggle button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.set === set)));
+      renderSwatches();
+    });
+  });
+
+  function renderSwatches() {
+    const tokens = [
+      ['surface-base','--bg'], ['surface-card','--card'], ['surface-raised','--raised'],
+      ['ink 內文','--ink'], ['ink-muted','--ink-muted'], ['jade','--jade'],
+      ['gold','--gold'], ['gold-text','--gold-text'], ['bronze','--bronze'], ['brush 墨','--brush'],
+    ];
+    const cs = getComputedStyle(root);
+    document.getElementById('swatches').innerHTML = tokens.map(([name,v]) => {
+      const val = cs.getPropertyValue(v).trim();
+      return `<div class="sw"><div class="chip" style="background:${val}"></div><div class="meta"><b>${name}</b><span>${val}</span></div></div>`;
+    }).join('');
+  }
+  renderSwatches();
+</script>
+</body>
+</html>

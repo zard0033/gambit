@@ -82,3 +82,26 @@ Task: Phase 2「重點回播」redesign，design-first。**可點 HTML demo 已�
 - **Phase C+/D**：捉雙/牽制賽後偵測（需精準度實測）；Claude API 動態講解＝開放式對話/BYOK（最後）。
 - **文件**：`epics/index.md` 試煉/學習迴圈狀態待補（純文件）。
 - **PgnViewer 棋譜列面板**深色 chrome 可選染 cream（獨立小任務，非棋盤/棋子，回放/複盤共用）。
+- **🎨 第二主題（noir）+ 主題切換器（≈ dark mode）** ⏸ 低優先、未施工。
+  - **目前進度**：設計定案、**spec 已固化**進 SoT（`design/gambit-design-system/colors_and_type.css` 的 `[data-theme="noir"]` 區塊 + 兩條護欄 + 文件註解）；對照 demo＝`design/demos/theme-tokens-mockup.html`（token 表 + 6 頁面切換）。**production 0 實作。**
+  - **待辦（屆時照序）**：① production token 層——`src/assets/main.css` 的 `@theme` + shadcn HSL `:root` **雙寫** noir override（~70% 重用既有 on-deep 詞彙）。② **主題切換 UI**——ProfileView 設定加 toggle（奶油 jade / 暖 noir），存 **localStorage + Supabase 跨裝置同步**，套 `data-theme` 到 `<html>`；尊重 `prefers-color-scheme` 當預設。③ 深區頁面 ~30 個寫死漸層 hex 在 component 內（木盤/地城幣/英雄卡）翻不到 token，**隨頁面上線逐步 tokenize**，別先做全域 sweep。④ 建議補 **CI WCAG 對比 gate**（兩 token 集都驗），防雙主題漂移。
+  - **觸發條件**：北極星 Phase 2（棋憶）告一段落、或有實際使用者需求/當上線賣點時再排。設計已釘死、零風險，可隨時乾淨接續。詳見下方『🎨 第二主題探索』段。
+
+### 🎨 第二主題（noir / "Dusk"）探索 — 設計中、未施工
+
+Eason 想加第二套主題（看到一張暖墨/天使圖，喜歡墨跡 + 暖黑 + 金）。已做兩個 demo（皆在 `design/demos/`，**純探索、未進 production**）：
+
+- **`ink-noir-explore.html`（v21）**：墨跡點綴探索。定案技法——墨筆＝**變寬度純向量筆畫**（高斯峰運筆痕、無鋸齒，飛白只給分隔線）；reward 特規＝乾淨金墨頓點 + 金墨飛濺（抖動網格鋪滿、避字、~10 顆）；Neve 對話框＝**形狀分工**（日常＝實墨乾淨圓角卡、特殊時刻才用有機墨團輪廓）、頭像小霧圈單色墨字（文楷）。**reward 特規不在反-juice 範圍**已補進 `production/tooling-inspira-ui.md` 黑名單例外。
+- **`theme-tokens-mockup.html`**：jade↔noir **完整 token 對照表** + 6 代表頁面 mockup（首頁/學習/試煉/課程/棋誌/我的，可切換）。
+
+**noir token 規劃邏輯**：把設計系統既有「deep-jade 暗區配色」（on-deep ink/semantics、glass、nav、dungeon）推到全 app；jade 當品牌家族穿進 nav/學習/coach，**主按鈕 jade 不孤立**；金維持唯一高光。
+
+**已過 /council（5 視角）審議並套入修正**：① base 改**暖暮色 `#141110`** + 暖棕陰影（守「永不純黑」鐵則、讓切換像調暗同房間，非冷中性黑）；② 主按鈕 `#226B55` + 近白字＝**過 WCAG AA ≈6:1**（原 #2A8268 只 4.41:1）；③ ink-faint 提到 `#8A8478` 過 AA。**兩條待寫進 SoT 的護欄**：金仍只給 reward/eval/focus（near-black 上金字對比變好、天然護欄消失）；沉浸區靠 elevation/glass/漸層分層（deep vs base 亮度近似、單靠色相日光下會消失）。
+
+**nav 決議（Eason 拍板）**：cream 維持 deep-jade 錨 `#103029`；**noir nav ＝「抬起」式**——比 base **亮**一階的 jade 條 `#1A2620` + glass 頂光（暗色主題慣例 elevated，非變暗），**選中那格用 primary jade**。原則＝兩主題都 jade，但各自往讀得清方向走（亮底壓暗、暗底抬亮）。金字看底色挑值：奶油底 `#8F6200`、深底 `#F8B500`（深面板 eyebrow 用亮金）。
+
+**狀態：設計定案 + spec 已固化（2026-06-17）。** ✅ noir token + nav A′ + 兩條護欄已正式寫進 **`design/gambit-design-system/colors_and_type.css`**（新增 `[data-theme="noir"]` 區塊 + 文件註解）＝**SoT spec 完成、未進 production**。
+
+**⏸ 實作刻意延後**（技術經理判斷，Eason 同意先回北極星）：noir 不在差異化關鍵路徑（Phase 2 棋憶才是護城河）、無需求方、無 toggle 基建、一上就讓每個新畫面兩主題各驗一次（維護稅）。設計已釘住、零風險，哪天真要 noir（夠多人喊/當上線賣點）再照下方排序乾淨實作。**回去做 Phase 2 棋憶。**
+
+**實作排序（屆時照做）**：先上 `[data-theme="noir"]` token 層（production `src/assets/main.css` @theme + shadcn HSL 雙寫、~70% 重用 on-deep）+ toggle（ProfileView 設定 + localStorage/Supabase 同步）；深區頁面有 ~30 個寫死漸層 hex 在 component 內（木盤/地城幣/英雄卡）翻不到 token，**隨頁面上線再逐步 tokenize**，別先做全域 sweep。建議補一個 CI 對比 gate（兩 token 集都驗 WCAG，防雙主題漂移）。棋盤木質兩主題暫共用（之後做使用者可換棋盤/棋子主題）。

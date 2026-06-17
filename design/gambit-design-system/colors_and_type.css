@@ -185,6 +185,103 @@
   --glass-blur:   10px;
   /* focused element: gold ring + soft glow */
   --focus-gold:   0 0 0 3px var(--accent), 0 0 18px rgba(248, 181, 0, 0.5);
+
+  /* ---- App-chrome（theme-aware）---- */
+  --nav-elev:     #103029;   /* 底部 nav 抬起面：cream＝deep-jade 錨（同 surface-deep）；noir override 為亮一階 */
+}
+
+/* ================================================================
+   NOIR / "DUSK" — 第二主題（dark）token override          [SPEC, 未進 production]
+   ================================================================
+   邏輯：把上面「在 deep-jade 暗區」的配色（ink-on-deep / glass / nav / dungeon）
+   推到全 app。base 移到「暖暮色」近黑（非冷中性黑——守『陰影暖棕、永不純黑』鐵則，
+   讓 cream↔noir 切換像「調暗同一房間」而非換 app）；jade 當品牌家族穿進 nav / 學習 /
+   coach，主操作 jade 不孤立；金 #F8B500 維持唯一高光。已過 /council 5 視角審議（含
+   WCAG 對比實算）。Eason 認可（2026-06）。
+
+   ⚠ 兩條 noir 專屬護欄（務必守）：
+   1) 金仍只給 reward / eval / focus。near-black 上金字對比變好（~11:1），cream 上
+      「醜到只能當高光」的天然護欄消失了——別讓金滲進 eyebrow / 數字 / 邊框。
+   2) 沉浸區（對局/課程/試煉/棋誌）靠 elevation / glass / 漸層分層，不只靠色相：
+      surface-deep #0F1E17 與 surface-base #141110 亮度近似，單靠色相在手機日光下會消失。
+
+   金字看底色挑值：奶油內容面＝accent-text #8F6200；深面板 eyebrow＝亮金 #F8B500。
+   nav：cream 深錨；noir 用「抬起」式 nav-elev #1A2620 + glass 頂光、選中那格用 primary。
+   棋盤 / 標註 / eval ＝ upstream owned，兩主題共用、不 override（之後做使用者可換盤/子）。
+
+   實作排序（Pragmatist）：先上 [data-theme="noir"] token 層（~70% 重用 on-deep 詞彙）；
+   深區頁面有 ~30 個寫死漸層 hex 在 component 內（木盤/地城幣/英雄卡）翻不到 token，
+   隨頁面上線再逐步 tokenize，別先做全域 sweep。對照 demo＝design/demos/theme-tokens-mockup.html。
+   ================================================================ */
+[data-theme="noir"] {
+  /* Surface — 暖暮色近黑 */
+  --surface-base:    #141110;
+  --surface-card:    #1E1A17;
+  --surface-raised:  #26211B;
+  --surface-mid:     #2E2922;
+  --surface-hover:   rgba(255, 255, 255, 0.06);
+  --surface-deep:       #0F1E17;   /* 沉浸 / nav 錨（jade-黑）*/
+  --surface-deep-2:     #16302A;
+  --surface-deep-hover: rgba(255, 255, 255, 0.08);
+
+  /* Ink — 暖白（呼應白翼）*/
+  --ink:             #ECE6DA;
+  --ink-muted:       #A39C8E;
+  --ink-faint:       #8A8478;   /* council: 提亮過 WCAG AA（鎖定標籤 / 時戳）*/
+  --ink-on-deep:     #E9F2ED;
+  --ink-on-deep-dim: #8FB3A6;
+
+  /* Primary — 深穩 jade（council: fg/primary ≈6:1 過 AA；原 #2A8268 只 4.41:1）*/
+  --primary:         #226B55;
+  --primary-dark:    #1B5444;
+  --primary-soft:    rgba(34, 107, 85, 0.20);
+  --primary-fg:      #F4F1E6;
+
+  /* Accent — gold 不變（唯一高光）；深底金字用亮金 */
+  --accent:          #F8B500;
+  --accent-light:    #FFD777;
+  --accent-dark:     #FFC94D;   /* 深底上的金字（cream 是 #8F6200）*/
+  --accent-text:     #FFC94D;
+  --accent-ink:      #3A2408;
+
+  /* Semantic — 用既有 on-deep 亮版 */
+  --success:         #7FD4A8;
+  --success-dark:    #5FB389;
+  --success-light:   rgba(127, 212, 168, 0.12);
+  --danger:          #E08E79;
+  --danger-dark:     #C9745E;
+  --danger-light:    rgba(224, 142, 121, 0.12);
+  --hint:            #E3B25E;
+  --hint-light:      rgba(227, 178, 94, 0.12);
+  --hint-ring:       rgba(227, 178, 94, 0.40);
+
+  /* Line / borders */
+  --line:            rgba(255, 255, 255, 0.09);
+  --line-subtle:     rgba(255, 255, 255, 0.06);
+  --line-strong:     rgba(255, 255, 255, 0.16);
+
+  /* Learning-map tiles */
+  --map-top:         #46C7A3;
+  --map-face:        #1F9E7A;
+  --map-socket:      #0F6E54;
+  --map-lock-top:    #3A3A40;
+  --map-lock-face:   #2E2E33;
+  --map-lock-socket: #232327;
+  --map-trail:       #F8B500;
+  --map-trail-base:  rgba(255, 255, 255, 0.14);
+
+  /* App-chrome: noir nav ＝抬起 jade（比 base 亮一階 + glass 頂光、active=primary）*/
+  --nav-elev:        #1A2620;
+
+  /* Elevation — 暖棕暗陰影（守『永不純黑』）；暗區優先靠 surface-deep-2 亮度抬升 */
+  --shadow-card:       0 2px 12px rgba(16, 9, 4, 0.55), 0 1px 2px rgba(16, 9, 4, 0.40);
+  --shadow-card-hover: 0 8px 26px rgba(16, 9, 4, 0.60), 0 2px 6px rgba(16, 9, 4, 0.45);
+  --shadow-button:     0 1px 2px rgba(16, 9, 4, 0.50);
+  --shadow-popover:    0 12px 34px rgba(16, 9, 4, 0.65), 0 4px 10px rgba(16, 9, 4, 0.50);
+
+  /* Glass — 暗區簽名 finish（微調）*/
+  --glass-bg:     rgba(255, 255, 255, 0.06);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 /* ============================================================
