@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: Phase 2 — 課程長在你自己的棋上（賽後檢討）
-Task: **Phase 1 棋誌 epic 全部上線**（CI 綠、部署站 200）。賽後檢討棋盤已從 FEN 字串換成真棋盤（PgnViewer）＋全 app 棋盤統一 Wood12+Gioco——**已 push（commit `e99d706`）**。**下一步＝Phase 2「重點回播」redesign，design-first：先做可點 demo → 拍板 → GDD → stories → 實作**（提案＋待定決策見下方待辦）。
+Task: Phase 2「重點回播」redesign，design-first。**可點 HTML demo 已做好並 Playwright 驗證三畫面 OK**＝`design/demos/highlight-replay-demo.html`（用 chess.js 驗過的真實一盤：義大利開局白方第7手 Re1 漏掉 c4 主教；三時刻＝⚑子力/最大轉折 ＋ ✦冷靜的一手d3 ＋ ◇無戰術轉折Bg5；Neve 模板講解、棋誌咬合 UI、逐手次要 toggle 全在 demo 內）。**下一步＝Eason 開 demo 看 → 對下方 5 個待定決策拍板 → 寫進 `design/gdd/post-game-review.md`（或新 GDD）→ `/design-review` → 切 stories → 實作。** 尚未 push（demo 是設計稿，待拍板後再決定要不要進版）。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 還沒固化的 in-flight 決策。**長期鐵則/技術參考一律在 CLAUDE.md 體系**（見下方「接手必讀」），這裡不複述；已完成施工細節在 git。
@@ -55,7 +55,20 @@ Task: **Phase 1 棋誌 epic 全部上線**（CI 綠、部署站 200）。賽後�
 - 🆕 **賽後檢討「重點回播」redesign**（Eason 構想＝Phase 2 ① 的 UX）：不逐手翻，只 **highlight 3-5 個關鍵時刻**（重用既有 cpLoss/最大轉折/`classify()`＝篩選+呈現非新邏輯，且只看關鍵手＝更平靜、對上「寧少勿濫」）。每時刻顯示**戰術名 + 你的步 vs 最佳步差異**，Neve **模板 per mistake-concept** 解釋（零 AI）；v2＝任意局面自由解釋（AI/BYOK，最後）。**咬合**：每個被點出的時刻＝一筆棋誌（②/③），review＝②蘇格拉底教學。⚠️ 大改 `ReviewView` 互動模型，依鐵則先 `/design-review`→拍板→才施工。
   - **可重用料（現成在 `ReviewView.vue` / `modules/learning-loop`）**：`computeCpLoss`、`biggestSwingCursor`、`classify()`（已產 concept）、`mistakeSignposts`、`selectMistakeSignposts`。棋盤＝剛上線的 `PgnViewer`。
   - **本 session 已提案、待 Eason 拍板的決策**：① 時刻怎麼選（推薦：玩家手依 deep cpLoss 排序、取有 concept 或大 swing 的前 3-5；是否也放 1 個「漂亮的一手」②未定）② 逐手瀏覽（推薦保留為次要 toggle，不丟現有 nav）③ Neve 講解＝每 mistake-concept 一個模板「我看到你想…，這裡…更好，因為…」④ eval bar / 棋譜列在重點回播模式收掉（平靜），逐手模式才出現 ⑤ 棋誌咬合先做 UI、寫入留一張 story。
-  - **下一步（接手就做）**：刻一個**可點 HTML demo**（真實一盤的關鍵時刻 + Neve 模板文案）給 Eason 看版面/節奏 → 拍板 → 寫進 `design/gdd/post-game-review.md`（或新 GDD）→ `/design-review` → 切 stories → 實作。
+  - ✅ **可點 demo＝`design/demos/highlight-replay-demo.html`（已迭代到 v2，過 Playwright 驗證 6 畫面）**。本機開：`cd design/demos && python -m http.server` → 瀏覽器 `localhost:8000/highlight-replay-demo.html`（file:// 被 Playwright 擋，直接拖進瀏覽器也行）。
+  - **已迭代到 v5，落實四輪 Eason 回饋（2026-06-17）**。結構：**dashboard-first**——第一頁＝Memory dashboard（**頂塊已拿掉**，只留：三時刻可點列表＋**Neve 跨對局質化觀察**＋逐手覆盤入口）→ 點時刻進**幻燈片**（動畫重現：走你那手→0.42s→移回→0.26s→走正確手；好手則帶出對手被迫回應如騎士被趕回 b6）→ **逐手覆盤**（滿版棋盤＋eval bar＋棋譜＋上下一步**動畫滑動非瞬移**，含吃子/易位）。上下一步在**牌卡底列**；「你走了 ┃ 更好的是」同字級只用顏色分；選時刻三類＝戰術相關＋整局最關鍵一手＋無戰術轉折；**Neve 文案＝「你」主詞主動語氣、不臆測意圖**。
+  - **跨對局統計＝確定走質化版（不靠 AI）**：Eason 認可。做法＝每盤標階段(開局/中局/殘局)+concept→跨盤累積統計→**規則挑最強趨勢+模板填數**出 Neve 一句觀察（非評分條、非 rating 曲線，守住「棋誌不是數據」護欄）。量化能力分數版**不做**。
+  - **棋子/棋盤/棋譜樣式 demo 不擬真**——實作時套既有 Wood12+Gioco Wood+PgnViewer（CLAUDE.md 視覺 SoT）。
+  - **棋誌↔回顧 模型已確認**：點棋誌那一筆即開此回顧；一盤必存一筆（與是否點開無關，故 dashboard 不放「已存入」動作提示）。
+  - **v6（第五輪）再調**：動畫每步間隔再拉長；逐手覆盤併進三時刻那組（虛線安靜列，去孤兒感）。
+  - **v7（第六輪）**：①第一手起步前停頓加長 ②**自刻 SVG eval 折線圖**（不裝圖表庫，守「整包框架不裝」護欄），放棋憶 dashboard 頂部滿版。
+  - **v8→v9（第七輪定版）＝拆兩條路線＋Neve 升級**：① 清單回到 **ICON＋顏色**（不用編號，Eason 偏好）② **拆兩條路線**：整張 eval 走勢圖＝**逐手覆盤入口**（整圖點擊，手機好點，不靠小圓點；圖上三個重點時刻仍以小色點標示、與清單同色）；**重點時刻**走下面的清單卡（點卡→該時刻）③ **Neve 升級**為醒目**深青卡＋頭像＋文楷**（套 persona 視覺嗓音）、**移到最上當開場**（Eason 覺得原本被輕視）。dashboard 定版順序＝**Neve（深青卡）→ 整局走勢(圖→逐手覆盤) → 重點時刻(清單)**。圖拉高 104px、白/黑優標籤移左側加底襯不被曲線壓。**棋憶 demo 至此 Eason 認可、暫告段落**（下一步：要動工時開 `design/gdd/memory.md` GDD→/design-review→切 stories）。
+  - **✅ 命名定案＝「棋憶」**（諧音記憶、呼應 Neve 記得你；UI 全繁中規則查證屬實，英文只給 GAMBIT 字標）。功能＝棋憶；內含「重點時刻」（幻燈片）＋「逐手覆盤」。demo 已全面更名。
+  - **✅ Neve 語氣＋視覺嗓音已固化進 `design/gambit-design-system/persona-neve.md`**：(1)「回顧態」register＋撰寫補充（你-主詞、主動、不臆測意圖、濃縮、失誤中性、好手不反射讚美、無戰術轉折 prefer-silence）；(2)「Neve 視覺嗓音」段——**全站 Neve 第一人稱的話統一 `font-lesson` 文楷＋頭像容器**建立識別，**Cubic 11 只當小 NEVE 名牌**、內文不排（點陣字長句難讀＋8-bit 感悖平靜人格）。Eason 已拍板採此方案（否決「全 Neve 用 Cubic 11」）。
+  - **🔑 重點時刻「生成邏輯」（Eason 問，要進 GDD Formulas/Tuning）**：**數量不固定**（非永遠 3）——上限 ~5、下限可為 1，門檻 gate（cpLoss < 閾值不選）、寧少勿濫（穩盤就少、不灌水）。候選來自三源：①戰術相關＝`classify()` 命中 concept（material/mate；日後 fork/pin…）②整局最關鍵一手＝最大 swing（anchor）＋玩家的亮點/好手 ③無 concept 的大 swing（prefer-silence）。排序＝cpLoss 大小為主、concept 命中加權；去重（相鄰手取大者）；幻燈片**依手數順序**呈現、最大 swing 標 anchor。每盤再各時刻標**階段**（開局/中局/殘局，由手數+子力數判定）→ 餵跨對局質化統計。**全程零 AI**（Stockfish cpLoss + classify 規則 + 模板）。
+  - **✅ 累積數字的家＝棋誌頁，不是棋憶 dashboard**（Eason 2026-06-17 拍板）：全站走過的累積（Neve 記得 N 盤／棋誌 N 則／同行 N 天）放**棋誌頁**（＝既有 `JournalView`，Phase 1 已上線）當頂部累積區，呼應 vision「回頭重讀一本越來越厚的書」。棋憶 dashboard 保持**單盤聚焦、平靜**，不放全站數字（試過一版已移除）。→ **棋誌頁累積頭部＝未來獨立增強**，非本次棋憶 GDD 範圍；要做再單獨 mock。
+  - **🔑 剩餘待拍板**：動畫快慢是否 OK（已把第一手起步前停頓加長到 650ms）。棋憶 dashboard 內容大致定（Neve 觀察＋三時刻＋逐手覆盤）。
+  - 拍板後 → 寫進 `design/gdd/post-game-review.md`（或新 `memory.md`）→ `/design-review` → 切 stories。**demo 尚未 push**。
 - **概念側門廢除 + 概念深化頁**：廢除「概念→課程側門」（`ConceptMapView` 戰術卡 `?from=concept` alias 到課程），概念改成「單一戰術主題的深化＝課程加深版」（自有 `steps`、共享 LessonView 渲染器吃不同資料）。**整包做**（只拆側門會留破洞）。牽連 `LessonView` `fromConcept` 分支、`lesson-progress` `markSideLearned`、`concept-progress` store、`data-sync` `lesson_side_learned`、概念地圖雙色點。**保留**賽後檢討 signpost（`ReviewView` `?from=lesson`→試煉）。**已做**：移除課程完成卡練習邀請 CTA。
 
 ### 待 Eason iPhone 實機複看（皆已修/已 push）
