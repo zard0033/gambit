@@ -139,6 +139,11 @@ export const useLessonProgressStore = defineStore('lessonProgress', () => {
   const totalCount = lessons.length
   const progress = computed(() => (totalCount === 0 ? 0 : completedCount.value / totalCount))
 
+  /** First unlocked, not-yet-completed lesson in curriculum order — the "continue learning" target. */
+  const nextLesson = computed(
+    () => lessons.find((l) => isUnlocked(l) && !completed.value.has(l.id)) ?? null,
+  )
+
   return {
     completed,
     sideLearned,
@@ -151,5 +156,6 @@ export const useLessonProgressStore = defineStore('lessonProgress', () => {
     completedCount,
     totalCount,
     progress,
+    nextLesson,
   }
 })

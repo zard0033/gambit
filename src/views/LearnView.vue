@@ -1,30 +1,26 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { Check, Lock, ChevronRight } from 'lucide-vue-next'
 import { lessons } from '@/data/lessons'
-import { LESSON_TIER_LABELS } from '@/types/lesson'
+import { LESSON_TIER_LABELS, LESSON_TIER_PIECES as TIER_PIECE, LESSON_TIER_NUMERALS as TIER_NUM } from '@/types/lesson'
 import type { Lesson, LessonTier } from '@/types/lesson'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
 import { ChapterBadge } from '@/components/ui/gambit'
 
 const router = useRouter()
 const progress = useLessonProgressStore()
+const { nextLesson } = storeToRefs(progress)
 
-// 棋子徽章：用棋盤同一套 Gioco Wood 棋子（扁平 jade 剪影），與 Home 一致。
+// 棋子徽章 URL base（用棋盤同一套 Gioco Wood 剪影，與 Home 一致）。
 const base = import.meta.env.BASE_URL
-const TIER_PIECE: Record<LessonTier, string> = { 1: 'bP', 2: 'bN', 3: 'bR', 4: 'bK' }
-const TIER_NUM: Record<LessonTier, string> = { 1: '一', 2: '二', 3: '三', 4: '四' }
 const TIER_SUB: Record<LessonTier, string> = {
   1: '棋子走法 · 基本規則',
   2: '戰術組合 · 棋子配合',
   3: '控制中心 · 快速發展',
   4: '殘局技巧 · 王兵協同',
 }
-
-const nextLesson = computed(
-  () => [...lessons].find((l) => progress.isUnlocked(l) && !progress.isCompleted(l.id)) ?? null,
-)
 
 interface Chapter {
   tier: LessonTier

@@ -95,6 +95,12 @@ export const LESSON_TIER_LABELS: Record<LessonTier, string> = {
   4: '殘局技術',
 }
 
+/** Gioco Wood piece code per tier — the chapter badge piece, matching the board set. */
+export const LESSON_TIER_PIECES: Record<LessonTier, string> = { 1: 'bP', 2: 'bN', 3: 'bR', 4: 'bK' }
+
+/** Chinese numeral per tier (第一章 … 第四章). */
+export const LESSON_TIER_NUMERALS: Record<LessonTier, string> = { 1: '一', 2: '二', 3: '三', 4: '四' }
+
 /**
  * The single coach persona shown in the lesson player (UI label, not embedded in
  * each step's text). Neve — an original character (the board-spirit of Gambit); see

@@ -7,8 +7,8 @@ import MoveAnnotationDisplay from '@/components/move-annotation-display.vue'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { getLessonById, lessons } from '@/data/lessons'
-import { COACH, LESSON_TIER_LABELS } from '@/types/lesson'
-import type { LessonStep, LessonTier } from '@/types/lesson'
+import { COACH, LESSON_TIER_LABELS, LESSON_TIER_PIECES as TIER_PIECE, LESSON_TIER_NUMERALS as TIER_NUM } from '@/types/lesson'
+import type { LessonStep } from '@/types/lesson'
 import { ChapterBadge } from '@/components/ui/gambit'
 import type { Annotation } from '@/modules/move-annotation/annotation-types'
 import type { MoveMadePayload } from '@/composables/use-chess-board'
@@ -16,9 +16,6 @@ import type { Rect } from '@/utils/board-geometry'
 import { useBoardFit } from '@/composables/use-board-fit'
 import { useReducedMotion } from '@/composables/use-reduced-motion'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
-
-const TIER_PIECE: Record<LessonTier, string> = { 1: 'bP', 2: 'bN', 3: 'bR', 4: 'bK' }
-const TIER_NUM: Record<LessonTier, string> = { 1: '一', 2: '二', 3: '三', 4: '四' }
 
 const route = useRoute()
 const router = useRouter()
