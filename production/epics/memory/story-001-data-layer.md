@@ -38,7 +38,7 @@
 
 *From GDD F4-schema + EC-6 + ADR-0014 Validation Criteria, scoped to this story:*
 
-- [ ] `memory_summaries` DDL file authored at `supabase/migrations/20260827000000_create_memory_summaries.sql` (§1 DDL verbatim).
+- [ ] `memory_summaries` DDL file authored at `supabase/migrations/20260828000000_create_memory_summaries.sql` (§1 DDL verbatim).
 - [ ] `useDataSyncStore.appendMemorySummary(s)` inserts `ON CONFLICT (user_id, game_id) DO NOTHING`; logged-in failure → `chess:memory:unsynced:<game_id>`; guest → `chess:memory:summaries`.
 - [ ] `useDataSyncStore.loadMemorySummaries()` selects own rows where `schema_version === MEMORY_SUMMARY_SCHEMA_VERSION`, newest-first.
 - [ ] `useMemoryStore.load()` merges cloud ∪ local (guest + queued), dedup by `game_id`, current schema only; a single corrupt local blob is skipped, never fatal.
@@ -51,7 +51,7 @@
 ## Implementation Notes
 
 ```
-supabase/migrations/20260827000000_create_memory_summaries.sql   ← ADR-0014 §1 DDL
+supabase/migrations/20260828000000_create_memory_summaries.sql   ← ADR-0014 §1 DDL
 src/types/memory.ts            ← MemoryGameSummary, Stage, MemoryConcept, NeveLine, Moment types
 src/config/memory-config.ts    ← MEMORY_SUMMARY_SCHEMA_VERSION=1 + all tuning constants (F1/F4/F5 + animation)
 src/stores/data-sync.ts        ← ADD memorySummaryRowToObj / memoryObjToRow + loadMemorySummaries + appendMemorySummary

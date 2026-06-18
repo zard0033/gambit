@@ -8,6 +8,8 @@ import { HISTORY_LOAD_LIMIT } from '@/config/history-config'
 import type { Cursor } from '@/types/game-history'
 import type { ResumeSnapshot } from '@/types/resume'
 import type { JournalEntry } from '@/types/journal'
+import type { MemoryGameSummary } from '@/types/memory'
+import { MEMORY_SUMMARY_SCHEMA_VERSION } from '@/config/memory-config'
 import { buildPgn } from '@/modules/game-export/assembler'
 
 export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error'
@@ -17,6 +19,10 @@ const UNSYNCED_PREFIX = 'chess:unsynced:'
 const JOURNAL_ENTRIES_KEY = 'chess:journal:entries'
 /** Logged-in entries that failed to insert; keyed by source_ref_id so retry is idempotent. */
 const JOURNAL_UNSYNCED_PREFIX = 'chess:journal:unsynced:'
+/** Guest (logged-out) memory summaries — local-first 棋憶 (ADR-0014 §5). */
+const MEMORY_SUMMARIES_KEY = 'chess:memory:summaries'
+/** Logged-in summaries that failed to insert; keyed by game_id so retry is idempotent. */
+const MEMORY_UNSYNCED_PREFIX = 'chess:memory:unsynced:'
 
 /** CompletedGame extended with a stable client-generated UUID for idempotent DB inserts. */
 interface QueuedGame extends CompletedGame {
@@ -96,6 +102,34 @@ function journalEntryToRow(e: JournalEntry, userId: string) {
     params: e.params,
     body: e.body,
     created_at: new Date(e.createdAt).toISOString(),
+  }
+}
+
+/** Map a `memory_summaries` DB row to the in-app MemoryGameSummary (ADR-0014 §1). */
+function memoryRowToSummary(r: Record<string, unknown>): MemoryGameSummary {
+  const s = (r.summary ?? {}) as {
+    stageCounts?: MemoryGameSummary['stageCounts']
+    conceptCounts?: Record<string, number>
+    anchorStage?: MemoryGameSummary['anchorStage']
+  }
+  return {
+    schemaVersion: r.schema_version as number,
+    gameId: r.game_id as string,
+    createdAt: new Date(r.created_at as string).getTime(),
+    stageCounts: s.stageCounts ?? { opening: 0, middlegame: 0, endgame: 0 },
+    conceptCounts: s.conceptCounts ?? {},
+    anchorStage: s.anchorStage ?? null,
+  }
+}
+
+/** Map a MemoryGameSummary to a `memory_summaries` insert row (id defaulted by the DB). */
+function memorySummaryToRow(s: MemoryGameSummary, userId: string) {
+  return {
+    user_id: userId,
+    game_id: s.gameId,
+    schema_version: s.schemaVersion,
+    summary: { stageCounts: s.stageCounts, conceptCounts: s.conceptCounts, anchorStage: s.anchorStage },
+    created_at: new Date(s.createdAt).toISOString(),
   }
 }
 
@@ -526,6 +560,126 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     }
   }
 
+  // ── 棋憶 (Memory) — ADR-0014. memory_summaries mirrors journal: guest localStorage → login
+  //    union reconcile, event-keyed on game_id, schema_version-filtered. ──
+
+  /** Read locally-held memory summaries: guest blob (`chess:memory:summaries`) + unsynced queue. */
+  function readLocalMemorySummaries(): MemoryGameSummary[] {
+    if (typeof localStorage === 'undefined') return []
+    const out: MemoryGameSummary[] = []
+    const guestRaw = localStorage.getItem(MEMORY_SUMMARIES_KEY)
+    if (guestRaw) {
+      try {
+        out.push(...(JSON.parse(guestRaw) as MemoryGameSummary[]))
+      } catch {
+        // skip corrupt guest blob
+      }
+    }
+    for (const key of Object.keys(localStorage)) {
+      if (!key.startsWith(MEMORY_UNSYNCED_PREFIX)) continue
+      const raw = localStorage.getItem(key)
+      if (!raw) continue
+      try {
+        out.push(JSON.parse(raw) as MemoryGameSummary)
+      } catch {
+        // skip corrupt queued summary
+      }
+    }
+    return out
+  }
+
+  function _pushGuestMemorySummary(summary: MemoryGameSummary): void {
+    if (typeof localStorage === 'undefined') return
+    let list: MemoryGameSummary[] = []
+    const raw = localStorage.getItem(MEMORY_SUMMARIES_KEY)
+    if (raw) {
+      try {
+        list = JSON.parse(raw) as MemoryGameSummary[]
+      } catch {
+        list = []
+      }
+    }
+    if (list.some((s) => s.gameId === summary.gameId)) return // local idempotency by game_id
+    list.push(summary)
+    localStorage.setItem(MEMORY_SUMMARIES_KEY, JSON.stringify(list))
+  }
+
+  function _queueMemorySummary(summary: MemoryGameSummary): void {
+    if (typeof localStorage === 'undefined') return
+    localStorage.setItem(`${MEMORY_UNSYNCED_PREFIX}${summary.gameId}`, JSON.stringify(summary))
+  }
+
+  /**
+   * Fetch the user's memory summaries (current schema_version only), newest first. Returns [] when
+   * logged out — the guest's summaries live in localStorage and are merged in by the store.
+   */
+  async function loadMemorySummaries(): Promise<MemoryGameSummary[]> {
+    const authStore = useAuthStore()
+    if (!authStore.userId) return []
+    const { data, error } = await supabase
+      .from('memory_summaries')
+      .select('*')
+      .eq('schema_version', MEMORY_SUMMARY_SCHEMA_VERSION)
+      .order('created_at', { ascending: false })
+    if (error) throw new Error(error.message ?? 'Failed to load memory summaries')
+    return (data ?? []).map(memoryRowToSummary)
+  }
+
+  /**
+   * Append a memory summary. Logged in: upsert ON CONFLICT (user_id, game_id) DO NOTHING (one
+   * summary per game — re-deriving is a no-op); on failure queue to `chess:memory:unsynced:*`.
+   * Logged out: write to the guest local-first store.
+   */
+  async function appendMemorySummary(summary: MemoryGameSummary): Promise<void> {
+    const authStore = useAuthStore()
+    const userId = authStore.userId
+    if (!userId) {
+      _pushGuestMemorySummary(summary)
+      return
+    }
+    try {
+      const { error } = await supabase
+        .from('memory_summaries')
+        .upsert(memorySummaryToRow(summary, userId), {
+          onConflict: 'user_id,game_id',
+          ignoreDuplicates: true,
+        })
+      if (error) {
+        _queueMemorySummary(summary)
+        return
+      }
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem(`${MEMORY_UNSYNCED_PREFIX}${summary.gameId}`)
+      }
+    } catch {
+      _queueMemorySummary(summary)
+    }
+  }
+
+  /**
+   * On login, push all locally-held summaries (guest blob + unsynced queue) to the cloud, deduped
+   * by game_id — the union reconcile. Each insert is ON CONFLICT DO NOTHING (no duplicate); a
+   * failure re-queues for the next login (no loss). Clears the guest blob afterward.
+   */
+  async function flushMemoryQueue(): Promise<void> {
+    const authStore = useAuthStore()
+    if (!authStore.userId) return
+    const seen = new Set<string>()
+    const unique: MemoryGameSummary[] = []
+    for (const s of readLocalMemorySummaries()) {
+      if (!seen.has(s.gameId)) {
+        seen.add(s.gameId)
+        unique.push(s)
+      }
+    }
+    for (const s of unique) {
+      await appendMemorySummary(s)
+    }
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(MEMORY_SUMMARIES_KEY)
+    }
+  }
+
   return {
     syncStatus,
     lastSyncedGameId,
@@ -545,5 +699,9 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     appendJournalEntry,
     readLocalJournalEntries,
     flushJournalQueue,
+    loadMemorySummaries,
+    appendMemorySummary,
+    readLocalMemorySummaries,
+    flushMemoryQueue,
   }
 })

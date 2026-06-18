@@ -22,7 +22,7 @@
 
 **Engine**: Supabase Postgres (live project `vfnzekqtvxhewifnmtnz`) | **Risk**: LOW
 **Engine Notes**:
-- Mirrors Journal story-007 / ADR-0013 acceptance exactly. Next migration timestamp after journal's `20260826000000` = `20260827000000`.
+- Mirrors Journal story-007 / ADR-0013 acceptance exactly. Next migration timestamp after journal's `20260826000000` = `20260828000000`.
 - No CSP change (same `VITE_SUPABASE_URL` origin).
 
 **Control Manifest Rules (this layer)**:
@@ -35,7 +35,7 @@
 
 *From ADR-0014 Validation Criteria, scoped to this gate:*
 
-- [ ] `supabase/migrations/20260827000000_create_memory_summaries.sql` (authored in story-001) applied to live DB via Dashboard SQL Editor → `Success. No rows returned`.
+- [ ] `supabase/migrations/20260828000000_create_memory_summaries.sql` (authored in story-001) applied to live DB via Dashboard SQL Editor → `Success. No rows returned`.
 - [ ] Anon REST probe: `GET …/rest/v1/memory_summaries?select=*&limit=1` → HTTP 200 `[]`; unauthenticated POST → HTTP 401 `42501` (RLS enforced).
 - [ ] `\d memory_summaries` (or schema check) confirms `UNIQUE(user_id, game_id)`, `schema_version int`, `summary jsonb`.
 - [ ] `supabase/README.md` table list updated to include `memory_summaries` (8 tables).
@@ -46,7 +46,7 @@
 
 ## Implementation Notes
 
-- Run the `migrations/20260827000000_create_memory_summaries.sql` SQL in the Dashboard SQL Editor (`https://supabase.com/dashboard/project/vfnzekqtvxhewifnmtnz/sql/new`).
+- Run the `migrations/20260828000000_create_memory_summaries.sql` SQL in the Dashboard SQL Editor (`https://supabase.com/dashboard/project/vfnzekqtvxhewifnmtnz/sql/new`).
 - Verify with the README anon-REST recipe (`VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` from `.env.local`).
 - Edit ADR-0014 Status block → Accepted (copy the ADR-0013 Accepted-note shape: date, project ref, GET/POST result codes, constraint confirmation).
 - This is a process gate, not code — no unit test; evidence is the probe output + the flipped ADR.

@@ -137,7 +137,7 @@ F4 cross-game line, F5 stage classification) but defers two architectural questi
 ### 1. Table: `memory_summaries` (per-game, owner-scoped RLS, union-reconcile, versioned)
 
 ```sql
--- supabase/migrations/20260827000000_create_memory_summaries.sql
+-- supabase/migrations/20260828000000_create_memory_summaries.sql
 create table if not exists public.memory_summaries (
   id             uuid        primary key default gen_random_uuid(),  -- client-generated
   user_id        uuid        not null references auth.users(id) on delete cascade,
@@ -351,7 +351,7 @@ DASHBOARD opened (Game Over → /review, or 棋誌 entry → deep-link)
 
 No existing memory data. New table.
 
-1. Author `supabase/migrations/20260827000000_create_memory_summaries.sql` with the §1 DDL.
+1. Author `supabase/migrations/20260828000000_create_memory_summaries.sql` with the §1 DDL.
 2. Apply **manually** via Dashboard SQL Editor (`supabase/README.md`) — repo is not CLI-linked.
    Success = `Success. No rows returned`.
 3. Verify with the anon REST probe (README §"Verify a table"):
