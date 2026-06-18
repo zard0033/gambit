@@ -43,6 +43,7 @@ Lichess open-source components (chessground, stockfish.wasm, chess-openings) pro
 | 19 | Dungeon Puzzle Mode | Gameplay | Phase 2 | Approved | [dungeon-puzzle-mode.md](./dungeon-puzzle-mode.md) ([review log](./reviews/dungeon-puzzle-mode-review-log.md)) | Chess Board, Navigation & Routing, Lesson System (pattern) |
 | 20 | Learning Loop (Concept Linking) | Gameplay (connective) | Phase 2 | Approved | [learning-loop.md](./learning-loop.md) ([review log](./reviews/learning-loop-review-log.md)) | Lesson System (#18), Dungeon Puzzle Mode (#19), Post-Game Review (#7) |
 | 21 | Journal (棋誌) | Gameplay (differentiation) | Phase 1 (diff) | Designed (v1: onset/arrival/solace) | [journal.md](./journal.md) ([review log](./reviews/journal-review-log.md)) | Lesson System (#18), Game History (#12), Data Sync (#11); Post-Game Review (#7) → Phase 2 only |
+| 22 | 棋憶 (Memory) | Gameplay (differentiation) | Phase 2 (diff, ①) | Approved (2026-06-18, round 2 lean) | [memory.md](./memory.md) ([review log](./reviews/memory-review-log.md)) | Post-Game Review (#7), Learning Loop (#20), Journal (#21), Game History (#12), Opening ID (#3) |
 
 ---
 

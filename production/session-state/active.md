@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
-Feature: Phase 2 — 課程長在你自己的棋上（賽後檢討）
-Task: Phase 2「重點回播」redesign，design-first。**可點 HTML demo 已做好並 Playwright 驗證三畫面 OK**＝`design/demos/highlight-replay-demo.html`（用 chess.js 驗過的真實一盤：義大利開局白方第7手 Re1 漏掉 c4 主教；三時刻＝⚑子力/最大轉折 ＋ ✦冷靜的一手d3 ＋ ◇無戰術轉折Bg5；Neve 模板講解、棋誌咬合 UI、逐手次要 toggle 全在 demo 內）。**下一步＝Eason 開 demo 看 → 對下方 5 個待定決策拍板 → 寫進 `design/gdd/post-game-review.md`（或新 GDD）→ `/design-review` → 切 stories → 實作。** 尚未 push（demo 是設計稿，待拍板後再決定要不要進版）。
+Feature: Phase 2 ① — 課程長在你自己的棋上（棋憶 / Memory）
+Task: **棋憶 epic 已切完，進入實作**。GDD APPROVED=`design/gdd/memory.md`(#22)。**已產出（2026-06-18）**：`ADR-0014`（memory 資料模型 + #7 唯讀消費邊界，**Proposed**；A 方案=game_sessions 加欄 已否決，採 B=獨立 `memory_summaries` 表比照 journal/ADR-0013，訪客 localStorage→登入 union reconcile）、`production/epics/memory/EPIC.md`、**11 張 story（001…011，全 Ready）**、`TR-memory-001…011` 進 tr-registry、index 更新。**下一步＝逐 story 實作**，建議序 **002→003（純函式零相依、可立刻紅綠燈）→005→004→001→006→007→008/009→010→011**。鐵則：純邏輯(002–005)對 Proposed ADR 即可開工；**story-011=ADR-0014 Accepted+live migration 閘**（解 001/010 的 live 驗證 + 007 的 recordGame）；**story-006 UX spec(fix#5) 須 /ux-review APPROVED 才動 007/008**；story-010 補 `journal.md` 回指棋憶（#21 per-game pen 屬 Phase 2，若未上線只先接 deep-link target）。ADR/epic/stories/demo/GDD 皆**尚未 push**。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 還沒固化的 in-flight 決策。**長期鐵則/技術參考一律在 CLAUDE.md 體系**（見下方「接手必讀」），這裡不複述；已完成施工細節在 git。
@@ -51,6 +51,8 @@ Task: Phase 2「重點回播」redesign，design-first。**可點 HTML demo 已�
 ## 🚧 待辦 / 開放項
 
 ### Phase 2（深化方向）
+
+> ✅ **2026-06-18：棋憶 GDD 已落成＝`design/gdd/memory.md`（系統 #22）+ 已過 design-review（MAJOR REVISION 已套，log 見 `reviews/memory-review-log.md`）。** 下方 demo 迭代 v1→v9 紀錄＝設計決策來源，已被 GDD 取代；接手看 GDD + STATUS 即可，這段保留只為追溯 demo 決策脈絡。
 
 - 🆕 **賽後檢討「重點回播」redesign**（Eason 構想＝Phase 2 ① 的 UX）：不逐手翻，只 **highlight 3-5 個關鍵時刻**（重用既有 cpLoss/最大轉折/`classify()`＝篩選+呈現非新邏輯，且只看關鍵手＝更平靜、對上「寧少勿濫」）。每時刻顯示**戰術名 + 你的步 vs 最佳步差異**，Neve **模板 per mistake-concept** 解釋（零 AI）；v2＝任意局面自由解釋（AI/BYOK，最後）。**咬合**：每個被點出的時刻＝一筆棋誌（②/③），review＝②蘇格拉底教學。⚠️ 大改 `ReviewView` 互動模型，依鐵則先 `/design-review`→拍板→才施工。
   - **可重用料（現成在 `ReviewView.vue` / `modules/learning-loop`）**：`computeCpLoss`、`biggestSwingCursor`、`classify()`（已產 concept）、`mistakeSignposts`、`selectMistakeSignposts`。棋盤＝剛上線的 `PgnViewer`。

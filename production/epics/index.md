@@ -41,6 +41,12 @@
 |------|-------|--------|-----|--------|--------------|---------|--------|
 | [journal](journal/EPIC.md) | Phase 1 (diff) | useJournalStore + journal_entries + JournalView + HomeView peek | journal.md (v1: onset/arrival/solace) | 7 (TR-journal-001…007) | ADR-0013 (**Accepted** 2026-06-16) + ADR-0011 + ADR-0005 | 7 stories | **story-007 done (table live + RLS verified); 001–006 Ready to implement** |
 
+## Phase 2 Differentiation Epics
+
+| Epic | Layer | Module | GDD | TR-IDs | ADR Coverage | Stories | Status |
+|------|-------|--------|-----|--------|--------------|---------|--------|
+| [memory](memory/EPIC.md) | Phase 2 (diff, ①) | memory_summaries + useMemoryStore + src/modules/memory + 棋憶 dashboard/slideshow + replay (PgnViewer reuse); read-only consumer of #7 | memory.md (Approved 2026-06-18, round 2 lean) | 11 (TR-memory-001…011) | ADR-0014 (**Proposed** 2026-06-18) + ADR-0011 + ADR-0007 + ADR-0005 + ADR-0006 | 11 stories (001…011, all Ready) | **Stories created 2026-06-18; ready to implement (002/003 first — pure, zero-dep); ADR-0014 acceptance = story-011 gate** |
+
 ## Process Epics
 
 | Epic | Purpose | Stories |

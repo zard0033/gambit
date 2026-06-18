@@ -22,7 +22,7 @@
 # STATUS VALUES: active | deprecated | superseded-by: TR-[system]-NNN
 
 version: 2
-last_updated: "2026-06-01"
+last_updated: "2026-06-18"
 
 requirements:
 
@@ -563,5 +563,86 @@ requirements:
     gdd: design/gdd/journal.md
     requirement: "ADR-0013 Accepted gate: apply 0013 migration to live DB (Dashboard SQL Editor), verify anon REST (200 [] / 401 42501), flip ADR-0013 Proposed→Accepted (unblocks TR-journal-002..006)"
     created: 2026-06-16
+    revised: ""
+    status: active
+
+  # ---- 棋憶 (Memory) ----
+  # Registered 2026-06-18 alongside /create-epics memory (normally /architecture-review's job;
+  # appended inline to unblock story creation). All covered by ADR-0014.
+  - id: TR-memory-001
+    system: memory
+    gdd: design/gdd/memory.md
+    requirement: "Data layer: memory_summaries table (owner RLS, UNIQUE(user_id, game_id), schema_version column); useDataSyncStore.loadMemorySummaries/appendMemorySummary (ON CONFLICT DO NOTHING, current-schema filter); useMemoryStore cross-game window + guest localStorage(chess:memory:*)→login union reconcile (ADR-0014)"
+    created: 2026-06-18
+    revised: ""
+    status: active
+  - id: TR-memory-002
+    system: memory
+    gdd: design/gdd/memory.md
+    requirement: "Key-moment selection F1 (pure, src/modules/memory): 3 candidate sources (tactical / anchor+bright / plain) → same-ply merge by priority → gate MEMORY_MOMENT_CP_GATE → force-include anchor+bright pre-cap → cap MEMORY_MOMENT_MAX → chronological order; zero new reviewEngine.analyze when #7 results already present (AC-2/2b/2c/2d, AC-3, AC-4, AC-5, AC-6, AC-14)"
+    created: 2026-06-18
+    revised: ""
+    status: active
+  - id: TR-memory-003
+    system: memory
+    gdd: design/gdd/memory.md
+    requirement: "Derivation (pure): White-normalized E_white[i] series (F2) + favorable swing; stage classification F5 (endgame-first by nonPawnMaterial, opening by bookExitPly/ply, middlegame catch-all), deterministic incl. all boundaries (AC-13)"
+    created: 2026-06-18
+    revised: ""
+    status: active
+  - id: TR-memory-004
+    system: memory
+    gdd: design/gdd/memory.md
+    requirement: "Cross-game Neve line F4 (rule-based, zero-AI): per-game tagging → OBS window (OBS_MIN_SAMPLE gate) → improving / recurring / neutral signal (NO weak-stage branch) → template fill; first/few-games line on insufficient sample (AC-12, AC-12b)"
+    created: 2026-06-18
+    revised: ""
+    status: active
+  - id: TR-memory-005
+    system: memory
+    gdd: design/gdd/memory.md
+    requirement: "Zero-AI Neve text: per-moment F3 template (kind+concept keyed) under 回顧態 register guardrails; banned-token lint ('你想'/blunder/錯/恭喜), assert no network/API call; F4 emits no weakest-stage line under any window (AC-11b)"
+    created: 2026-06-18
+    revised: ""
+    status: active
+  - id: TR-memory-006
+    system: memory
+    gdd: design/gdd/memory.md
+    requirement: "UX/a11y spec (fix #5, sequenced BEFORE dashboard/slideshow impl): two-door affordance differentiation + slideshow↔replay cross-link (EC-13), chart drift-guard tap (EC-12), color-blind icon+word channel (EC-14), reduced-motion full-comparison end-state (EC-5), keyboard parity + ≥44px targets (AC-17), back-nav targets per entry point (Rule 1). House a11y/visual standard."
+    created: 2026-06-18
+    revised: ""
+    status: active
+  - id: TR-memory-007
+    system: memory
+    gdd: design/gdd/memory.md
+    requirement: "棋憶 dashboard (/review entry replaces direct-to-dense-board): DOM order Neve card → shape-of-game SVG eval view → moment list; zero-state component (no celebratory tokens) on 0 moments; no ranking/verdict node rendered; progressive render pre-COMPLETE (AC-1, AC-3, EC-1, EC-3)"
+    created: 2026-06-18
+    revised: ""
+    status: active
+  - id: TR-memory-008
+    system: memory
+    gdd: design/gdd/memory.md
+    requirement: "Moment slideshow: board at pre-move FEN + animated re-play (mistake: play→pause→back→better; good: play→provoked reply), skip-to-end-state, 重播這一手; move comparison one font-size differentiated by color/weight + leading word (AC-10); reduced-motion static both-halves (AC-9); swipe/chevron/arrow nav, past-last→dashboard cue (EC-15, EC-2)"
+    created: 2026-06-18
+    revised: ""
+    status: active
+  - id: TR-memory-009
+    system: memory
+    gdd: design/gdd/memory.md
+    requirement: "Move-by-move replay reuses shipped PgnViewer + Wood12/Gioco + Move Annotation Display (NOT a hand-rolled board); self-drawn SVG eval chart with gold ply cursor; move list cpLoss chips + anchor accent bar + current-ply auto-scroll; asset URLs carry import.meta.env.BASE_URL; openable at a specific ply (AC-8, AC-16)"
+    created: 2026-06-18
+    revised: ""
+    status: active
+  - id: TR-memory-010
+    system: memory
+    gdd: design/gdd/memory.md
+    requirement: "棋誌 coupling: exactly one journal entry per completed game regardless of whether 棋憶 was opened; a journal entry deep-link (gameId, ply=N) opens this game's 棋憶 and mounts replay with cursor at ply N (AC-15); journal.md (#21) back-references 棋憶 as its review destination"
+    created: 2026-06-18
+    revised: ""
+    status: active
+  - id: TR-memory-011
+    system: memory
+    gdd: design/gdd/memory.md
+    requirement: "ADR-0014 Accepted gate: apply 20260827000000_create_memory_summaries migration to live DB (Dashboard SQL Editor), verify anon REST (200 [] / 401 42501), update supabase/README table list (8 tables), flip ADR-0014 Proposed→Accepted (unblocks TR-memory-001..010)"
+    created: 2026-06-18
     revised: ""
     status: active
