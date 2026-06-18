@@ -78,7 +78,7 @@ describe('usePlayEngine — AC-3: no SharedArrayBuffer', () => {
     const path = require('path') as typeof import('path')
     const files = [
       'src/modules/chess-engine/play-engine.ts',
-      'src/workers/stockfish-play.worker.ts',
+      'src/workers/stockfish-worker.ts',
     ]
     for (const file of files) {
       const content = fs.readFileSync(path.join(process.cwd(), file), 'utf8')

@@ -12,15 +12,10 @@ import { ref, computed, readonly, type Ref } from 'vue'
 export interface ReplayNavigationOptions {
   /** Auto-play step interval in ms. */
   intervalMs?: number
-  /** Injectable timer setter (for deterministic tests). */
-  setIntervalFn?: typeof setInterval
-  clearIntervalFn?: typeof clearInterval
 }
 
 export function useReplayNavigation(total: Ref<number>, options?: ReplayNavigationOptions) {
   const intervalMs = options?.intervalMs ?? 1000
-  const setIntervalImpl = options?.setIntervalFn ?? setInterval
-  const clearIntervalImpl = options?.clearIntervalFn ?? clearInterval
 
   const currentPly = ref(0)
   const isPlaying = ref(false)
@@ -48,7 +43,7 @@ export function useReplayNavigation(total: Ref<number>, options?: ReplayNavigati
   function stop(): void {
     isPlaying.value = false
     if (timer !== null) {
-      clearIntervalImpl(timer)
+      clearInterval(timer)
       timer = null
     }
   }
@@ -56,7 +51,7 @@ export function useReplayNavigation(total: Ref<number>, options?: ReplayNavigati
   function play(): void {
     if (isPlaying.value || !canGoNext.value) return
     isPlaying.value = true
-    timer = setIntervalImpl(() => {
+    timer = setInterval(() => {
       if (currentPly.value >= total.value) {
         stop()
       } else {

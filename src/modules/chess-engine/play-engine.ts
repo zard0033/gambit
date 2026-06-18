@@ -1,6 +1,5 @@
 import { ref, readonly } from 'vue'
-import type { IStockfishWorker } from '../../workers/stockfish-worker'
-import { createPlayEngineWorker } from '../../workers/stockfish-play.worker'
+import { createStockfishWorker, type IStockfishWorker } from '../../workers/stockfish-worker'
 
 export type { IStockfishWorker }
 export type WorkerFactory = () => IStockfishWorker
@@ -145,7 +144,7 @@ function runHandshake(worker: IStockfishWorker): Promise<void> {
   })
 }
 
-const defaultFactory: WorkerFactory = createPlayEngineWorker
+const defaultFactory: WorkerFactory = createStockfishWorker
 const defaultEventTarget: VisibilityEventTarget | undefined =
   typeof document !== 'undefined' ? document : undefined
 

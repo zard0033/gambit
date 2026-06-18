@@ -5,8 +5,7 @@
  * TR-chess-engine-005: lazy-create on first analyze(); auto-terminate after 30s idle.
  */
 import { ref, readonly } from 'vue'
-import type { IStockfishWorker } from '../../workers/stockfish-worker'
-import { createReviewEngineWorker } from '../../workers/stockfish-review.worker'
+import { createStockfishWorker, type IStockfishWorker } from '../../workers/stockfish-worker'
 
 // ---- Error types ----
 
@@ -122,7 +121,7 @@ function runHandshake(worker: IStockfishWorker): Promise<void> {
 
 // ---- Composable ----
 
-const defaultFactory: WorkerFactory = createReviewEngineWorker
+const defaultFactory: WorkerFactory = createStockfishWorker
 
 /**
  * NNUE Review Engine composable.
