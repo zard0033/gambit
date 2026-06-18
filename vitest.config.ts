@@ -1,33 +1,24 @@
-import { defineConfig } from 'vitest/config'
-import vue from '@vitejs/plugin-vue'
-import { fileURLToPath, URL } from 'node:url'
+import { defineConfig, mergeConfig } from 'vitest/config'
+import viteConfig from './vite.config'
 
-export default defineConfig({
-  plugins: [vue()],
-  resolve: {
-    alias: [
-      { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
-      // pgn-viewer doesn't export CSS in its package.json exports map; bypass via absolute path
-      {
-        find: '@lichess-org/pgn-viewer/dist/lichess-pgn-viewer.css',
-        replacement: fileURLToPath(
-          new URL('./node_modules/@lichess-org/pgn-viewer/dist/lichess-pgn-viewer.css', import.meta.url),
-        ),
+// Inherit plugins + resolve.alias (incl. the pgn-viewer CSS workaround) from vite.config
+// so they never drift between build and test.
+export default mergeConfig(
+  viteConfig,
+  defineConfig({
+    test: {
+      globals: true,
+      setupFiles: ['tests/setup-node26-compat.ts'],
+      include: ['tests/unit/**/*.test.ts', 'tests/integration/**/*.test.ts', 'tests/smoke/**/*.test.ts'],
+      exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**'],
+      reporters: ['default'],
+      coverage: {
+        provider: 'v8',
+        reportsDirectory: 'test-results/coverage',
       },
-    ],
-  },
-  test: {
-    globals: true,
-    setupFiles: ['tests/setup-node26-compat.ts'],
-    include: ['tests/unit/**/*.test.ts', 'tests/integration/**/*.test.ts', 'tests/smoke/**/*.test.ts'],
-    exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**'],
-    reporters: ['default'],
-    coverage: {
-      provider: 'v8',
-      reportsDirectory: 'test-results/coverage',
+      outputFile: {
+        json: 'test-results/vitest-results.json',
+      },
     },
-    outputFile: {
-      json: 'test-results/vitest-results.json',
-    },
-  },
-})
+  }),
+)
