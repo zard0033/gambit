@@ -1,1 +1,0 @@
-{"name":"hce-spike","private":true,"type":"module","dependencies":{"stockfish":"^16.0.0","stockfish.wasm":"^0.10.0"}}
