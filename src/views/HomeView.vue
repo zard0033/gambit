@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { ArrowRight, Target, BookOpen, Library, Swords } from 'lucide-vue-next'
-import { lessons } from '@/data/lessons'
-import { LESSON_TIER_LABELS } from '@/types/lesson'
-import type { LessonTier } from '@/types/lesson'
+import { LESSON_TIER_LABELS, LESSON_TIER_PIECES as TIER_PIECE } from '@/types/lesson'
+import { greetingForNow } from '@/lib/utils'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
 import { useDungeonProgressStore } from '@/stores/dungeon-progress'
 import { useUiStore } from '@/stores/ui-store'
@@ -18,6 +18,7 @@ import { DarkPanel, ChapterBadge, StatCard, SectionLabel, ProgressBar } from '@/
 
 const router = useRouter()
 const progress = useLessonProgressStore()
+const { nextLesson } = storeToRefs(progress)
 const dungeon = useDungeonProgressStore()
 const uiStore = useUiStore()
 const resume = useResumeGameStore()
@@ -39,22 +40,7 @@ const resumeInfo = computed(() => {
   }
 })
 
-// 棋子徽章：用棋盤同一套 Gioco Wood 棋子（依課程 tier 變化），與盤面風格統一。
-const TIER_PIECE: Record<LessonTier, string> = { 1: 'bP', 2: 'bN', 3: 'bR', 4: 'bK' }
-
-// 時間感問候
-const greeting = computed(() => {
-  const h = new Date().getHours()
-  if (h < 6) return '夜深了'
-  if (h < 12) return '早安'
-  if (h < 18) return '午安'
-  return '晚安'
-})
-
-// 要續學的課：第一個已解鎖、未完成
-const nextLesson = computed(
-  () => [...lessons].find((l) => progress.isUnlocked(l) && !progress.isCompleted(l.id)) ?? null,
-)
+const greeting = computed(greetingForNow)
 const lessonOrdinal = computed(() => progress.completedCount + 1)
 
 function startGame() {

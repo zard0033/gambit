@@ -3,13 +3,11 @@ import { computed } from 'vue'
 
 const props = withDefaults(
   defineProps<{
-    /** Unicode fallback glyph (legacy). Prefer `piece` for board-matching artwork. */
-    glyph?: string
     /** Gioco Wood piece code (e.g. 'bK', 'wN') — renders the same SVG the board uses. */
     piece?: string
     size?: number
   }>(),
-  { glyph: '♜', size: 60 },
+  { size: 60 },
 )
 
 // Vite serves under a base path on GitHub Pages (/my-first-chess-game/). url() in JS/inline-style is
@@ -30,11 +28,8 @@ const dots = computed(() => [
 // ~20% smaller than a king. Normalise so every silhouette renders at the same optical height.
 const PIECE_CONTENT_FRAC: Record<string, number> = { K: 0.807, Q: 0.762, R: 0.676, B: 0.732, N: 0.71, P: 0.638 }
 const glyphSize = computed(() => {
-  if (props.piece) {
-    const intrinsic = PIECE_CONTENT_FRAC[props.piece.slice(-1).toUpperCase()] ?? 0.74
-    return Math.round(props.size * Math.min(0.7, 0.4 / intrinsic))
-  }
-  return Math.round(props.size * 0.52)
+  const intrinsic = PIECE_CONTENT_FRAC[props.piece?.slice(-1).toUpperCase() ?? ''] ?? 0.74
+  return Math.round(props.size * Math.min(0.7, 0.4 / intrinsic))
 })
 </script>
 
@@ -70,12 +65,6 @@ const glyphSize = computed(() => {
           maskSize: 'contain',
         }"
       />
-      <span
-        v-else
-        class="text-primary leading-none [text-shadow:0_1px_2px_rgba(61,34,16,0.12)]"
-        :style="{ fontSize: `${glyphSize}px` }"
-        >{{ glyph }}</span
-      >
     </div>
   </div>
 </template>

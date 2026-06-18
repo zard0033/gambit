@@ -9,10 +9,6 @@ import { completedStages } from '@/lib/journal/stages'
 import { recordSolaceSession, sessionsSinceLastSolace, touchSession } from '@/lib/journal/session'
 import { outcomeFromResult, planEntries, type PlayedGame, type SettleSnapshot } from '@/lib/journal/settle'
 
-function emptyByVolume(): Record<Volume, JournalEntry[]> {
-  return { 卷一規則: [], 卷二戰術: [], 卷三開局: [], 卷四殘局: [] }
-}
-
 /**
  * Journal (棋誌) store — owns the merged, timeline-ordered view (ADR-0005, ADR-0013).
  * Derivation/settle logic is story-002; this store loads and presents. It never imports
@@ -95,7 +91,7 @@ export const useJournalStore = defineStore('journal', () => {
 
   /** Entries grouped by volume for the overview (onset, volume=null, is excluded). */
   function byVolume(): Record<Volume, JournalEntry[]> {
-    const groups = emptyByVolume()
+    const groups: Record<Volume, JournalEntry[]> = { 卷一規則: [], 卷二戰術: [], 卷三開局: [], 卷四殘局: [] }
     for (const entry of entries.value) {
       if (entry.volume) groups[entry.volume].push(entry)
     }

@@ -1,8 +1,9 @@
 import { ref, readonly } from 'vue'
-import type { IStockfishWorker } from '../../workers/stockfish-worker'
-import { createPlayEngineWorker } from '../../workers/stockfish-play.worker'
+import { createStockfishWorker, type IStockfishWorker } from '../../workers/stockfish-worker'
+import { runHandshake, EngineUnavailableError } from './handshake'
 
 export type { IStockfishWorker }
+export { EngineUnavailableError }
 export type WorkerFactory = () => IStockfishWorker
 
 /** Injectable visibility event target (document-like). Injectable for unit testability. */
@@ -26,14 +27,6 @@ export type EngineState =
   | 'CRASHED'
   | 'DISPOSED'
   | 'IDLE_TERMINATED'
-
-/** Emitted when the engine fails to initialise or crashes during handshake. */
-export class EngineUnavailableError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = 'EngineUnavailableError'
-  }
-}
 
 /** ADR-0002 §5: AbortSignal cancellation API. */
 export class CanceledError extends Error {
@@ -74,78 +67,10 @@ export interface PlayResult {
   ponder?: string
 }
 
-/**
- * Play-engine UCI options per ADR-0002 §7 and control manifest Core layer.
- * All setoption lines are sent BEFORE isready (AC-5 invariant).
- * ADR-0001 (amended 2026-06-02): SF18 Lite is always-NNUE — no `Use NNUE` option is sent.
- */
-const PLAY_ENGINE_OPTIONS = [
-  'setoption name Hash value 16',
-  'setoption name Threads value 1',
-  'setoption name Ponder value false',
-  'setoption name MultiPV value 1',
-] as const
-
 /** ADR-0002 §3: max wait for bestmove after UCI stop before CRASHED. */
 const STOP_DRAIN_TIMEOUT_MS = 2_000
 
-/** ADR-0002 §7: maximum wait for uciok before CRASHED. */
-const UCIOK_TIMEOUT_MS = 5_000
-
-/** ADR-0002 §7: maximum wait for readyok after isready before CRASHED. WASM first-load needs up to ~8s. */
-const READYOK_TIMEOUT_MS = 10_000
-
-/**
- * Runs the strict two-phase UCI handshake.
- * Phase 1: send `uci`, await `uciok` within UCIOK_TIMEOUT_MS.
- * Phase 2: send setoptions + `isready`, await `readyok` within READYOK_TIMEOUT_MS.
- * Rejects with EngineUnavailableError on either timeout.
- */
-function runHandshake(worker: IStockfishWorker): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    let uciokSeen = false
-    let uciokTimer: ReturnType<typeof setTimeout>
-    let readyokTimer: ReturnType<typeof setTimeout> | undefined
-
-    const fail = (message: string): void => {
-      worker.onmessage = null
-      clearTimeout(uciokTimer)
-      clearTimeout(readyokTimer)
-      reject(new EngineUnavailableError(message))
-    }
-
-    uciokTimer = setTimeout(
-      () => fail(`uciok not received within ${UCIOK_TIMEOUT_MS}ms`),
-      UCIOK_TIMEOUT_MS,
-    )
-
-    worker.onmessage = (ev: MessageEvent<string>) => {
-      const line = ev.data.trim()
-
-      if (!uciokSeen && line === 'uciok') {
-        clearTimeout(uciokTimer)
-        uciokSeen = true
-        for (const opt of PLAY_ENGINE_OPTIONS) worker.postMessage(opt)
-        worker.postMessage('isready')
-        readyokTimer = setTimeout(
-          () => fail(`readyok not received within ${READYOK_TIMEOUT_MS}ms`),
-          READYOK_TIMEOUT_MS,
-        )
-        return
-      }
-
-      if (uciokSeen && line === 'readyok') {
-        clearTimeout(readyokTimer)
-        worker.onmessage = null
-        resolve()
-      }
-    }
-
-    worker.postMessage('uci')
-  })
-}
-
-const defaultFactory: WorkerFactory = createPlayEngineWorker
+const defaultFactory: WorkerFactory = createStockfishWorker
 const defaultEventTarget: VisibilityEventTarget | undefined =
   typeof document !== 'undefined' ? document : undefined
 

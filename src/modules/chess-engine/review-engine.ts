@@ -5,8 +5,10 @@
  * TR-chess-engine-005: lazy-create on first analyze(); auto-terminate after 30s idle.
  */
 import { ref, readonly } from 'vue'
-import type { IStockfishWorker } from '../../workers/stockfish-worker'
-import { createReviewEngineWorker } from '../../workers/stockfish-review.worker'
+import { createStockfishWorker, type IStockfishWorker } from '../../workers/stockfish-worker'
+import { runHandshake, EngineUnavailableError } from './handshake'
+
+export { EngineUnavailableError }
 
 // ---- Error types ----
 
@@ -14,13 +16,6 @@ export class EngineDisposedError extends Error {
   constructor() {
     super('reviewEngine is DISPOSED — create a new instance')
     this.name = 'EngineDisposedError'
-  }
-}
-
-export class EngineUnavailableError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = 'EngineUnavailableError'
   }
 }
 
@@ -69,60 +64,12 @@ export type WorkerFactory = () => IStockfishWorker
 
 // ---- Constants ----
 
-const UCIOK_TIMEOUT_MS = 5_000
-const READYOK_TIMEOUT_MS = 10_000
 const STOP_DRAIN_TIMEOUT_MS = 2_000
 const IDLE_TERMINATE_MS = 30_000
 
-// Stockfish 18 Lite is always NNUE (the eval network is embedded in the WASM and
-// there is no `Use NNUE` UCI option), so no eval-mode switch is sent here.
-const ENGINE_OPTIONS = [
-  'setoption name Hash value 16',
-  'setoption name Threads value 1',
-  'setoption name Ponder value false',
-  'setoption name MultiPV value 1',
-] as const
-
-// ---- Handshake ----
-
-function runHandshake(worker: IStockfishWorker): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    let uciokSeen = false
-    let uciokTimer: ReturnType<typeof setTimeout>
-    let readyokTimer: ReturnType<typeof setTimeout> | undefined
-
-    const fail = (msg: string): void => {
-      worker.onmessage = null
-      clearTimeout(uciokTimer)
-      clearTimeout(readyokTimer)
-      reject(new EngineUnavailableError(msg))
-    }
-
-    uciokTimer = setTimeout(() => fail(`uciok not received within ${UCIOK_TIMEOUT_MS}ms`), UCIOK_TIMEOUT_MS)
-
-    worker.onmessage = (ev: MessageEvent<string>) => {
-      const line = ev.data.trim()
-      if (!uciokSeen && line === 'uciok') {
-        clearTimeout(uciokTimer)
-        uciokSeen = true
-        for (const opt of ENGINE_OPTIONS) worker.postMessage(opt)
-        worker.postMessage('isready')
-        readyokTimer = setTimeout(() => fail(`readyok not received within ${READYOK_TIMEOUT_MS}ms`), READYOK_TIMEOUT_MS)
-        return
-      }
-      if (uciokSeen && line === 'readyok') {
-        clearTimeout(readyokTimer)
-        worker.onmessage = null
-        resolve()
-      }
-    }
-    worker.postMessage('uci')
-  })
-}
-
 // ---- Composable ----
 
-const defaultFactory: WorkerFactory = createReviewEngineWorker
+const defaultFactory: WorkerFactory = createStockfishWorker
 
 /**
  * NNUE Review Engine composable.
