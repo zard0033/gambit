@@ -93,9 +93,9 @@ v1 範圍鐵律（Eason 2026-06-16 拍板）：只做**從持久狀態可推導*
 | Data Sync (#11) | 雲端持久化、跨裝置同步 | 全部 | — | 透過 `data-sync` store（**不**直接 `supabase.from`，守 ADR-0011；表結構見 ADR-0013） |
 | (Phase 2) Lesson #18 答對事件 | 無提示首次答對 motif | ① epiphany | 依課所屬階 | 需 #18 補：每題答對事件含 `motif`＋持久 `hintUsed` |
 | (Phase 2) Post-Game Review (#7) | 賽後「冷靜／漂亮一手」 | ② move | 卷二（預設） | 需 #7 補/重定義：per-move 冷靜手訊號＋ deep-pass cpLoss；含 gameId+ply |
-| (Phase 2) Game Replay / `PgnViewer` | ② 的可回放入口 | — | — | 需 by-id replay route（MVP `/history/:gameId`，v0/v1 未建） |
+| (Phase 2) Game Replay / `PgnViewer` | ② 的可回放入口 | — | — | by-id replay 入口＝**棋憶 (#22)**：journal entry tap → `/review?gameId&ply` 開該局棋憶 dashboard、`ply` 直接落 replay（story-010 已接 `?ply` target；`?gameId` 載任意局待 #21 per-game ② pen 出現 caller 後再接） |
 
-> **下游**：未來「課程長在你棋上（①深化）」「蘇格拉底賽後教學（②）」會**讀**棋誌 entry 當素材。v1 不實作，但資料模型對外穩定。
+> **下游**：未來「課程長在你棋上（①深化）」「蘇格拉底賽後教學（②）」會**讀**棋誌 entry 當素材。v1 不實作，但資料模型對外穩定。**棋憶 (#22) 是 journal entry 的賽後回顧目的地**（GDD `memory.md` Rule 23：tap 一筆 entry → 開該局棋憶；雙向 deep-link 用 #7 對外的 `gameId+ply` handle）。目前 v1 entry（onset/arrival/solace）非 per-game review 筆——solace 的 `sourceRefId` 雖帶 gameId，但「tap entry→棋憶」要等 #21 的 per-game ② pen（Phase 2）才有語意正確的 caller。
 
 ## Formulas
 

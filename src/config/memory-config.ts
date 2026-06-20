@@ -42,4 +42,17 @@ export const OPENING_PLY_MAX = 16
 /** Non-pawn material above which early plies are opening. */
 export const OPENING_MATERIAL = 56
 
-// Slideshow animation knobs (GDD v9: 650/380/700/520 ms) land with story-008, their first consumer.
+// ---- Zero-state copy (EC-1 / AC-3) ----
+/** The calm, non-congratulatory line shown when a steady game surfaces no moments (GDD EC-1).
+ *  AC-3 asserts the rendered copy equals this string and contains none of 做得好/恭喜/完美. */
+export const MEMORY_ZERO_STATE_COPY = '這盤你走得很穩，沒有需要特別停下來看的地方。'
+
+// ---- Slideshow animation knobs (story-008; GDD v9 demo-tuned, OQ-2 sit-with-it sign-off) ----
+/** Calm beat before the first move plays. */
+export const ANIM_FIRST_MOVE_PRE_PAUSE_MS = 650
+/** Per-piece slide duration (slideshow + replay). */
+export const ANIM_MOVE_DURATION_MS = 380
+/** Hold after your move, before moving the piece back. */
+export const ANIM_READ_PAUSE_MS = 700
+/** Hold after moving back, before the better move plays. */
+export const ANIM_BACK_PAUSE_MS = 520

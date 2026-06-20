@@ -52,3 +52,4 @@ own rows — no separate insert policy needed. Row existence = the monotonic fac
 | `lesson_side_learned` | 20260824000000 | concept side-door learned set |
 | `in_progress_game` | 20260825000000 | resume-in-progress game |
 | `journal_entries` | 20260826000000 | **棋誌** (ADR-0013) — append-only Neve entries. **Idempotency is event-level `UNIQUE(user_id, source_ref_id)`** (NOT row-UUID — that does not survive guest→login reconcile). `type` is `text` (NOT enum) so Phase 2 pens need no migration. Applied + RLS-verified 2026-06-16. |
+| `memory_summaries` | 20260828000000 | **棋憶** (ADR-0014) — one durable per-game summary feeding the F4 cross-game line (NOT a moment cache). Event-level `UNIQUE(user_id, game_id)` (`ON CONFLICT DO NOTHING`); `schema_version int` lets F4 ignore incompatible rows; `summary jsonb`; `game_id text` (no FK — guest games have no `game_sessions` row). Applied + RLS-verified 2026-06-20. |

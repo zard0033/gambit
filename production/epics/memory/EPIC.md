@@ -3,7 +3,7 @@
 > **Layer**: Feature — Phase 2 Differentiation ① (the moat)
 > **GDD**: design/gdd/memory.md (Approved 2026-06-18, round 2 lean — review log `design/gdd/reviews/memory-review-log.md`)
 > **Architecture Module**: `memory_summaries` table + `useDataSyncStore` memory methods + `useMemoryStore` (cross-game window) + `src/modules/memory/*` (pure F1/F2/F4/F5 + templates) + 棋憶 dashboard/slideshow views + move-by-move replay (reuses shipped PgnViewer); read-only consumer of `usePostGameReview` (#7)
-> **Status**: Blocked → Ready on ADR-0014 acceptance — ADR-0014 **Proposed** 2026-06-18 (story-011 = acceptance + live migration gate)
+> **Status**: ADR-0014 **Accepted** 2026-06-20 (story-011 gate PASSED: migration live + anon REST probe 200/401). 001–005 shipped (`a3caa1d`); UI 006–010 implemented + unit-green 2026-06-20. Remaining = browser/iPhone visual sign-off (manual).
 > **Stories**: story-001…011 created 2026-06-18 (see table below) — all **Ready**; recommended start order 002 → 003 (pure, zero-dep) → 005 → 004 → 001 → 006 → 007 → 008/009 → 010 → 011
 
 ## Overview
@@ -31,7 +31,7 @@ durable summary is **not** a per-game moment cache.
 
 | Decision | Coverage |
 |----------|----------|
-| `memory_summaries` schema, event-key idempotency (`game_id`), guest reconcile, `schema_version` durability | **ADR-0014** (new, 2026-06-18) — Proposed |
+| `memory_summaries` schema, event-key idempotency (`game_id`), guest reconcile, `schema_version` durability | **ADR-0014** (new, 2026-06-18) — Accepted 2026-06-20 |
 | #7 → #22 read-only consumption boundary; pure-function selection; 0-analysis contract | **ADR-0014** |
 | `/review` becomes 棋憶 dashboard; dense surface = replay reusing PgnViewer | **ADR-0014** (view/route ownership) |
 | `useMemoryStore` as its own Pinia store (cross-game window only) | ADR-0005 (per-feature store boundary) |
@@ -42,16 +42,17 @@ durable summary is **not** a per-game moment cache.
 
 | ADR | Decision Summary | Status | Engine Risk |
 |-----|-----------------|--------|-------------|
-| ADR-0014: 棋憶 Data Model & Review Consumption Boundary | `memory_summaries` table (`UNIQUE(user_id, game_id)`, `schema_version`, guest reconcile); #7 read-only consumption with 0 new analysis; pure `src/modules/memory/*`; `/review`→dashboard, dense→PgnViewer replay | **Proposed** (2026-06-18) | LOW |
+| ADR-0014: 棋憶 Data Model & Review Consumption Boundary | `memory_summaries` table (`UNIQUE(user_id, game_id)`, `schema_version`, guest reconcile); #7 read-only consumption with 0 new analysis; pure `src/modules/memory/*`; `/review`→dashboard, dense→PgnViewer replay | **Accepted** (2026-06-20) | LOW |
 | ADR-0011: Supabase Auth + Data Sync | memory persistence lives on `useDataSyncStore`; RLS `user_id=auth.uid()`; offline queue; union reconcile | Accepted | LOW |
 | ADR-0007: Post-Game Review Analysis Loop | #7 owns `analysisResults`/`biggestSwingCursor` (computed once, never moves), persists none across sessions — the read-only source 棋憶 consumes / re-triggers on cold open | Accepted | LOW |
 | ADR-0005: Pinia Store Boundaries | `useMemoryStore` is its own store (cross-game window only); no supabase import; selection is pure functions not store state | Accepted | LOW |
 | ADR-0006: Move Annotation Rendering | replay arrows/eval reuse Move Annotation Display; neutral semantics, no re-coloring | Accepted | LOW |
 
-> **BLOCKED until ADR-0014 Accepted** (an Accepted ADR is required before stories leave Blocked, per
-> `docs/CLAUDE.md`). story-011 is the acceptance + live-migration gate (mirrors Journal story-007 /
-> ADR-0013). Implement data + logic stories against the Proposed ADR in parallel where they need no
-> live table (pure F1/F2/F4/F5 are testable without the DB); persistence verification waits on the gate.
+> **ADR-0014 Accepted 2026-06-20** — story-011 acceptance + live-migration gate PASSED (migration applied
+> via Dashboard SQL Editor; anon REST probe GET 200 `[]` / POST 401 `42501`; mirrors Journal story-007 /
+> ADR-0013). All stories unblocked. *(Historical: data + logic stories were implemented against the Proposed
+> ADR in parallel where they needed no live table — pure F1/F2/F4/F5 are testable without the DB; live
+> persistence verification was what waited on this gate.)*
 
 ## GDD Requirements (AC → Story map)
 

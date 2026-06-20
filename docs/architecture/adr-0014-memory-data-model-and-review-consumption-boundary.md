@@ -2,13 +2,17 @@
 
 ## Status
 
-Proposed
+Accepted
 
+> **Accepted 2026-06-20**: `memory_summaries` migration (`supabase/migrations/20260828000000_create_memory_summaries.sql`)
+> applied to live DB (`vfnzekqtvxhewifnmtnz`) via Dashboard SQL Editor. Verified by anon REST probe:
+> `GET …/memory_summaries?select=*&limit=1` → HTTP 200 `[]`; unauthenticated POST → HTTP 401 `42501`
+> (RLS enforced). `UNIQUE(user_id, game_id)` + `schema_version integer` + `summary jsonb` per §1 spec.
+> Unblocks the live-persistence halves of 棋憶 stories 001/004/007/010.
+>
 > **Proposed 2026-06-18**: authored after the `design/gdd/memory.md` design-review (round 2 lean
-> APPROVED, log `design/gdd/reviews/memory-review-log.md`). Blocks 棋憶 (#22) implementation
-> stories until Accepted (an Accepted ADR is required before stories can leave Blocked, per
-> `docs/CLAUDE.md`). Acceptance gate = the `memory_summaries` migration applied to live DB +
-> anon REST verified (mirrors ADR-0013's acceptance flow).
+> APPROVED, log `design/gdd/reviews/memory-review-log.md`). Acceptance gate = the `memory_summaries`
+> migration applied to live DB + anon REST verified (mirrors ADR-0013's acceptance flow).
 
 ## Date
 
@@ -368,8 +372,8 @@ successful schema.
 
 ## Validation Criteria
 
-- [ ] `memory_summaries` exists on the live DB; anon REST probe returns HTTP 200 `[]`; unauthenticated
-  insert returns `42501`.
+- [x] `memory_summaries` exists on the live DB; anon REST probe returns HTTP 200 `[]`; unauthenticated
+  insert returns `42501`. *(Verified 2026-06-20.)*
 - [ ] Inserting the same `(user_id, game_id)` twice yields exactly one row (`ON CONFLICT DO NOTHING`).
 - [ ] Guest writes N summaries → login → cloud row count == `|distinct game_id|`; every local
   `game_id` present in cloud.

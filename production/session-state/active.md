@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: Phase 2 ① — 課程長在你自己的棋上（棋憶 / Memory）
-Task: **棋憶 epic 已切完，進入實作**。GDD APPROVED=`design/gdd/memory.md`(#22)。**已產出（2026-06-18）**：`ADR-0014`（memory 資料模型 + #7 唯讀消費邊界，**Proposed**；A 方案=game_sessions 加欄 已否決，採 B=獨立 `memory_summaries` 表比照 journal/ADR-0013，訪客 localStorage→登入 union reconcile）、`production/epics/memory/EPIC.md`、**11 張 story（001…011，全 Ready）**、`TR-memory-001…011` 進 tr-registry、index 更新。**進度：純邏輯層 002–005 全部實作完（`src/modules/memory/{selection,derive,stage,summary,cross-game,templates}.ts` + `src/lib/memory/persona-lint.ts` + `src/config/memory-config.ts` + `src/types/memory.ts`，39 unit tests 綠、app typecheck 0；尚未 commit）。** 002=F1 選取（含導出 `gatedCandidates` 給 F4 pre-cap stageCounts）；003=F2 E_white + F5 stage；004=F4 buildGameSummary + pickNeveLine（improving>recurring>neutral、無 weak-stage）；005=F3/F4 模板（`renderMoment`/`renderNeveLine`）+ `lintNeve`（重用 journal `lintBody` 的 emoji/象棋詞 house 規則 + 加 你想/blunder/錯/恭喜）。ponytail：F2-2 `favorableSwing` 不另抽；F3 每概念單句（不做多變體 bank，repetition 再說）。**Neve 文案已過 Eason 一輪回饋（下法→棋風；F3 改白話「把{棋子}移到 {格}」非 SAN；bright 點名棋子）。F3 的 move token＝`MoveDesc{piece(中文),to(格)}` + 漏子的 hungPiece/hungSquare，由 view 層 007/008 組裝後餵 `renderMoment`。** **story-001 資料層完成**：`supabase/migrations/20260828000000_create_memory_summaries.sql`（timestamp 改 828 避撞 Gambit-noir 的 user_preferences 827）+ data-sync 4 方法（load/append/readLocal/flushMemoryQueue，mirror journal、ON CONFLICT user_id,game_id、schema_version 過濾、訪客 union reconcile）+ `useMemoryStore`（load/recordGame/neveLine/reconcileOnLogin）。**全層 55 tests 綠（純邏輯 39 + data-sync-memory 12 + memory-store 4）、app typecheck 0。** ⏸ `reconcileOnLogin` 的 App.vue userId watch 接線**延到 007**（消費者上線才接，否則空轉）。**下一步序：006（UX spec doc）→007（dashboard，接 recordGame + App.vue 接線）/008/009→010→011**。**已跑 `/ponytail-review`（砍未用 ANIM_*，-5 行）+ `/code-review` high 多-agent（修 `readLocalMemorySummaries`→`Object.keys` 對齊 journal、cross-game 過時註解；駁回 force-include 誤報＝anchor+bright≤2<MAX）→ commit + push origin main。下一步：006 UX spec doc。**鐵則：純邏輯(002–005)對 Proposed ADR 即可開工；**story-011=ADR-0014 Accepted+live migration 閘**（解 001/010 的 live 驗證 + 007 的 recordGame）；**story-006 UX spec(fix#5) 須 /ux-review APPROVED 才動 007/008**；story-010 補 `journal.md` 回指棋憶（#21 per-game pen 屬 Phase 2，若未上線只先接 deep-link target）。ADR/epic/stories/demo/GDD 皆**尚未 push**。
+Task: 棋憶 (#22) UI — **006–011 全部完成**（**尚未 commit/push**，全在 working tree）。logic+persistence 早已上線（`a3caa1d`）。**驗證**：app typecheck 0、`npm run build` 綠、`vitest run` **804 passed/80 files**、路由 e2e（spa-deep-link/journal）chromium 8/8。**011 gate PASSED 2026-06-20**：Eason 手動套 migration、anon REST probe GET 200 `[]`／POST 401 `42501` → **ADR-0014 Accepted**、README(8 表)/EPIC/index 已更新、evidence `memory-migration-gate.md` 記錄。**OQ-R1 Accepted（Eason 2026-06-20）**：敗局 anchor 中性「轉折點」◆＋金 accent 條、不戴星。**視覺驗證 PASSED 2026-06-20**（dev server + Playwright seed 一盤含 turning-point+plain 重點時刻的完局，截 dashboard/replay/slideshow 三畫面：DOM 序對、Neve 深青卡、走勢圖、◆ 金邊、**Replay Wood12 木盤無 lichess 深盤漏**、slideshow 比較欄+中性 Neve）。**抓到並修兩個單元測試漏掉的 bug**：①**設計 token 不解析**——SVG/inline 用 `var(--danger)`/`var(--surface-card)` 等原始名，但 app 是 Tailwind v4 `--color-*` → 全 fallback 黑；已把 4 元件（EvalShapeChart/ReplayEvalChart/MomentList/MomentCard）改 `--color-*`（`--accent-text`→`--color-gold-dark`）。②**回顧態把失誤講成讚美**——turning-point（anchor 收斂成 kind='bright'）跑了 bright 模板「你穩住了…拿回主導權」；已在 MemorySlideshow 用 `templateKind` 讓 turning-point 改用中性 plain 模板。修後 typecheck 0、vitest 804 綠。（驗證用的 dev seam 已還原、截圖已清。）**架構決定**：`/review` 維持單一 route → 新 `MemoryView.vue`（owns 單一 usePostGameReview ⇒ analysis 跑一次/AC-14；內部 mode='dashboard|slideshow|replay' + History API 淺堆疊，瀏覽器返回 pop 到 dashboard/GDD Rule 2；provide `MEMORY_CONTEXT` 給三子視圖）。舊 `ReviewView.vue` 已刪→`MemoryReplay.vue`（009）；signpost 測試已遷 `memory-replay-signpost.test.ts`。**新檔**：`src/views/MemoryView.vue` + `src/components/memory/{memory-context.ts,MemoryDashboard,NeveCard,EvalShapeChart,MomentList,EmptyMemory,MemoryReplay,ReplayEvalChart,MemorySlideshow,MomentCard,DotBand}.vue` + `src/modules/memory/{describe,choreography}.ts` + config（零態文案/動畫 timing）+ 測試（describe/choreography/moment-card/eval-charts/replay-signpost/deeplink）+ evidence docs（slideshow/replay/migration-gate）。journal GDD 已加棋憶回指（Rule 23）。**剩餘**：①**只剩 iPhone 實機手感**（畫面長相已代驗）——008 動畫節奏（OQ-2 650/380/700/520ms）、觸控左右滑換時刻、減少動態下跳結局態的手感（evidence docs 已列 checklist）。②**010 `?gameId` 載任意局 + 棋誌 entry tap→棋憶**＝待 #21 per-game ② pen（Phase 2）出現 caller 再接（YAGNI；`?ply` target 已就緒）。③注意 **Gambit-noir 平行 worktree** 共用同 origin，migration timestamp 已避（memory 828 vs noir 827）。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 還沒固化的 in-flight 決策。**長期鐵則/技術參考一律在 CLAUDE.md 體系**（見下方「接手必讀」），這裡不複述；已完成施工細節在 git。
@@ -28,7 +28,7 @@ Task: **棋憶 epic 已切完，進入實作**。GDD APPROVED=`design/gdd/memory
 **三階（鐵律：一次蓋一塊磚，每塊能單獨上線、單獨證明靈魂）：**
 
 - **Phase 1 — 棋誌**（心臟）：✅ **已完成上線**（001~007 ＋ 004 全覽UI ＋ 005 peek/未讀）。
-- **Phase 2 — 課程長在你自己的棋上（①）**：最大護城河。賽後檢討棋盤＝入口（**真棋盤已做**），下一步＝「重點回播」redesign（見待辦）。
+- **Phase 2 — 課程長在你自己的棋上（①＝棋憶 #22）**：最大護城河。賽後檢討棋盤＝入口（真棋盤已做）。**logic+persistence 已上線（a3caa1d），剩 UI 006–011（見 STATUS / 待辦）。**
 - **Phase 3 — 沉浸感 ＋ 旅程 IA**：等心臟＋引擎好了再包。
 - **商業模式**（訂閱／付費深度／BYOK）＝最後，有體驗＋用戶再說。
 
@@ -43,8 +43,8 @@ Task: **棋憶 epic 已切完，進入實作**。GDD APPROVED=`design/gdd/memory
 ## 現況（產品已全線可用）
 
 - **核心動線**：對局 → 賽後檢討 → 課程 / 試煉，Google OAuth + 跨裝置同步。
-- **測試**：vue-tsc 0、vitest **730 passed**。Supabase 6 張表到位，**無待套 migration**。
-- **已完成里程碑**（細節在 git）：試煉道場 #19、學習迴圈 #20、課程四階 21 課、UI Redesign Phase 0–4、Google OAuth 遷移、訪客 local-first + 續玩、棋誌 Phase 1、賽後檢討真棋盤 + 全站棋盤主題統一。
+- **測試**：vue-tsc 0、vitest 綠（棋憶 +55；全套總數以實跑為準，勿照抄舊數字）。Supabase **live 7 張表**；**`memory_summaries`（第 8 張）migration 待套**（story-011 上 live + flip ADR-0014）。
+- **已完成里程碑**（細節在 git）：試煉道場 #19、學習迴圈 #20、課程四階 21 課、UI Redesign Phase 0–4、Google OAuth 遷移、訪客 local-first + 續玩、棋誌 Phase 1、賽後檢討真棋盤 + 全站棋盤主題統一、**棋憶 #22 logic+persistence（UI 待做）**。
 
 ---
 
@@ -52,25 +52,7 @@ Task: **棋憶 epic 已切完，進入實作**。GDD APPROVED=`design/gdd/memory
 
 ### Phase 2（深化方向）
 
-> ✅ **2026-06-18：棋憶 GDD 已落成＝`design/gdd/memory.md`（系統 #22）+ 已過 design-review（MAJOR REVISION 已套，log 見 `reviews/memory-review-log.md`）。** 下方 demo 迭代 v1→v9 紀錄＝設計決策來源，已被 GDD 取代；接手看 GDD + STATUS 即可，這段保留只為追溯 demo 決策脈絡。
-
-- 🆕 **賽後檢討「重點回播」redesign**（Eason 構想＝Phase 2 ① 的 UX）：不逐手翻，只 **highlight 3-5 個關鍵時刻**（重用既有 cpLoss/最大轉折/`classify()`＝篩選+呈現非新邏輯，且只看關鍵手＝更平靜、對上「寧少勿濫」）。每時刻顯示**戰術名 + 你的步 vs 最佳步差異**，Neve **模板 per mistake-concept** 解釋（零 AI）；v2＝任意局面自由解釋（AI/BYOK，最後）。**咬合**：每個被點出的時刻＝一筆棋誌（②/③），review＝②蘇格拉底教學。⚠️ 大改 `ReviewView` 互動模型，依鐵則先 `/design-review`→拍板→才施工。
-  - **可重用料（現成在 `ReviewView.vue` / `modules/learning-loop`）**：`computeCpLoss`、`biggestSwingCursor`、`classify()`（已產 concept）、`mistakeSignposts`、`selectMistakeSignposts`。棋盤＝剛上線的 `PgnViewer`。
-  - **本 session 已提案、待 Eason 拍板的決策**：① 時刻怎麼選（推薦：玩家手依 deep cpLoss 排序、取有 concept 或大 swing 的前 3-5；是否也放 1 個「漂亮的一手」②未定）② 逐手瀏覽（推薦保留為次要 toggle，不丟現有 nav）③ Neve 講解＝每 mistake-concept 一個模板「我看到你想…，這裡…更好，因為…」④ eval bar / 棋譜列在重點回播模式收掉（平靜），逐手模式才出現 ⑤ 棋誌咬合先做 UI、寫入留一張 story。
-  - ✅ **可點 demo＝`design/demos/highlight-replay-demo.html`（已迭代到 v2，過 Playwright 驗證 6 畫面）**。本機開：`cd design/demos && python -m http.server` → 瀏覽器 `localhost:8000/highlight-replay-demo.html`（file:// 被 Playwright 擋，直接拖進瀏覽器也行）。
-  - **已迭代到 v5，落實四輪 Eason 回饋（2026-06-17）**。結構：**dashboard-first**——第一頁＝Memory dashboard（**頂塊已拿掉**，只留：三時刻可點列表＋**Neve 跨對局質化觀察**＋逐手覆盤入口）→ 點時刻進**幻燈片**（動畫重現：走你那手→0.42s→移回→0.26s→走正確手；好手則帶出對手被迫回應如騎士被趕回 b6）→ **逐手覆盤**（滿版棋盤＋eval bar＋棋譜＋上下一步**動畫滑動非瞬移**，含吃子/易位）。上下一步在**牌卡底列**；「你走了 ┃ 更好的是」同字級只用顏色分；選時刻三類＝戰術相關＋整局最關鍵一手＋無戰術轉折；**Neve 文案＝「你」主詞主動語氣、不臆測意圖**。
-  - **跨對局統計＝確定走質化版（不靠 AI）**：Eason 認可。做法＝每盤標階段(開局/中局/殘局)+concept→跨盤累積統計→**規則挑最強趨勢+模板填數**出 Neve 一句觀察（非評分條、非 rating 曲線，守住「棋誌不是數據」護欄）。量化能力分數版**不做**。
-  - **棋子/棋盤/棋譜樣式 demo 不擬真**——實作時套既有 Wood12+Gioco Wood+PgnViewer（CLAUDE.md 視覺 SoT）。
-  - **棋誌↔回顧 模型已確認**：點棋誌那一筆即開此回顧；一盤必存一筆（與是否點開無關，故 dashboard 不放「已存入」動作提示）。
-  - **v6（第五輪）再調**：動畫每步間隔再拉長；逐手覆盤併進三時刻那組（虛線安靜列，去孤兒感）。
-  - **v7（第六輪）**：①第一手起步前停頓加長 ②**自刻 SVG eval 折線圖**（不裝圖表庫，守「整包框架不裝」護欄），放棋憶 dashboard 頂部滿版。
-  - **v8→v9（第七輪定版）＝拆兩條路線＋Neve 升級**：① 清單回到 **ICON＋顏色**（不用編號，Eason 偏好）② **拆兩條路線**：整張 eval 走勢圖＝**逐手覆盤入口**（整圖點擊，手機好點，不靠小圓點；圖上三個重點時刻仍以小色點標示、與清單同色）；**重點時刻**走下面的清單卡（點卡→該時刻）③ **Neve 升級**為醒目**深青卡＋頭像＋文楷**（套 persona 視覺嗓音）、**移到最上當開場**（Eason 覺得原本被輕視）。dashboard 定版順序＝**Neve（深青卡）→ 整局走勢(圖→逐手覆盤) → 重點時刻(清單)**。圖拉高 104px、白/黑優標籤移左側加底襯不被曲線壓。**棋憶 demo 至此 Eason 認可、暫告段落**（下一步：要動工時開 `design/gdd/memory.md` GDD→/design-review→切 stories）。
-  - **✅ 命名定案＝「棋憶」**（諧音記憶、呼應 Neve 記得你；UI 全繁中規則查證屬實，英文只給 GAMBIT 字標）。功能＝棋憶；內含「重點時刻」（幻燈片）＋「逐手覆盤」。demo 已全面更名。
-  - **✅ Neve 語氣＋視覺嗓音已固化進 `design/gambit-design-system/persona-neve.md`**：(1)「回顧態」register＋撰寫補充（你-主詞、主動、不臆測意圖、濃縮、失誤中性、好手不反射讚美、無戰術轉折 prefer-silence）；(2)「Neve 視覺嗓音」段——**全站 Neve 第一人稱的話統一 `font-lesson` 文楷＋頭像容器**建立識別，**Cubic 11 只當小 NEVE 名牌**、內文不排（點陣字長句難讀＋8-bit 感悖平靜人格）。Eason 已拍板採此方案（否決「全 Neve 用 Cubic 11」）。
-  - **🔑 重點時刻「生成邏輯」（Eason 問，要進 GDD Formulas/Tuning）**：**數量不固定**（非永遠 3）——上限 ~5、下限可為 1，門檻 gate（cpLoss < 閾值不選）、寧少勿濫（穩盤就少、不灌水）。候選來自三源：①戰術相關＝`classify()` 命中 concept（material/mate；日後 fork/pin…）②整局最關鍵一手＝最大 swing（anchor）＋玩家的亮點/好手 ③無 concept 的大 swing（prefer-silence）。排序＝cpLoss 大小為主、concept 命中加權；去重（相鄰手取大者）；幻燈片**依手數順序**呈現、最大 swing 標 anchor。每盤再各時刻標**階段**（開局/中局/殘局，由手數+子力數判定）→ 餵跨對局質化統計。**全程零 AI**（Stockfish cpLoss + classify 規則 + 模板）。
-  - **✅ 累積數字的家＝棋誌頁，不是棋憶 dashboard**（Eason 2026-06-17 拍板）：全站走過的累積（Neve 記得 N 盤／棋誌 N 則／同行 N 天）放**棋誌頁**（＝既有 `JournalView`，Phase 1 已上線）當頂部累積區，呼應 vision「回頭重讀一本越來越厚的書」。棋憶 dashboard 保持**單盤聚焦、平靜**，不放全站數字（試過一版已移除）。→ **棋誌頁累積頭部＝未來獨立增強**，非本次棋憶 GDD 範圍；要做再單獨 mock。
-  - **🔑 剩餘待拍板**：動畫快慢是否 OK（已把第一手起步前停頓加長到 650ms）。棋憶 dashboard 內容大致定（Neve 觀察＋三時刻＋逐手覆盤）。
-  - 拍板後 → 寫進 `design/gdd/post-game-review.md`（或新 `memory.md`）→ `/design-review` → 切 stories。**demo 尚未 push**。
+- **棋憶（#22）— logic+persistence 已上線（`a3caa1d`），剩 UI 006–011。** 完整細節在 STATUS 區塊 + `production/epics/memory/`（EPIC + story-001…011）+ GDD `design/gdd/memory.md` + ADR-0014。設計 SoT＝approved demo `design/demos/highlight-replay-demo.html`（v9，七輪定版，dashboard 順序：Neve 深青卡 → 整局走勢圖(→逐手覆盤) → 重點時刻清單）；Neve 回顧態語氣＋視覺嗓音＋白話走法已固化在 `persona-neve.md`；重點時刻生成邏輯/階段判定/跨局質化觀察＝全寫進 GDD Formulas 且已實作。**全站累積數字（Neve 記得 N 盤／棋誌 N 則／同行 N 天）的家＝棋誌頁 `JournalView`，非棋憶 dashboard**——未來獨立增強（GDD Downstream 已記），不在本次範圍。
 - **概念側門廢除 + 概念深化頁**：廢除「概念→課程側門」（`ConceptMapView` 戰術卡 `?from=concept` alias 到課程），概念改成「單一戰術主題的深化＝課程加深版」（自有 `steps`、共享 LessonView 渲染器吃不同資料）。**整包做**（只拆側門會留破洞）。牽連 `LessonView` `fromConcept` 分支、`lesson-progress` `markSideLearned`、`concept-progress` store、`data-sync` `lesson_side_learned`、概念地圖雙色點。**保留**賽後檢討 signpost（`ReviewView` `?from=lesson`→試煉）。**已做**：移除課程完成卡練習邀請 CTA。
 
 ### 待 Eason iPhone 實機複看（皆已修/已 push）
