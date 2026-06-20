@@ -96,6 +96,18 @@
   升變），故待能實機測升變再移除。
 - **`recommend.ts` 的 `recommended()`**：有測試/文件、與 candidates/practiceTarget 成套的保留 API，刻意不刪。
 
+## 手寫 `var()` 顏色 token（SVG / inline-style 前先讀）
+
+- **手寫 SVG `fill`/`stroke` 或 inline `:style` 的顏色，用 `var(--color-*)`**（Tailwind v4 `@theme`，定義在
+  `src/assets/main.css`）——**不是** design system `colors_and_type.css` 的原始名（`--danger`、
+  `--surface-card`、`--ink-muted`、`--accent`、`--accent-text`…）。那些原始 token **沒載進 runtime**，
+  `var(--danger)` 解析失敗會 **fallback 成黑**（圖表線、label 底板、icon、accent 全黑）。
+- 對照：`--danger`→`--color-danger`、`--surface-card`→`--color-surface-card`、`--ink-muted`→`--color-ink-muted`、
+  `--accent`→`--color-accent`、**金字 `--accent-text`(#8F6200)→`--color-gold-dark`**。
+- Tailwind class（`text-danger`、`bg-surface-card`、`border-line`…）正常解析，**只有手寫 `var()` 會踩**。
+- **單元測試驗不到**：`expect(style).toContain('var(--danger)')` 只驗屬性「含」字串、不驗「解析」——
+  2026-06-20 棋憶圖表/卡片 4 個元件全黑就是這個，靠 dev-server 截圖才抓到。手寫 token 後**截圖驗一次**。
+
 ## Forbidden Patterns
 
 - [None configured yet — add as architectural decisions are made]
