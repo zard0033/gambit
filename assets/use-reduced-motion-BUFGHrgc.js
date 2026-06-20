@@ -1,1 +1,0 @@
-import{A as e,Z as t,k as n}from"./chess-board-kt08SF6R.js";function r(){let r=t(!1),i=null;function a(e){r.value=e.matches}return n(()=>{typeof window>`u`||(i=window.matchMedia(`(prefers-reduced-motion: reduce)`),r.value=i.matches,i.addEventListener(`change`,a))}),e(()=>{i?.removeEventListener(`change`,a)}),{prefersReducedMotion:r}}export{r as t};
