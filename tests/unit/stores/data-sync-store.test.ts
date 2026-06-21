@@ -349,26 +349,26 @@ describe('useDataSyncStore', () => {
     })
   })
 
-  // ── lesson_side_learned (Concept-tab side-door, Learning Loop #20) ──────
+  // ── concept_deepened (concept deepening page) ───────────────────────────
 
-  describe('loadSideLearned', () => {
+  describe('loadDeepenedConcepts', () => {
     it('returns [] when logged out without touching supabase', async () => {
       const store = useDataSyncStore()
-      expect(await store.loadSideLearned()).toEqual([])
+      expect(await store.loadDeepenedConcepts()).toEqual([])
       expect(supabase.from).not.toHaveBeenCalled()
     })
 
-    it('maps rows to lesson_id strings when logged in', async () => {
+    it('maps rows to concept_id strings when logged in', async () => {
       const selectFn = vi.fn().mockResolvedValueOnce({
-        data: [{ lesson_id: 'pin' }, { lesson_id: 'skewer' }],
+        data: [{ concept_id: 'pin' }, { concept_id: 'skewer' }],
         error: null,
       })
       vi.mocked(supabase.from).mockReturnValueOnce({ select: selectFn } as never)
       useAuthStore().userId = 'uid-1'
 
       const store = useDataSyncStore()
-      expect(await store.loadSideLearned()).toEqual(['pin', 'skewer'])
-      expect(supabase.from).toHaveBeenCalledWith('lesson_side_learned')
+      expect(await store.loadDeepenedConcepts()).toEqual(['pin', 'skewer'])
+      expect(supabase.from).toHaveBeenCalledWith('concept_deepened')
     })
 
     it('returns [] on error (degrades to local cache)', async () => {
@@ -377,34 +377,34 @@ describe('useDataSyncStore', () => {
       useAuthStore().userId = 'uid-1'
 
       const store = useDataSyncStore()
-      expect(await store.loadSideLearned()).toEqual([])
+      expect(await store.loadDeepenedConcepts()).toEqual([])
     })
   })
 
-  describe('upsertSideLearned', () => {
+  describe('upsertDeepenedConcepts', () => {
     it('no-ops (false) when logged out', async () => {
       const store = useDataSyncStore()
-      expect(await store.upsertSideLearned(['pin'])).toBe(false)
+      expect(await store.upsertDeepenedConcepts(['pin'])).toBe(false)
       expect(supabase.from).not.toHaveBeenCalled()
     })
 
     it('no-ops (false) for an empty id list', async () => {
       useAuthStore().userId = 'uid-1'
       const store = useDataSyncStore()
-      expect(await store.upsertSideLearned([])).toBe(false)
+      expect(await store.upsertDeepenedConcepts([])).toBe(false)
       expect(supabase.from).not.toHaveBeenCalled()
     })
 
-    it('upserts user-scoped rows to lesson_side_learned and returns true', async () => {
+    it('upserts user-scoped rows to concept_deepened and returns true', async () => {
       const upsertFn = vi.fn().mockResolvedValueOnce({ error: null })
       vi.mocked(supabase.from).mockReturnValueOnce({ upsert: upsertFn } as never)
       useAuthStore().userId = 'uid-1'
 
       const store = useDataSyncStore()
-      expect(await store.upsertSideLearned(['pin'])).toBe(true)
-      expect(supabase.from).toHaveBeenCalledWith('lesson_side_learned')
+      expect(await store.upsertDeepenedConcepts(['pin'])).toBe(true)
+      expect(supabase.from).toHaveBeenCalledWith('concept_deepened')
       const [rows] = upsertFn.mock.calls[0]
-      expect(rows).toEqual([{ user_id: 'uid-1', lesson_id: 'pin' }])
+      expect(rows).toEqual([{ user_id: 'uid-1', concept_id: 'pin' }])
     })
   })
 

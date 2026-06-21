@@ -12,10 +12,11 @@ import ConceptMapView from '@/views/ConceptMapView.vue'
 import { puzzles } from '@/data/puzzles'
 import { conceptToMotifs } from '@/data/concepts'
 
-// Concept Map — additive redesign (quick-spec concept-tab-tactic-entry). The page is BOTH a calm
-// reflection (已學/已練, lesson-only never「未達成」) AND a by-tactic learning entry: every tile is
-// tappable and side-doors into its lesson (`?from=concept`). Seeds localStorage BEFORE mount so the
-// progress stores hydrate deterministically.
+// Concept Map — deepening redesign (quick-spec concept-deepening-page). The page is BOTH a calm
+// reflection (已學/已練, lesson-only never「未達成」) AND a door to go deeper: every tile is tappable
+// and opens its DEEPENING page (`/learn/concept/:id`) — the old `?from=concept` lesson side-door is
+// gone. Deepening completion is a quiet text state (深入 ›/重溫 ›), not a third coloured dot.
+// Seeds localStorage BEFORE mount so the progress stores hydrate deterministically.
 
 function makeRouter() {
   return createRouter({
@@ -24,18 +25,20 @@ function makeRouter() {
       { path: '/', component: { template: '<div/>' } },
       { path: '/learn', component: { template: '<div/>' } },
       { path: '/learn/concepts', component: ConceptMapView },
+      { path: '/learn/concept/:conceptId', component: { template: '<div/>' } },
       { path: '/learn/:lessonId', component: { template: '<div/>' } },
       { path: '/dungeon/:puzzleId', component: { template: '<div/>' } },
     ],
   })
 }
 
-function seed(opts: { lessons?: string[]; sideLearned?: string[]; solved?: string[] } = {}) {
-  localStorage.setItem(
-    'pgr:lessons:progress',
-    JSON.stringify({ completed: opts.lessons ?? [], sideLearned: opts.sideLearned ?? [] }),
-  )
+function seed(opts: { lessons?: string[]; solved?: string[]; deepened?: string[] } = {}) {
+  localStorage.setItem('pgr:lessons:progress', JSON.stringify({ completed: opts.lessons ?? [] }))
   localStorage.setItem('pgr:dungeon:progress', JSON.stringify({ solved: opts.solved ?? [], hinted: [] }))
+  localStorage.setItem(
+    'pgr:concept:practice',
+    JSON.stringify({ practiceSolved: [], deepened: opts.deepened ?? [] }),
+  )
 }
 
 async function mountAt() {
@@ -67,7 +70,8 @@ describe('ConceptMapView', () => {
     expect(w.findAll('[data-testid="concept-tile-lit"]')).toHaveLength(0)
     expect(w.findAll('[data-testid="concept-tile-dormant"]').length).toBe(8)
     expect(w.text()).not.toContain('未達成')
-    // No practice entry anywhere on this page (removed by design).
+    // Every tile offers the deepening door (深入), never a practice CTA.
+    expect(w.findAll('[data-testid="concept-tile-deepen"]').length).toBe(8)
     expect(w.find('[data-testid="concept-practise-cta"]').exists()).toBe(false)
   })
 
@@ -77,22 +81,20 @@ describe('ConceptMapView', () => {
     // Act
     const { wrapper: w } = await mountAt()
     const forkTile = tileWithText(w, 'concept-tile-lit', '捉雙')
-    // Assert: 已學 chip present, 已練 absent, no practice CTA.
+    // Assert: 已學 chip present, 已練 absent.
     expect(forkTile).toBeTruthy()
     expect(forkTile.find('.legend-learned').exists()).toBe(true)
     expect(forkTile.find('.legend-practiced').exists()).toBe(false)
-    expect(forkTile.find('[data-testid="concept-practise-cta"]').exists()).toBe(false)
   })
 
-  it('test_conceptMap_sideLearnedConcept_litViaSideDoorSignal', async () => {
-    // Arrange: pin learned ONLY through the Concept side-door (sideLearned, not linear completion).
-    seed({ sideLearned: ['pin'] })
+  it('test_conceptMap_learnedReadsLinearCompletionOnly', async () => {
+    // Arrange: nothing completed linearly — 已學 must NOT light (the sideLearned union was removed).
+    seed()
     // Act
     const { wrapper: w } = await mountAt()
-    const pinTile = tileWithText(w, 'concept-tile-lit', '牽制')
-    // Assert: the side-door signal lights 已學.
-    expect(pinTile).toBeTruthy()
-    expect(pinTile.find('.legend-learned').exists()).toBe(true)
+    // Assert: no concept lights up from a phantom side-door signal; every tile sits dormant.
+    expect(w.findAll('[data-testid="concept-tile-lit"]').length).toBe(0)
+    expect(w.find('[data-concept="pin"]').attributes('data-testid')).toBe('concept-tile-dormant')
   })
 
   it('test_conceptMap_practicedConcept_showsBothChips', async () => {
@@ -121,15 +123,25 @@ describe('ConceptMapView', () => {
     expect(w.text()).not.toContain('未達成')
   })
 
-  it('test_conceptMap_tapTile_sideDoorsIntoLessonWithFromConcept', async () => {
-    // Arrange: nothing done — pick a dormant tile (捉雙 / fork → lesson id `fork`).
+  it('test_conceptMap_tapTile_opensDeepeningPage', async () => {
+    // Arrange: nothing done — pick a dormant tile (捉雙 / fork).
     seed()
     const { wrapper: w, router } = await mountAt()
     // Act: tap the tile.
     await tileWithText(w, 'concept-tile-dormant', '捉雙').trigger('click')
     await flushPromises()
-    // Assert: navigates to the tactic's lesson via the Concept side-door.
-    expect(router.currentRoute.value.path).toBe('/learn/fork')
-    expect(router.currentRoute.value.query.from).toBe('concept')
+    // Assert: navigates to the tactic's deepening page (no `?from=concept` side-door).
+    expect(router.currentRoute.value.path).toBe('/learn/concept/fork')
+    expect(router.currentRoute.value.query.from).toBeUndefined()
+  })
+
+  it('test_conceptMap_deepenedConcept_showsReturnAffordance', async () => {
+    // Arrange: fork deepened; pin not.
+    seed({ deepened: ['fork'] })
+    const { wrapper: w } = await mountAt()
+    // Assert: deepened tile reads 重溫, un-deepened reads 深入.
+    expect(w.find('[data-concept="fork"]').text()).toContain('重溫')
+    expect(w.find('[data-concept="fork"]').text()).not.toContain('深入')
+    expect(w.find('[data-concept="pin"]').text()).toContain('深入')
   })
 })

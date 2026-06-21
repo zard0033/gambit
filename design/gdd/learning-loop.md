@@ -222,6 +222,12 @@ opt-in, no verdict, not in the default render.
 
 ### 3.5 The Concept Map (loop spine, replaces XP/streak)
 
+> **2026-06-21 重構（supersedes the `?from=concept` side-door of `quick-specs/concept-tab-tactic-entry.md`）**:
+> 每個概念卡不再側門跳進入門課，而是通向該戰術的**深化頁**（`/learn/concept/:conceptId`，更深一層的
+> transfer-focused 迷你課）。入門課留在線性 track；側門/`sideLearned`/`lesson_side_learned` 整套拆除，
+> 已學改只讀線性 `completed`。已學/已練兩訊號不變，深化完成為第三個獨立安靜狀態（卡片「深入/重溫」文字，
+> 非彩點）。詳見 `quick-specs/concept-deepening-page.md`。下文 §3.5 既有條目維持其「平靜反映面」靈魂不變。
+
 - A calm view (route `/learn/concepts` or a Learn panel) showing each concept's standing.
 - **v1 shows 已學 / 已練 only** (§4.2). **Fix (rec 7)**: to avoid checklist/progress anxiety, the Map
   **does not render un-started concepts as「未達成」/待辦**; it surfaces lit concepts and keeps the rest
@@ -234,7 +240,7 @@ opt-in, no verdict, not in the default render.
   ships on 已學/已練 only. If built later, it must be framed neutrally ("最近在你的對局中相關", a discovery
   hook) — never as a「你犯過的錯」history.
 - No streak, timer, leaderboard, points, or XP anywhere (Gambit rule).
-- Each row links to the concept's lesson and drill puzzles (the Map is also a navigation hub).
+- Each row links to the concept's **deepening page** (`/learn/concept/:id`; the Map is the door to go deeper). *(2026-06-21 重構: was「lesson and drill puzzles」side-door — see §3.5 note.)*
 
 ### 3.6 Phasing (recommended landing order)
 

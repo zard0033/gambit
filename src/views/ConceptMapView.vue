@@ -1,11 +1,11 @@
 <script setup lang="ts">
 /**
- * Concept Map (Learning Loop #20). Two jobs, additive (GDD §3.5 + quick-spec concept-tab-tactic-entry):
+ * Concept Map (Learning Loop #20). Two jobs, additive (GDD §3.5 + quick-spec concept-deepening-page):
  *  1. A calm REFLECTION of which tactics you've met (已學) and drilled (已練) — no score, no ranking,
  *     un-started tactics kept visually quiet, never「未達成」.
- *  2. A by-tactic LEARNING ENTRY: tapping any tactic opens its lesson via the Concept side-door
- *     (`?from=concept`), so a non-beginner can jump straight to a tactic even if it's linearly locked.
- *     The side-door lights 已學 through a separate signal and never advances linear progress (D1 pattern).
+ *  2. A door to GO DEEPER: tapping any tactic opens its deepening page (`/learn/concept/:id`) — a
+ *     transfer-focused mini-course. Deepening completion is a quiet text state (深入 ›/重溫 ›), never a
+ *     third coloured dot. (Replaces the old `?from=concept` lesson side-door, now decommissioned.)
  *
  * No practice (試煉) entry lives here on purpose: one tactic maps to many puzzles, so there is no single
  * right target. Practice stays in the lesson-completion Bridge-1 invitation and the Dungeon.
@@ -13,7 +13,7 @@
 import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ChevronRight } from 'lucide-vue-next'
-import { concepts, getConceptById } from '@/data/concepts'
+import { concepts } from '@/data/concepts'
 import type { ChessConcept } from '@/types/concept'
 import { learned, practiced } from '@/modules/learning-loop/mastery'
 import { puzzles } from '@/data/puzzles'
@@ -67,13 +67,13 @@ interface ConceptVM {
   lit: boolean
   isLearned: boolean
   isPracticed: boolean
-  lessonId: string | undefined
+  isDeepened: boolean
 }
 
 const allVM = computed<ConceptVM[]>(() =>
   concepts.map((c) => {
-    // 已學 reads the union of linear completion AND Concept-tab side-door learns (store.isLearned).
-    const isLearned = learned(c.id, (id) => lessonProgress.isLearned(id))
+    // 已學 reads linear lesson completion only (the side-door / sideLearned union was removed).
+    const isLearned = learned(c.id, (id) => lessonProgress.isCompleted(id))
     const isPracticed = practiced(c.id, puzzles, isSolved)
     return {
       id: c.id,
@@ -83,7 +83,7 @@ const allVM = computed<ConceptVM[]>(() =>
       lit: isLearned || isPracticed,
       isLearned,
       isPracticed,
-      lessonId: getConceptById(c.id)?.teaches[0],
+      isDeepened: conceptProgress.isDeepened(c.id),
     }
   }),
 )
@@ -97,9 +97,9 @@ const conceptsByGroup = computed(() =>
   })),
 )
 
-// Tap-to-learn: open the tactic's lesson via the Concept side-door (bypasses the linear lock).
-function learnConcept(v: ConceptVM): void {
-  if (v.lessonId) router.push(`/learn/${v.lessonId}?from=concept`)
+// Tap-to-deepen: open the tactic's deepening page (always available; no lock to bypass).
+function deepenConcept(v: ConceptVM): void {
+  router.push(`/learn/concept/${v.id}`)
 }
 
 const base = import.meta.env.BASE_URL
@@ -130,8 +130,8 @@ const maskStyle = (piece: string) => ({
             :data-testid="v.lit ? 'concept-tile-lit' : 'concept-tile-dormant'"
             :data-concept="v.id"
             class="glass-panel relative flex min-h-[72px] flex-row items-center gap-3 overflow-hidden rounded-2xl p-3 text-left transition-colors hover:bg-white/[0.14] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
-            :aria-label="`學習「${v.label}」`"
-            @click="learnConcept(v)"
+            :aria-label="`深入「${v.label}」`"
+            @click="deepenConcept(v)"
           >
             <span
               v-if="v.id === focusId"
@@ -157,7 +157,13 @@ const maskStyle = (piece: string) => ({
               </div>
               <div class="mt-0.5 truncate font-sans text-[10px] text-ink-faint">{{ v.blurb }}</div>
             </div>
-            <ChevronRight v-if="!v.lit" :size="16" :stroke-width="2" class="shrink-0 text-ink-faint" aria-hidden="true" />
+            <span
+              class="flex shrink-0 items-center gap-0.5 self-center font-sans text-[11px] text-ink-faint"
+              :data-testid="v.isDeepened ? 'concept-tile-deepened' : 'concept-tile-deepen'"
+            >
+              {{ v.isDeepened ? '重溫' : '深入' }}
+              <ChevronRight :size="14" :stroke-width="2" aria-hidden="true" />
+            </span>
           </button>
         </div>
       </section>

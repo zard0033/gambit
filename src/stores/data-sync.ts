@@ -318,31 +318,31 @@ export const useDataSyncStore = defineStore('dataSync', () => {
   }
 
   /**
-   * Fetch the user's Concept side-door learns. Returns [] when not logged in or on error
-   * (degrades to the local cache; a read failure must never surface). Kept separate from
-   * lesson_progress so side-door learns never leak into linear unlock. ADR-0011.
+   * Fetch the concepts the user has deepened (concept deepening page). Returns [] when not logged
+   * in or on error (degrades to the local cache; a read failure must never surface). Kept separate
+   * from lesson_progress — deepening is its own quiet state, never feeds linear unlock. ADR-0011.
    */
-  async function loadSideLearned(): Promise<string[]> {
+  async function loadDeepenedConcepts(): Promise<string[]> {
     const authStore = useAuthStore()
     if (!authStore.userId) return []
-    const { data, error } = await supabase.from('lesson_side_learned').select('lesson_id')
+    const { data, error } = await supabase.from('concept_deepened').select('concept_id')
     if (error) return []
-    return (data ?? []).map((r) => r.lesson_id as string)
+    return (data ?? []).map((r) => r.concept_id as string)
   }
 
   /**
-   * Idempotently persist Concept side-door learns for the logged-in user. No-op (returns false)
-   * when not logged in — the caller keeps them in localStorage and re-flushes on the next login.
-   * Learning is monotonic, so duplicates are ignored by the PK.
+   * Idempotently persist deepened concepts for the logged-in user. No-op (returns false) when not
+   * logged in — the caller keeps them in localStorage and re-flushes on the next login. Deepening is
+   * monotonic, so duplicates are ignored by the PK.
    */
-  async function upsertSideLearned(lessonIds: string[]): Promise<boolean> {
+  async function upsertDeepenedConcepts(conceptIds: string[]): Promise<boolean> {
     const authStore = useAuthStore()
     const userId = authStore.userId
-    if (!userId || lessonIds.length === 0) return false
-    const rows = lessonIds.map((lesson_id) => ({ user_id: userId, lesson_id }))
+    if (!userId || conceptIds.length === 0) return false
+    const rows = conceptIds.map((concept_id) => ({ user_id: userId, concept_id }))
     const { error } = await supabase
-      .from('lesson_side_learned')
-      .upsert(rows, { onConflict: 'user_id,lesson_id', ignoreDuplicates: true })
+      .from('concept_deepened')
+      .upsert(rows, { onConflict: 'user_id,concept_id', ignoreDuplicates: true })
     return !error
   }
 
@@ -691,8 +691,8 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     deleteResumeGame,
     loadLessonProgress,
     upsertLessonProgress,
-    loadSideLearned,
-    upsertSideLearned,
+    loadDeepenedConcepts,
+    upsertDeepenedConcepts,
     loadDungeonProgress,
     upsertDungeonProgress,
     loadJournalEntries,

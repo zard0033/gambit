@@ -56,6 +56,10 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 > `isCheckmate()`、子力交換逐步推算、確認 expectedMove／solution 是客觀最佳解、局面
 > 真的匹配要教的概念。2026-06-14 一次審出 10 處「合法但棋理錯」（假將殺、升變送子變和棋、
 > 加防守者範例、釘后概念不成立等），全數 chess.js 驗證後才修。
+> **chess.js + 手動實證仍驗不出「對手有反駁」**（戰術根本不成立）：批次新增教學內容
+> （`data/lessons/*`、`data/puzzles/*`、`data/concept-deepening/*`）後，**加跑一次對抗式棋理審查**
+> （多 agent 各自找反駁）。2026-06-21 概念深化頁就靠它抓到 2 個 chess.js 全綠、卻被 `Qe8`／`Kxd8`
+> 反殺、白方反丟子的「假戰術」——單元測試與人工逐步推算都漏了。
 
 > **內容授權護欄**：lichess 題庫位置／解法＝CC0，可商用直接採；lila／chessops／Learn 課文
 > ＝copyleft（**禁抄**），教學文一律繁中 clean-room 自寫；棋子 Gioco Wood＝CC BY-NC-SA 4.0

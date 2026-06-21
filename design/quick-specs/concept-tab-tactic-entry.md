@@ -1,3 +1,5 @@
+> ⚠️ **SUPERSEDED 2026-06-21 by `quick-specs/concept-deepening-page.md`** — 本文描述的 `?from=concept` 側門（`sideLearned`/`markSideLearned`/`from=concept` 進入豁免、已學＝completed ∪ sideLearned 聯集）**已整套拆除**，改為概念深化頁（`/learn/concept/:conceptId` + `concept_deepened`）。下方 §3/§6/§7/§8 的施工指示已失效，**請勿照做**。保留本檔僅作設計史紀錄。
+
 # 概念頁改版 — 在熟悉度地圖上加「按戰術切入學習」（加法版）
 
 > **性質**：功能增補（additive，**不是**重新定義）。在 GDD §3.5 既有的熟悉度地圖上，新增 tap-to-learn 入口。**不改寫 §2 Player Fantasy**（保留「平靜的反映面」定位）。

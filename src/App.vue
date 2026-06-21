@@ -6,6 +6,7 @@ import { useDataSyncStore } from '@/stores/data-sync'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
 import { useDungeonProgressStore } from '@/stores/dungeon-progress'
 import { useResumeGameStore } from '@/stores/resume-game'
+import { useConceptProgressStore } from '@/stores/concept-progress'
 import { useJournalStore } from '@/stores/journal'
 import { useUiStore } from '@/stores/ui-store'
 import type { PendingGame } from '@/stores/ui-store'
@@ -17,6 +18,7 @@ const dataSyncStore = useDataSyncStore()
 const lessonProgressStore = useLessonProgressStore()
 const dungeonProgressStore = useDungeonProgressStore()
 const resumeGameStore = useResumeGameStore()
+const conceptProgressStore = useConceptProgressStore()
 const journalStore = useJournalStore()
 const uiStore = useUiStore()
 const route = useRoute()
@@ -43,7 +45,7 @@ const isLearnPager = computed(() => route.path === '/learn' || route.path === '/
 // remount。learn/concepts 共用同一 LearnPager 實例（分頁滑動不可重繪），固定同一 key。其餘維持每路由一實例。
 const routeKey = computed(() => {
   const n = route.name as string
-  if (n === 'puzzle' || n === 'lesson' || n === 'replay') return route.fullPath
+  if (n === 'puzzle' || n === 'lesson' || n === 'replay' || n === 'concept-deepen') return route.fullPath
   if (n === 'learn' || n === 'concepts') return 'learn-pager'
   return n
 })
@@ -72,6 +74,7 @@ watch(() => authStore.userId, (userId) => {
     lessonProgressStore.reconcileOnLogin()
     dungeonProgressStore.reconcileOnLogin()
     resumeGameStore.reconcileOnLogin()
+    conceptProgressStore.reconcileOnLogin()
     journalStore.reconcileOnLogin()
   }
 }, { immediate: true })

@@ -49,7 +49,8 @@ own rows — no separate insert policy needed. Row existence = the monotonic fac
 | `skill_scores` | 20260821000001 | append-only skill snapshot per game |
 | `lesson_progress` | 20260822000000 | `(user_id, lesson_id)` completed set |
 | `dungeon_progress` | 20260823000000 | puzzle solved set |
-| `lesson_side_learned` | 20260824000000 | concept side-door learned set |
+| `lesson_side_learned` | 20260824000000 | concept side-door learned set. **DEPRECATED 2026-06-21** — side-door decommissioned (superseded by `concept_deepened`); table kept (not dropped) but no longer read/written. |
 | `in_progress_game` | 20260825000000 | resume-in-progress game |
 | `journal_entries` | 20260826000000 | **棋誌** (ADR-0013) — append-only Neve entries. **Idempotency is event-level `UNIQUE(user_id, source_ref_id)`** (NOT row-UUID — that does not survive guest→login reconcile). `type` is `text` (NOT enum) so Phase 2 pens need no migration. Applied + RLS-verified 2026-06-16. |
 | `memory_summaries` | 20260828000000 | **棋憶** (ADR-0014) — one durable per-game summary feeding the F4 cross-game line (NOT a moment cache). Event-level `UNIQUE(user_id, game_id)` (`ON CONFLICT DO NOTHING`); `schema_version int` lets F4 ignore incompatible rows; `summary jsonb`; `game_id text` (no FK — guest games have no `game_sessions` row). Applied + RLS-verified 2026-06-20. |
+| `concept_deepened` | 20260829000000 | **概念深化** (quick-spec concept-deepening-page) — `(user_id, concept_id)` deepened set. Separate quiet signal, never feeds linear unlock (replaces `lesson_side_learned`). Owner-scoped RLS. ⏳ **migration 待 Eason 手動套 + gate**（timestamp 829 避開 noir 827／memory 828）。 |

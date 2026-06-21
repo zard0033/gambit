@@ -8,20 +8,16 @@ const STORAGE_KEY = 'pgr:lessons:progress'
 
 interface ProgressShape {
   completed: string[]
-  // Lessons learned out-of-order via the Concept tab's side-door (Learning Loop #20). Kept SEPARATE
-  // from `completed` on purpose — mirrors the dungeon's practice-vs-solved split (GDD §3.2 D1): a
-  // side-door learn lights the Concept Map's 已學 but must NOT feed `isUnlocked` / linear progression.
-  sideLearned?: string[]
 }
 
-/** Read a persisted string[] field from STORAGE_KEY. Corrupt/absent → []; progress must never throw. */
-function loadField(field: 'completed' | 'sideLearned'): string[] {
+/** Read the persisted completed[] from STORAGE_KEY. Corrupt/absent → []; progress must never throw. */
+function loadCompleted(): string[] {
   if (typeof localStorage === 'undefined') return []
   const raw = localStorage.getItem(STORAGE_KEY)
   if (!raw) return []
   try {
     const parsed = JSON.parse(raw) as ProgressShape
-    const arr = parsed?.[field]
+    const arr = parsed?.completed
     if (!Array.isArray(arr)) return []
     return arr.filter((id): id is string => typeof id === 'string')
   } catch {
@@ -36,39 +32,16 @@ function loadField(field: 'completed' | 'sideLearned'): string[] {
  * Completion is monotonic, so reconciliation is a union — local and cloud never conflict.
  */
 export const useLessonProgressStore = defineStore('lessonProgress', () => {
-  const completed = ref<Set<string>>(new Set(loadField('completed')))
-  // Side-door learns (Concept tab). localStorage-only for now; not yet cloud-synced.
-  const sideLearned = ref<Set<string>>(new Set(loadField('sideLearned')))
+  const completed = ref<Set<string>>(new Set(loadCompleted()))
 
   function persist(): void {
     if (typeof localStorage === 'undefined') return
-    const payload: ProgressShape = {
-      completed: [...completed.value],
-      sideLearned: [...sideLearned.value],
-    }
+    const payload: ProgressShape = { completed: [...completed.value] }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
   }
 
   function isCompleted(id: string): boolean {
     return completed.value.has(id)
-  }
-
-  /**
-   * 已學 for the Concept Map: completed linearly OR learned via the Concept tab side-door. This is the
-   * union that lights the map; `isUnlocked` deliberately does NOT consult `sideLearned` (no leak).
-   */
-  function isLearned(id: string): boolean {
-    return completed.value.has(id) || sideLearned.value.has(id)
-  }
-
-  /** Record a side-door learn. No-op if already completed linearly (that's the stronger state). */
-  function markSideLearned(id: string): void {
-    if (completed.value.has(id) || sideLearned.value.has(id)) return
-    sideLearned.value.add(id)
-    sideLearned.value = new Set(sideLearned.value)
-    persist()
-    // Best-effort cloud write; no-ops when logged out (re-flushed on next login).
-    void useDataSyncStore().upsertSideLearned([id])
   }
 
   function markComplete(id: string): void {
@@ -80,13 +53,9 @@ export const useLessonProgressStore = defineStore('lessonProgress', () => {
     void useDataSyncStore().upsertLessonProgress([id])
   }
 
-  /** Pull cloud completions + side-door learns into the local sets (union). Called on login. */
+  /** Pull cloud completions into the local set (union). Called on login. */
   async function syncFromCloud(): Promise<void> {
-    const dataSync = useDataSyncStore()
-    const [cloudCompleted, cloudSideLearned] = await Promise.all([
-      dataSync.loadLessonProgress(),
-      dataSync.loadSideLearned(),
-    ])
+    const cloudCompleted = await useDataSyncStore().loadLessonProgress()
     let changed = false
     for (const id of cloudCompleted) {
       if (!completed.value.has(id)) {
@@ -94,31 +63,16 @@ export const useLessonProgressStore = defineStore('lessonProgress', () => {
         changed = true
       }
     }
-    // A side-door learn that has since been completed linearly is redundant — skip it.
-    for (const id of cloudSideLearned) {
-      if (!completed.value.has(id) && !sideLearned.value.has(id)) {
-        sideLearned.value.add(id)
-        changed = true
-      }
-    }
     if (changed) {
       completed.value = new Set(completed.value)
-      sideLearned.value = new Set(sideLearned.value)
       persist()
     }
   }
 
-  /**
-   * Reconcile local and cloud on login: push local-only completions + side-door learns up,
-   * then pull cloud-only ones down. Wire to the App.vue userId watch.
-   */
+  /** Reconcile local and cloud on login: push local-only completions up, then pull cloud-only down. */
   async function reconcileOnLogin(): Promise<void> {
-    const dataSync = useDataSyncStore()
     if (completed.value.size > 0) {
-      await dataSync.upsertLessonProgress([...completed.value])
-    }
-    if (sideLearned.value.size > 0) {
-      await dataSync.upsertSideLearned([...sideLearned.value])
+      await useDataSyncStore().upsertLessonProgress([...completed.value])
     }
     await syncFromCloud()
   }
@@ -146,11 +100,8 @@ export const useLessonProgressStore = defineStore('lessonProgress', () => {
 
   return {
     completed,
-    sideLearned,
     isCompleted,
-    isLearned,
     markComplete,
-    markSideLearned,
     isUnlocked,
     reconcileOnLogin,
     completedCount,
