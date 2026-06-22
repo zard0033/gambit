@@ -80,7 +80,12 @@ const isTerminal = computed(() => normalized.value.evalMateNorm === 0)
 
 // ---- Arrow geometry ----
 
-const squarePx = computed(() => (props.boardSizePx ?? 400) / 8)
+// Shaft thickness from the real cg-board square (squareToRect), not boardSizePx/8 — boardSizePx is
+// the cg-wrap width and over-states the square by a few px. Fallback to wrap/8 when no rect (Replay).
+const squarePx = computed(() => {
+  void resizeVersion.value // recompute when the board resizes
+  return props.squareToRect('a1')?.width ?? (props.boardSizePx ?? 400) / 8
+})
 
 function squareCenter(square: string): { x: number; y: number } | null {
   const rect = props.squareToRect(square)

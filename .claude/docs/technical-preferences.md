@@ -85,8 +85,11 @@
 - **桌機棋盤過大 root cause**：vue3-chessboard `.main-wrap` 被釘 `width:700px`。解＝board wrapper 加 `board-fit`
   ＋ scoped `.board-fit :deep(.main-wrap){width:100%!important;max-width:100%!important;height:auto!important}`。
   PlayView/Review/Replay 遇過大套同一 fix。
-- **annotation 高亮/箭頭 vs 格子 2–4px 偏移**（polish 後續）：MoveAnnotationDisplay 用 cg-wrap（536px）算格子，
-  但實際 cg-board 531.2px、左偏 ~5px → 改用 `elements.board` 尺寸＋原點。牽涉全站箭頭/標註，需獨立驗證。
+- **annotation 高亮/箭頭 vs 格子偏移（已修，2026-06-22）**：位置幾何在源頭 `chess-board.vue::squareToRect`
+  已改用**真實 cg-board `getBoundingClientRect()` 尺寸 ＋ 相對 cg-wrap 原點**（`br.left-wr.left, br.top-wr.top`），
+  三個消費端（對局/課程、賽後檢討、回放）共用此修正過的 `squareToRect`，端點/高亮本就對齊格子。
+  `move-annotation-display.vue` 的 `squarePx`（只用於箭頭桿粗、不影響位置）也已從 cg-wrap/8 對齊到真實格子尺寸
+  `squareToRect('a1').width` 並補 resize 反應。若日後又見偏移，root cause 在 `chess-board.vue::squareToRect` 或消費端傳錯 `squareToRect`，不在 overlay 元件。
 
 ## Deferred Cleanups（刻意保留、勿移除）
 
