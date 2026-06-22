@@ -131,4 +131,28 @@ test.describe('Journal overview (/journal)', () => {
       page.getByText(/^我們同行 \d+ 天了，我記得你的 3 盤棋，也為你寫下了 3 篇。$/),
     ).toBeVisible()
   })
+
+  // memory GDD Rule 23: a game-linked entry (solace) taps into that game's 棋憶; milestones don't.
+  test('test_journal_solace_entry_taps_into_its_game_memory', async ({ page }) => {
+    await page.addInitScript(() => {
+      // The game behind the solace entry (SEED solace sourceRefId === 'game-1'), so 棋憶 loads it.
+      const game = {
+        id: 'game-1',
+        moves: ['e2e4', 'e7e5', 'g1f3', 'b8c6', 'f1c4', 'g8f6'],
+        result: '0-1', playerColor: 'white', endReason: 'resignation',
+        aiSkillLevel: 5, completedAt: Date.now(), playerMoveTimes: [1000], isTerminal: true,
+      }
+      localStorage.setItem('chess:unsynced:game-1', JSON.stringify(game))
+    })
+    await openJournal(page, { seed: SEED })
+
+    // Only the solace entry is interactive (onset/arrival are milestones, not game-linked).
+    const linked = page.locator('.journal-card[role="button"]')
+    await expect(linked).toHaveCount(1)
+    await expect(linked).toContainText('回到那盤')
+    await linked.click()
+
+    await expect(page).toHaveURL(/\/review\?gameId=game-1/)
+    await expect(page.getByRole('heading', { name: '棋憶' })).toBeVisible({ timeout: 15000 })
+  })
 })

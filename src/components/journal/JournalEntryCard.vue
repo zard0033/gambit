@@ -1,8 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { ChevronRight } from 'lucide-vue-next'
 import type { JournalEntry, Volume } from '@/types/journal'
 
 const props = withDefaults(defineProps<{ entry: JournalEntry; index?: number; unread?: boolean }>(), { index: 0, unread: false })
+
+const router = useRouter()
+
+// 綁單一對局的筆（solace，sourceRefId＝那盤 game_sessions id）→ 可點，跳那盤棋憶。
+// 里程碑筆（onset/arrival）不綁對局 → 不可點（memory GDD Rule 23 + Eason 2026-06-22）。
+const gameId = computed(() => (props.entry.type === 'solace' ? props.entry.sourceRefId : null))
+function openMemory(): void {
+  if (gameId.value) router.push({ name: 'review', query: { gameId: gameId.value } })
+}
 
 // 抵達筆＝旅程章節里程碑：卡上加一條章節小標（時間軸 IA 下，卷只當里程碑、不當歸屬桶）。
 const VOLUME_LABEL: Record<Volume, string> = {
@@ -22,7 +33,17 @@ const riseDelay = computed(() => `${Math.min(props.index * 70, 320)}ms`)
 </script>
 
 <template>
-  <article class="journal-card rounded-card px-5 py-[18px]" :style="{ animationDelay: riseDelay }">
+  <article
+    class="journal-card rounded-card px-5 py-[18px] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
+    :class="{ 'journal-card--linked': gameId }"
+    :style="{ animationDelay: riseDelay }"
+    :role="gameId ? 'button' : undefined"
+    :tabindex="gameId ? 0 : undefined"
+    :aria-label="gameId ? '回到這盤棋的棋憶' : undefined"
+    @click="openMemory"
+    @keydown.enter.prevent="openMemory"
+    @keydown.space.prevent="openMemory"
+  >
     <div
       v-if="milestone"
       class="mb-2.5 flex items-center justify-center gap-2.5 font-display text-[13px] tracking-[0.06em] text-primary-dark"
@@ -33,6 +54,7 @@ const riseDelay = computed(() => `${Math.min(props.index * 70, 320)}ms`)
       <span v-if="unread" class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#7EBEA5]/60" data-testid="journal-unread-dot" aria-hidden="true" />{{ dateLabel }}
     </p>
     <p class="journal-body font-lesson text-[17px] leading-[1.9] text-ink">{{ entry.body }}</p>
+    <p v-if="gameId" class="mt-2.5 flex items-center justify-end gap-0.5 font-sans text-[13px] text-ink-muted">回到那盤<ChevronRight :size="14" :stroke-width="1.8" aria-hidden="true" /></p>
   </article>
 </template>
 
@@ -50,6 +72,10 @@ const riseDelay = computed(() => `${Math.min(props.index * 70, 320)}ms`)
 }
 /* CJK 不可斜體（假斜扭曲字形）— 顯式鎖正體。 */
 .journal-body { font-style: normal; }
+
+/* 綁對局的筆＝可點回那盤棋憶；hover 只動 border-color（不動 box-shadow，守動效鐵則）。 */
+.journal-card--linked { cursor: pointer; transition: border-color 150ms ease; }
+.journal-card--linked:hover { border-color: #d8c4a0; }
 
 @keyframes card-rise { to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
