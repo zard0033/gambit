@@ -1,7 +1,7 @@
 # Story 008: Moment Slideshow — animated re-play + move comparison + reduced-motion
 
 > **Epic**: memory
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Feature — Phase 2 Differentiation ① — Visual/Feel
 > **Type**: Visual/Feel (animation choreography + move-comparison UI)
 > **Estimate**: L (6 hours)

@@ -1,7 +1,7 @@
 # Story 011: ADR-0014 Accepted + `memory_summaries` Live Migration Gate
 
 > **Epic**: memory
-> **Status**: Ready (run when story-001 DDL exists and persistence is ready to verify)
+> **Status**: Done — gate PASSED 2026-06-20, ADR-0014 Accepted
 > **Layer**: Feature — Phase 2 Differentiation ① — Config/Process
 > **Type**: Config/Data (release gate — live migration + ADR acceptance)
 > **Estimate**: S (1–2 hours)

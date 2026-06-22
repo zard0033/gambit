@@ -1,7 +1,7 @@
 # Story 007: 棋憶 Dashboard View — Neve card → shape-of-game eval → moment list + zero-state
 
 > **Epic**: memory
-> **Status**: Ready (⚠️ `recordGame` live persistence verification gated on story-011)
+> **Status**: Done
 > **Layer**: Feature — Phase 2 Differentiation ① — UI
 > **Type**: UI (dashboard view, composes #7 + memory module)
 > **Estimate**: L (5–6 hours)

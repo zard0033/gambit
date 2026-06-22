@@ -1,7 +1,7 @@
 # Story 009: Move-by-Move Replay — reuse shipped PgnViewer + eval cursor + move list
 
 > **Epic**: memory
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Feature — Phase 2 Differentiation ① — UI
 > **Type**: UI (dense replay surface, reuses game-replay PgnViewer)
 > **Estimate**: M (4–5 hours)

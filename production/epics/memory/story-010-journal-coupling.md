@@ -1,7 +1,7 @@
 # Story 010: 棋誌 Coupling — one entry per game + (gameId, ply) deep-link
 
 > **Epic**: memory
-> **Status**: Ready (⚠️ live integration verification gated on story-011)
+> **Status**: Done — Shipped 2026-06-22 (slice A: `66e17ae`, slice B: `b3ca459`)
 > **Layer**: Feature — Phase 2 Differentiation ① — Integration
 > **Type**: Integration (cross-system: 棋憶 ↔ 棋誌 #21)
 > **Estimate**: M (3–4 hours)

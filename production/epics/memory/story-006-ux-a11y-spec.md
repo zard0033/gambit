@@ -1,7 +1,7 @@
 # Story 006: UX / a11y Spec (fix #5) — two doors, color-blind, reduced-motion, keyboard, back-nav
 
 > **Epic**: memory
-> **Status**: Ready
+> **Status**: Done
 > **Layer**: Feature — Phase 2 Differentiation ① — UI (spec authoring)
 > **Type**: UI (UX spec doc — gates the view stories)
 > **Estimate**: M (3–4 hours)

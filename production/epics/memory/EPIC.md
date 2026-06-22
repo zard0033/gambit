@@ -4,7 +4,7 @@
 > **GDD**: design/gdd/memory.md (Approved 2026-06-18, round 2 lean — review log `design/gdd/reviews/memory-review-log.md`)
 > **Architecture Module**: `memory_summaries` table + `useDataSyncStore` memory methods + `useMemoryStore` (cross-game window) + `src/modules/memory/*` (pure F1/F2/F4/F5 + templates) + 棋憶 dashboard/slideshow views + move-by-move replay (reuses shipped PgnViewer); read-only consumer of `usePostGameReview` (#7)
 > **Status**: ADR-0014 **Accepted** 2026-06-20 (story-011 gate PASSED: migration live + anon REST probe 200/401). 001–005 shipped (`a3caa1d`); UI 006–010 implemented + unit-green 2026-06-20. Remaining = browser/iPhone visual sign-off (manual).
-> **Stories**: story-001…011 created 2026-06-18 (see table below) — all **Ready**; recommended start order 002 → 003 (pure, zero-dep) → 005 → 004 → 001 → 006 → 007 → 008/009 → 010 → 011
+> **Stories**: story-001…011 created 2026-06-18 (see table below) — all **Done** ✅; recommended start order 002 → 003 (pure, zero-dep) → 005 → 004 → 001 → 006 → 007 → 008/009 → 010 → 011
 
 ## Overview
 
