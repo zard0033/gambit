@@ -215,6 +215,45 @@ describe('usePostGameReview — Rule 14: time budget cuts Pass 2', () => {
   })
 })
 
+// ---- AC-5: analysis cache restore (localStorage) ----
+
+/** Minimal in-memory Storage so a cache written by one review instance is read by the next. */
+function makeMemStorage(): Storage {
+  const m = new Map<string, string>()
+  return {
+    get length() { return m.size },
+    clear: () => m.clear(),
+    getItem: (k: string) => (m.has(k) ? m.get(k)! : null),
+    setItem: (k: string, v: string) => { m.set(k, v) },
+    removeItem: (k: string) => { m.delete(k) },
+    key: (i: number) => Array.from(m.keys())[i] ?? null,
+  } as Storage
+}
+
+describe('usePostGameReview — AC-5: analysis cache restore', () => {
+  beforeEach(() => { vi.useFakeTimers() })
+  afterEach(() => { vi.useRealTimers() })
+
+  it('test_reopen_restoresCachedAnalysis_skipsReanalysis', async () => {
+    const storage = makeMemStorage()
+    const game = makeGame(['e2e4', 'e7e5'])
+
+    const first = makeInstantAnalyzeFn()
+    const r1 = usePostGameReview({ storage })
+    await r1.init(game, first.fn)
+    expect(first.calls.length).toBeGreaterThan(0)
+    await vi.advanceTimersByTimeAsync(600) // fire the debounced flush
+
+    // A fresh instance (= re-open after a PWA restart) must restore, not re-run the engine.
+    const second = makeInstantAnalyzeFn()
+    const r2 = usePostGameReview({ storage })
+    await r2.init(game, second.fn)
+
+    expect(second.calls).toHaveLength(0)
+    expect(r2.phase.value).toBe('COMPLETE')
+  })
+})
+
 // ---- AC-27: N=0 (zero-move game) ----
 
 describe('usePostGameReview — AC-27: N=0 zero-move game', () => {

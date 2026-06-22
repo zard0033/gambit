@@ -133,4 +133,14 @@ defineExpose({ getViewer: () => viewer, toPly, getCurrentPly, setBestArrow })
   width: 100%;
   min-height: 44px;
 }
+
+/* lichess-pgn-viewer sizes its board column off 100vh (a desktop "fit the viewport height" assumption).
+   On a tall, narrow phone 100vh is far wider than the viewport, so the board overflows the container
+   badly. Force the stacked single-column layout (board → controls → move list) with the board capped to
+   the wrapper width. :deep reaches the .lpv the library mounts inside our wrapper via JS. */
+.pgn-viewer-wrapper :deep(.lpv) {
+  grid-template-areas: 'board' 'controls' 'side';
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto var(--controls-height) minmax(0, auto);
+}
 </style>

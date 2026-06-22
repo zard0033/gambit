@@ -45,9 +45,9 @@ function makeRouter() {
   })
 }
 
-/** Seed deep analysis into sessionStorage so init() restores COMPLETE without running the engine. */
+/** Seed deep analysis into the localStorage cache so init() restores COMPLETE without the engine. */
 function seedAnalysis(entries: Entry[]) {
-  sessionStorage.setItem(`pgr:analysis:${COMPLETED_AT}`, JSON.stringify(entries))
+  localStorage.setItem(`pgr:analysis:v1:${COMPLETED_AT}`, JSON.stringify(entries))
 }
 
 function setGame(moves: string[]) {
@@ -69,7 +69,7 @@ async function mountReplay() {
 
 beforeEach(() => {
   setActivePinia(createPinia())
-  sessionStorage.clear()
+  localStorage.clear()
 })
 
 describe('MemoryReplay — Bridge 3 signpost (AC-9b)', () => {

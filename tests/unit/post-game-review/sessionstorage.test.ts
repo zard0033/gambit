@@ -1,5 +1,6 @@
 /**
- * Unit tests for sessionStorage persistence in usePostGameReview.
+ * Unit tests for the analysis-cache persistence in usePostGameReview (now localStorage-backed so the
+ * cache survives PWA restarts; tests inject an in-memory Storage so the backend is irrelevant here).
  * Story: post-game-review/story-004-sessionstorage
  * AC-1..AC-5
  */
@@ -60,7 +61,7 @@ describe('sessionStorage — AC-1: key format', () => {
     await new Promise(r => setTimeout(r, 600))
 
     const keys = [...Array(storage.length)].map((_, i) => storage.key(i))
-    expect(keys).toContain('pgr:analysis:1716900000000')
+    expect(keys).toContain('pgr:analysis:v1:1716900000000')
   })
 })
 
@@ -81,7 +82,7 @@ describe('sessionStorage — AC-2: pv stripped', () => {
     // Advance fake timers to fire the 500ms debounce
     await vi.runAllTimersAsync()
 
-    const saved = storage.getItem('pgr:analysis:1716900000000')
+    const saved = storage.getItem('pgr:analysis:v1:1716900000000')
     expect(saved).not.toBeNull()
 
     const parsed = JSON.parse(saved!) as Record<string, unknown>[]
@@ -100,7 +101,7 @@ describe('sessionStorage — AC-2: pv stripped', () => {
     await review.init(game, makeInstantFn())
     await vi.runAllTimersAsync()
 
-    const saved = storage.getItem('pgr:analysis:1716900000000')
+    const saved = storage.getItem('pgr:analysis:v1:1716900000000')
     const parsed = JSON.parse(saved!) as Record<string, unknown>[]
     const record = parsed.find(r => r !== null)!
     expect(record).toHaveProperty('bestMove')
@@ -132,8 +133,10 @@ describe('sessionStorage — AC-3: debounced writes', () => {
     // Fire the debounce timer
     await vi.runAllTimersAsync()
 
-    // After timer: exactly 1 setItem call for the coalesced result
-    expect(setItemSpy).toHaveBeenCalledTimes(1)
+    // After timer: the data key is written exactly once (coalesced). The cache index is also written
+    // once per flush, so assert on the data key specifically rather than the total setItem count.
+    const dataWrites = setItemSpy.mock.calls.filter((c) => c[0] === 'pgr:analysis:v1:1716900000000')
+    expect(dataWrites).toHaveLength(1)
   })
 })
 
@@ -175,7 +178,7 @@ describe('sessionStorage — AC-5: restore on remount', () => {
     await new Promise(r => setTimeout(r, 600))
 
     // Verify storage has data
-    const saved = storage.getItem('pgr:analysis:1716900000000')
+    const saved = storage.getItem('pgr:analysis:v1:1716900000000')
     expect(saved).not.toBeNull()
 
     // Second session: should restore from storage

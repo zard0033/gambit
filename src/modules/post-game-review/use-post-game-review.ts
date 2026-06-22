@@ -45,6 +45,17 @@ export interface PostGameReviewDeps {
 /** Persisted form of StoredAnalysisEntry — pv stripped to save space. */
 export type PersistedResult = Omit<StoredAnalysisEntry, 'pv'>
 
+// ---- Analysis cache (localStorage) ----
+// The per-ply analysis is cached so re-opening a game's 棋憶 skips re-analysis (AC-5). It lives in
+// localStorage (survives PWA restarts) — sessionStorage was cleared on every cold start, so iOS users
+// re-analyzed on every visit. Versioned so an engine-tuning change invalidates stale caches (mirrors
+// MEMORY_SUMMARY_SCHEMA_VERSION); FIFO-capped so our own footprint stays bounded (≤ cap games). A write
+// that still hits quota (from other localStorage usage) degrades gracefully — it does not reclaim space.
+const ANALYSIS_CACHE_VERSION = 1
+const ANALYSIS_CACHE_MAX_GAMES = 30
+const ANALYSIS_KEY_PREFIX = `pgr:analysis:v${ANALYSIS_CACHE_VERSION}:`
+const ANALYSIS_INDEX_KEY = `pgr:analysis:index:v${ANALYSIS_CACHE_VERSION}`
+
 // ---- FEN sequence builder ----
 
 /**
@@ -176,14 +187,32 @@ export function usePostGameReview(deps?: PostGameReviewDeps) {
   const _completedGame = shallowRef<CompletedGame | null>(null)
   let _fenSequence: string[] = []
 
-  // ---- sessionStorage persistence (S4-05) ----
+  // ---- localStorage persistence: analysis cache (AC-5) ----
 
-  const _storage = deps?.storage ?? (typeof globalThis.sessionStorage !== 'undefined' ? globalThis.sessionStorage : null)
+  const _storage = deps?.storage ?? (typeof globalThis.localStorage !== 'undefined' ? globalThis.localStorage : null)
   const persistenceAvailable = ref(true)
   let _debounceTimer: ReturnType<typeof setTimeout> | null = null
 
   function _storageKey(game: CompletedGame): string {
-    return `pgr:analysis:${game.completedAt.toString()}`
+    return `${ANALYSIS_KEY_PREFIX}${game.completedAt.toString()}`
+  }
+
+  /** FIFO-bound the cache: keep the key index most-recent-last, evicting the oldest beyond the cap. */
+  function _recordInIndex(key: string): void {
+    if (!_storage) return
+    try {
+      const raw = _storage.getItem(ANALYSIS_INDEX_KEY)
+      const idx: string[] = raw ? JSON.parse(raw) : []
+      const next = idx.filter((k) => k !== key)
+      next.push(key)
+      while (next.length > ANALYSIS_CACHE_MAX_GAMES) {
+        const evicted = next.shift()
+        if (evicted) _storage.removeItem(evicted)
+      }
+      _storage.setItem(ANALYSIS_INDEX_KEY, JSON.stringify(next))
+    } catch {
+      // best-effort: a stale index only over-retains, never corrupts a cache hit
+    }
   }
 
   function _flushToStorage(): void {
@@ -191,10 +220,12 @@ export function usePostGameReview(deps?: PostGameReviewDeps) {
     if (_debounceTimer) clearTimeout(_debounceTimer)
     _debounceTimer = setTimeout(() => {
       try {
+        const key = _storageKey(_completedGame.value!)
         const stripped: Array<PersistedResult | null> = analysisResults.value.map(r =>
           r ? { bestMove: r.bestMove, evalCp: r.evalCp, evalMate: r.evalMate, depthReached: r.depthReached, pass: r.pass } : null,
         )
-        _storage!.setItem(_storageKey(_completedGame.value!), JSON.stringify(stripped))
+        _storage!.setItem(key, JSON.stringify(stripped))
+        _recordInIndex(key)
       } catch {
         persistenceAvailable.value = false
       }
@@ -364,7 +395,8 @@ export function usePostGameReview(deps?: PostGameReviewDeps) {
 
     const n = game.moves.length
 
-    // Try restoring prior session; if all results are deep, skip re-analysis (AC-5)
+    // Try restoring prior session; if all results are deep, skip re-analysis (AC-5). A budget-truncated
+    // cache (tail still 'preview' from a Rule 14 cut) fails the all-deep gate and re-runs both passes.
     const restored = _tryRestoreFromStorage(game)
     if (restored && analysisResults.value.length === n && analysisResults.value.every(r => r?.pass === 'deep')) {
       phase.value = 'COMPLETE'

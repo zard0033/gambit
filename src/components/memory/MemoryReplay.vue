@@ -6,6 +6,7 @@
  * review instance from MemoryContext — runs NO analysis itself (ADR-0014).
  */
 import { computed, onMounted, ref, watch } from 'vue'
+import { useBoardFit } from '@/composables/use-board-fit'
 import { RouterLink } from 'vue-router'
 import { ChevronLeft, ChevronRight, Zap } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
@@ -28,6 +29,7 @@ const ctx = useMemoryContext()
 const review = ctx.review
 
 const boardWrapperRef = ref<HTMLElement | null>(null)
+useBoardFit(boardWrapperRef)
 const pgnRef = ref<InstanceType<typeof PgnViewer> | null>(null)
 
 // ---- cpLoss display (reused #7 display contract, Rule 22) ----
@@ -78,10 +80,6 @@ const isMobile = ref(_mq?.matches ?? false)
 function _onMqChange(e: MediaQueryListEvent) { isMobile.value = e.matches }
 if (_mq) _mq.addEventListener('change', _onMqChange)
 
-const currentBestUci = computed<string | null>(() => {
-  const best = review.analysisResults.value[review.cursor.value]?.bestMove
-  return best && best.length >= 4 ? best : null
-})
 const currentEvaluation = computed<EvaluationInput | null>(() => {
   const i = review.cursor.value
   const result = review.analysisResults.value[i]
@@ -92,10 +90,8 @@ const displayEvaluation = computed<EvaluationInput | null>(() => (isMobile.value
 
 function syncBoard(): void {
   pgnRef.value?.toPly(review.cursor.value)
-  pgnRef.value?.setBestArrow(currentBestUci.value)
 }
 watch(() => review.cursor.value, syncBoard)
-watch(currentBestUci, (uci) => pgnRef.value?.setBestArrow(uci))
 function onMoveSelected(): void { review.goTo(pgnRef.value?.getCurrentPly() ?? 0) }
 
 // ---- Biggest swing (anchor) ----

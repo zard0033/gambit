@@ -9,7 +9,7 @@ import type { CompletedGame } from '@/stores/game-store'
  * the view — the caller redirects).
  *
  * `completedAt` is set from `playedAt` so it equals the game's original completedAt — this keeps the
- * analysis cache key (`pgr:analysis:<completedAt>`) and the memory summary game_id consistent with the
+ * analysis cache key (`pgr:analysis:v<n>:<completedAt>`) and the memory summary game_id consistent with the
  * post-game pass, so re-opening a game is idempotent (no duplicate summary).
  */
 export function historyEntryToCompletedGame(entry: GameHistoryEntry): CompletedGame | null {

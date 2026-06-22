@@ -47,12 +47,16 @@ export const OPENING_MATERIAL = 56
  *  AC-3 asserts the rendered copy equals this string and contains none of 做得好/恭喜/完美. */
 export const MEMORY_ZERO_STATE_COPY = '這盤你走得很穩，沒有需要特別停下來看的地方。'
 
+/** Neve's loading-state line (棋憶 analysis still running). First-person present — she is looking at
+ *  this game WITH you while it analyzes (persona-neve §棋憶 loading 態). Calm presence, not a spinner. */
+export const MEMORY_ANALYZING_COPY = '讓我順著你的每一步，慢慢看過這盤。'
+
 // ---- Slideshow animation knobs (story-008; GDD v9 demo-tuned, OQ-2 sit-with-it sign-off) ----
 /** Calm beat before the first move plays. */
-export const ANIM_FIRST_MOVE_PRE_PAUSE_MS = 650
+export const ANIM_FIRST_MOVE_PRE_PAUSE_MS = 900
 /** Per-piece slide duration (slideshow + replay). */
 export const ANIM_MOVE_DURATION_MS = 380
 /** Hold after your move, before moving the piece back. */
-export const ANIM_READ_PAUSE_MS = 700
+export const ANIM_READ_PAUSE_MS = 1200
 /** Hold after moving back, before the better move plays. */
-export const ANIM_BACK_PAUSE_MS = 520
+export const ANIM_BACK_PAUSE_MS = 800
