@@ -9,7 +9,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { ChevronLeft, ChevronRight, Zap } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
-import { useGameStore } from '@/stores/game-store'
 import { classify, selectMistakeSignposts, type ClassifiedMistake } from '@/modules/learning-loop/classify'
 import { candidates } from '@/modules/learning-loop/recommend'
 import { getConceptById } from '@/data/concepts'
@@ -27,7 +26,6 @@ const props = defineProps<{ ply: number }>()
 
 const ctx = useMemoryContext()
 const review = ctx.review
-const gameStore = useGameStore()
 
 const boardWrapperRef = ref<HTMLElement | null>(null)
 const pgnRef = ref<InstanceType<typeof PgnViewer> | null>(null)
@@ -58,7 +56,7 @@ const cpLossDisplay = computed<{ text: string; preliminary: boolean; omit: boole
   if (review.phase.value === 'COMPLETE' && (!curr || !next)) return { text: '—', preliminary: false, omit: false }
   if (review.phase.value === 'ANALYZING' && (!curr || !next)) return { text: '…', preliminary: false, omit: false }
   if (!curr || !next) return { text: '—', preliminary: false, omit: false }
-  const playedMove = gameStore.completedGame?.moves[i]
+  const playedMove = ctx.game.value?.moves[i]
   const bestMove = curr.bestMove
   if (playedMove && bestMove && playedMove.toLowerCase() === bestMove.toLowerCase()) {
     return { text: '', preliminary: false, omit: true }
@@ -119,7 +117,7 @@ function allowedForcedMate(i: number): boolean {
 }
 const mistakeSignposts = computed<Signpost[]>(() => {
   if (review.phase.value !== 'COMPLETE') return []
-  const game = gameStore.completedGame
+  const game = ctx.game.value
   if (!game) return []
   const fens = buildFenSequence([...game.moves])
   const classified: ClassifiedMistake[] = []

@@ -10,7 +10,9 @@ import { ref, computed, onMounted, onUnmounted, provide, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ArrowLeft } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
-import { useGameStore } from '@/stores/game-store'
+import { useGameStore, type CompletedGame } from '@/stores/game-store'
+import { useGameHistoryStore } from '@/stores/game-history'
+import { historyEntryToCompletedGame } from '@/modules/memory/history-game'
 import { useMemoryStore } from '@/stores/memory'
 import { usePostGameReview, buildFenSequence, type StoredAnalysisEntry } from '@/modules/post-game-review/use-post-game-review'
 import { useReviewEngine } from '@/modules/chess-engine/review-engine'
@@ -36,7 +38,10 @@ const engine = useReviewEngine()
 
 const openingResult = ref<OpeningResult | null>(null)
 
-const game = computed(() => gameStore.completedGame)
+// Game under review: a past game loaded by ?gameId (對局紀錄 / 棋誌 entry tap), else the just-finished
+// game in the store (post-game flow). Both feed the same 棋憶.
+const loadedGame = ref<CompletedGame | null>(null)
+const game = computed(() => loadedGame.value ?? gameStore.completedGame)
 const orientation = computed<'white' | 'black'>(() => game.value?.playerColor ?? 'white')
 const pgn = computed<string>(() => {
   if (!game.value) return ''
@@ -158,9 +163,21 @@ const ctx: MemoryContext = {
 provide(MEMORY_CONTEXT, ctx)
 
 // ---- Lifecycle ----
-onMounted(() => {
+onMounted(async () => {
+  // ?gameId (對局紀錄 / 棋誌 entry tap) → load + review that past game; else the just-finished game.
+  const idQ = route.query.gameId
+  if (idQ !== undefined && idQ !== null) {
+    const id = Array.isArray(idQ) ? idQ[0] : idQ
+    const historyStore = useGameHistoryStore()
+    if (historyStore.cacheState !== 'valid') await historyStore.fetchHistory().catch(() => {})
+    // Taps from 對局紀錄 always hit a loaded entry; only a cold deep-link to a game past the first
+    // page (HISTORY_LOAD_LIMIT) or a deleted one misses → loadedGame stays null → redirect below.
+    const entry = historyStore.entries.find((e) => e.id === id)
+    loadedGame.value = entry ? historyEntryToCompletedGame(entry) : null
+  }
+
   const g = game.value
-  if (!g) { router.push('/'); return }
+  if (!g) { router.push(idQ ? '/history' : '/'); return }
   openingResult.value = identifyOpening([...g.moves])
   void memory.load().catch(() => { /* cross-game window best-effort */ })
   window.addEventListener('popstate', onPopState)

@@ -6,9 +6,9 @@ import '@lichess-org/pgn-viewer/dist/lichess-pgn-viewer.css'
 interface Props {
   pgn: string
   orientation?: 'white' | 'black'
-  /** Let pgn-viewer handle arrow-key navigation. ReplayView sets false to own the keyboard. */
+  /** Let pgn-viewer handle arrow-key navigation. MemoryReplay sets false to own the keyboard. */
   keyboardToMove?: boolean
-  /** Show pgn-viewer's built-in control bar. ReplayView sets false and supplies its own. */
+  /** Show pgn-viewer's built-in control bar. MemoryReplay sets false and supplies its own. */
   showControls?: boolean
 }
 

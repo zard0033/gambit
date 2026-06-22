@@ -40,12 +40,12 @@ const fullBleed = computed(() => route.meta.fullBleed === true)
 // 學習 pager（/learn、/learn/concepts）自管高度與內部捲動，main 不可再加底部 nav padding，否則高度溢位。
 const isLearnPager = computed(() => route.path === '/learn' || route.path === '/learn/concepts')
 
-// RouterView key：param 路由（puzzle/lesson/replay）的 setup 只讀 route.params 一次，換 param 時 vue-router
-// 會重用同一 component instance、setup 不重跑（試煉「下一題」換題無反應的主因）。用 fullPath 當 key 強制
-// remount。learn/concepts 共用同一 LearnPager 實例（分頁滑動不可重繪），固定同一 key。其餘維持每路由一實例。
+// RouterView key：param/query 路由（puzzle/lesson/concept-deepen/review-by-gameId）的 setup 只讀一次，
+// 換 param/query 時 vue-router 會重用同一 component instance、setup 不重跑（試煉「下一題」換題無反應的主因）。
+// 用 fullPath 當 key 強制 remount。learn/concepts 共用同一 LearnPager 實例（分頁滑動不可重繪），固定同一 key。
 const routeKey = computed(() => {
   const n = route.name as string
-  if (n === 'puzzle' || n === 'lesson' || n === 'replay' || n === 'concept-deepen') return route.fullPath
+  if (n === 'puzzle' || n === 'lesson' || n === 'review' || n === 'concept-deepen') return route.fullPath
   if (n === 'learn' || n === 'concepts') return 'learn-pager'
   return n
 })

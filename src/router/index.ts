@@ -18,7 +18,6 @@ export const routes = [
   { path: '/review',          name: 'review',    component: () => import('@/views/MemoryView.vue') },
   { path: '/history',         name: 'history',   component: () => import('@/views/HistoryView.vue') },
   { path: '/journal',         name: 'journal',   component: () => import('@/views/JournalView.vue'), meta: { fullBleed: true } },
-  { path: '/replay/:gameId',  name: 'replay',    component: () => import('@/views/ReplayView.vue') },
   { path: '/profile',         name: 'profile',   component: () => import('@/views/ProfileView.vue') },
   { path: '/sign-in',         name: 'sign-in',   component: () => import('@/views/SignInView.vue'), meta: { fullBleed: true } },
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },

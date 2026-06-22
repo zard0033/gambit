@@ -23,7 +23,7 @@ const result = computed(() => RESULT[props.entry.playerResult])
 const colorLabel = computed(() => (props.entry.playerColor === 'white' ? '執白' : '執黑'))
 
 function onRowClick() {
-  router.push({ name: 'replay', params: { gameId: props.entry.id } })
+  router.push({ name: 'review', query: { gameId: props.entry.id } })
 }
 
 function onTouchStart(e: TouchEvent) {
