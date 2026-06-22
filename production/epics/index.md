@@ -1,6 +1,6 @@
 # Epics Index
 
-**Last Updated**: 2026-06-30
+**Last Updated**: 2026-06-22
 **Engine**: Web App — TypeScript 5 · Vue 3 · Vite 5 · vue3-chessboard · stockfish@18.0.7 (SF18 Lite single-threaded, NNUE embedded; ADR-0001 amended 2026-06-02)
 **Manifest Version**: 2026-05-29 (control-manifest.md)
 
@@ -32,8 +32,8 @@
 |------|-------|--------|-----|--------------|---------|--------|
 | [game-replay](game-replay/EPIC.md) | Feature (Phase 2) | ReplayView + review-engine | game-replay.md | ADR-0001/0003/0005 (no new ADR) | 5 stories | **Shipped** (S10 — QA APPROVED 2026-06-02；S10-01…04 done；S10-05 動畫 polish deferred) |
 | [lesson-system](lesson-system/EPIC.md) | Feature (Phase 2) | LearnView + LessonView + useLessonProgressStore | lesson-system.md | ADR-0005 (no new ADR for v0) | 5 stories | **Built** (S01–04 shipped + tested：LearnView/LessonView/progress store/lessons data；S05 內容撰寫 ongoing) |
-| [dungeon-puzzle](dungeon-puzzle/EPIC.md) | Feature (Phase 2) | DungeonMapView + DungeonPuzzleView + useDungeonProgressStore + use-dungeon-puzzle | dungeon-puzzle-mode.md | ADR-0005 (no new ADR for v0) | 6 stories (S13) | **In Design** (GDD Approved 2026-06-05；無 streak；待實作) |
-| [learning-loop](learning-loop/EPIC.md) | Feature (Phase 2 connective) | concept SoT + 3 bridges (lesson↔puzzle↔game) + Concept Map | learning-loop.md | ADR-0012 | Phase A: 4 stories (S14)；B–D 待排 | **GDD Approved (round 2, 2026-06-06)**；Phase A stories 已開（S14-01…04）；D1 側門練習；待實作 |
+| [dungeon-puzzle](dungeon-puzzle/EPIC.md) | Feature (Phase 2) | DungeonMapView + DungeonPuzzleView + useDungeonProgressStore + use-dungeon-puzzle | dungeon-puzzle-mode.md | ADR-0005 (no new ADR for v0) | 7 stories (S13) | **Shipped (core)** — S13-01…05 done (map/solver/store/composable, Playwright-verified)；S13-06 謎題集撰寫 + Home 入口 **Backlog**；S13-07 sync code-complete，migration 待套 live |
+| [learning-loop](learning-loop/EPIC.md) | Feature (Phase 2 connective) | concept SoT + 3 bridges (lesson↔puzzle↔game) + Concept Map | learning-loop.md | ADR-0012 | Phase A: 4 stories (S14)；B–D 待排 | **Phase A Shipped** — S14-01…04 done 2026-06-06（concept SoT + Bridge 1 完成卡 + D1 側門練習，zero dungeon mutation）；Phase B（Bridge 2 + Concept Map）/ C（Bridge 3）/ D 待排 |
 
 ## Phase 1 Differentiation Epics
 
@@ -107,4 +107,4 @@ historical-docs reconciliation (S11-05)；iPhone on-device QA。
   replay-analysis-overlay）已套 Gambit；LearnView 改章節卡片；SignIn 全屏；清 18 個 RPG 貼圖孤兒。
   棋盤/棋子/標註/eval 上游所有未動。536 unit tests 全過。commit 93e48f7 / ef781f9。
 
-**Last Updated**: 2026-06-05
+**Last Updated**: 2026-06-22
