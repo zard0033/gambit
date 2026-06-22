@@ -4,21 +4,23 @@ import type { ConceptDeepening } from '../../types/concept-deepening'
 /**
  * Concept deepening catalog (quick-specs/concept-deepening-page.md §2.2). One entry per concept —
  * the `Record<ChessConcept, …>` makes adding a concept without deepening content a compile error.
- * Each is a short transfer-focused mini-course: 3 progressively richer positions + a calm recap.
- * Neve's method: every interactive step poses the idea as a question; the hint is Socratic (goal /
- * what-to-watch, never the move — the move arrow is the opt-in reveal); successText states the
- * transferable principle. Clean-room; all FENs carry both kings; chess.js validity + mate claims
- * enforced by tests/unit/data/concept-deepening.test.ts.
+ * Each is a recognition-training mini-course: 3 positions on a "Neve 收手" scaffolding gradient
+ * (step 0 she shows it → step 1 she only asks → step 2 silence, you find it alone), plus an
+ * `essence` line crystallized for the wrap-up popup. The hint + reveal arrow stay on every step as
+ * the opt-in escape hatch (never shown upfront); successText states the transferable principle.
+ * Clean-room; all FENs carry both kings; chess.js validity + mate claims enforced by
+ * tests/unit/data/concept-deepening.test.ts.
  */
 export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
   material: {
     conceptId: 'material',
     title: '子力 · 深化',
     intro: '子力的深化不在算分數，在養成一雙眼睛：每步落子前，先掃對手有沒有「沒人保護」的子。',
+    essence: '子力的精髓：落子前先掃一遍——對手哪顆子沒人守？看見它，便宜就是你的。',
     steps: [
       {
         fen: '4k3/1b6/8/8/8/8/8/1R2K3 w - - 0 1',
-        text: '黑主教站在 b7，沒有任何子保護它。你的城堡就在同一條 b 線上——怎麼收下這個免費的子？',
+        text: '先養那雙眼睛：黑方有一顆子沒人守著。找到它，收下來。',
         highlights: ['b7'],
         arrows: [{ orig: 'b1', dest: 'b7' }],
         expectedMove: { from: 'b1', to: 'b7' },
@@ -27,7 +29,7 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: '4k3/8/2p5/3r4/8/4N3/8/4K3 w - - 0 1',
-        text: '黑城堡在 d5，被 c6 的兵保護著——但城堡比騎士值錢。用騎士換它，划不划算？',
+        text: '這次它有兵守著——但守它的子，會不會比它便宜？划算的交換，也是賺。',
         highlights: ['d5'],
         arrows: [{ orig: 'e3', dest: 'd5' }],
         expectedMove: { from: 'e3', to: 'd5' },
@@ -36,16 +38,12 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: '4k3/8/8/8/2q5/4N3/8/4K3 w - - 0 1',
-        text: '最值錢的目標：黑后孤零零站在 c4，沒人守。你的騎士跳得到嗎？',
-        highlights: ['c4'],
+        text: '這一個，我不說了。盤上有顆子沒人守——自己找找看。',
+        highlights: [],
         arrows: [{ orig: 'e3', dest: 'c4' }],
         expectedMove: { from: 'e3', to: 'c4' },
-        hint: '騎士走 L 形，想想哪一步能踏上 c4。',
-        successText: '騎士白吃一個后，這盤大概就定了。記住那句話：每步先問「對手哪個子沒人保護」。',
-      },
-      {
-        fen: '4k3/8/8/8/2N5/8/8/4K3 b - - 0 1',
-        text: '子力的深化不是算術，是習慣：落子前掃一遍對手沒保護的子。看見它，半盤的便宜都是你的。',
+        hint: '騎士走 L 形，想想哪一步能踏上那顆沒人守的子。',
+        successText: '騎士白吃一個后，這盤大概就定了。那雙掃過棋盤的眼睛，你開始有了。',
       },
     ],
   },
@@ -54,10 +52,11 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
     conceptId: 'fork',
     title: '捉雙 · 深化',
     intro: '捉雙的深化，是在更亂的盤面第一眼看出那個「一石二鳥」的落點。',
+    essence: '捉雙的精髓：一個落點，兩個威脅，對手只能救一個。',
     steps: [
       {
         fen: '2q1k3/8/8/8/4N3/8/8/4K3 w - - 0 1',
-        text: '黑王 e8、黑后 c8。有一格能讓騎士同時將軍王、又叉到后——將軍逼對手非救王不可。',
+        text: '捉雙＝一個落點同時碰兩顆子。先看王和后——有一格能一次將軍王、又叉到后。',
         highlights: ['e8', 'c8'],
         arrows: [
           { orig: 'e4', dest: 'd6' },
@@ -70,7 +69,7 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: 'r5k1/8/8/8/8/8/8/3QK3 w - - 0 1',
-        text: '你的后 vs 黑王 g8、黑城堡 a8。后是長程子——哪一格能用兩條斜線同時搆到王和城堡？',
+        text: '換你看：他的王和城堡站得開——有沒有一格，能用兩條斜線同時搆到？',
         highlights: ['g8', 'a8'],
         arrows: [
           { orig: 'd1', dest: 'd5' },
@@ -83,8 +82,8 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: '2r3k1/8/8/3N4/8/8/8/4K3 w - - 0 1',
-        text: '前兩次叉的都是后——騎士也能叉「王和城堡」。黑王 g8、黑城堡 c8，找同時將軍王、又搆到城堡的落點。',
-        highlights: ['g8', 'c8'],
+        text: '這一個，我不說了。盤上藏著一個「一子碰兩子」的落點——自己找找看。',
+        highlights: [],
         arrows: [
           { orig: 'd5', dest: 'e7' },
           { orig: 'e7', dest: 'g8' },
@@ -92,11 +91,7 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
         ],
         expectedMove: { from: 'd5', to: 'e7' },
         hint: '找騎士能跳到、且同時將軍 g8、又叉到 c8 城堡的那一格。',
-        successText: '將軍捉雙：王被將軍只能逃，你下一步白吃城堡。后、城堡都能被叉——關鍵是找那個「一子碰兩子」的落點。',
-      },
-      {
-        fen: '2N3k1/8/8/8/8/8/8/4K3 b - - 0 1',
-        text: '捉雙的深化＝在亂局裡一眼看出「同時攻兩子」：將軍捉雙、長程斜線、騎士最難擋。每步先找那個一石二鳥的落點。',
+        successText: '將軍捉雙：王被將軍只能逃，你下一步白吃城堡。關鍵永遠是那個「一子碰兩子」的落點。',
       },
     ],
   },
@@ -105,10 +100,11 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
     conceptId: 'pin',
     title: '牽制 · 深化',
     intro: '牽制的深化：認得釘子只是第一步。真正賺子力，是「先釘住，再多派一個子把它吃掉」。',
+    essence: '牽制的精髓：先把它釘死，動不了的子等於消失——再多派一個子收下。',
     steps: [
       {
         fen: '4k3/8/8/4n3/3P4/8/8/4R1K1 w - - 0 1',
-        text: '黑騎士 e5 被你的城堡釘在王前面——一步都動不了。被釘死的子等於消失，現在多派一個子吃掉它。',
+        text: '牽制＝釘住對手一顆子，讓它動不了。黑騎士 e5 被釘在王前面，一步都跑不掉。被釘死的子等於消失，現在收下它。',
         highlights: ['e5'],
         arrows: [{ orig: 'd4', dest: 'e5' }],
         expectedMove: { from: 'd4', to: 'e5' },
@@ -117,7 +113,7 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: 'k7/8/8/q7/8/8/8/R5K1 w - - 0 1',
-        text: '黑后 a5、黑王 a8 疊在 a 線上，后被你的城堡釘住——而且王離得太遠，吃不回來。直接收下。',
+        text: '換你看：黑后 a5、黑王 a8 疊在 a 線上，后被釘住、王又離得太遠。這顆釘死的后，誰來收？',
         highlights: ['a5'],
         arrows: [{ orig: 'a1', dest: 'a5' }],
         expectedMove: { from: 'a1', to: 'a5' },
@@ -126,16 +122,12 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: '3q1k2/8/8/3n4/4P3/8/8/3R2K1 w - - 0 1',
-        text: '黑騎士 d5 擋在黑后 d8 前面——它若移開，你的城堡就吃后（相對牽制），所以它幾乎動不了。用兵攻它。',
-        highlights: ['d5'],
+        text: '這一個，我不說了。盤上有顆子，動了就會丟更值錢的——它其實也被釘住了，自己找找看。',
+        highlights: [],
         arrows: [{ orig: 'e4', dest: 'd5' }],
         expectedMove: { from: 'e4', to: 'd5' },
         hint: '兵吃下 d5 的騎士。對手若用后吃回，你的城堡正等在 d 線。',
         successText: '相對牽制：騎士不敢動（動了丟后），等於被釘住。兵吃騎士、后吃兵、城堡再吃后——大賺。',
-      },
-      {
-        fen: '3q1k2/8/8/3P4/8/8/8/3R2K1 b - - 0 1',
-        text: '牽制的深化＝凍結再吃：絕對牽制（後面是王）、相對牽制（後面是后／城堡）都一樣——先把它釘死，再多派子力收下。',
       },
     ],
   },
@@ -144,10 +136,11 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
     conceptId: 'mate',
     title: '將殺 · 深化',
     intro: '將殺的深化，是把「將死」從碰運氣變成看得出來的圖案：底線殺、雙城堡爬樓梯、后王逼角。',
+    essence: '將殺的精髓：不是算殺幾步，是看見王沒有一格能逃的那一刻。',
     steps: [
       {
         fen: '6k1/5ppp/8/8/8/8/8/3R2K1 w - - 0 1',
-        text: '黑王被自己的兵悶在底線（f7 g7 h7 堵死逃生）。城堡攻進底線會怎樣？',
+        text: '底線殺：黑王被自己的兵悶在底線，f7 g7 h7 把往前的逃路全堵死了。城堡有一條空線直通他的底線。',
         highlights: ['g8'],
         arrows: [{ orig: 'd1', dest: 'd8' }],
         expectedMove: { from: 'd1', to: 'd8' },
@@ -156,7 +149,7 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: '4k3/R7/8/8/8/8/8/4K2R w - - 0 1',
-        text: '雙城堡趕王：a7 的城堡已封死第 7 排。另一個城堡開到第 8 排將軍，王往哪都不行。',
+        text: '換你收：a7 的城堡已經封死整條第 7 排，王退不下來。另一個城堡還閒著——它能不能上去把最後一排也封了？',
         highlights: ['e8'],
         arrows: [{ orig: 'h1', dest: 'h8' }],
         expectedMove: { from: 'h1', to: 'h8' },
@@ -165,16 +158,12 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: '7k/3Q4/6K1/8/8/8/8/8 w - - 0 1',
-        text: '后王合作逼殺：你的王 g6 罩住 g7、h7。后只要踏上 g7 將軍，王就被悶死在角落。',
-        highlights: ['h8'],
+        text: '這一個，我不說了。王已縮在角落，你的王罩住了他僅剩的逃生格——后只差貼上去那一步。',
+        highlights: [],
         arrows: [{ orig: 'd7', dest: 'g7' }],
         expectedMove: { from: 'd7', to: 'g7' },
         hint: '把后送到 g7 將軍——你的王 g6 保護著它，黑王吃不掉，逃生格也全被封。',
         successText: '后+王的基本殺：后將軍、王保護后並封逃生格。記住后不能單獨將殺，一定要王來幫忙。',
-      },
-      {
-        fen: '7k/6Q1/6K1/8/8/8/8/8 b - - 0 1',
-        text: '將殺的深化＝認圖案：底線（王被兵悶）、雙城堡爬樓梯、后王逼角。將死不是運氣，是看見王沒有逃生格的那一刻。',
       },
     ],
   },
@@ -183,10 +172,11 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
     conceptId: 'skewer',
     title: '串擊 · 深化',
     intro: '串擊的深化：牽制的雙胞胎，差別在「前面大、後面小」。練習把對手最值錢的子逼到前面當盾牌。',
+    essence: '串擊的精髓：大子在前、值錢的子在後、連成一線——將軍前面的，逼牠讓開，後面的就到手。',
     steps: [
       {
         fen: '8/8/8/q3k3/8/8/8/6KR w - - 0 1',
-        text: '黑王 e5、黑后遠在 a5，同一橫排。王最值錢、一定得對將軍讓步——沿這條橫排正面將軍。',
+        text: '串擊＝大子在前、值錢的子在後、連成一線。先看這條橫排：黑王、黑后排在同一線上，前面那顆最值錢、躲不過將軍。',
         highlights: ['e5', 'a5'],
         arrows: [{ orig: 'h1', dest: 'h5' }],
         expectedMove: { from: 'h1', to: 'h5' },
@@ -195,7 +185,7 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: '8/1q6/8/8/4k3/8/8/4KB2 w - - 0 1',
-        text: '用主教斜線串擊：黑王 e4、黑后遠在 b7，同一條斜線。把主教擺上這條線將軍。',
+        text: '換你看：黑王、黑后這次連在一條斜線上，王在前。哪個子能擺上這條斜線，正面將軍那顆大的？',
         highlights: ['e4', 'b7'],
         arrows: [{ orig: 'f1', dest: 'g2' }],
         expectedMove: { from: 'f1', to: 'g2' },
@@ -204,16 +194,12 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: '8/3q4/8/8/3k4/8/8/R3K3 w - - 0 1',
-        text: '最後用直線練一次：黑王 d4、黑后 d7，疊在同一條直行。城堡開到這條行將軍。',
-        highlights: ['d4', 'd7'],
+        text: '這一個，我不說了。直行上也有「前大後小、連成一線」。',
+        highlights: [],
         arrows: [{ orig: 'a1', dest: 'd1' }],
         expectedMove: { from: 'a1', to: 'd1' },
         hint: '把城堡擺到 d 行底端將軍黑王，王一閃，后就暴露。',
         successText: '橫的、斜的、直的——串擊的圖案永遠一樣：王在前、后在後、連成一線。',
-      },
-      {
-        fen: '8/3R4/8/8/3k4/8/8/4K3 b - - 0 1',
-        text: '串擊的深化＝認線：橫排、直行、斜線都行，只要對手「前大後小、連成一線」。將軍前面的大子，逼牠讓開，後面的子就到手。',
       },
     ],
   },
@@ -222,10 +208,11 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
     conceptId: 'discovered',
     title: '閃擊 · 深化',
     intro: '閃擊的深化：移開一個子，露出後面子力的攻擊。最強的是閃將與雙將——對手被迫解將，你移開的子順手撈一個。',
+    essence: '閃擊的精髓：移開卡在攻擊線上的自己人，後面那顆子的威脅就現身了。',
     steps: [
       {
         fen: '4k3/8/2q5/4N3/8/8/8/4R1K1 w - - 0 1',
-        text: '複習最強型：城堡 e1 和黑王 e8 中間卡著你的騎士，黑后在 c6。騎士能不能一步吃后、又替城堡開路將軍？',
+        text: '這是閃將：你的城堡 e1 和黑王 e8 之間，卡著自己的騎士；黑后落單在 c6。看那條被堵住的 e 線，再看那顆沒人守的后。',
         highlights: ['e8', 'c6'],
         arrows: [
           { orig: 'e5', dest: 'c6' },
@@ -237,7 +224,7 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: 'q3k3/8/8/8/4B3/8/8/4R1K1 w - - 0 1',
-        text: '黑后 a8、黑王 e8。主教擋在 e 線城堡前。有一步能讓主教自己將軍、又露出城堡也將軍——「雙將」！雙將之下，王只能逃。',
+        text: '黑后 a8、黑王 e8。你的主教擋在 e 線城堡前——有沒有一步，能讓主教自己將軍、同時又讓開 e 線露出城堡？',
         highlights: ['e8', 'a8'],
         arrows: [
           { orig: 'e4', dest: 'c6' },
@@ -250,8 +237,8 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: '4k3/8/8/6b1/4N3/8/8/4R1K1 w - - 0 1',
-        text: '換你抓圖案：城堡 e1、王 e8、中間是你的騎士；黑主教在 g5。怎麼一步吃子、又打開 e 線將軍？',
-        highlights: ['e8', 'g5'],
+        text: '這一個，我不說了。盤上有顆你的子，正擋在自己後面那記攻擊的前頭——移開它，看能不能順手再做一件事。',
+        highlights: [],
         arrows: [
           { orig: 'e4', dest: 'g5' },
           { orig: 'e1', dest: 'e8' },
@@ -260,10 +247,6 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
         hint: '騎士吃 g5 的主教，順便讓開 e 線、露出城堡將軍。',
         successText: '你看出來了——卡在攻擊線上的自己人，常是閃擊的引信。每次問：移開它能不能順便將軍或吃子？',
       },
-      {
-        fen: '5k2/8/8/6N1/8/8/8/4R1K1 b - - 0 1',
-        text: '閃擊的深化＝看自己卡在攻擊線上的子：移開它就露出後面的攻擊。最強是閃將與雙將——對手被迫解將，你移開的子順手撈一個。',
-      },
     ],
   },
 
@@ -271,10 +254,11 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
     conceptId: 'defense',
     title: '保護 · 深化',
     intro: '保護的深化：被攻擊時別慌，把四招（吃攻擊者／加防守者／反擊／移開）掃一遍，挑損失最小的。',
+    essence: '保護的精髓：被攻擊先別逃——把四招掃一遍，挑損失最小的那一招。',
     steps: [
       {
         fen: '4k3/8/8/8/3n4/2P2R2/8/4K3 w - - 0 1',
-        text: '黑騎士 d4 正攻擊你 f3 的城堡。四招裡最乾脆的是「吃掉攻擊者」——你有子能吃 d4 嗎？',
+        text: '黑騎士 d4 正攻擊你 f3 的城堡。被攻擊時有四招：吃攻擊者、加防守者、反擊、移開。先掃最乾脆的——這個攻擊者，你有子搆得到嗎？',
         highlights: ['d4', 'f3'],
         arrows: [{ orig: 'c3', dest: 'd4' }],
         expectedMove: { from: 'c3', to: 'd4' },
@@ -283,7 +267,7 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: '3r2k1/8/8/8/8/3N4/8/5BK1 w - - 0 1',
-        text: '黑城堡 d8 沿 d 線盯上你的騎士 d3，你沒有子能吃到城堡。除了逃，還能怎麼守住騎士？',
+        text: '黑城堡 d8 沿 d 線盯上你的騎士 d3，你沒有子能吃到城堡。吃不掉攻擊者，第二招呢？',
         highlights: ['d8', 'd3'],
         arrows: [{ orig: 'f1', dest: 'e2' }],
         expectedMove: { from: 'f1', to: 'e2' },
@@ -292,16 +276,12 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: '6k1/8/8/8/6b1/8/8/3RK3 w - - 0 1',
-        text: '黑主教 g4 盯著你 d1 的城堡，你吃不到、也守不住。第四招：移開——但別白逃，找一步「邊逃邊將軍」。',
-        highlights: ['g4', 'd1'],
+        text: '這一個，我不說了。你有顆子被盯上，吃不掉、也補不了防守——四招只剩一招，而且別白逃。',
+        highlights: [],
         arrows: [{ orig: 'd1', dest: 'd8' }],
         expectedMove: { from: 'd1', to: 'd8' },
         hint: '城堡沿 d 線往上衝，有沒有一格能順便將軍黑王、讓你逃得有價值？',
-        successText: '逃也要逃得有意義：Rd8+ 一邊躲開主教、一邊將軍。被攻擊時冷靜掃四招，挑對你最有利的。',
-      },
-      {
-        fen: '3R4/8/6k1/8/6b1/8/8/4K3 b - - 0 1',
-        text: '被攻擊的深化＝紀律：吃攻擊者 > 加防守者 > 邊逃邊反擊。每次先掃四招再動，別一被嚇就亂跑。',
+        successText: '逃也要逃得有意義：城堡躲開主教的同時將軍。被攻擊時冷靜掃四招，挑對你最有利的。',
       },
     ],
   },
@@ -310,10 +290,11 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
     conceptId: 'center',
     title: '控制中心 · 深化',
     intro: '控制中心的深化：開局的隱形戰場。每一步問——這步有沒有幫我佔住或攻擊中央四格（d4 e4 d5 e5）？',
+    essence: '控制中心的精髓：開局每一步都先問一句——這步有沒有佔住或攻擊中央那四格？',
     steps: [
       {
         fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-        text: '開局第一課：佔中央。哪一步兵能一次踏進中心、又替主教和后開路？',
+        text: '開局的隱形戰場在中央那四格。你的兵裡，有一支推出去就能站上中心、又替後面的子讓開路。',
         highlights: ['e4', 'd5'],
         arrows: [{ orig: 'e2', dest: 'e4' }],
         expectedMove: { from: 'e2', to: 'e4' },
@@ -322,7 +303,7 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2',
-        text: '子力要往中央發展。騎士在 g1，跳到哪能控制中央、又攻擊對方 e5 的兵？（騎士擺邊上力量最弱）',
+        text: '中央站穩了，子力也該往中間走。你的騎士還在角落——它跳去哪，既指著中央、又壓上對方那支 e5 的兵？',
         highlights: ['f3', 'e5'],
         arrows: [{ orig: 'g1', dest: 'f3' }],
         expectedMove: { from: 'g1', to: 'f3' },
@@ -331,16 +312,12 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
       },
       {
         fen: 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3',
-        text: '你已佔住中央，現在去挑戰對手的。哪一步兵能攻擊黑方 e5、把中央主導權搶過來？',
-        highlights: ['d4', 'e5'],
+        text: '這一個，我不說了。你已經佔住中央，現在輪到去爭對手的——想想哪一步爭中央。',
+        highlights: [],
         arrows: [{ orig: 'd2', dest: 'd4' }],
         expectedMove: { from: 'd2', to: 'd4' },
         hint: '推 d 兵兩格到 d4，直接攻擊 e5。對手若 exd4，你會搶得發展先機。',
         successText: 'd4！——挑戰並打開中央。控制中心不只站著，還要主動爭奪。掌握中央，子力就更自由。',
-      },
-      {
-        fen: 'r1bqkbnr/pppp1ppp/2n5/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3',
-        text: '控制中心的深化＝每步自問：這步有沒有爭中央？兵佔中、子指中、別把子擺邊。掌握中央，後面的攻防你都先一步。',
       },
     ],
   },

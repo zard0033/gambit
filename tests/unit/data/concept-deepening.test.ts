@@ -30,6 +30,13 @@ describe('concept deepening catalog', () => {
       expect(d.steps.length, `${d.conceptId}: needs ≥2 steps`).toBeGreaterThanOrEqual(2)
     }
   })
+
+  it('test_catalog_eachHasEssence', () => {
+    // The wrap-up popup (A3) shows `essence`; a blank one would compile but ship an empty回味卡.
+    for (const d of allDeepenings) {
+      expect(d.essence.trim(), `${d.conceptId}: empty essence`).toBeTruthy()
+    }
+  })
 })
 
 describe('getConceptDeepening', () => {

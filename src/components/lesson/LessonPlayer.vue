@@ -22,7 +22,6 @@ import type { Annotation } from '@/modules/move-annotation/annotation-types'
 import type { MoveMadePayload } from '@/composables/use-chess-board'
 import type { Rect } from '@/utils/board-geometry'
 import { useBoardFit } from '@/composables/use-board-fit'
-import { useReducedMotion } from '@/composables/use-reduced-motion'
 
 const props = withDefaults(
   defineProps<{
@@ -32,11 +31,17 @@ const props = withDefaults(
     scenario?: string
     backTo: string
     backLabel: string
+    /** 'inline' (default) swaps the coach bubble to the wrap-up card (lessons' certificate).
+     *  'overlay' keeps the board/bubble on screen and lets the caller pop its own modal on
+     *  @complete — 深化頁 uses this for its essence wrap-up popup. */
+    completionMode?: 'inline' | 'overlay'
   }>(),
-  { playerColor: 'white', scenario: undefined },
+  { playerColor: 'white', scenario: undefined, completionMode: 'inline' },
 )
 
-const emit = defineEmits<{ complete: [] }>()
+// `complete` reports whether the player finished without ANY aid (no wrong move / hint / reveal) —
+// the deepen wrap-up uses it for Neve's "you saw it yourself" acknowledgment.
+const emit = defineEmits<{ complete: [unaided: boolean] }>()
 
 const router = useRouter()
 
@@ -53,6 +58,10 @@ const wrongMove = ref<{ from: string; to: string } | null>(null)
 const everWrong = ref(false)
 const hintShown = ref(false)
 const answerRevealed = ref(false)
+
+// Session-level (NOT reset per step): did the player lean on any aid — a wrong move, a hint, or the
+// answer reveal — anywhere in this run? Drives the deepen wrap-up's "you saw it unaided" line.
+const usedAidThisSession = ref(false)
 
 watch(stepIndex, async () => {
   solved.value = false
@@ -159,6 +168,7 @@ function handleMove(payload: MoveMadePayload): void {
   } else {
     wrongMove.value = { from: payload.from, to: payload.to }
     everWrong.value = true
+    usedAidThisSession.value = true
   }
 }
 
@@ -172,67 +182,35 @@ const lightbulbGlowing = computed(
   () => everWrong.value && !wrongMove.value && !solved.value && !hintShown.value,
 )
 
-// ── Typewriter effect for coach narration ──
-const { prefersReducedMotion } = useReducedMotion()
-const displayedText = ref('')
-let typewriterTimer: ReturnType<typeof setTimeout> | null = null
-
-function startTypewriter(text: string): void {
-  if (typewriterTimer !== null) clearTimeout(typewriterTimer)
-  if (prefersReducedMotion.value) {
-    displayedText.value = text
-    return
-  }
-  displayedText.value = ''
-  let i = 0
-  const step = (): void => {
-    displayedText.value = text.slice(0, i + 1)
-    i++
-    if (i < text.length) typewriterTimer = setTimeout(step, 8)
-  }
-  step()
-}
-
-function skipTypewriter(): void {
-  if (typewriterTimer !== null) {
-    clearTimeout(typewriterTimer)
-    typewriterTimer = null
-  }
-  displayedText.value = currentStep.value?.text ?? ''
-}
-
-// 對話框自動捲：教練文字逐字長出、或提示／回饋／成功訊息新增時，把焦點維持在最新內容。
+// 對話框自動捲：換步、或提示／回饋／成功訊息新增時，把焦點維持在最新內容。
 const coachScroll = ref<HTMLElement | null>(null)
 function scrollCoachToBottom(): void {
   const el = coachScroll.value
   if (el) el.scrollTop = el.scrollHeight
 }
 watch(
-  [displayedText, hintShown, wrongMove, answerRevealed, solved],
+  [stepIndex, hintShown, wrongMove, answerRevealed, solved],
   async () => {
     await nextTick()
     scrollCoachToBottom()
   },
 )
 
-// Watch stepIndex (not the text string): two adjacent steps with identical text must still replay
-// the typewriter, which a string-diff watch would skip.
-watch(
-  stepIndex,
-  () => startTypewriter(currentStep.value?.text ?? ''),
-  { immediate: true },
-)
-onBeforeUnmount(() => { if (typewriterTimer !== null) clearTimeout(typewriterTimer) })
-
 // ── Wrap-up: in-bubble finish. The card content + footer actions come from the wrapper via slots. ──
 // 課末不跳彈窗：最後一步按「完成」才就地切成收尾。必須由使用者明確觸發——不能在「走到最後一步」自動完成，
 // 否則敘述型 5/5 會被秒跳過（4/5 走對就快轉）。
-const finished = ref(false)
+const finished = ref(false) // inline mode only: swaps the bubble to the wrap-up card
+let _completed = false
 function complete(): void {
-  if (finished.value) return
-  finished.value = true
-  emit('complete')
-  nextTick().then(scrollCoachToBottom)
+  if (_completed) return
+  _completed = true
+  const unaided = !usedAidThisSession.value
+  if (props.completionMode === 'inline') {
+    finished.value = true
+    nextTick().then(scrollCoachToBottom)
+  }
+  // overlay mode leaves the board/bubble in place; the caller pops its own modal on this event.
+  emit('complete', unaided)
 }
 
 function next(): void {
@@ -329,7 +307,7 @@ function prev(): void {
 
       <!-- Coach bubble:暖色對話框浮在 jade。氣泡自身 flex column——上半教練文字可捲、下半動作列釘在
            氣泡底（手機/桌機統一，按鈕永遠可見）。底部 safe-area 留白防 iPhone 圓角吃按鈕。 -->
-      <div class="flex min-h-0 flex-1 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-1 lg:w-104 lg:flex-none lg:px-0 lg:pb-0 lg:pt-0" :class="finished ? 'items-center' : 'items-start'">
+      <div class="flex min-h-0 flex-1 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 lg:w-104 lg:flex-none lg:px-0 lg:pb-0 lg:pt-0" :class="finished ? 'items-center' : 'items-start'">
         <div
           class="flex max-h-full min-h-0 min-w-0 flex-1 flex-col rounded-[18px] bg-surface-card shadow-[0_6px_20px_rgba(8,24,18,0.28)]"
         >
@@ -352,12 +330,11 @@ function prev(): void {
               class="mb-3 border-l-2 border-primary/40 pl-3 font-lesson text-[15px] leading-relaxed text-ink-muted"
             >{{ scenario }}</p>
 
-            <!-- Step narration：打字機逐字出現，點擊立即完成。完成後棋盤與敘述都收起，只留收尾卡。 -->
+            <!-- Step narration：直接顯示（不再逐字打字機）。完成後棋盤與敘述都收起，只留收尾卡。 -->
             <p
               v-if="!finished"
-              class="cursor-default font-sans text-base leading-loose text-ink"
-              @click="skipTypewriter"
-            >{{ displayedText }}</p>
+              class="font-sans text-base leading-loose text-ink"
+            >{{ currentStep?.text }}</p>
 
             <!-- Wrong-move feedback (按鈕在下方釘底動作列) -->
             <Alert v-if="wrongMove" variant="danger" class="mt-3">
@@ -399,7 +376,7 @@ function prev(): void {
               <!-- 走錯：只留 揭曉答案 + 重試（重試靠右為主行動），不顯示上一步／下一步 -->
               <template v-else-if="wrongMove">
                 <div class="flex-1" />
-                <Button v-if="!answerRevealed" variant="secondary" size="sm" class="text-sm" @click="answerRevealed = true">揭曉答案</Button>
+                <Button v-if="!answerRevealed" variant="secondary" size="sm" class="text-sm" @click="answerRevealed = true; usedAidThisSession = true">揭曉答案</Button>
                 <Button variant="danger" size="sm" class="text-sm" @click="retry"><RotateCw :size="15" :stroke-width="1.8" /> 重試</Button>
               </template>
 
@@ -412,7 +389,7 @@ function prev(): void {
                     size="sm"
                     class="border-hint-ring bg-hint-light text-sm text-hint-fg hover:bg-hint-ring"
                     :class="{ 'lightbulb-glow': lightbulbGlowing }"
-                    @click="hintShown = true"
+                    @click="hintShown = true; usedAidThisSession = true"
                   >
                     <Lightbulb :size="15" :stroke-width="1.8" /> 提示
                   </Button>
@@ -420,7 +397,7 @@ function prev(): void {
                     v-else-if="!answerRevealed"
                     size="sm"
                     class="bg-hint-ring text-sm text-hint-fg hover:bg-hint"
-                    @click="answerRevealed = true"
+                    @click="answerRevealed = true; usedAidThisSession = true"
                   >揭曉答案</Button>
                 </template>
 

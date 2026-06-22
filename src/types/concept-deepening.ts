@@ -17,4 +17,6 @@ export interface ConceptDeepening {
   /** Situational set-up shown before the first step (Neve's method: scenario first). */
   intro: string
   steps: LessonStep[]
+  /** The tactic's essence, crystallized — shown in the wrap-up popup for a calm "回味" (A3). */
+  essence: string
 }
