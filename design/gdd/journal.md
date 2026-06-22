@@ -208,6 +208,7 @@ v1 範圍鐵律（Eason 2026-06-16 拍板）：只做**從持久狀態可推導*
 - **讀字載體**：暖 cream 卡片承載 Neve 的字，與深色世界對比讓字「浮」在光裡。卡片文字對比須達 AA（aurora 暖光暈勿壓低 cream 卡邊緣字的對比——art-bible/asset-spec 時驗證）。
 - **字型**：Neve 的文字用課程內文 `font-lesson`（LXGW WenKai）或標題 `font-display`（BIZ UDPMincho），呼應「文學書」質感；時間戳用 `font-num`（Cubic）。卡片間若有落在 deep-jade 上的標籤，用 `ink-on-deep` 不用 `text-gold`（金限 focus/reward fill）。
 - **累積感＝無字視覺**：書架長卷／深色場景隨筆數變化，**不用統計數據**（無勝率/rating/準確率）。最強累積感留給 Phase 2 的 ⑥ 時間回望。
+  - **註（2026-06-22，與 memory GDD Rule 24 調和）**：此處禁的是**績效統計**（勝率/rating/準確率＝計分板）。**陪伴標記**（Neve 記得 N 盤／同行 N 天／寫下 N 篇）是另一類——量的是「我們一起走了多久」非表現好壞，由 memory GDD Rule 24 指定家在 JournalView。已實作為頁首 Neve 第一人稱**一句話**（`font-lesson`，`src/lib/journal/totals.ts`），**非數據儀表板**，故不違反本條的「無字計分板」精神。「同行 N 天」自啟程單調遞增、不重置（陪伴非 streak）。
 - **動效**：只動 transform／opacity，150–300ms，緩慢優美（氛圍非 juice）；尊重 `prefers-reduced-motion`。**禁** box-shadow 動畫、彩帶、震動、彈窗慶祝。
 - **音訊（選配）**：可有極輕的環境音，但 v1 不必做；棋誌不需音效回饋（守平靜）。
 

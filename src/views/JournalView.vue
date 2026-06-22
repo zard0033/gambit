@@ -3,13 +3,16 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft, ChevronDown, ChevronRight } from 'lucide-vue-next'
 import { useJournalStore } from '@/stores/journal'
+import { useDataSyncStore } from '@/stores/data-sync'
 import type { JournalEntry } from '@/types/journal'
 import { getLastSeenAt, isUnread, markSeen } from '@/lib/journal/unread'
+import { daysTogether, totalsLine } from '@/lib/journal/totals'
 import JournalLamp from '@/components/journal/JournalLamp.vue'
 import JournalEntryCard from '@/components/journal/JournalEntryCard.vue'
 
 const router = useRouter()
 const journal = useJournalStore()
+const dataSync = useDataSyncStore()
 
 // 空狀態固定字串（Neve 語氣，無 emoji）— assert 相等用。
 const EMPTY_STATE_COPY = '還沒有什麼好寫的。先下一盤吧。'
@@ -17,6 +20,21 @@ const EMPTY_STATE_COPY = '還沒有什麼好寫的。先下一盤吧。'
 // 未讀水位：在此 visit mount 前捕捉，保持本次渲染穩定。mount 後 markSeen() 更新 localStorage，
 // 下次開啟時 getLastSeenAt() 才讀到新值，使 marker 在本次可見一次後消失。
 const lastSeenAt = getLastSeenAt()
+
+// 進頁那刻的 now，供「同行 N 天」算用（穩定一次渲染）。
+const openedAt = Date.now()
+
+// 全站累積（memory GDD Rule 24）：Neve 記得 N 盤／同行 N 天／寫下 N 篇。陪伴標記非績效統計。
+const gameCount = ref(0)
+const totals = computed(() => {
+  if (journal.entries.length === 0) return null
+  const firstTs = Math.min(...journal.entries.map((e) => e.createdAt))
+  return totalsLine({
+    games: gameCount.value,
+    entries: journal.entries.length,
+    days: daysTogether(firstTs, openedAt),
+  })
+})
 
 const greeting = computed(() => {
   const h = new Date().getHours()
@@ -85,6 +103,7 @@ function goBack(): void {
 onMounted(async () => {
   await journal.load()
   markSeen()
+  gameCount.value = await dataSync.countGames()
 })
 </script>
 
@@ -110,6 +129,7 @@ onMounted(async () => {
       <div class="px-2 pb-6 pt-10 text-center">
         <p class="font-display text-[22px] leading-relaxed text-ink-on-deep">{{ greeting }}</p>
         <p class="mt-2.5 font-lesson text-[15px] text-ink-on-deep-dim">我把你走過的，都記在這裡了。</p>
+        <p v-if="totals" class="mt-1.5 font-lesson text-[14px] leading-relaxed text-ink-on-deep-dim/80">{{ totals }}</p>
       </div>
 
       <!-- 空狀態 -->

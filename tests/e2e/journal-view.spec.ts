@@ -102,4 +102,33 @@ test.describe('Journal overview (/journal)', () => {
     const style = await page.locator('.journal-body').first().evaluate((n) => getComputedStyle(n).fontStyle)
     expect(style).not.toBe('italic')
   })
+
+  // 全站累積（memory GDD Rule 24）：Neve 記得 N 盤／同行 N 天／寫下 N 篇。
+  test('test_journal_running_totals_line_counts_games_days_entries', async ({ page }) => {
+    // Seed three guest games (chess:unsynced:*) so countGames() (guest = local queue) returns 3.
+    await page.addInitScript(() => {
+      const game = (id: string) => ({
+        id, moves: ['e2e4', 'e7e5'], result: '1-0', playerColor: 'white',
+        endReason: 'checkmate', aiSkillLevel: 5, completedAt: Date.now(),
+        playerMoveTimes: [1000], isTerminal: true,
+      })
+      for (const id of ['g1', 'g2', 'g3']) {
+        localStorage.setItem(`chess:unsynced:${id}`, JSON.stringify(game(id)))
+      }
+    })
+    // Recent dates so "days together" reads realistically (onset ~4 days ago).
+    const DAY = 86_400_000
+    const now = Date.now()
+    const recent: SeedEntry[] = [
+      { ...SEED[0], createdAt: now - 4 * DAY },
+      { ...SEED[1], createdAt: now - 2 * DAY },
+      { ...SEED[2], createdAt: now - 1 * DAY },
+    ]
+    await openJournal(page, { seed: recent }) // 3 entries: onset + arrival + solace
+
+    // games and entries are stable (3 each); the day count varies, so match it loosely.
+    await expect(
+      page.getByText(/^我們同行 \d+ 天了，我記得你的 3 盤棋，也為你寫下了 3 篇。$/),
+    ).toBeVisible()
+  })
 })

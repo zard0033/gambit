@@ -289,6 +289,21 @@ export const useDataSyncStore = defineStore('dataSync', () => {
   }
 
   /**
+   * Total game count for the 棋誌 running total (memory GDD Rule 24) — exact, not the paginated
+   * page length. Guest: the local queue length. Logged-in: a head COUNT query. Returns 0 on error
+   * (a header marker must never surface a failure). All supabase.from() lives here per ADR-0011.
+   */
+  async function countGames(): Promise<number> {
+    const authStore = useAuthStore()
+    if (!authStore.userId) return _readUnsyncedRows().length
+    const { count, error } = await supabase
+      .from('game_sessions')
+      .select('*', { count: 'exact', head: true })
+    if (error) return 0
+    return count ?? 0
+  }
+
+  /**
    * Fetch the user's completed lesson ids. Returns [] when not logged in or on error
    * (lesson progress degrades to the local cache; a read failure must never surface).
    * All lesson_progress supabase.from() calls live here per ADR-0011.
@@ -686,6 +701,7 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     syncGame,
     flushUnsyncedQueue,
     loadGameHistory,
+    countGames,
     loadResumeGame,
     upsertResumeGame,
     deleteResumeGame,

@@ -291,6 +291,37 @@ describe('useDataSyncStore', () => {
     })
   })
 
+  // ── countGames (棋誌 running total, memory GDD Rule 24) ──────────────────
+
+  describe('countGames', () => {
+    it('returns the local queue length when logged out (no supabase call)', async () => {
+      localStorage.setItem('chess:unsynced:a', JSON.stringify({ ...makeGame(), id: 'a' }))
+      localStorage.setItem('chess:unsynced:b', JSON.stringify({ ...makeGame(), id: 'b' }))
+
+      const store = useDataSyncStore()
+      expect(await store.countGames()).toBe(2)
+      expect(supabase.from).not.toHaveBeenCalled()
+    })
+
+    it('returns the exact head count when logged in', async () => {
+      const selectFn = vi.fn().mockResolvedValueOnce({ count: 42, error: null })
+      vi.mocked(supabase.from).mockReturnValueOnce({ select: selectFn } as never)
+      useAuthStore().userId = 'uid-1'
+
+      const store = useDataSyncStore()
+      expect(await store.countGames()).toBe(42)
+    })
+
+    it('returns 0 on error (a header marker must never surface a failure)', async () => {
+      const selectFn = vi.fn().mockResolvedValueOnce({ count: null, error: { message: 'boom' } })
+      vi.mocked(supabase.from).mockReturnValueOnce({ select: selectFn } as never)
+      useAuthStore().userId = 'uid-1'
+
+      const store = useDataSyncStore()
+      expect(await store.countGames()).toBe(0)
+    })
+  })
+
   // ── lesson_progress (S12 cross-device) ──────────────────────────────────
 
   describe('loadLessonProgress', () => {
