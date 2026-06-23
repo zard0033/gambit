@@ -1,11 +1,27 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: 概念深化頁 A 類 UX 重設計（Phase 2 收尾；棋憶 #22 全線已 ship）
-Task: 概念深化頁 A 類「Neve 收手」首磚（`30dccf1`）+ 第二磚棋誌鉤子（`df5402d`）+ 第三磚文案語氣收斂（`66025cb`/`df73ebe`）皆已 commit+push。**第四磚＝「雜訊盤面+變體池」，設計 workflow 判決＝MINIMAL（Eason 2026-06-23 拍板）**，spec 已增訂（`concept-deepening-page.md` §10–§14）。施工順序（逐項回報）：① 先建 Stockfish MultiPV 唯一解閘門腳本（安全網，現缺）② `steps[]`→`variants[][]` 形狀遷移 + `deepenedCount` 持久化 ③ clean-room 自寫 fork 1 個 L1 雜訊盤沉默關 variant、過三道 gate ④ 交 Eason iPhone 實機驗（unaided→epiphany 鏈 + 重溫換盤）。
+Task: 概念深化頁第四磚＝MINIMAL（Eason 2026-06-23 拍板）。**今日：①Stockfish 唯一解閘門 spike 已建+push（`9efc7f4`）、spec 增訂 push（`1184e00`）；閘門首跑審計 shipped 深化內容→抓到 6 處假戰術/瑕疵。②已 clean-room 重做 4 個明確 bug 局面（fork#2/pin#2/mate#2/discovered#1）、chess.js 驗過、寫進 data（未提交）。** 🔴 **尚未跑 Stockfish 閘門驗 eval 唯一性——未驗證前禁止 commit。明天從下方「🔴 明天接手」開始。**
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
 > **差異化北極星 = `production/gambit-differentiation-vision.md`**——提任何功能/重構/UI 前**先讀**。
+
+---
+
+## 明天接手（2026-06-23 收尾）
+
+**今日完成並 push**：① Stockfish 唯一解閘門 spike + CLAUDE.md 棋理護欄升級（`9efc7f4`）、第四磚 spec 增訂（`1184e00`）。② 閘門首跑審計 shipped 深化內容→抓到 6 處假戰術/瑕疵；其中 **4 個明確 bug 已 clean-room 重做、chess.js + Stockfish 閘門雙驗、commit+push**：
+- **fork#2** `2q3k1/8/8/3N4/8/8/P7/4K3` `d5e7`（修原 K+N vs K 假贏；gap 10975cp）
+- **pin#2** `3k4/8/8/3n4/2P5/8/8/3RK3` `c4d5`（修原白方反落後；吃絕對被釘的騎士）
+- **mate#2** `7k/8/5K2/8/8/8/8/6Q1` `g1g7`（修原 3 個 mate-in-1 非唯一；Qg7# 唯一、Kf6 支援）
+- **discovered#1** `q3k3/8/4N3/8/8/8/8/4R1K1` `e6c7`（改騎士雙將避開原「Bxa8 直接吃后」支配；gap 98200cp）
+
+**剩（明天/後續）**：
+1. **defense#1/2**（閘門仍 FAIL，屬「教學手非引擎最佳」非假贏）：defense#1 騎士 d3 已被 Bf1 防守（加防守者多餘）、defense#2 `Rd4`（逃＋反攻）勝過教學 `Rd8+`。defense/center 本質多解 →把閘門對 defense 改 **weak-rule**（比照 center 不驗唯一性），與重做這兩例一起做。
+2. **第四磚原計畫**（雜訊盤面+變體池 MINIMAL，見 spec §10–§14 + 下方第四磚段）：`steps[]`→`variants[][]` 變體池 + `deepenedCount` 持久化 + fork 1 個雜訊盤沉默關 variant（過三道 gate）+ iPhone 實機驗 unaided→epiphany。
+
+**踩過的坑（別重蹈）**：用 workflow 讓 agent **自己設計+自驗棋局失敗**——agent 不擅長自驗、會在 repo 根目錄狂寫 scratch（`.tmp-chess/`、`scratch_*.mjs`）把 vitest 全炸（vite config 解析壞）；已全清、根依賴未損。**改用「主模型自己設計 → chess.js + 真實 Stockfish 閘門驗」**才可靠。待 Eason 同意的全域 memory：spawn subagent/workflow 時須在 prompt 明令「只寫 scratchpad、禁寫 repo root」（它們不繼承 scratchpad 規則）。
 
 ---
 
@@ -57,7 +73,7 @@ Task: 概念深化頁 A 類「Neve 收手」首磚（`30dccf1`）+ 第二磚棋�
 
 **第三磚（已 commit `66025cb`/`df73ebe`）＝Neve 語氣文案潤飾**：去 AI 味（砍破折號自我修辭、三段式排比、空泛隱喻、膚淺感嘆如「你聞到了什麼」）、戒掉反覆借用 Neve「眼睛」招牌意象、收緊。8 檔純文字、零棋理變動。跑 3-lens 對抗式人格審查（register / 自然度 / 懷疑論者）：16/21 改善或等價，3 處退步已回退。2 處 split（arrival.6 拿掉「我不說漂亮」、control-center 拿掉「別急著走」）多數判改善故保留，skeptic 異議＝丟了人格招牌/引導停頓，留待 iPhone 複看時 Eason 定奪。固化「文案語氣護欄」進 CLAUDE.md。
 
-**第四磚＝雜訊盤面+變體池，判決 MINIMAL（Eason 2026-06-23 拍板）**：設計 workflow（7 agent，含「signpost 才是歸宿」反方→主張 HOLD-PIVOT，synthesis 升級為 MINIMAL）。spec 已增訂 `concept-deepening-page.md` §0/§2.2 改寫 + §10–§14（變體池形狀 `steps[]`→`variants[][]`、雜訊盤四鐵則、三道 gate＝chess.js→**Stockfish MultiPV 唯一解（現缺）**→對抗審查、MINIMAL gate + 退場條款）。**為何 MINIMAL 不全做**：① Stockfish 唯一解閘門尚未存在、現有 data test 只驗合法不驗唯一解（6-21 假戰術陷阱，雜訊盤放大 N 倍）② epiphany 鏈未真機驗 ③ 深化頁 vs signpost 歸宿未定（vision §5 還列付費深度）。**MINIMAL 範圍**＝fork 1 個雜訊盤沉默關 + 先建 Stockfish 閘門腳本，驗核心假設；成立→未來擴/併，不成立→停/pivot（只賠 1 概念）。**第三層時間軸遞回明確延後**（歸宿在 signpost，非深化頁獨立 scheduler）。
+**第四磚＝雜訊盤面+變體池，判決 MINIMAL（Eason 2026-06-23 拍板）**：設計 workflow（7 agent，含「signpost 才是歸宿」反方→主張 HOLD-PIVOT，synthesis 升級為 MINIMAL）。spec 已增訂 `concept-deepening-page.md` §0/§2.2 改寫 + §10–§14（變體池形狀 `steps[]`→`variants[][]`、雜訊盤四鐵則、三道 gate＝chess.js→**Stockfish MultiPV 唯一解**（已建 `9efc7f4`：`tests/e2e/concept-deepening-uniqueness-spike`）→對抗審查、MINIMAL gate + 退場條款）。**為何 MINIMAL 不全做**：① Stockfish 唯一解閘門尚未存在、現有 data test 只驗合法不驗唯一解（6-21 假戰術陷阱，雜訊盤放大 N 倍）② epiphany 鏈未真機驗 ③ 深化頁 vs signpost 歸宿未定（vision §5 還列付費深度）。**MINIMAL 範圍**＝fork 1 個雜訊盤沉默關 + 先建 Stockfish 閘門腳本，驗核心假設；成立→未來擴/併，不成立→停/pivot（只賠 1 概念）。**第三層時間軸遞回明確延後**（歸宿在 signpost，非深化頁獨立 scheduler）。
 
 **剩（後續磚）**：① 第四磚 MINIMAL 施工（見上方 STATUS 四步）② iPhone 實機點深化頁手感（含 A3 彈窗、**epiphany 鉤子實際觸發 + 棋誌顯示**、合成事件本機測不到）③ 懷疑論者長期提醒：內化真正歸宿在棋憶 signpost，等 signpost 養肥（fork/pin 對局回推上線 + 真機觸發率達門檻）再回頭問深化頁是否該獨立存在。
 
