@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: 概念深化頁 A 類 UX 重設計（Phase 2 收尾；棋憶 #22 全線已 ship）
-Task: 概念深化頁 A 類「Neve 收手」首磚（`30dccf1`）+ 第二磚棋誌鉤子（`df5402d`）皆已 commit+push。**第三磚＝Neve 語氣文案潤飾（待 commit）**：去 AI 味、減重複「眼睛」隱喻、收緊 8 檔文案（深化 successText / 棋誌 arrival·epiphany·onset 模板 / 課程 scenario / 試煉 brief），純文字、零棋理變動，過 3-lens 對抗式人格審查、3 處退步已回退。下一步＝iPhone 實機複看（含 epiphany 觸發）/ 重磚「雜訊盤面+變體池」（見下方「概念深化頁」段）。
+Task: 概念深化頁 A 類「Neve 收手」首磚（`30dccf1`）+ 第二磚棋誌鉤子（`df5402d`）+ 第三磚文案語氣收斂（`66025cb`/`df73ebe`）皆已 commit+push。**第四磚＝「雜訊盤面+變體池」，設計 workflow 判決＝MINIMAL（Eason 2026-06-23 拍板）**，spec 已增訂（`concept-deepening-page.md` §10–§14）。施工順序（逐項回報）：① 先建 Stockfish MultiPV 唯一解閘門腳本（安全網，現缺）② `steps[]`→`variants[][]` 形狀遷移 + `deepenedCount` 持久化 ③ clean-room 自寫 fork 1 個 L1 雜訊盤沉默關 variant、過三道 gate ④ 交 Eason iPhone 實機驗（unaided→epiphany 鏈 + 重溫換盤）。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
@@ -55,9 +55,11 @@ Task: 概念深化頁 A 類「Neve 收手」首磚（`30dccf1`）+ 第二磚棋�
 
 **第二磚（已 commit `df5402d`）＝棋誌鉤子**：沉默關**全程零求助**（LessonPlayer `unaided`）解出 → 自動寫一筆新 pen `epiphany`（「你自己看出來的」）到棋誌。走既有 settle 推導架構（非任意 append）：concept-progress 加 `deepenedUnaided` set（localStorage-only，journal entry 才是跨裝置 SoT）→ snapshot `unaidedDeepenings`/`recordedEpiphanyRefIds` → `deriveCandidates` 推 epiphany（PRIORITY 4，onset 與 arrival 之間）→ 6 句 Neve 收手文案模板（過 persona-lint 嚴格規則：無 blame/digit）。volume 由 concept 的 teaches[0] 課程 category 推得（重用 `CATEGORY_VOLUME`）。entry 不可點、自動歸卷。標準路徑已固化進 `.claude/docs/technical-preferences.md`。vitest 815 綠、vue-tsc 0（既有 pgn-viewer/resume-game/vite.config 紅非本次）。**未實機驗**（chessground 合成事件測不到，併入下方 iPhone 複看）。
 
-**第三磚（待 commit）＝Neve 語氣文案潤飾**：去 AI 味（砍破折號自我修辭、三段式排比、空泛隱喻、膚淺感嘆如「你聞到了什麼」）、戒掉反覆借用 Neve「眼睛」招牌意象、收緊。8 檔純文字、零棋理變動（FEN/走法/solution/expectedMove 逐字未動）。跑 3-lens 對抗式人格審查（register / 自然度 / 懷疑論者）對 `persona-neve.md` 逐句 verdict：16/21 改善或等價，3 處退步已回退（pin brief 丟「動不了」、fork brief「不該」評判腔、mate-in-2「離角落不遠」丟方向動態）。2 處 split（arrival.6 拿掉「我不說漂亮」、control-center 拿掉「別急著走」）多數判改善故保留，skeptic 異議＝丟了人格招牌/引導停頓，留待 iPhone 複看時 Eason 定奪。vitest 815 綠。
+**第三磚（已 commit `66025cb`/`df73ebe`）＝Neve 語氣文案潤飾**：去 AI 味（砍破折號自我修辭、三段式排比、空泛隱喻、膚淺感嘆如「你聞到了什麼」）、戒掉反覆借用 Neve「眼睛」招牌意象、收緊。8 檔純文字、零棋理變動。跑 3-lens 對抗式人格審查（register / 自然度 / 懷疑論者）：16/21 改善或等價，3 處退步已回退。2 處 split（arrival.6 拿掉「我不說漂亮」、control-center 拿掉「別急著走」）多數判改善故保留，skeptic 異議＝丟了人格招牌/引導停頓，留待 iPhone 複看時 Eason 定奪。固化「文案語氣護欄」進 CLAUDE.md。
 
-**剩（後續磚）**：① 雜訊盤面 + 變體池 + 隔時間交錯遞回（內容量大、需 Stockfish 驗唯一解）② iPhone 實機點深化頁手感（含 A3 彈窗、**epiphany 鉤子實際觸發 + 棋誌顯示**、合成事件本機測不到）③ 懷疑論者長期提醒：內化真正歸宿在棋憶 signpost，等 signpost 養肥再回頭問深化頁是否該獨立存在。
+**第四磚＝雜訊盤面+變體池，判決 MINIMAL（Eason 2026-06-23 拍板）**：設計 workflow（7 agent，含「signpost 才是歸宿」反方→主張 HOLD-PIVOT，synthesis 升級為 MINIMAL）。spec 已增訂 `concept-deepening-page.md` §0/§2.2 改寫 + §10–§14（變體池形狀 `steps[]`→`variants[][]`、雜訊盤四鐵則、三道 gate＝chess.js→**Stockfish MultiPV 唯一解（現缺）**→對抗審查、MINIMAL gate + 退場條款）。**為何 MINIMAL 不全做**：① Stockfish 唯一解閘門尚未存在、現有 data test 只驗合法不驗唯一解（6-21 假戰術陷阱，雜訊盤放大 N 倍）② epiphany 鏈未真機驗 ③ 深化頁 vs signpost 歸宿未定（vision §5 還列付費深度）。**MINIMAL 範圍**＝fork 1 個雜訊盤沉默關 + 先建 Stockfish 閘門腳本，驗核心假設；成立→未來擴/併，不成立→停/pivot（只賠 1 概念）。**第三層時間軸遞回明確延後**（歸宿在 signpost，非深化頁獨立 scheduler）。
+
+**剩（後續磚）**：① 第四磚 MINIMAL 施工（見上方 STATUS 四步）② iPhone 實機點深化頁手感（含 A3 彈窗、**epiphany 鉤子實際觸發 + 棋誌顯示**、合成事件本機測不到）③ 懷疑論者長期提醒：內化真正歸宿在棋憶 signpost，等 signpost 養肥（fork/pin 對局回推上線 + 真機觸發率達門檻）再回頭問深化頁是否該獨立存在。
 
 ### 待 Eason iPhone 實機複看
 
