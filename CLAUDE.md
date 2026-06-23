@@ -60,6 +60,13 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 > （`data/lessons/*`、`data/puzzles/*`、`data/concept-deepening/*`）後，**加跑一次對抗式棋理審查**
 > （多 agent 各自找反駁）。2026-06-21 概念深化頁就靠它抓到 2 個 chess.js 全綠、卻被 `Qe8`／`Kxd8`
 > 反殺、白方反丟子的「假戰術」——單元測試與人工逐步推算都漏了。
+> **對抗式審查也會漏，最後一道＝Stockfish 唯一解閘門**：批次新增/修改戰術局面後，跑
+> `tests/e2e/concept-deepening-uniqueness-spike`（MultiPV=2、≤5s/局面、@spike CI 排除；
+> `CONCEPT=<x>` 可單跑一概念）。它對每個 `expectedMove` 驗「PV1==教學手 且 PV1−PV2 ≥200cp」
+> （將殺題：唯一 mate-in-N）——抓得出對抗審查漏的「贏了子卻 K+單馬 vs K 和棋／白方仍落後／
+> 被更簡單手支配」。2026-06-23 此閘門首跑即在過了 2 輪對抗審查的 shipped 深化內容裡抓到 6 處
+> （fork#2 假贏成和棋、pin#2 靠對手送子、mate#2 非唯一將殺、discovered#1 被直接吃后支配…）。
+> defense／center 概念本質多解，閘門對它們走 weak-rule（不驗唯一性）。
 
 > **文案語氣護欄**：批次「潤飾 Neve 文案」（純改字、零棋理）後，跑一次對抗式人格審查
 > （多 lens 對 `design/gambit-design-system/persona-neve.md` 逐句 verdict），別只信 vitest／
