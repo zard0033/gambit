@@ -80,6 +80,28 @@ describe('useConceptProgressStore', () => {
     const store = useConceptProgressStore()
     expect(store.isDeepened('mate')).toBe(true)
   })
+
+  it('test_markDeepenedUnaided_addsAndPersists', () => {
+    const store = useConceptProgressStore()
+    store.markDeepenedUnaided('fork')
+    expect([...store.deepenedUnaided]).toEqual(['fork'])
+    const persisted = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}')
+    expect(persisted.deepenedUnaided).toContain('fork')
+  })
+
+  it('test_markDeepenedUnaided_isIdempotent', () => {
+    const store = useConceptProgressStore()
+    store.markDeepenedUnaided('pin')
+    store.markDeepenedUnaided('pin')
+    expect([...store.deepenedUnaided]).toEqual(['pin'])
+  })
+
+  it('test_deepenedUnaided_rehydratesFromPersistedState', () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ practiceSolved: [], deepenedUnaided: ['skewer'] }))
+    setActivePinia(createPinia())
+    const store = useConceptProgressStore()
+    expect([...store.deepenedUnaided]).toEqual(['skewer'])
+  })
 })
 
 // AC2: finishing a concept deepening writes ONLY the deepening signal — lesson `completed`,

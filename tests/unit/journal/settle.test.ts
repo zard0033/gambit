@@ -25,6 +25,8 @@ function snap(o: Partial<SettleSnapshot> = {}): SettleSnapshot {
     hasOnset: o.hasOnset ?? false,
     completedStages: o.completedStages ?? [],
     recordedStageIds: o.recordedStageIds ?? new Set<string>(),
+    unaidedDeepenings: o.unaidedDeepenings ?? [],
+    recordedEpiphanyRefIds: o.recordedEpiphanyRefIds ?? new Set<string>(),
     recentGames: o.recentGames ?? [],
     sessionsSinceLastSolace: o.sessionsSinceLastSolace ?? Number.POSITIVE_INFINITY,
     now: o.now ?? 1000,
@@ -99,6 +101,22 @@ describe('deriveCandidates — arrival', () => {
   })
 })
 
+describe('deriveCandidates — epiphany (unaided deepening)', () => {
+  const fork = { conceptId: 'fork', volume: '卷二戰術' as Volume, params: { 概念: '捉雙' } }
+
+  it('yields epiphany for an unaided concept with no prior epiphany', () => {
+    const c = deriveCandidates(snap({ hasOnset: true, unaidedDeepenings: [fork] }))
+    expect(c).toEqual([{ pen: 'epiphany', sourceRefId: 'fork', volume: '卷二戰術', params: { 概念: '捉雙' } }])
+  })
+
+  it('skips a concept that already has an epiphany (dedup, one per concept)', () => {
+    const c = deriveCandidates(
+      snap({ hasOnset: true, unaidedDeepenings: [fork], recordedEpiphanyRefIds: new Set(['fork']) }),
+    )
+    expect(c).toEqual([])
+  })
+})
+
 describe('deriveCandidates — solace', () => {
   it('AC-solace-1: yields solace at streak with cooldown satisfied', () => {
     const c = deriveCandidates(
@@ -120,10 +138,16 @@ describe('selectCandidates — F2 priority + cap', () => {
   const onset: Candidate = { pen: 'onset', sourceRefId: 'onset', volume: null, params: {} }
   const arrival = (id: string): Candidate => ({ pen: 'arrival', sourceRefId: id, volume: '卷一規則', params: {} })
   const solace: Candidate = { pen: 'solace', sourceRefId: 'g0', volume: '卷二戰術', params: {} }
+  const epiphany: Candidate = { pen: 'epiphany', sourceRefId: 'fork', volume: '卷二戰術', params: { 概念: '捉雙' } }
 
   it('AC-priority-2: arrival and solace both kept; arrival sorts above solace', () => {
     const out = selectCandidates([solace, arrival('rules')])
     expect(out.map((c) => c.pen)).toEqual(['arrival', 'solace'])
+  })
+
+  it('epiphany sorts above arrival, below onset', () => {
+    const out = selectCandidates([solace, arrival('rules'), epiphany, onset])
+    expect(out.map((c) => c.pen)).toEqual(['onset', 'epiphany', 'arrival'])
   })
 
   it('AC-priority-1: never writes more than the cap', () => {

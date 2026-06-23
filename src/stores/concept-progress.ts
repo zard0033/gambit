@@ -8,10 +8,12 @@ interface ProgressShape {
   practiceSolved: string[]
   /** Concepts whose deepening page the player has completed (quick-specs/concept-deepening-page.md). */
   deepened?: string[]
+  /** Concepts whose deepening silent gate was solved with no aid — triggers the epiphany journal pen. */
+  deepenedUnaided?: string[]
 }
 
 /** Read a persisted string[] field from STORAGE_KEY. Corrupt/absent → []; progress must never throw. */
-function loadField(field: 'practiceSolved' | 'deepened'): string[] {
+function loadField(field: 'practiceSolved' | 'deepened' | 'deepenedUnaided'): string[] {
   if (typeof localStorage === 'undefined') return []
   const raw = localStorage.getItem(STORAGE_KEY)
   if (!raw) return []
@@ -36,12 +38,14 @@ function loadField(field: 'practiceSolved' | 'deepened'): string[] {
 export const useConceptProgressStore = defineStore('conceptProgress', () => {
   const practiceSolved = ref<Set<string>>(new Set(loadField('practiceSolved')))
   const deepenedConcepts = ref<Set<string>>(new Set(loadField('deepened')))
+  const deepenedUnaided = ref<Set<string>>(new Set(loadField('deepenedUnaided')))
 
   function persist(): void {
     if (typeof localStorage === 'undefined') return
     const payload: ProgressShape = {
       practiceSolved: [...practiceSolved.value],
       deepened: [...deepenedConcepts.value],
+      deepenedUnaided: [...deepenedUnaided.value],
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
   }
@@ -70,6 +74,18 @@ export const useConceptProgressStore = defineStore('conceptProgress', () => {
     persist()
     // Best-effort cloud write; no-ops when logged out (re-flushed on next login).
     void useDataSyncStore().upsertDeepenedConcepts([conceptId])
+  }
+
+  /**
+   * Record that a concept's deepening silent gate was solved with no aid. Idempotent; localStorage
+   * only — the epiphany journal entry it triggers is the cross-device source of truth (it cloud-syncs
+   * via the journal queue). The journal's settle dedups, so re-marking never double-writes.
+   */
+  function markDeepenedUnaided(conceptId: string): void {
+    if (deepenedUnaided.value.has(conceptId)) return
+    deepenedUnaided.value.add(conceptId)
+    deepenedUnaided.value = new Set(deepenedUnaided.value)
+    persist()
   }
 
   /** Pull cloud-only deepened concepts into the local set (union). Called on login. */
@@ -106,6 +122,8 @@ export const useConceptProgressStore = defineStore('conceptProgress', () => {
     deepenedConcepts,
     isDeepened,
     markDeepened,
+    deepenedUnaided,
+    markDeepenedUnaided,
     reconcileOnLogin,
   }
 })

@@ -111,6 +111,26 @@
 - **單元測試驗不到**：`expect(style).toContain('var(--danger)')` 只驗屬性「含」字串、不驗「解析」——
   2026-06-20 棋憶圖表/卡片 4 個元件全黑就是這個，靠 dev-server 截圖才抓到。手寫 token 後**截圖驗一次**。
 
+## 新增棋誌（journal）筆種 pen 的標準路徑（加 pen 前先讀）
+
+棋誌是**從持久狀態決定性推導**的（ADR-0013、zero-AI R9、idempotent）——**不可**從 view 直接
+`dataSync.appendJournalEntry` 任意寫一筆（會繞過 dedup / 決定性 / 跨裝置合併）。新增一個 pen 一律走
+settle 管線，照以下五步（以 2026-06-23 加的 `epiphany`＝沉默關零求助「你自己看出來的」為範本）：
+
+1. **持久化觸發來源**：把觸發事實寫進某個 store 的持久欄位（如 concept-progress 的 `deepenedUnaided`，
+   localStorage-only 即可——**真正的跨裝置 SoT 是寫出去的 journal entry**，它會經 journal queue 同步）。
+2. **`Pen` 型別**（`types/journal.ts`）加新值；`journal_entries.type` 是自由文字欄、**無需 migration**。
+3. **SettleSnapshot**（`lib/journal/settle.ts`）加兩個欄位：可寫清單 + 已寫的 `recorded…RefIds`（dedup）；
+   在 `deriveCandidates` 推 candidate，`PRIORITY` 給優先序。snapshot 必須「全部來自持久狀態」（R5 無暫存）。
+4. **模板**（`data/journal-templates/<pen>.ts`，≥5 變體）＋註冊進 index；**過 persona-lint**——若是情感/肯定類
+   pen，在 `lib/journal/persona-lint.ts` 的 `lintEntryBody` 併入嚴格規則（無 blame/digit，如 solace/epiphany）。
+5. **journal store `evaluate()`** 組 snapshot 新欄位（從 store + 既有 entries 推），view 在事件點呼叫
+   `journal.evaluate()`（idempotent，dedup 保證不重複）。
+
+volume 別自己發明映射——concept 走 `teaches[0]` 課程的 category → `CATEGORY_VOLUME`（`lib/journal/stages.ts`），
+與 arrival 同一 SoT。**chessground 互動觸發的 pen 本機/Playwright 測不到**（合成事件），邏輯靠 unit 全綠，
+實際觸發＋棋誌顯示待實機點一輪。
+
 ## Forbidden Patterns
 
 - [None configured yet — add as architectural decisions are made]

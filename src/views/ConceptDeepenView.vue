@@ -7,10 +7,12 @@ import { ArrowRight } from 'lucide-vue-next'
 import { COACH } from '@/types/lesson'
 import { getConceptDeepening } from '@/data/concept-deepening'
 import { useConceptProgressStore } from '@/stores/concept-progress'
+import { useJournalStore } from '@/stores/journal'
 
 const route = useRoute()
 const router = useRouter()
 const conceptProgress = useConceptProgressStore()
+const journal = useJournalStore()
 
 const deepening = getConceptDeepening(route.params.conceptId as string)
 
@@ -24,7 +26,14 @@ const unaided = ref(false)
 const wrapOverlay = ref<HTMLElement | null>(null)
 
 function onComplete(playerUnaided: boolean): void {
-  if (deepening) conceptProgress.markDeepened(deepening.conceptId)
+  if (deepening) {
+    conceptProgress.markDeepened(deepening.conceptId)
+    // Solved the silent gate with no aid → Neve quietly logs "你自己看出來的" in the journal.
+    if (playerUnaided) {
+      conceptProgress.markDeepenedUnaided(deepening.conceptId)
+      void journal.evaluate()
+    }
+  }
   unaided.value = playerUnaided
   showWrapUp.value = true
   // a11y: move focus into the dialog (aria-modal needs focus inside; Esc / scrim-click then dismiss).

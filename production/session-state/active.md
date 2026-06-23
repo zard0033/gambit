@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: 概念深化頁 A 類 UX 重設計（Phase 2 收尾；棋憶 #22 全線已 ship）
-Task: **概念深化頁 A 類「Neve 收手」首磚施工完成（未 commit）**。多 agent brainstorm + council 拍板＝深化頁從「換皮課程」改成「Neve 一段一段放手的辨識訓練」。首磚＝撤鷹架（3 關：她指→她問→沉默）+ Neve 收手文案 + A1 間距 + A3 收尾彈窗（精髓 essence + 全程未求助時第一人稱認可）+ 全站拿掉逐字打字機。細節見下方「概念深化頁」段。
+Task: **概念深化頁 A 類「Neve 收手」首磚已 commit（`30dccf1`）**。多 agent brainstorm + council 拍板＝深化頁從「換皮課程」改成「Neve 一段一段放手的辨識訓練」。首磚＝撤鷹架（3 關：她指→她問→沉默）+ Neve 收手文案 + A1 間距 + A3 收尾彈窗（精髓 essence + 全程未求助時第一人稱認可）+ 全站拿掉逐字打字機。下一步＝後續磚（見下方「概念深化頁」段）。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
@@ -51,9 +51,11 @@ Task: **概念深化頁 A 類「Neve 收手」首磚施工完成（未 commit）
 
 **設計拍板（Eason 2026-06-22，經多 agent brainstorm + council）**：深化 ≠ 更難的三題，而是 **Neve 一段一段放手**——課程＝先講後做、深化＝先認後證。一個概念兩段（「她教你看 → 換你自己看」，避免「初階/進階/Lv」這種打卡心智）。spec＝`design/quick-specs/concept-deepening-page.md`（待補增訂）。
 
-**首磚（施工完成、未 commit）**：① **撤鷹架** 3 關漸層——step0 她指給你看、step1 她只問你一句、step2 沉默「我不說了」（highlights 清空；hint/arrows 仍是 opt-in 逃生梯）② Neve 收手文案（8 概念全重寫，fen/expectedMove/arrows/hint 逐字未動，過 2 輪對抗式棋理審查）③ **A1** 木盤↔氣泡間距拉開 ④ **A3** 收尾改原頁彈窗（精髓 `essence` + 全程未求助才出第一人稱認可）⑤ **全站拿掉逐字打字機**。共用渲染器 `LessonPlayer` 加 `completionMode='overlay'`＋`complete(unaided)`；資料移除第 4 個 recap step（剩 3 互動）+ 加 `essence` 欄。vitest 805、典型畫面已截圖驗（A1/打字機/1-3 步/沉默關）。
+**首磚（已 commit `30dccf1`）**：① **撤鷹架** 3 關漸層——step0 她指給你看、step1 她只問你一句、step2 沉默「我不說了」（highlights 清空；hint/arrows 仍是 opt-in 逃生梯）② Neve 收手文案（8 概念全重寫，fen/expectedMove/arrows/hint 逐字未動，過 2 輪對抗式棋理審查）③ **A1** 木盤↔氣泡間距拉開 ④ **A3** 收尾改原頁彈窗（精髓 `essence` + 全程未求助才出第一人稱認可）⑤ **全站拿掉逐字打字機**。共用渲染器 `LessonPlayer` 加 `completionMode='overlay'`＋`complete(unaided)`；資料移除第 4 個 recap step（剩 3 互動）+ 加 `essence` 欄。vitest 805、典型畫面已截圖驗（A1/打字機/1-3 步/沉默關）。
 
-**剩（後續磚，非首磚範圍）**：① 棋誌鉤子（沉默關無輔助解出→寫一筆「你自己看出來的」）② 雜訊盤面 + 變體池 + 隔時間交錯遞回（內容量大、需 Stockfish 驗唯一解）③ iPhone 實機點深化頁手感（含 A3 彈窗、合成事件本機測不到）④ 懷疑論者長期提醒：內化真正歸宿在棋憶 signpost，等 signpost 養肥再回頭問深化頁是否該獨立存在。
+**第二磚（施工完成、未 commit）＝棋誌鉤子**：沉默關**全程零求助**（LessonPlayer `unaided`）解出 → 自動寫一筆新 pen `epiphany`（「你自己看出來的」）到棋誌。走既有 settle 推導架構（非任意 append）：concept-progress 加 `deepenedUnaided` set（localStorage-only，journal entry 才是跨裝置 SoT）→ snapshot `unaidedDeepenings`/`recordedEpiphanyRefIds` → `deriveCandidates` 推 epiphany（PRIORITY 4，onset 與 arrival 之間）→ 6 句 Neve 收手文案模板（過 persona-lint 嚴格規則：無 blame/digit）。volume 由 concept 的 teaches[0] 課程 category 推得（重用 `CATEGORY_VOLUME`）。entry 不可點、自動歸卷。vitest 815 綠、vue-tsc 0（既有 pgn-viewer/resume-game/vite.config 紅非本次）。**未實機驗**（chessground 合成事件測不到，併入下方 iPhone 複看）。
+
+**剩（後續磚）**：① 雜訊盤面 + 變體池 + 隔時間交錯遞回（內容量大、需 Stockfish 驗唯一解）② iPhone 實機點深化頁手感（含 A3 彈窗、**epiphany 鉤子實際觸發 + 棋誌顯示**、合成事件本機測不到）③ 懷疑論者長期提醒：內化真正歸宿在棋憶 signpost，等 signpost 養肥再回頭問深化頁是否該獨立存在。
 
 ### 待 Eason iPhone 實機複看
 

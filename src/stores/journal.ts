@@ -4,8 +4,9 @@ import type { JournalEntry, Volume } from '@/types/journal'
 import { useDataSyncStore } from '@/stores/data-sync'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
 import { useGameHistoryStore } from '@/stores/game-history'
+import { useConceptProgressStore } from '@/stores/concept-progress'
 import { mergeAndOrder } from '@/lib/journal/order'
-import { completedStages } from '@/lib/journal/stages'
+import { completedStages, unaidedDeepenedConcepts } from '@/lib/journal/stages'
 import { recordSolaceSession, sessionsSinceLastSolace, touchSession } from '@/lib/journal/session'
 import { outcomeFromResult, planEntries, type PlayedGame, type SettleSnapshot } from '@/lib/journal/settle'
 
@@ -36,6 +37,7 @@ export const useJournalStore = defineStore('journal', () => {
     const dataSync = useDataSyncStore()
     const lessonProgress = useLessonProgressStore()
     const gameHistory = useGameHistoryStore()
+    const conceptProgress = useConceptProgressStore()
 
     await load()
     if (gameHistory.entries.length === 0) {
@@ -57,6 +59,10 @@ export const useJournalStore = defineStore('journal', () => {
       completedStages: completedStages(lessonProgress.completed),
       recordedStageIds: new Set(
         entries.value.filter((e) => e.type === 'arrival').map((e) => e.sourceRefId),
+      ),
+      unaidedDeepenings: unaidedDeepenedConcepts(conceptProgress.deepenedUnaided),
+      recordedEpiphanyRefIds: new Set(
+        entries.value.filter((e) => e.type === 'epiphany').map((e) => e.sourceRefId),
       ),
       recentGames,
       sessionsSinceLastSolace: sessionsSinceLastSolace(ordinal),

@@ -4,8 +4,9 @@
  * `journal_entries.type` is a free text column).
  */
 
-/** A journal pen (entry kind). v1 implements onset/arrival/solace. */
-export type Pen = 'onset' | 'arrival' | 'solace'
+/** A journal pen (entry kind). v1 implements onset/arrival/solace; epiphany = a concept
+ * deepening's silent gate solved with no aid ("你自己看出來的"). */
+export type Pen = 'onset' | 'arrival' | 'solace' | 'epiphany'
 
 /** Journey volume an entry is filed under. `onset` is filed under none (null). */
 export type Volume = '卷一規則' | '卷二戰術' | '卷三開局' | '卷四殘局'
@@ -26,7 +27,7 @@ export interface JournalTemplate {
 export interface JournalEntry {
   readonly id: string
   readonly type: Pen
-  /** Event idempotency key: onset='onset', arrival=stageId, solace=triggering gameId. */
+  /** Event idempotency key: onset='onset', arrival=stageId, solace=triggering gameId, epiphany=conceptId. */
   readonly sourceRefId: string
   /** null for onset (pinned at the book's start, filed under no volume). */
   readonly volume: Volume | null

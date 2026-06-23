@@ -17,6 +17,13 @@ export interface CompletedStage {
   params: JournalParams
 }
 
+/** A concept whose deepening silent gate was solved unaided — the epiphany source. */
+export interface DeepenedConcept {
+  conceptId: string
+  volume: Volume
+  params: JournalParams
+}
+
 export type GameOutcome = 'win' | 'loss' | 'draw'
 
 /** A played game, newest-first, reduced to what settle needs. */
@@ -33,6 +40,10 @@ export interface SettleSnapshot {
   completedStages: CompletedStage[]
   /** stageIds that already have an arrival entry (R6 / AC-arrival-2/3 dedup). */
   recordedStageIds: ReadonlySet<string>
+  /** Concepts deepened unaided (eligible for an epiphany entry). */
+  unaidedDeepenings: DeepenedConcept[]
+  /** conceptIds that already have an epiphany entry (dedup — one epiphany per concept). */
+  recordedEpiphanyRefIds: ReadonlySet<string>
   /** Recent games, newest-first (for the leading loss run). */
   recentGames: PlayedGame[]
   /** Sessions since the last solace (∞ if never) — for SOLACE_COOLDOWN. */
@@ -43,8 +54,8 @@ export interface SettleSnapshot {
   newId: () => string
 }
 
-/** Priority for F2 selection (higher wins). Phase 2 inserts epiphany=4, move=1. */
-const PRIORITY: Record<Pen, number> = { onset: 5, arrival: 3, solace: 2 }
+/** Priority for F2 selection (higher wins). Phase 2 inserts move=1. */
+const PRIORITY: Record<Pen, number> = { onset: 5, epiphany: 4, arrival: 3, solace: 2 }
 
 /** Count the leading run of losses (newest-first) and the game that triggered it. */
 export function leadingLossRun(games: PlayedGame[]): { count: number; triggeringGameId: string | null } {
@@ -77,6 +88,12 @@ export function deriveCandidates(s: SettleSnapshot): Candidate[] {
     }
   }
 
+  for (const c of s.unaidedDeepenings) {
+    if (!s.recordedEpiphanyRefIds.has(c.conceptId)) {
+      out.push({ pen: 'epiphany', sourceRefId: c.conceptId, volume: c.volume, params: c.params })
+    }
+  }
+
   const { count, triggeringGameId } = leadingLossRun(s.recentGames)
   if (count >= SOLACE_LOSS_STREAK && s.sessionsSinceLastSolace >= SOLACE_COOLDOWN && triggeringGameId) {
     out.push({ pen: 'solace', sourceRefId: triggeringGameId, volume: '卷二戰術', params: {} })
@@ -85,7 +102,8 @@ export function deriveCandidates(s: SettleSnapshot): Candidate[] {
   return out
 }
 
-/** F2: take the top `cap` candidates by priority. v1 |candidates| ≤ cap so all are kept. */
+/** F2: take the top `cap` candidates by priority. A 4-candidate session (onset+epiphany+arrival+
+ * solace) drops the lowest (solace) past the cap; it re-derives on the next settle. */
 export function selectCandidates(candidates: Candidate[], cap: number = SESSION_ENTRY_CAP): Candidate[] {
   return [...candidates].sort((a, b) => PRIORITY[b.pen] - PRIORITY[a.pen]).slice(0, cap)
 }
