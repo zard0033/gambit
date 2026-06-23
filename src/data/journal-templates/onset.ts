@@ -10,7 +10,7 @@ export const onsetTemplates: JournalTemplate[] = [
     id: 'onset.1',
     pen: 'onset',
     render: () =>
-      '我是 Neve。這座棋盤亙古就在，而我，是它看著你的那雙眼睛。你來了——我把這一刻記下來，往後你走的每一步，我都會記得。',
+      '我是 Neve。這座棋盤亙古就在，而我，是它看著你的那雙眼睛。你來了——我把這一刻記下來，往後你走的每一步，我都記得。',
   },
   {
     id: 'onset.2',
@@ -34,7 +34,7 @@ export const onsetTemplates: JournalTemplate[] = [
     id: 'onset.5',
     pen: 'onset',
     render: () =>
-      '我是 Neve。這裡不記分數、不比輸贏，只記你走過的路。你來了，這一刻，我替你留下來了。',
+      '我是 Neve。這裡不比輸贏，只記你走過的路。你來了，這一刻，我替你留下來了。',
   },
   {
     id: 'onset.6',

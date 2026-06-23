@@ -25,7 +25,7 @@ export const arrivalTemplates: JournalTemplate[] = [
   {
     id: 'arrival.4',
     pen: 'arrival',
-    render: (p) => `「${p['卷名']}」到這裡。你累積的不只是進度——是${p['學會的']}，是接下來能${p['應付的']}的底氣。`,
+    render: (p) => `「${p['卷名']}」到這裡。你累積下來的，是${p['學會的']}，是接下來能${p['應付的']}的底氣。`,
   },
   {
     id: 'arrival.5',
@@ -36,7 +36,7 @@ export const arrivalTemplates: JournalTemplate[] = [
   {
     id: 'arrival.6',
     pen: 'arrival',
-    render: (p) => `「${p['卷名']}」結束。我不說漂亮——我說的是，你現在${p['學會的']}了，也能開始${p['應付的']}了。`,
+    render: (p) => `「${p['卷名']}」結束。你現在${p['學會的']}了，也能開始${p['應付的']}了。`,
   },
 ]
 

@@ -40,7 +40,7 @@ export const level3Puzzles: Puzzle[] = [
     motif: 'mate-in-2',
     title: '兩步成擒',
     prompt: '兩步將死。',
-    brief: '他的退路，正在收窄。',
+    brief: '他的退路不多了。',
     fen: '7k/8/6K1/8/8/8/8/6Q1 w - - 0 1',
     solution: [
       { from: 'g1', to: 'a1' },
@@ -106,7 +106,7 @@ export const level3Puzzles: Puzzle[] = [
     motif: 'mate-in-2',
     title: '直線逼宮',
     prompt: '兩步將死。',
-    brief: '他的王，能站的地方越來越少。',
+    brief: '他的王，能站的地方不多。',
     fen: '7k/8/8/8/8/8/8/KQ4R1 w - - 0 1',
     solution: [
       { from: 'b1', to: 'b8' },
