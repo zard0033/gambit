@@ -61,6 +61,13 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 > （多 agent 各自找反駁）。2026-06-21 概念深化頁就靠它抓到 2 個 chess.js 全綠、卻被 `Qe8`／`Kxd8`
 > 反殺、白方反丟子的「假戰術」——單元測試與人工逐步推算都漏了。
 
+> **文案語氣護欄**：批次「潤飾 Neve 文案」（純改字、零棋理）後，跑一次對抗式人格審查
+> （多 lens 對 `design/gambit-design-system/persona-neve.md` 逐句 verdict），別只信 vitest／
+> persona-lint——它們只驗硬規則（FEN／走法合法、無 emoji／車馬象／blame／digit），**驗不出語氣退步**
+> （丟 motif 定義線索、評判腔、丟方向性）。2026-06-23 一輪文案收斂即靠 3-lens（register／自然度／
+> 懷疑論者）審出 3 處退步、vitest 815 全綠：pin brief 丟「動不了」、fork brief「不該」帶評判、
+> mate-in-2「離角落不遠」丟逼王方向動態。與上面「棋理護欄」同構：硬閘門驗不出的，靠對抗式審查補。
+
 > **內容授權護欄**：lichess 題庫位置／解法＝CC0，可商用直接採；lila／chessops／Learn 課文
 > ＝copyleft（**禁抄**），教學文一律繁中 clean-room 自寫；棋子 Gioco Wood＝CC BY-NC-SA 4.0
 > （已在 `public/CREDITS.md` 標註）、棋盤 Wood12＝CC0。引入任何外部內容前先確認授權。
