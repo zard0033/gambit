@@ -41,15 +41,17 @@ const filterConcept = process.env.CONCEPT
 const targets: Target[] = []
 for (const d of Object.values(conceptDeepenings)) {
   if (filterConcept && d.conceptId !== filterConcept) continue
-  d.steps.forEach((step, i) => {
-    if (!step.expectedMove) return
-    const m = step.expectedMove
-    targets.push({
-      id: `${d.conceptId}#${i}`,
-      conceptId: d.conceptId,
-      fen: step.fen,
-      expected: `${m.from}${m.to}${m.promotion ?? ''}`,
-      kind: kindOf(d.conceptId),
+  d.variants.forEach((variant, vi) => {
+    variant.forEach((step, i) => {
+      if (!step.expectedMove) return
+      const m = step.expectedMove
+      targets.push({
+        id: `${d.conceptId}v${vi}#${i}`,
+        conceptId: d.conceptId,
+        fen: step.fen,
+        expected: `${m.from}${m.to}${m.promotion ?? ''}`,
+        kind: kindOf(d.conceptId),
+      })
     })
   })
 }

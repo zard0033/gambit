@@ -115,6 +115,9 @@ Every task follows: **Question -> Options -> Decision -> Draft -> Approval**
 > Always push explicitly with `git push origin main` — never bare `git push` — so a
 > branch that tracks `upstream` can never push your work to the template repo.
 
+> **active.md 同步守則**：push 前先更新 `production/session-state/active.md`（完成項標 ✅、更新下一步），
+> 一起 stage 進同一個 commit，不必單獨推。不寫 commit hash（查 `git log` 即可，hash 在 active.md 裡是冗餘）。
+
 See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 
 > **First session?** If the project has no engine configured and no game concept,

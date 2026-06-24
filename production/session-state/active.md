@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: 概念深化頁 A 類 UX 重設計（Phase 2 收尾；棋憶 #22 全線已 ship）
-Task: 概念深化頁第四磚＝MINIMAL（Eason 2026-06-23 拍板）。**defense weak-rule + defense#1/#2 重做完成（gate 把 defense 納入 center 的 weak-rule；defense#1 改釘子局面讓「加防守者」前提為真、defense#2 改底排串擊逃法修「王守城堡假前提＋對稱反擊」雙缺陷）——三道 gate 全清（chess.js / Stockfish pv1 三手皆 match / 對抗審查 ALL SOUND）、vitest 815 綠、五維+ponytail review 過。待 Eason 確認 commit。** 接手點＝① 第四磚 MINIMAL 施工（變體池+雜訊盤，見 spec §10–§14）② iPhone 實機驗 unaided→epiphany。
+Task: 第四磚 MINIMAL ✅ 完成。下一步＝iPhone 實機驗 unaided→epiphany + A3 彈窗手感。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
@@ -75,7 +75,9 @@ Task: 概念深化頁第四磚＝MINIMAL（Eason 2026-06-23 拍板）。**defens
 
 **第四磚＝雜訊盤面+變體池，判決 MINIMAL（Eason 2026-06-23 拍板）**：設計 workflow（7 agent，含「signpost 才是歸宿」反方→主張 HOLD-PIVOT，synthesis 升級為 MINIMAL）。spec 已增訂 `concept-deepening-page.md` §0/§2.2 改寫 + §10–§14（變體池形狀 `steps[]`→`variants[][]`、雜訊盤四鐵則、三道 gate＝chess.js→**Stockfish MultiPV 唯一解**（已建 `9efc7f4`：`tests/e2e/concept-deepening-uniqueness-spike`）→對抗審查、MINIMAL gate + 退場條款）。**為何 MINIMAL 不全做**：① Stockfish 唯一解閘門尚未存在、現有 data test 只驗合法不驗唯一解（6-21 假戰術陷阱，雜訊盤放大 N 倍）② epiphany 鏈未真機驗 ③ 深化頁 vs signpost 歸宿未定（vision §5 還列付費深度）。**MINIMAL 範圍**＝fork 1 個雜訊盤沉默關 + 先建 Stockfish 閘門腳本，驗核心假設；成立→未來擴/併，不成立→停/pivot（只賠 1 概念）。**第三層時間軸遞回明確延後**（歸宿在 signpost，非深化頁獨立 scheduler）。
 
-**剩（後續磚）**：① 第四磚 MINIMAL 施工（見上方 STATUS 四步）② iPhone 實機點深化頁手感（含 A3 彈窗、**epiphany 鉤子實際觸發 + 棋誌顯示**、合成事件本機測不到）③ 懷疑論者長期提醒：內化真正歸宿在棋憶 signpost，等 signpost 養肥（fork/pin 對局回推上線 + 真機觸發率達門檻）再回頭問深化頁是否該獨立存在。
+**第四磚 ✅ 完成**：`steps[]`→`variants[][]` 變體池 + `deepenedCount` localStorage 持久化 + fork 雜訊盤 variant 1（三道 gate 全清）+ ConceptDeepenView `variantIndex` computed。vitest 818 綠、vue-tsc 0 新增錯誤、五維+ponytail review 過。
+
+**剩（後續磚）**：① iPhone 實機點深化頁手感（A3 彈窗、**epiphany 鉤子實際觸發 + 棋誌顯示**）② 根據實機感受決定擴池（其他概念加 variant）或 HOLD ③ 懷疑論者長期提醒：真正歸宿在棋憶 signpost，等 signpost 養肥再評估深化頁獨立存在的必要。
 
 ### 待 Eason iPhone 實機複看
 

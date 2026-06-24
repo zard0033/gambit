@@ -16,7 +16,12 @@ export interface ConceptDeepening {
   title: string
   /** Situational set-up shown before the first step (Neve's method: scenario first). */
   intro: string
-  steps: LessonStep[]
+  /**
+   * Variant pool (spec §10). Each inner array is a full 3-step Neve-收手 triplet.
+   * variants.length === 1 is the degenerate single-variant case (zero breaking change from old `steps`).
+   * The active variant is selected deterministically: deepenedCount[conceptId] % variants.length.
+   */
+  variants: LessonStep[][]
   /** The tactic's essence, crystallized — shown in the wrap-up popup for a calm "回味" (A3). */
   essence: string
 }

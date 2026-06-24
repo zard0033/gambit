@@ -67,11 +67,32 @@ describe('useConceptProgressStore', () => {
     expect(persisted.deepened).toContain('fork')
   })
 
-  it('test_markDeepened_isIdempotent', () => {
+  it('test_markDeepened_isIdempotent_forSet', () => {
+    // deepenedConcepts Set deduplicates — calling twice should not add a second entry.
     const store = useConceptProgressStore()
     store.markDeepened('pin')
     store.markDeepened('pin')
     expect([...store.deepenedConcepts]).toEqual(['pin'])
+  })
+
+  it('test_markDeepened_incrementsCountEachCall', () => {
+    // deepenedCount always increments for variant rotation (spec §10 MINIMAL AC-V3).
+    const store = useConceptProgressStore()
+    expect(store.deepenedCount['fork']).toBeUndefined()
+    store.markDeepened('fork')
+    expect(store.deepenedCount['fork']).toBe(1)
+    store.markDeepened('fork')
+    expect(store.deepenedCount['fork']).toBe(2)
+  })
+
+  it('test_deepenedCount_persistsAndRehydrates', () => {
+    const store = useConceptProgressStore()
+    store.markDeepened('mate')
+    store.markDeepened('mate')
+    // Reload store from localStorage
+    setActivePinia(createPinia())
+    const store2 = useConceptProgressStore()
+    expect(store2.deepenedCount['mate']).toBe(2)
   })
 
   it('test_deepened_rehydratesFromPersistedState', () => {
