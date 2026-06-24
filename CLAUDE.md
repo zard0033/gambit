@@ -67,6 +67,10 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 > 被更簡單手支配」。2026-06-23 此閘門首跑即在過了 2 輪對抗審查的 shipped 深化內容裡抓到 6 處
 > （fork#2 假贏成和棋、pin#2 靠對手送子、mate#2 非唯一將殺、discovered#1 被直接吃后支配…）。
 > defense／center 概念本質多解，閘門對它們走 weak-rule（不驗唯一性）。
+> **weak-rule 下「pv1==教學手」只是 REVIEW、必要非充分**：2026-06-24 重做 defense#2 時，Stockfish
+> pv1 ✓matches 卻仍藏「城堡被自家王守＝『補不了防守』假前提」＋「Rd4 反擊對稱→K+R vs K+B 和棋」
+> 雙缺陷，是對抗式棋理審查（gate ③）抓出的、閘門放行。故 weak-rule 概念的把關主力＝gate ③，閘門
+> 只證「教學手不是被支配的爛手」。對抗審查 prompt 要明問「前提是否屬實／反擊是否對稱／概念是否唯一可讀」。
 
 > **文案語氣護欄**：批次「潤飾 Neve 文案」（純改字、零棋理）後，跑一次對抗式人格審查
 > （多 lens 對 `design/gambit-design-system/persona-neve.md` 逐句 verdict），別只信 vitest／

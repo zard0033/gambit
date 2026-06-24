@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: 概念深化頁 A 類 UX 重設計（Phase 2 收尾；棋憶 #22 全線已 ship）
-Task: 概念深化頁第四磚＝MINIMAL（Eason 2026-06-23 拍板）。**今日：①Stockfish 唯一解閘門 spike 已建+push（`9efc7f4`）、spec 增訂 push（`1184e00`）；閘門首跑審計 shipped 深化內容→抓到 6 處假戰術/瑕疵。②已 clean-room 重做 4 個明確 bug 局面（fork#2/pin#2/mate#2/discovered#1）、chess.js 驗過、寫進 data（未提交）。** 🔴 **尚未跑 Stockfish 閘門驗 eval 唯一性——未驗證前禁止 commit。明天從下方「🔴 明天接手」開始。**
+Task: 概念深化頁第四磚＝MINIMAL（Eason 2026-06-23 拍板）。**defense weak-rule + defense#1/#2 重做完成（gate 把 defense 納入 center 的 weak-rule；defense#1 改釘子局面讓「加防守者」前提為真、defense#2 改底排串擊逃法修「王守城堡假前提＋對稱反擊」雙缺陷）——三道 gate 全清（chess.js / Stockfish pv1 三手皆 match / 對抗審查 ALL SOUND）、vitest 815 綠、五維+ponytail review 過。待 Eason 確認 commit。** 接手點＝① 第四磚 MINIMAL 施工（變體池+雜訊盤，見 spec §10–§14）② iPhone 實機驗 unaided→epiphany。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
@@ -18,7 +18,7 @@ Task: 概念深化頁第四磚＝MINIMAL（Eason 2026-06-23 拍板）。**今日
 - **discovered#1** `q3k3/8/4N3/8/8/8/8/4R1K1` `e6c7`（改騎士雙將避開原「Bxa8 直接吃后」支配；gap 98200cp）
 
 **剩（明天/後續）**：
-1. **defense#1/2**（閘門仍 FAIL，屬「教學手非引擎最佳」非假贏）：defense#1 騎士 d3 已被 Bf1 防守（加防守者多餘）、defense#2 `Rd4`（逃＋反攻）勝過教學 `Rd8+`。defense/center 本質多解 →把閘門對 defense 改 **weak-rule**（比照 center 不驗唯一性），與重做這兩例一起做。
+1. ~~**defense#1/2 + 閘門 weak-rule**~~ ✅ **2026-06-24 完成（待 commit）**：閘門把 `defense` 納入 `center` weak-rule（Kind `'center'`→`'weak'`、`WEAK_RULE` set）；defense#1 改 `3r2k1/8/8/8/3N4/8/8/2BK4`（騎士被釘在王前→「加防守者」前提為真，Be3）、defense#2 改 `1k5b/8/8/4R3/8/8/8/4K3`（城堡真沒人守+底排串擊逃法 Re8+ 贏主教→修舊局「王守城堡假前提＋Rd4 對稱反擊和棋」）。三道 gate 全清、815 綠、五維+ponytail 過。
 2. **第四磚原計畫**（雜訊盤面+變體池 MINIMAL，見 spec §10–§14 + 下方第四磚段）：`steps[]`→`variants[][]` 變體池 + `deepenedCount` 持久化 + fork 1 個雜訊盤沉默關 variant（過三道 gate）+ iPhone 實機驗 unaided→epiphany。
 
 **踩過的坑（別重蹈）**：用 workflow 讓 agent **自己設計+自驗棋局失敗**——agent 不擅長自驗、會在 repo 根目錄狂寫 scratch（`.tmp-chess/`、`scratch_*.mjs`）把 vitest 全炸（vite config 解析壞）；已全清、根依賴未損。**改用「主模型自己設計 → chess.js + 真實 Stockfish 閘門驗」**才可靠。待 Eason 同意的全域 memory：spawn subagent/workflow 時須在 prompt 明令「只寫 scratchpad、禁寫 repo root」（它們不繼承 scratchpad 規則）。

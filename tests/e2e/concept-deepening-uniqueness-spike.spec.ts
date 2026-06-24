@@ -11,7 +11,8 @@
  * over every deepening variant's expectedMove and verdicts each:
  *   - tactic concepts: PV1 == expectedMove AND PV1−PV2 ≥ 200cp (no equally-good sibling line)
  *   - mate concept:    PV1 is mate-in-N == expectedMove AND PV2 is not a same/shorter mate
- *   - center concept:  opening has many equivalent moves — weak rule only, flagged for manual review
+ *   - center/defense:  many equivalent moves by nature (opening choices; the four defensive tools
+ *                      often tie) — weak rule only, flagged for manual review of the reported PV1
  *
  * Informational @spike (excluded from CI via playwright.config grepInvert). The report is the
  * signal: read it before committing any new variant. Run:
@@ -26,9 +27,13 @@ test.use({ ...devices['Desktop Chrome'] })
 const BUDGET_MS = 5_000
 const UNIQUE_CP_GAP = 200
 
-type Kind = 'tactic' | 'mate' | 'center'
+type Kind = 'tactic' | 'mate' | 'weak'
+// center + defense are multi-solution by nature — uniqueness is the wrong gate (a defensive
+// position routinely has several equally-good tools, e.g. escape-with-check vs escape-with-
+// counterattack). Verdict REVIEW: the report still prints PV1 so it's a manual eyeball, not a pass.
+const WEAK_RULE = new Set(['center', 'defense'])
 const kindOf = (conceptId: string): Kind =>
-  conceptId === 'mate' ? 'mate' : conceptId === 'center' ? 'center' : 'tactic'
+  conceptId === 'mate' ? 'mate' : WEAK_RULE.has(conceptId) ? 'weak' : 'tactic'
 
 type Target = { id: string; conceptId: string; fen: string; expected: string; kind: Kind }
 
@@ -142,9 +147,9 @@ test.describe('@spike concept-deepening uniqueness gate', () => {
       let verdict: 'PASS' | 'FAIL' | 'REVIEW' = 'PASS'
       let note = ''
 
-      if (t.kind === 'center') {
+      if (t.kind === 'weak') {
         verdict = 'REVIEW'
-        note = `center weak-rule, manual (pv1=${move ?? '?'})`
+        note = `${t.conceptId} weak-rule, manual (pv1=${move ?? '?'}${moveOk ? ' ✓matches' : ''})`
       } else if (t.kind === 'mate') {
         const m1 = mateN(r?.mpv1 ?? null)
         const m2 = mateN(r?.mpv2 ?? null)
@@ -171,9 +176,9 @@ test.describe('@spike concept-deepening uniqueness gate', () => {
     const pass = rows.filter((r) => r.verdict === 'PASS').length
     const fail = rows.filter((r) => r.verdict === 'FAIL').length
     const review = rows.filter((r) => r.verdict === 'REVIEW').length
-    console.log(`\nSUMMARY: ${pass} PASS / ${fail} FAIL / ${review} REVIEW (center weak-rule)`)
+    console.log(`\nSUMMARY: ${pass} PASS / ${fail} FAIL / ${review} REVIEW (center/defense weak-rule)`)
     if (fail > 0) {
-      console.log('⚠️  FAILs are informational here (existing data may be legitimately non-unique, e.g. defense).')
+      console.log('⚠️  FAILs are informational here (existing data may be legitimately non-unique).')
       console.log('   For a NEW noise-board variant, a FAIL means: do NOT ship it — adjust the noise until it passes.')
     }
 
