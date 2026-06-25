@@ -27,10 +27,14 @@ const emit = defineEmits<{ (e: 'open', ply: number): void }>()
 // SVG plot geometry (viewBox units). Left pad leaves room for the 白優/黑優 label plate.
 const W = 320
 const H = 120
-const PAD_L = 34
+const PAD_L = 40
 const PAD_Y = 8
 const MID = H / 2
 const plotW = W - PAD_L - 6
+// Axis-label backing-plate widths. The player's side carries the wider 「白優 你」 badge; it MUST stay
+// < PAD_L so the badge never overlaps the plot (first point sits at x=PAD_L). Bump PAD_L too if widened.
+const PLATE_W = 30
+const PLATE_W_SELF = 38
 
 const n = computed(() => props.series.length)
 
@@ -111,19 +115,9 @@ function onActivate(): void {
     @pointermove="onPointerMove"
     @click="onActivate"
   >
-    <div class="mb-1 flex items-center justify-between">
-      <span class="flex items-center gap-2">
-        <span class="font-display text-sm text-ink">這盤的走勢</span>
-        <!-- 你執白/黑：標出使用者這盤的方，讓上方白優/黑優軸有所本（你看不出白黑） -->
-        <span class="flex items-center gap-1 font-sans text-[11px] text-ink-muted">
-          <span
-            class="h-2 w-2 shrink-0 rounded-full border"
-            :class="orientation === 'white' ? 'border-black/20 bg-[#fbfbf6]' : 'border-white/20 bg-[#2a2a2a]'"
-            aria-hidden="true"
-          />
-          你執{{ orientation === 'white' ? '白' : '黑' }}
-        </span>
-      </span>
+    <!-- 標題 + 逐手覆盤 併在一起（同一處讀）；「你執白/黑」移到圖內白優/黑優軸旁當 badge -->
+    <div class="mb-1 flex items-center gap-2">
+      <span class="font-display text-sm text-ink">這盤的走勢</span>
       <span class="flex items-center gap-1 font-sans text-xs text-ink-muted">
         <LayoutGrid :size="13" :stroke-width="1.8" aria-hidden="true" /> 逐手覆盤
       </span>
@@ -161,12 +155,24 @@ function onActivate(): void {
         stroke-width="1.5"
         style="pointer-events: none"
       />
-      <!-- left-edge labels with a backing plate so the curve never overlaps them (Rule 10) -->
+      <!-- left-edge labels with a backing plate so the curve never overlaps them (Rule 10). The
+           player's own side is a filled jade badge with 「你」 (which colour you had this game), so
+           the 白優/黑優 axis isn't ambiguous — the cue lives right on the axis it explains. -->
       <g>
-        <rect x="0" y="2" width="30" height="16" rx="3" fill="var(--color-surface-card)" opacity="0.92" />
-        <text x="4" y="14" font-size="10" fill="var(--color-ink-muted)">白優</text>
-        <rect x="0" :y="H - 18" width="30" height="16" rx="3" fill="var(--color-surface-card)" opacity="0.92" />
-        <text x="4" :y="H - 6" font-size="10" fill="var(--color-ink-muted)">黑優</text>
+        <!-- 白優 (top) -->
+        <rect x="0" y="2" :width="orientation === 'white' ? PLATE_W_SELF : PLATE_W" height="16" rx="3"
+              :fill="orientation === 'white' ? 'var(--color-primary)' : 'var(--color-surface-card)'"
+              :opacity="orientation === 'white' ? 1 : 0.92" />
+        <text x="4" y="14" font-size="10"
+              :fill="orientation === 'white' ? 'var(--color-primary-fg)' : 'var(--color-ink-muted)'"
+              :font-weight="orientation === 'white' ? 700 : 400">{{ orientation === 'white' ? '白優 你' : '白優' }}</text>
+        <!-- 黑優 (bottom) -->
+        <rect x="0" :y="H - 18" :width="orientation === 'black' ? PLATE_W_SELF : PLATE_W" height="16" rx="3"
+              :fill="orientation === 'black' ? 'var(--color-primary)' : 'var(--color-surface-card)'"
+              :opacity="orientation === 'black' ? 1 : 0.92" />
+        <text x="4" :y="H - 6" font-size="10"
+              :fill="orientation === 'black' ? 'var(--color-primary-fg)' : 'var(--color-ink-muted)'"
+              :font-weight="orientation === 'black' ? 700 : 400">{{ orientation === 'black' ? '黑優 你' : '黑優' }}</text>
       </g>
     </svg>
   </button>

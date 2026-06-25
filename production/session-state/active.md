@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: 概念深化頁 A 類 UX 重設計（Phase 2 收尾；棋憶 #22 全線已 ship）
-Task: iPhone 實機反饋第一批已修（board 跑版+執色指示+epiphany 收斂+型別債）。待拍板＝深化頁命運（1-A）。
+Task: 深化頁命運已拍板＝改「判斷場 / RecognitionGate」(見下方專段)。下一步＝設計 fork 3 盤(2真1誘餌、過閘門)再寫元件。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
@@ -19,8 +19,37 @@ Eason iPhone 實測深化頁/棋憶/試煉，反饋分三批處理。**本 commi
 - **1-C** 拿掉 epiphany inline 自誇句：移除「深化完成」彈窗內「這一輪我一句都沒提醒你」（Eason 嫌自我邀功、違 Neve 安靜人格）；**journal epiphany 記錄保留**（默默承載）。
 - **型別債**（順手）：清掉 9 個既有 vue-tsc 紅（pgn-viewer/resume-game mock 型別、cross-game 死 import、vite.config manualChunks return）→ vue-tsc 現 **0 error**。
 
+**同日晚間更新：**
+- **board 跑版「修了還壞」真相＝裝置舊快取（孤兒 SW），非 code bug**：桌機 Chromium+WebKit 連舊 code 都正方無溢出、Eason 無痕分頁正常、部署站查得 0 SW/sw.js 404 → 307d2cc 一直是對的，是 Eason 裝置殘留舊 service worker 餵舊版。**清網站資料後正常**。連帶修 CLAUDE.md/technical-preferences 假的「vite-plugin-pwa 已裝」→「未實作」+ PWA 進 backlog（commit 310e507）。**測試教訓：驗剛部署的版本一律用無痕分頁，別信常駐分頁。**
+- **2(b) loading 實測 <10s** ✅（Eason iPhone，比 ~20s 目標還快；品質對新手足夠、不回調）。
+- **走勢圖 badge 重排（Eason 第二輪「item 4」，≠ 下方重置功能那個 item 4）✅ 本 commit push**：EvalShapeChart 移除 header 圓點 chip、「逐手覆盤」併到標題旁；「你執白/黑」改成圖內白優/黑優軸上的 jade badge（命名常數 `PLATE_W_SELF<PAD_L` 不變式）。vue-tsc 0、818 綠、五維+ponytail 過。**本機渲染不了此圖（game-store 記憶體態無法 seed、自動打局未啟動），視覺待 Eason 裝置複看（用無痕分頁）。**
+- **本機互動測試解鎖**：`page.mouse.click(x,y)` 真實座標可驅動 chessground tap-to-move（已固化進 technical-preferences）；深化 unaided→epiphany 鏈已本機驗。
+
+## 深化頁重設計拍板（2026-06-25 晚）＝「判斷場 / RecognitionGate」
+
+Eason 對深化頁不滿（跟課程毫無二致、沒「更深一層」感）→ 跑 12-agent workflow（優化 vs 重練；brief 在 run `wf_1da48163-e57`）。
+
+**核心洞見**：問題不在文案、在結構——深化頁進去就告訴你「這是捉雙頁、這盤有捉雙」，所以你**只練 execution（找+走已知戰術），從沒練 recognition（判斷有沒有）**。「學以致用」的客觀定義＝沒人提示時你能不能認出時機（**含認出「這裡沒有」**）。現況完全沒碰這層 → 潤色救不了。
+
+**判決＝hybrid 分兩階段**（同一個 `RecognitionGate` 元件、換觸發源、非重做）：
+- **階段一（先做）＝辨時機關**：深化第三步（沉默關）從「單盤找答案」改成「判斷場」。
+- **階段二（後做，北極星歸宿）＝接棋憶 signpost**：同元件改由「你真實對局裡偵測到錯過的該概念機會」觸發。**受 `classify.ts` 只可靠分類 material+mate 限制**（fork/pin pv 不可靠 defer）→ 8 概念只覆蓋 2，須先評估擴 classifier，故排第二。
+
+**UX 已與 Eason 走過、鎖定**（捉雙為例）：
+- 三步放手：① 她指給你看 ② 她只問一句（此二步**維持單盤、沿用 LessonPlayer**；fading 結構學習科學上是對的）③ **判斷場**。
+- 判斷場＝**carousel**（**3 張全尺寸盤、左右滑、不用縮圖+放大**——避開醜轉場，棋盤尺寸全程不變、只水平 slide）。**2 真 + 1 誘餌**（誘餌＝看似有戰術、對手能反駁）。
+- 有捉雙→走出來；沒有→按「這裡沒有」。
+- **漏看真盤**（按了「這裡沒有」但其實有）→ 判完她一句「還有一手在等你」、**不點破哪盤**（Eason 選 A）。
+- **走了誘餌**→ 子滑回、**事後**Neve 解釋為何不成立（反駁理由**必須與 Stockfish PV 對得上**，否則講錯比假將殺更傷）（Eason OK）。
+- **全真盤收完 + 誘餌跳過才過關**（無「完成」鈕可亂按、「跳過」不能當作弊）→ 精髓彈窗；全程未求助→棋誌 epiphany（走既有 settle 管線、不從 view 直接 append）。
+- **關鍵架構**：第三步抽成獨立 `RecognitionGate.vue`、**不再 import LessonPlayer**——這是「視覺/任務跟課程拉開」與「階段二複用」的雙重關鍵。沿用全 app 棋盤主題（Wood12+Gioco、board-fit、觸控≥44px）。
+
+**下一步（先內容、後元件）＝設計 fork 1 概念的 3 張盤**（2 真過 Stockfish 唯一解閘門、1 誘餌過反向閘門＋對抗審查），每張附 FEN/走法/Neve 文案，棋理站得住再寫元件。**棋理是這磚真風險，UI 是熟路。**
+
+**開放問題**（workflow 列）：① 誘餌造題工時＝全案最大未知（先用 fork 單概念量測）② unaided/epiphany 在 recognition 流程下的門檻鬆緊 ③ 階段二要不要投資擴 classifier 到 fork/pin（pv 不可靠是已知難題）④ 既有變體池（8 概念已過閘門 FEN）建議降級為判斷場「真盤」內容來源（不浪費）。
+
 **待 Eason 拍板（第二批，需決策，未動工）：**
-- **1-A 深化頁命運（最關鍵）**：Eason 玩牽制深化覺得「超爛」+「沉默關跟第一步一模一樣」。查證＝pin variant 0 的 step0/step2 都是「兵吃被釘在王前的騎士」d/e 線鏡像，單概念內撐不起「她慢慢放手」的差異。這正是懷疑論者一直提醒的「歸宿在 signpost」。選項：(i) 認真重做（沉默關換真正不同場景、過三道 gate）或 (ii) 深化頁降級/收掉。**等 Eason 判斷再投工。**
+- ~~**1-A 深化頁命運（最關鍵）**~~ ✅ **已拍板＝改「判斷場 / RecognitionGate」（見上方專段「深化頁重設計拍板」）**。下一步＝先設計 fork 3 盤再寫元件。
 - **item 4 重置對局記錄**：原估「小修」誤判——實為跨 store 破壞性刪除（Supabase delete + localStorage + 衍生 journal/memory 資料完整性）。待 scope：只清 list？還是連 concept-progress/journal 一起重置（測試用）？guest-only local vs 含 Supabase？
 - **2(e) 重點步 list 無用**：走勢圖下方一句小字+數字沒給可行動資訊。建議改「點圖轉折→跳該手」或拿掉。
 - ~~**2(b) loading 太慢**~~ ✅ **已調（OQ-5 resolved 2026-06-25）**：賽後深算旋鈕下調瞄準 ~20s 總時間——
