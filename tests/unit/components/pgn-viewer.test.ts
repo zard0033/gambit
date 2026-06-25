@@ -1,13 +1,15 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import PgnViewer from '@/components/pgn-viewer.vue'
 
 // --- Mock setup ---
 
+// Explicit call signatures: a bare `ReturnType<typeof vi.fn>` widens to `Mock<Procedure |
+// Constructable>` under vitest 4, which TS then refuses to call directly (它以為可能是 constructor).
 let mockViewerInstance: {
-  toPath: ReturnType<typeof vi.fn>
-  curData: ReturnType<typeof vi.fn>
+  toPath: Mock<(path: unknown, recursive: boolean) => void>
+  curData: Mock<() => unknown>
 }
 
 vi.mock('@lichess-org/pgn-viewer', () => ({
@@ -19,14 +21,14 @@ const TEST_PGN = '1.e4 e5 2.Nf3 Nc6'
 beforeEach(() => {
   // Fresh instance per test — prevents toPath patch leaking between tests
   mockViewerInstance = {
-    toPath: vi.fn(),
-    curData: vi.fn().mockReturnValue({}),
+    toPath: vi.fn<(path: unknown, recursive: boolean) => void>(),
+    curData: vi.fn<() => unknown>().mockReturnValue({}),
   }
   vi.clearAllMocks()
   // Re-assign after clearAllMocks so the factory closure returns the fresh object
   mockViewerInstance = {
-    toPath: vi.fn(),
-    curData: vi.fn().mockReturnValue({}),
+    toPath: vi.fn<(path: unknown, recursive: boolean) => void>(),
+    curData: vi.fn<() => unknown>().mockReturnValue({}),
   }
 })
 

@@ -52,6 +52,10 @@ const currentStep = computed<LessonStep | null>(() => props.steps[stepIndex.valu
 const isInteractive = computed(() => !!currentStep.value?.expectedMove)
 const isLastStep = computed(() => stepIndex.value >= props.steps.length - 1)
 
+// The side to move this step = the side the player moves with — name it so a bare「輪到你了」
+// isn't ambiguous about colour (mirrors 試煉's turn indicator). Derived from the step FEN.
+const turnLabel = computed(() => (currentStep.value?.fen?.split(' ')[1] === 'b' ? '黑方' : '白方'))
+
 // Per-step interaction state — reset whenever the step changes.
 const solved = ref(false)
 const wrongMove = ref<{ from: string; to: string } | null>(null)
@@ -347,7 +351,7 @@ function prev(): void {
 
             <!-- Hint text -->
             <div v-else-if="isInteractive && !solved" class="mt-3">
-              <p class="mb-2 font-sans text-sm text-ink-muted">輪到你了——在棋盤上走一步。</p>
+              <p class="mb-2 font-sans text-sm text-ink-muted">輪到你了——你執{{ turnLabel }}，在棋盤上走一步。</p>
               <Alert v-if="hintShown" variant="hint">
                 <AlertDescription class="text-hint-fg">{{ currentStep?.hint }}</AlertDescription>
                 <p v-if="answerRevealed" class="mt-2 text-sm text-hint">答案已畫在棋盤上——照著箭頭走走看。</p>
@@ -434,13 +438,6 @@ function prev(): void {
 </template>
 
 <style scoped>
-/* vue3-chessboard 的 .main-wrap 被釘死 700px（撐爆容器、桌機棋盤過大溢出）。強制它跟著外層寬度走，
-   底下的 main-board(aspect)→cg-board 才會一起 follow 成正方（桌機棋盤過大修正）。 */
-.board-fit :deep(.main-wrap) {
-  width: 100% !important;
-  max-width: 100% !important;
-  height: auto !important;
-}
 /* Coach bubble scrolls when narration is long; hide the scrollbar — the gradient fade is the cue. */
 .coach-scroll {
   scrollbar-width: none;

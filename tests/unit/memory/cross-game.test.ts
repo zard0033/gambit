@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { pickNeveLine } from '@/modules/memory/cross-game'
-import type { MemoryGameSummary, Stage } from '@/types/memory'
+import type { MemoryGameSummary } from '@/types/memory'
 
 // Frozen test constants (GDD AC preamble).
 const T = { window: 10, minSample: 6, minStage: 3, improveDelta: 0.3, conceptFrac: 0.5 }

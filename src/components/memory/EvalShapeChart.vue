@@ -12,11 +12,16 @@ import type { Moment } from '@/types/memory'
 import { momentVisualKind } from '@/modules/memory/describe'
 import { EVAL_CHART_CLAMP_CP } from '@/config/memory-config'
 
-const props = defineProps<{
-  series: Array<number | null>
-  moments: Moment[]
-  anchorPly: number | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    series: Array<number | null>
+    moments: Moment[]
+    anchorPly: number | null
+    /** The side the player had — names it so the 白優/黑優 axis isn't ambiguous (你看不出白黑). */
+    orientation?: 'white' | 'black'
+  }>(),
+  { orientation: 'white' },
+)
 const emit = defineEmits<{ (e: 'open', ply: number): void }>()
 
 // SVG plot geometry (viewBox units). Left pad leaves room for the 白優/黑優 label plate.
@@ -101,13 +106,24 @@ function onActivate(): void {
   <button
     type="button"
     class="group block w-full rounded-card border border-line bg-surface-card px-3 pb-2.5 pt-3 text-left transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-    aria-label="這盤的走勢，逐手覆盤"
+    :aria-label="`這盤的走勢，你執${orientation === 'white' ? '白' : '黑'}方，逐手覆盤`"
     @pointerdown="onPointerDown"
     @pointermove="onPointerMove"
     @click="onActivate"
   >
     <div class="mb-1 flex items-center justify-between">
-      <span class="font-display text-sm text-ink">這盤的走勢</span>
+      <span class="flex items-center gap-2">
+        <span class="font-display text-sm text-ink">這盤的走勢</span>
+        <!-- 你執白/黑：標出使用者這盤的方，讓上方白優/黑優軸有所本（你看不出白黑） -->
+        <span class="flex items-center gap-1 font-sans text-[11px] text-ink-muted">
+          <span
+            class="h-2 w-2 shrink-0 rounded-full border"
+            :class="orientation === 'white' ? 'border-black/20 bg-[#fbfbf6]' : 'border-white/20 bg-[#2a2a2a]'"
+            aria-hidden="true"
+          />
+          你執{{ orientation === 'white' ? '白' : '黑' }}
+        </span>
+      </span>
       <span class="flex items-center gap-1 font-sans text-xs text-ink-muted">
         <LayoutGrid :size="13" :stroke-width="1.8" aria-hidden="true" /> 逐手覆盤
       </span>

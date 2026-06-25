@@ -28,6 +28,7 @@ export default defineConfig({
         manualChunks(id: string) {
           if (/[\\/]node_modules[\\/](vue3-chessboard|chessground|chess\.js)[\\/]/.test(id)) return 'chess-board'
           if (/[\\/]node_modules[\\/]chess-openings[\\/]/.test(id)) return 'chess-openings'
+          return undefined
         },
       },
     },

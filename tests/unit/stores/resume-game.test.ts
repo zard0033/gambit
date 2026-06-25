@@ -5,7 +5,7 @@ import type { ResumePayload, ResumeSnapshot } from '@/types/resume'
 
 const upsertResumeGame = vi.fn().mockResolvedValue(true)
 const deleteResumeGame = vi.fn().mockResolvedValue(true)
-const loadResumeGame = vi.fn<[], Promise<ResumeSnapshot | null>>().mockResolvedValue(null)
+const loadResumeGame = vi.fn<() => Promise<ResumeSnapshot | null>>().mockResolvedValue(null)
 
 vi.mock('@/stores/data-sync', () => ({
   useDataSyncStore: () => ({ upsertResumeGame, deleteResumeGame, loadResumeGame }),

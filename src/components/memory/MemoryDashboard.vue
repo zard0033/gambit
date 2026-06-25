@@ -44,6 +44,7 @@ const analysisProgress = computed(() => {
         :series="ctx.series.value"
         :moments="ctx.moments.value"
         :anchor-ply="ctx.anchorPly.value"
+        :orientation="ctx.orientation.value"
         @open="(ply) => ctx.openReplay(ply)"
       />
       <!-- 3. Moment list / zero-state -->

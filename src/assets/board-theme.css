@@ -17,6 +17,19 @@ body cg-board {
   background-repeat: no-repeat;
 }
 
+/* ---- .board-fit contract (global) ----
+   vue3-chessboard pins its `.main-wrap` to width:700px, which overflows any narrower wrapper
+   (撐爆木框 / 桌機過大 / mobile 整個跑版). The `.board-fit` class — paired with the useBoardFit
+   composable that floors the wrapper to a multiple of 8 — owns the override so cg-board follows
+   the wrapper into a square. Global (not per-view scoped) because it bit repeatedly when a new
+   board view forgot to copy the scoped rule (棋憶 失誤動畫). Any `.board-fit` view gets it free.
+   PgnViewer (Replay) sizes via `.lpv`/`.cg-wrap`, has no `.main-wrap`, so this never touches it. */
+.board-fit .main-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
 /* ---- Coordinate labels (a–h / 1–8) ----
    Native chessground coords (CSS-positioned → responsive). chessground's default
    colors wash out on this tea palette, so use a solid cream fill with a real dark

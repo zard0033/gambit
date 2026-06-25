@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import LessonPlayer from '@/components/lesson/LessonPlayer.vue'
 import { Button } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-vue-next'
-import { COACH } from '@/types/lesson'
 import { getConceptDeepening } from '@/data/concept-deepening'
 import { useConceptProgressStore } from '@/stores/concept-progress'
 import { useJournalStore } from '@/stores/journal'
@@ -31,19 +30,18 @@ const variantIndex = computed(() => {
 // Wrap-up popup (A3): the board stays behind; this overlay crystallizes the essence and — only when
 // the player got through without any aid — Neve quietly acknowledges that they saw it themselves.
 const showWrapUp = ref(false)
-const unaided = ref(false)
 const wrapOverlay = ref<HTMLElement | null>(null)
 
 function onComplete(playerUnaided: boolean): void {
   if (deepening) {
     conceptProgress.markDeepened(deepening.conceptId)
     // Solved the silent gate with no aid → Neve quietly logs "你自己看出來的" in the journal.
+    // The recognition lives there, not as an on-screen self-congratulation (Neve stays calm).
     if (playerUnaided) {
       conceptProgress.markDeepenedUnaided(deepening.conceptId)
       void journal.evaluate()
     }
   }
-  unaided.value = playerUnaided
   showWrapUp.value = true
   // a11y: move focus into the dialog (aria-modal needs focus inside; Esc / scrim-click then dismiss).
   nextTick(() => wrapOverlay.value?.focus())
@@ -91,19 +89,6 @@ function onComplete(playerUnaided: boolean): void {
 
         <!-- 精髓：這個戰術濃縮成一句，讓人離開前再回味一次 -->
         <p class="w-full font-lesson text-[16px] leading-relaxed text-ink">{{ deepening.essence }}</p>
-
-        <!-- 只在全程未求助時，Neve 罕見地以第一人稱認可——平時不給，所以有重量 -->
-        <p
-          v-if="unaided"
-          data-testid="concept-deepen-unaided"
-          class="mt-4 flex items-start gap-2 text-left font-lesson text-[14px] leading-relaxed text-ink-muted"
-        >
-          <span
-            class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary font-num text-[10px] leading-none text-primary-fg"
-            aria-hidden="true"
-          >{{ COACH.name.charAt(0) }}</span>
-          <span>這一輪，我一句都沒提醒你。是你自己看見的。</span>
-        </p>
 
         <Button
           variant="gold"

@@ -375,13 +375,3 @@ function goNext(): void {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* vue3-chessboard 的 .main-wrap 被釘死 700px（撐爆木框、桌機棋盤過大且木框對不到）。強制它跟著
-   木框寬度走，cg-board 才會 follow 成正方、剛好貼合木盤（桌機棋盤過大／木框未對齊修正）。 */
-.board-fit :deep(.main-wrap) {
-  width: 100% !important;
-  max-width: 100% !important;
-  height: auto !important;
-}
-</style>

@@ -1,13 +1,30 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: 概念深化頁 A 類 UX 重設計（Phase 2 收尾；棋憶 #22 全線已 ship）
-Task: 第四磚 MINIMAL ✅ 完成。下一步＝iPhone 實機驗 unaided→epiphany + A3 彈窗手感。
+Task: iPhone 實機反饋第一批已修（board 跑版+執色指示+epiphany 收斂+型別債）。待拍板＝深化頁命運（1-A）。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
 > **差異化北極星 = `production/gambit-differentiation-vision.md`**——提任何功能/重構/UI 前**先讀**。
 
 ---
+
+## 2026-06-25 iPhone 實機反饋（第一批已修，待 push 部署後複驗）
+
+Eason iPhone 實測深化頁/棋憶/試煉，反饋分三批處理。**本 commit ＝第一批（清楚、零決策）：**
+
+- **棋盤跑版**（棋憶失誤動畫 + 試煉，Eason 圖1）：root cause＝MemorySlideshow 用了 `board-fit` class 但**漏抄** `.main-wrap` 覆寫 → vue3-chessboard 撐到 700px 溢出。修法＝把覆寫**全域化**進 `board-theme.css`（`.board-fit .main-wrap`，隨 class 走、根治複發），刪 DungeonPuzzle/LessonPlayer 兩份重複。試煉本機 iPhone viewport 實證 main-wrap=344px 正方。**棋憶失誤動畫 chessground 合成事件本機測不到，待實機複驗。**
+- **1-A(a)** 深化 step 加執色：LessonPlayer `turnLabel`（FEN side-to-move 推白/黑方），「輪到你了——你執X方，在棋盤上走一步」。
+- **2(c)** 走勢圖加執色 chip：EvalShapeChart 加 `orientation` prop（預設 white）+「你執白/黑」dot+label，MemoryDashboard 傳 `ctx.orientation`。
+- **1-C** 拿掉 epiphany inline 自誇句：移除「深化完成」彈窗內「這一輪我一句都沒提醒你」（Eason 嫌自我邀功、違 Neve 安靜人格）；**journal epiphany 記錄保留**（默默承載）。
+- **型別債**（順手）：清掉 9 個既有 vue-tsc 紅（pgn-viewer/resume-game mock 型別、cross-game 死 import、vite.config manualChunks return）→ vue-tsc 現 **0 error**。
+
+**待 Eason 拍板（第二批，需決策，未動工）：**
+- **1-A 深化頁命運（最關鍵）**：Eason 玩牽制深化覺得「超爛」+「沉默關跟第一步一模一樣」。查證＝pin variant 0 的 step0/step2 都是「兵吃被釘在王前的騎士」d/e 線鏡像，單概念內撐不起「她慢慢放手」的差異。這正是懷疑論者一直提醒的「歸宿在 signpost」。選項：(i) 認真重做（沉默關換真正不同場景、過三道 gate）或 (ii) 深化頁降級/收掉。**等 Eason 判斷再投工。**
+- **item 4 重置對局記錄**：原估「小修」誤判——實為跨 store 破壞性刪除（Supabase delete + localStorage + 衍生 journal/memory 資料完整性）。待 scope：只清 list？還是連 concept-progress/journal 一起重置（測試用）？guest-only local vs 含 Supabase？
+- **2(e) 重點步 list 無用**：走勢圖下方一句小字+數字沒給可行動資訊。建議改「點圖轉折→跳該手」或拿掉。
+- **2(b) loading 太慢**：去查賽後分析時間預算旋鈕（depth/multipv/位置數）評估能砍多少。
+- **2(a) loading 結合 Neve「思考中」對話框**：小工程。
 
 ## 明天接手（2026-06-23 收尾）
 
