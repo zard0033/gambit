@@ -18,7 +18,7 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 - **Frontend Framework**: Vue 3 + Vue Router + Pinia
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Build System**: Vite + vite-plugin-pwa
+- **Build System**: Vite（PWA／service worker 規劃中、**尚未安裝接上** `vite-plugin-pwa`，見 technical-preferences）
 - **Chess Board**: vue3-chessboard (wraps lichess chessground for Vue)
 - **Chess Engine**: Stockfish 18 Lite (single-threaded WASM, NNUE embedded) — `stockfish@18.0.7` (nmrugg/stockfish.js); files in `public/stockfish/stockfish-18-lite-single.{js,wasm}`
 - **Chess Rules**: chess.js (bundled with vue3-chessboard)

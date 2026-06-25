@@ -107,5 +107,9 @@ Eason iPhone 實測深化頁/棋憶/試煉，反饋分三批處理。**本 commi
 ### 未來獨立任務
 
 - **Phase C+/D**：捉雙/牽制賽後偵測（需精準度實測）；Claude API 動態講解/BYOK（最後）。
+- **PWA / Add-to-Home-Screen ⏸ 未實作**：目前零 service worker、零 manifest、`vite-plugin-pwa` 沒裝（CLAUDE.md
+  舊版誤列為已裝、2026-06-25 修正）。要做時：① 裝 `vite-plugin-pwa` + manifest + 圖示（pwa-192 已有）②
+  **必用 `registerType: 'autoUpdate'`**——否則 SW 把舊版鎖死、部署更新卡住（本次就因裝置殘留舊快取繞兩輪）③
+  Required ADRs 第 6「PWA caching strategy」要先寫。觸發＝要離線/裝成 App 的需求出現。**非 Phase 2 關鍵路徑。**
 - **epics/index Summary/Story Count 兩張彙總表過時**（沒納入 journal/memory/dungeon/learning-loop），獨立重算、刻意未動。
 - **🎨 第二主題（noir / "Dusk"）** ⏸ 低優先、未施工。設計定案、spec 已固化進 SoT（`colors_and_type.css` 的 `[data-theme="noir"]` 區塊 + 兩條護欄：金只給 reward/eval/focus、沉浸區靠 elevation/glass 分層）；demo＝`design/demos/{theme-tokens-mockup,ink-noir-explore}.html`。production 0 實作。**刻意延後**（不在 Phase 2 關鍵路徑、無需求方、上線即雙主題維護稅）。屆時排序：① `[data-theme="noir"]` token 層（`src/assets/main.css` @theme + shadcn HSL 雙寫、~70% 重用 on-deep）② toggle（ProfileView + localStorage/Supabase 同步、尊重 `prefers-color-scheme`）③ 深區 ~30 處寫死漸層 hex 隨頁面逐步 tokenize（別全域 sweep）④ CI WCAG 對比 gate。觸發＝Phase 2 告一段落/有需求/當賣點。

@@ -21,7 +21,10 @@
   - Must work in Safari iOS 16+
   - Touch targets ≥ 44×44px
   - No hover-only interactions (mobile has no hover state)
-  - PWA-enabled for iPhone "Add to Home Screen" experience
+  - PWA（Add to Home Screen／離線）**尚未實作**——目前無 service worker、無 manifest。部署＝GitHub Pages
+    純靜態，靠 HTTP 快取（index.html 約 10 分鐘 max-age）自癒；**測試剛部署的版本若看到舊畫面＝裝置快取**，
+    用無痕分頁、或設定→Safari→進階→網站資料刪該站即可。若日後實作 PWA，務必用 autoUpdate 策略，否則
+    service worker 會把舊版鎖死、部署更新卡住（2026-06-25 就因誤以為有 PWA 而繞路兩輪）。
   - Audio playback requires user gesture on iOS
 
 ## Naming Conventions
@@ -152,7 +155,6 @@ volume 別自己發明映射——concept 走 `teaches[0]` 課程的 category �
 | `pinia` ^3.x | State management | Vue official |
 | `typescript` ^6.x | Programming language | Microsoft |
 | `vite` ^8.x | Dev server + bundler | Community |
-| `vite-plugin-pwa` ^0.x | PWA support for iPhone Home Screen | Community |
 | `tailwindcss` ^4.x | Utility-first CSS | Community |
 | `vue3-chessboard` ^1.x | Chess board Vue component (wraps chessground) | qwerty084 |
 | `chess.js` | Chess rules (bundled with vue3-chessboard) | Community |
