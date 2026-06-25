@@ -199,9 +199,9 @@ This manifest is a programmer's quick-reference extracted from all Accepted-trea
 
 ### Performance Guardrails
 
-- **`REVIEW_PREVIEW_DEPTH = 12`, `REVIEW_PREVIEW_MOVE_TIME_MS = 1500ms`** (Pass 1 cap) — source: ADR-0007 §7
-- **`REVIEW_TARGET_DEPTH = 22`** (provisional — OQ-5 spike gates), **`REVIEW_MAX_MOVE_TIME_MS = 10000ms`** (Pass 2 cap) — source: ADR-0007 §7
-- **`REVIEW_TOTAL_TIME_BUDGET_MS = 90000ms`** (Pass 2 hard ceiling — positions not yet deepened keep their Pass-1 preview result) — source: ADR-0007 §7
+- **`REVIEW_PREVIEW_DEPTH = 12`, `REVIEW_PREVIEW_MOVE_TIME_MS = 1000ms`** (Pass 1 cap) — source: ADR-0007 §7 (OQ-5 resolved 2026-06-25: per-move 1500→1000ms)
+- **`REVIEW_TARGET_DEPTH = 16`** (OQ-5 resolved 2026-06-25: lowered 22→16 for iPhone ~20s review UX; depth 16 still ≫ beginner play), **`REVIEW_MAX_MOVE_TIME_MS = 4000ms`** (Pass 2 cap, lowered 10000→4000) — source: ADR-0007 §7
+- **`REVIEW_TOTAL_TIME_BUDGET_MS = 12000ms`** (Pass 2 hard ceiling — positions not yet deepened keep their Pass-1 preview result; OQ-5 resolved 2026-06-25: lowered 90000→12000) — source: ADR-0007 §7
 - **`DEPTH_MISMATCH_TOLERANCE = 4`** (depth guard threshold) — source: ADR-0007 §7
 - **`MATE_CP = 30000`** (mate-to-centipawn sentinel) — source: ADR-0007 §7
 - **Export handler synchronous-portion budget**: < 5 ms total — source: ADR-0010 §Perf

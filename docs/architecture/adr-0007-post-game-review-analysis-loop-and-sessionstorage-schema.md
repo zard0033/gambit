@@ -3,6 +3,16 @@
 ## Status
 Proposed — OQ-5 desktop spike RESOLVED (2026-05-30); real-iPhone measurement deferred to Sprint 6.
 
+> **Production retune (2026-06-25)** — independent of OQ-5 reachability (depth 22 *is* reachable):
+> the live Pass-2 knobs were lowered for iPhone review-speed UX — `REVIEW_TARGET_DEPTH` 22→16,
+> `REVIEW_MAX_MOVE_TIME_MS` 10000→4000, `REVIEW_TOTAL_TIME_BUDGET_MS` 90000→12000,
+> `REVIEW_PREVIEW_MOVE_TIME_MS` 1500→1000 (a full review stared at a ~90s progress bar; target ~20s).
+> The §7 knob tables, Decision §1, and the loop diagram below retain the ORIGINAL values as the
+> decision record; **live truth = `src/config/engine-tuning.ts` + control-manifest**. Rationale:
+> depth 16 (~2500 Elo) far exceeds beginner play and 棋憶's 60/120cp moment gates are coarse, so the
+> quality cost (cp precision, borderline moments) is acceptable for a calm training tool. The
+> `@spike` `depth-22-spike` e2e + its evidence file are now historical.
+
 > **OQ-5 spike result** (S5-03, 2026-05-30): Desktop Chromium HCE baseline reaches depth 27–29 per
 > position in 10s — `REVIEW_TARGET_DEPTH = 22` CONFIRMED. Full evidence in
 > `production/qa/evidence/s5-03-depth22-spike-evidence.md`.

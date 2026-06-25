@@ -23,8 +23,11 @@ Eason iPhone 實測深化頁/棋憶/試煉，反饋分三批處理。**本 commi
 - **1-A 深化頁命運（最關鍵）**：Eason 玩牽制深化覺得「超爛」+「沉默關跟第一步一模一樣」。查證＝pin variant 0 的 step0/step2 都是「兵吃被釘在王前的騎士」d/e 線鏡像，單概念內撐不起「她慢慢放手」的差異。這正是懷疑論者一直提醒的「歸宿在 signpost」。選項：(i) 認真重做（沉默關換真正不同場景、過三道 gate）或 (ii) 深化頁降級/收掉。**等 Eason 判斷再投工。**
 - **item 4 重置對局記錄**：原估「小修」誤判——實為跨 store 破壞性刪除（Supabase delete + localStorage + 衍生 journal/memory 資料完整性）。待 scope：只清 list？還是連 concept-progress/journal 一起重置（測試用）？guest-only local vs 含 Supabase？
 - **2(e) 重點步 list 無用**：走勢圖下方一句小字+數字沒給可行動資訊。建議改「點圖轉折→跳該手」或拿掉。
-- **2(b) loading 太慢**：去查賽後分析時間預算旋鈕（depth/multipv/位置數）評估能砍多少。
-- **2(a) loading 結合 Neve「思考中」對話框**：小工程。
+- ~~**2(b) loading 太慢**~~ ✅ **已調（OQ-5 resolved 2026-06-25）**：賽後深算旋鈕下調瞄準 ~20s 總時間——
+  `REVIEW_TARGET_DEPTH` 22→16、`REVIEW_MAX_MOVE_TIME_MS` 10s→4s、`REVIEW_TOTAL_TIME_BUDGET_MS` 90s→12s、
+  `REVIEW_PREVIEW_MOVE_TIME_MS` 1.5s→1s（`engine-tuning.ts`）。bump `ANALYSIS_CACHE_VERSION` 1→2 使舊 depth-22
+  cache 失效。同步 control-manifest/GDD/ADR-0007 status note。**真實秒數待 Eason iPhone 實測**，不夠快再砍一格。
+- **2(a) loading 結合 Neve「思考中」對話框**：小工程，未動。
 
 ## 明天接手（2026-06-23 收尾）
 

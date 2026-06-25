@@ -51,7 +51,9 @@ export type PersistedResult = Omit<StoredAnalysisEntry, 'pv'>
 // re-analyzed on every visit. Versioned so an engine-tuning change invalidates stale caches (mirrors
 // MEMORY_SUMMARY_SCHEMA_VERSION); FIFO-capped so our own footprint stays bounded (≤ cap games). A write
 // that still hits quota (from other localStorage usage) degrades gracefully — it does not reclaim space.
-const ANALYSIS_CACHE_VERSION = 1
+// v2 (2026-06-25): REVIEW_TARGET_DEPTH 22→16 etc. (OQ-5) — bump invalidates stale depth-22 caches
+// so a returning user re-analyzes at the new settings instead of mixing depth-22 and depth-16 evals.
+const ANALYSIS_CACHE_VERSION = 2
 const ANALYSIS_CACHE_MAX_GAMES = 30
 const ANALYSIS_KEY_PREFIX = `pgr:analysis:v${ANALYSIS_CACHE_VERSION}:`
 const ANALYSIS_INDEX_KEY = `pgr:analysis:index:v${ANALYSIS_CACHE_VERSION}`

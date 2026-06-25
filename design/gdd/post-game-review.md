@@ -307,11 +307,11 @@ If Stockfish returns `depthReached < REVIEW_TARGET_DEPTH` (e.g. `movetimeMs` tim
 
 | Knob | Default | Safe Range | Affects |
 | ---- | ------- | ---------- | ------- |
-| `REVIEW_PREVIEW_DEPTH` | 12 | 8–16 | Pass-1 (preview) depth. Shallow so the whole game reads quickly (≤1.5 s/position, capped by `REVIEW_PREVIEW_MOVE_TIME_MS`). Below 8 produces unreliable evaluations. |
-| `REVIEW_PREVIEW_MOVE_TIME_MS` | 1 500 ms | 500–3 000 ms | Pass-1 per-position time cap. Keeps the preview pass fast on mobile. |
-| `REVIEW_TARGET_DEPTH` | 22 | 12–26 | Pass-2 (deep) depth. Higher = more accurate cpLoss but slower. **Default pending the OQ-7 iPhone Safari depth-reachability spike — may be lowered if depth 22 is not reachable within the per-position cap on the reference device.** |
-| `REVIEW_MAX_MOVE_TIME_MS` | 10 000 ms | 3 000–30 000 ms | Pass-2 per-position time cap. Lower values speed up review but may leave `depthReached < REVIEW_TARGET_DEPTH` on slow devices (handled by Rule 22a guard + EC-11). |
-| `REVIEW_TOTAL_TIME_BUDGET_MS` | 90 000 ms | 30 000–300 000 ms | Hard ceiling on the **deep** pass (Rule 14). When reached, Pass 2 stops and remaining positions keep their Pass-1 preview result. Pass 1 is never cut. Bounds total review time for long games. |
+| `REVIEW_PREVIEW_DEPTH` | 12 | 8–16 | Pass-1 (preview) depth. Shallow so the whole game reads quickly (≤1 s/position, capped by `REVIEW_PREVIEW_MOVE_TIME_MS`). Below 8 produces unreliable evaluations. |
+| `REVIEW_PREVIEW_MOVE_TIME_MS` | 1 000 ms | 500–3 000 ms | Pass-1 per-position time cap. Keeps the preview pass fast on mobile. |
+| `REVIEW_TARGET_DEPTH` | 16 | 12–26 | Pass-2 (deep) depth. Higher = more accurate cpLoss but slower. **OQ-5 resolved 2026-06-25: lowered 22→16 for iPhone ~20s review UX; depth 16 (~2500 Elo) still far exceeds beginner play and the 60/120cp moment gates are coarse.** |
+| `REVIEW_MAX_MOVE_TIME_MS` | 4 000 ms | 3 000–30 000 ms | Pass-2 per-position time cap. Lower values speed up review but may leave `depthReached < REVIEW_TARGET_DEPTH` on slow devices (handled by Rule 22a guard + EC-11). |
+| `REVIEW_TOTAL_TIME_BUDGET_MS` | 12 000 ms | 10 000–300 000 ms | Hard ceiling on the **deep** pass (Rule 14). When reached, Pass 2 stops and remaining positions keep their Pass-1 preview result. Pass 1 is never cut. Bounds total review time for long games. |
 | `DEPTH_MISMATCH_TOLERANCE` | 4 | 2–8 | Max `abs(depthReached[i] − depthReached[i+1])` for a cpLoss to display as a final value (Rule 22a). Above this, the value is shown as preliminary to avoid depth-artifact swings. |
 | `MATE_CP` | 30 000 | 10 000–32 000 | Centipawn value representing a forced mate in F2 ranking (F2a/F4). Affects only swing *ordering*; mate transitions display via F2b labels, not this number. |
 | `SHOW_BEST_MOVE_ARROW` | true | true / false | Whether to display the engine's best-move arrow during review. Disabling removes the main teaching signal; intended as an accessibility or preference toggle only. |

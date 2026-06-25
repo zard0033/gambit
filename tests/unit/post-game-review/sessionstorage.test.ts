@@ -61,7 +61,7 @@ describe('sessionStorage — AC-1: key format', () => {
     await new Promise(r => setTimeout(r, 600))
 
     const keys = [...Array(storage.length)].map((_, i) => storage.key(i))
-    expect(keys).toContain('pgr:analysis:v1:1716900000000')
+    expect(keys).toContain('pgr:analysis:v2:1716900000000')
   })
 })
 
@@ -82,7 +82,7 @@ describe('sessionStorage — AC-2: pv stripped', () => {
     // Advance fake timers to fire the 500ms debounce
     await vi.runAllTimersAsync()
 
-    const saved = storage.getItem('pgr:analysis:v1:1716900000000')
+    const saved = storage.getItem('pgr:analysis:v2:1716900000000')
     expect(saved).not.toBeNull()
 
     const parsed = JSON.parse(saved!) as Record<string, unknown>[]
@@ -101,7 +101,7 @@ describe('sessionStorage — AC-2: pv stripped', () => {
     await review.init(game, makeInstantFn())
     await vi.runAllTimersAsync()
 
-    const saved = storage.getItem('pgr:analysis:v1:1716900000000')
+    const saved = storage.getItem('pgr:analysis:v2:1716900000000')
     const parsed = JSON.parse(saved!) as Record<string, unknown>[]
     const record = parsed.find(r => r !== null)!
     expect(record).toHaveProperty('bestMove')
@@ -135,7 +135,7 @@ describe('sessionStorage — AC-3: debounced writes', () => {
 
     // After timer: the data key is written exactly once (coalesced). The cache index is also written
     // once per flush, so assert on the data key specifically rather than the total setItem count.
-    const dataWrites = setItemSpy.mock.calls.filter((c) => c[0] === 'pgr:analysis:v1:1716900000000')
+    const dataWrites = setItemSpy.mock.calls.filter((c) => c[0] === 'pgr:analysis:v2:1716900000000')
     expect(dataWrites).toHaveLength(1)
   })
 })
@@ -178,7 +178,7 @@ describe('sessionStorage — AC-5: restore on remount', () => {
     await new Promise(r => setTimeout(r, 600))
 
     // Verify storage has data
-    const saved = storage.getItem('pgr:analysis:v1:1716900000000')
+    const saved = storage.getItem('pgr:analysis:v2:1716900000000')
     expect(saved).not.toBeNull()
 
     // Second session: should restore from storage

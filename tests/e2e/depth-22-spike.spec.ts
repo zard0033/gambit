@@ -1,6 +1,10 @@
 /**
  * S5-03: ADR-0007 OQ-5 spike — Stockfish depth-22 reachability
  *
+ * HISTORICAL (2026-06-25): production lowered REVIEW_TARGET_DEPTH 22→16 for iPhone review-speed UX
+ * (see ADR-0007 Status note / engine-tuning.ts). This spike's literal `22`/`10000` below are the
+ * ORIGINAL target it measured — kept as the reachability record, not the current production values.
+ *
  * Purpose: Determine if `REVIEW_TARGET_DEPTH = 22` is achievable within
  * `REVIEW_MAX_MOVE_TIME_MS = 10000` on the test machine.
  *

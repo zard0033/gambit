@@ -69,9 +69,15 @@
   `localStorage=undefined` 而紅。shim 在 happy-dom init 後**條件式**（`if typeof localStorage === 'undefined'`）
   補裝可用的 InMemoryStorage（key 為 own enumerable，使 `Object.keys` 正常）。對 Node 22 是 no-op
   （happy-dom 已正常注入 → shim 跳過），公司電腦 22 pull 後測試照綠、不需動作（建議仍升 26 對齊 CI）。
-- **chessground 合成事件測不到**：B5 試煉互動（log 累積、inline 達成、答錯滑回、換步不 remount、
-  揭曉箭頭走子後消失）等靠 chessground 合成事件的行為，Playwright 難自動觸發 → 靠 vue-tsc 0 ＋ unit
-  ＋邏輯正確性保證，需部署後實機點一輪確認。
+- **chessground 互動本機可驅動（更新 2026-06-25，修正舊「合成事件測不到」結論）**：先前以為 Playwright 完全
+  推不動 chessground，其實只對 **drag / 高階 `dragAndDrop`/dispatch** 成立。**tap-to-move（點起點格→點目標格）
+  用真實座標滑鼠點擊可驅動**——chessground 監聽 board 上的 pointer 事件、由座標判格，不吃 element-targeted click（格子
+  非可定址 DOM）。做法：抓 `cg-board` 的 `getBoundingClientRect()`，格邊長＝`width/8`，**白方視角**格中心
+  `x = left+(file+0.5)·sq`、`y = top+(8−rank+0.5)·sq`（file a=0…h=7、rank 1–8；黑方視角 file/rank 對調），
+  再用 Playwright `page.mouse.click(x,y)` 點起點、點目標即走子（MCP：`browser_run_code_unsafe` 內呼 `page.mouse.click`）。
+  guest 登入即可進深化／試煉；棋憶 slideshow 仍需先有完整分析局才到得了。**已用此法本機驗過牽制深化三關
+  unaided→epiphany 鏈 + board-fit 渲染**。→ B5 試煉互動、epiphany 等先前「待 iPhone 複看」項目，本機 Playwright
+  即可截圖驗（純 drag 行為仍需實機）。
 
 ## Board / chessground gotchas（vue3-chessboard，動棋盤幾何/易位/標註前先讀）
 

@@ -47,7 +47,7 @@ function makeRouter() {
 
 /** Seed deep analysis into the localStorage cache so init() restores COMPLETE without the engine. */
 function seedAnalysis(entries: Entry[]) {
-  localStorage.setItem(`pgr:analysis:v1:${COMPLETED_AT}`, JSON.stringify(entries))
+  localStorage.setItem(`pgr:analysis:v2:${COMPLETED_AT}`, JSON.stringify(entries))
 }
 
 function setGame(moves: string[]) {
