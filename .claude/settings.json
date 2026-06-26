@@ -22,6 +22,7 @@
       "Bash(npm view *)",
       "Bash(npx vitest *)",
       "Bash(npx vue-tsc *)",
+      "Bash(node *)",
       "mcp__playwright__browser_snapshot",
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_click",

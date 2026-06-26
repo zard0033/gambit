@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: 概念深化頁 A 類 UX 重設計（Phase 2 收尾；棋憶 #22 全線已 ship）
-Task: 深化頁命運已拍板＝改「判斷場 / RecognitionGate」(見下方專段)。下一步＝設計 fork 3 盤(2真1誘餌、過閘門)再寫元件。
+Task: 判斷場 MINIMAL 功能層 + redesign 完成（fork 3 盤過三道 gate、元件、串接、氣泡 redesign）。剩收尾：LessonPlayer 氣泡套同款層次、iPhone 實機驗演示/epiphany、push 前全套+review。**未 push。**
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
@@ -46,7 +46,21 @@ Eason 對深化頁不滿（跟課程毫無二致、沒「更深一層」感）�
 
 **下一步（先內容、後元件）＝設計 fork 1 概念的 3 張盤**（2 真過 Stockfish 唯一解閘門、1 誘餌過反向閘門＋對抗審查），每張附 FEN/走法/Neve 文案，棋理站得住再寫元件。**棋理是這磚真風險，UI 是熟路。**
 
-**開放問題**（workflow 列）：① 誘餌造題工時＝全案最大未知（先用 fork 單概念量測）② unaided/epiphany 在 recognition 流程下的門檻鬆緊 ③ 階段二要不要投資擴 classifier 到 fork/pin（pv 不可靠是已知難題）④ 既有變體池（8 概念已過閘門 FEN）建議降級為判斷場「真盤」內容來源（不浪費）。
+**開放問題**（workflow 列）：① 誘餌造題工時＝全案最大未知（先用 fork 單概念量測）② unaided/epiphany 在 recognition 流程下的門檻鬆緊 ③ 階段二要不要投資擴 classifier 到 fork/pin（pv 不可靠是已知難題）④ ~~既有變體池降級為真盤來源~~ **已否決**：稀疏舊變體圖案一眼可見＝退回 execution，判斷場 3 盤全做 L1 雜訊盤、不複用。
+
+## 判斷場 MINIMAL 實作 ✅（2026-06-26，未 push）
+
+- **棋理 3 盤過三道 gate**（fork、密度 L1 輕雜訊 ~10 子，Eason 拍板）：真A `8/7p/2r3k1/pp6/7P/5N2/P5P1/4K3` Ne5+（叉王+城堡，gap 1005cp）、真B `2q3k1/p5pp/8/3N4/8/8/P5PP/4K3` Ne7+（叉王+后，gap 703cp）、誘餌 `6k1/5ppp/8/3r4/4N3/5P2/P6P/4K3`（Nf6+ 被 gxf6 反駁、PV1=安靜步、關鍵 g7 藏進 f7/g7/h7 兵陣）。驗法＝chess.js + **node 直驅 Stockfish**（`require('stockfish')('lite-single')`+`sendCommand`+攔 `console.log`，無需 dev server，比 @spike 輕）+ 2 獨立對抗審查全清。
+- **元件**：`components/lesson/RecognitionBoard.vue`（子：棋盤+演示 `playRefutation`，純 `:fen` prop driven 零 emit 副作用、reduced-motion 自動）+ `RecognitionGate.vue`（父：carousel slide + verdict 狀態機 + Neve 氣泡）。資料 `data/concept-deepening/recognition.ts`、型別 `types/recognition.ts`（real/decoy discriminated union）。
+- **串接**：fork 深化改 2 步 lead-in（**刪舊 step2 沉默單盤 + variant1 雜訊變體池**，Eason 選 A——重溫終極歸宿＝接棋憶真實對局，不堆罐頭重溫盤）；`ConceptDeepenView` 兩階段（LessonPlayer step0/1 → RecognitionGate），epiphany=兩階段都 unaided。
+- **redesign**（Eason「對話框很亂」→ `/redesign` H/M/L 全做）：氣泡收斂成「頂列(Neve+導航) + 主問(執色併提問『你執**白方**，這一盤有沒有捉雙？』) + 小字引導 + 鈕」單一精簡卡（內容高度、不撐滿）；intro 移進場一次性過場。本機 Playwright 截圖驗過渲染/carousel/演示/層次。
+- spec §15 固化（`concept-deepening-page.md`）。**vue-tsc 0、相關 40 測試綠**（新 recognition gate 7）。
+
+**剩收尾（未 push）：**
+1. **LessonPlayer 氣泡**套同款「Neve 旁白／控制面板」拆分（Eason 早期截圖嫌「好多文字」、影響入門課 21 課、單獨驗一輪）。
+2. **iPhone 實機驗**：演示節奏（騎士跳→停→兵吃看得清嗎）、epiphany 觸發+棋誌顯示、carousel slide 手感（合成事件本機測不到）。
+3. **push 前**：uniqueness spike 納入判斷場真盤、全套 vitest + E2E（改了路由目標 view）、五維+ponytail review、active.md 同步。
+4. **memory 待寫**（Eason 已同意）：node 直驅 Stockfish 驗任意 FEN 法 → `technical-preferences.md`。
 
 **待 Eason 拍板（第二批，需決策，未動工）：**
 - ~~**1-A 深化頁命運（最關鍵）**~~ ✅ **已拍板＝改「判斷場 / RecognitionGate」（見上方專段「深化頁重設計拍板」）**。下一步＝先設計 fork 3 盤再寫元件。

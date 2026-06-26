@@ -166,3 +166,90 @@
 
 - **AC-M1**（核心假設可驗）：fork 有 ≥1 雜訊盤沉默關 variant、過三道 gate；iPhone 實機點通「沉默關走對 → unaided → epiphany 棋誌寫入並顯示」+ 重溫換盤手感。
 - **AC-C1**（Calm）：地圖仍只「深入›/重溫›」兩態、不加第三顆彩點、不上鎖、無「X/N 變體」「還有 N 盤」量詞；變體輪替對玩家隱形。
+
+---
+
+# 15. 判斷場 / RecognitionGate（2026-06-25 晚拍板，演進 §10–§14 的歸宿）
+
+> 設計拍板（Eason 2026-06-25，12-agent workflow `wf_1da48163-e57`）。**取代「深化第三步＝單盤沉默關」**，並重定 §10–§14 雜訊盤的歸宿：雜訊盤不是用來「重溫換盤」（變體池），而是用來**判斷場**——測 recognition。§11 雜訊鐵則沿用，§10 變體池/§14 AC-V* 暫擱（fork 概念改走判斷場結構，不走 `variants[][]` 重溫；既有 8 概念單變體不動）。fork 為 MINIMAL 首個概念。
+
+## 15.1 為什麼（recognition ≠ execution）
+
+舊深化頁進去就告訴你「這是捉雙頁、這盤有捉雙」→ 只練 **execution**（找+走已知戰術），從沒練 **recognition**（沒人提示時認出時機，**含認出「這裡沒有」**）。「學以致用」的客觀定義＝沒人提示時你能不能認出，潤色救不了，是結構問題。判斷場補這層。
+
+## 15.2 結構（取代深化第三步）
+
+一個概念三步放手（fading，學習科學上對的）：step0 她指給你看 → step1 她只問你（此二步**維持單盤、沿用 LessonPlayer**）→ **step2 改為判斷場**。**fork 概念走判斷場；其他 7 概念維持原 step2 單盤沉默關**（MINIMAL 不動）。
+
+## 15.3 沉默原則（判斷場成立的前提，非選項）
+
+每張盤**全沉默**：無 `highlights`、無 `arrows`、文案不提示有沒有，只有入口統一指示。**不放逐盤 hint / 揭曉答案**（會直接報出「有沒有」，破壞判斷）。一旦高亮被叉的子＝告訴你答案＝退回 execution。安全網改用：漏看真盤 → 判完提示重看；走誘餌 → 子滑回 + 事後演示。
+
+## 15.4 carousel UX 狀態機
+
+- **carousel**：3 張全尺寸盤、左右水平 slide（棋盤尺寸全程不變，不用縮圖+放大、避開醜轉場）。沿用全 app 棋盤主題 Wood12+Gioco、`board-fit`、觸控 ≥44px。
+- **每盤兩種輸入**：在盤上走一步 / 按「這裡沒有」。
+- **真盤**：走 `expectedMove` → 對（successText）；走別的 → 子滑回；按「這裡沒有」→ 漏看（記 `missed`）。
+- **誘餌**：按「這裡沒有」→ 對（演示反駁 + 文案，見 15.5）；走 `temptMove` → 子滑回 + 演示反駁 + 文案（記「曾上當」）；走別的 → 滑回。
+- **過關**＝全真盤走對 **且** 誘餌按「這裡沒有」。**無「完成」鈕可亂按**、「跳過」不能當作弊。**漏看真盤** → 判完一句「還有一手在等你」、**不點破哪盤** → 回頭重判。
+- **收尾**＝essence 精髓彈窗（沿用 `ConceptDeepening.essence`）。**全程零誤判 + 零求助**（未漏看真盤、未走誘餌、未演示求助）→ **epiphany** 棋誌筆（走既有 settle 管線，標準路徑見 `technical-preferences.md`「新增棋誌 pen」，**不從 view 直接 append**）。
+
+## 15.5 反駁演示 `playSequence`（誘餌專屬，Eason 2026-06-26 加碼）
+
+誘餌答對 / 走錯滑回後，Neve 在盤上**演示反駁線**，讓你親眼看到「為什麼不成立」（騎士跳上去、對手的兵把牠吃掉）：
+
+- 技術：`boardApi.move({from,to})` 逐步播放（chessground 原生走子動畫，吃子時被吃子消失）、`setConfig({viewOnly:true})` 禁手、演示完 `setPosition(fen)` 復位。API 已在 `chess-board.vue`（易位 remap）使用、低風險。
+- **一份 `playSequence(moves[])` 兩處複用**：答對演示完整 `[temptMove, refutation]`；走錯時使用者已走 temptMove、接著演示 `[refutation]`。
+- 尊重 `prefers-reduced-motion`（reduced 直接 `setPosition` 到終局/縮短）。節奏靠 iPhone 實機調（合成事件本機/Playwright 測不到）。
+- **只給誘餌**：真盤使用者自己走了那步、已看到結果；演示補誘餌「沒走所以沒看到為什麼」的缺口，讓判斷對也有厚一層的收穫。
+
+## 15.6 盤面密度＝L1 輕雜訊（Eason 2026-06-25 拍板）
+
+判斷場真盤/誘餌**全做 L1 雜訊盤**（~9–11 子，+2–3 顆無關兵藏圖案），**不複用稀疏舊變體**（稀疏＝圖案一眼可見＝退回 execution，連帶推翻 active.md 開放問題④「複用舊變體當真盤」）。雜訊鐵則沿用 §11（不碰戰術骨架、不創第二解、不破壞原解、不引更亮釣餌、距骨架曼哈頓 ≥3、以兵為主、總子數 ≤12 防 Calm 過載）。
+
+## 15.7 內容驗證——三道 gate（誘餌反向版）
+
+- **真盤**：同 §12（chess.js → Stockfish PV1==`expectedMove` 且與 PV2 gap ≥200cp → 對抗審查）。
+- **誘餌反向 gate**：
+  1. **chess.js**：合法 + 白王不被將 + `temptMove` 是合法將軍/走法 + `refutation` 合法且吃掉誘餌子。
+  2. **Stockfish**：① `temptMove` **不是** PV1（PV1 是安靜步、盤上無得利戰術＝「這裡沒有」客觀成立）；② 走 `temptMove` 後對手 PV1 == `refutation` 且大優（反駁對得上引擎，Neve 演示/解釋不會講錯）。
+  3. **對抗審查**：多 agent 各自找反駁——**前提是否屬實**（誘餌手真被反駁）、**「這裡沒有」是否客觀**（窮舉白方所有手、確認無別的真戰術）、反駁是否唯一。
+
+## 15.8 fork 判斷場內容（3 盤，三道 gate 全清 2026-06-26）
+
+| 盤 | FEN | 正解 | Stockfish 驗證 |
+|---|---|---|---|
+| 真盤 A（叉王+城堡） | `8/7p/2r3k1/pp6/7P/5N2/P5P1/4K3` | `Ne5+`（f3e5） | PV1=Ne5+、gap 1005cp ✅ |
+| 真盤 B（叉王+后） | `2q3k1/p5pp/8/3N4/8/8/P5PP/4K3` | `Ne7+`（d5e7） | PV1=Ne7+、gap 703cp ✅ |
+| 誘餌（g7 藏進 f7/g7/h7） | `6k1/5ppp/8/3r4/4N3/5P2/P6P/4K3` | 按「這裡沒有」 | PV1=安靜步；`Nf6+`→`gxf6` 黑+766cp ✅ |
+
+三盤皆 chess.js 全綠（白走/白王不被將/合法）+ 兩個獨立對抗審查員（chess.js 窮舉 + Stockfish 重驗）無一被推翻。誘餌反駁演示序列＝`[Nf6+(e4f6), gxf6(g7f6)]`。
+
+## 15.9 Neve 文案（教學態第一人稱，font-lesson）
+
+- **入口**（carousel 開頭一次）：之前我指給你看、也讓你自己找過。這次不一樣——下面幾盤，有的藏著捉雙，有的什麼也沒有。換你判斷：看見了就走出來，看不見就說「這裡沒有」。
+- **真盤 A successText**：將軍捉雙——對手忙著救王，下一步城堡就是你的。
+- **真盤 B successText**：騎士一跳，將軍王、又叉著后，對手只能救一個。
+- **誘餌 · 按「這裡沒有」（正確）**：對，這裡沒有。騎士看似能跳 f6 同時碰王和城堡——但 g7 的兵守著那一格，你沒上當。（接 `playSequence` 演示 Nf6+→gxf6）
+- **誘餌 · 走了 `Nf6+`（子滑回）**：看起來像皇家捉雙，對吧？可是 g7 的兵守著 f6。騎士一跳，他一個 gxf6 就把牠吃了，城堡安然無事——你反而白丟一隻騎士。捉雙之前，先看落點有沒有人守。（接 `playSequence` 演示 gxf6）
+- **漏看真盤**（按了「沒有」但其實有，判完才說、不點破哪盤）：還有一手在等你。回頭再看一遍——有一盤，藏著捉雙。
+- **收尾精髓**（沿用 fork essence）：捉雙的精髓——一個落點，兩個威脅，對手只能救一個。
+
+## 15.10 Acceptance Criteria（MINIMAL）
+
+**自動（blocking）：**
+
+- **AC-R1**（資料 gate）：fork 判斷場 3 盤過內容 gate——真盤 chess.js 合法 + Stockfish 唯一解；誘餌 chess.js（temptMove 將軍、refutation 吃子）+ Stockfish 反向（temptMove≠PV1、走後 refutation 大優）。
+- **AC-R2**（過關判定）：全真盤走 `expectedMove` 對 + 誘餌按「這裡沒有」→ 過關；漏看真盤不過關（觸發重看）；走誘餌記「曾上當」。
+- **AC-R3**（epiphany 條件）：全程零誤判 + 零求助 → 寫 epiphany journal entry（走 settle 管線、idempotent、不重複）；任一誤判/演示求助 → 不寫。
+- **AC-R4**（沉默無漏標註）：判斷場任一盤皆無 highlights/arrows/hint/揭曉鈕；DOM/snapshot 驗。
+- **AC-R5**（不污染狀態）：`playSequence` 演示純視覺，演示完盤面復位；judge/epiphany 狀態不受演示影響。
+
+**手動（advisory）：**
+
+- **AC-RM1**（手感）：iPhone 實機——carousel 左右 slide 順、棋盤尺寸不變、走子判斷與「這裡沒有」≥44px；演示節奏（騎士跳→停→兵吃）看得清；epiphany 棋誌寫入並顯示。
+- **AC-RM2**（Calm）：無 streak/timer/計量、無「X/3 盤」量詞、Neve 平靜不評判、Wood12 主題吃到、`prefers-reduced-motion` 演示降級。
+
+## 15.11 MINIMAL 範圍 + 退場
+
+**只 fork 1 概念**（不為 8 概念預造抽象）。**成立**（實機手感 + epiphany 觸發）→ 未來擴其他概念 / 接階段二棋憶 signpost（受 `classify.ts` 只可靠分類 material+mate 限制，須先評估擴 classifier）；**不成立** → 停/pivot，只賠 1 概念的內容。誘餌造題工時＝全案最大未知，本磚單概念量測。

@@ -2,9 +2,11 @@
 import { ref, nextTick, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import LessonPlayer from '@/components/lesson/LessonPlayer.vue'
+import RecognitionGate from '@/components/lesson/RecognitionGate.vue'
 import { Button } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-vue-next'
 import { getConceptDeepening } from '@/data/concept-deepening'
+import { getRecognitionSet } from '@/data/concept-deepening/recognition'
 import { useConceptProgressStore } from '@/stores/concept-progress'
 import { useJournalStore } from '@/stores/journal'
 
@@ -14,9 +16,17 @@ const conceptProgress = useConceptProgressStore()
 const journal = useJournalStore()
 
 const deepening = getConceptDeepening(route.params.conceptId as string)
+// fork's third step is a Recognition Gate (spec §15); concepts without one keep the single-board
+// silent gate inside LessonPlayer (their variant still carries all 3 steps).
+const recognitionSet = deepening ? getRecognitionSet(deepening.conceptId) : undefined
 
 // Unknown concept → back to the map. No lock to bypass: deepening is always open (Calm rule).
 if (!deepening) router.replace('/learn/concepts')
+
+// Two-phase for concepts with a gate: LessonPlayer (step0/1) → RecognitionGate. unaided requires
+// BOTH phases clean — no aid in the lesson, no miss/trap in the gate — to fire the epiphany pen.
+const phase = ref<'lesson' | 'recognition'>('lesson')
+let lessonUnaided = false
 
 // Deterministic variant selection (spec §10 MINIMAL): no random/LLM, only the completion count.
 // First visit = variant 0 (clean board); each revisit advances to the next variant (mod pool size).
@@ -32,12 +42,25 @@ const variantIndex = computed(() => {
 const showWrapUp = ref(false)
 const wrapOverlay = ref<HTMLElement | null>(null)
 
-function onComplete(playerUnaided: boolean): void {
+function onLessonDone(unaided: boolean): void {
+  if (recognitionSet) {
+    lessonUnaided = unaided
+    phase.value = 'recognition'
+  } else {
+    finishDeepening(unaided)
+  }
+}
+
+function onRecognitionDone(gateUnaided: boolean): void {
+  finishDeepening(lessonUnaided && gateUnaided)
+}
+
+function finishDeepening(unaided: boolean): void {
   if (deepening) {
     conceptProgress.markDeepened(deepening.conceptId)
-    // Solved the silent gate with no aid → Neve quietly logs "你自己看出來的" in the journal.
-    // The recognition lives there, not as an on-screen self-congratulation (Neve stays calm).
-    if (playerUnaided) {
+    // Got through unaided → Neve quietly logs "你自己看出來的" in the journal. The recognition lives
+    // there, not as an on-screen self-congratulation (Neve stays calm).
+    if (unaided) {
       conceptProgress.markDeepenedUnaided(deepening.conceptId)
       void journal.evaluate()
     }
@@ -50,7 +73,7 @@ function onComplete(playerUnaided: boolean): void {
 
 <template>
   <LessonPlayer
-    v-if="deepening"
+    v-if="deepening && phase === 'lesson'"
     :steps="deepening.variants[variantIndex]"
     :title="deepening.title"
     player-color="white"
@@ -58,7 +81,17 @@ function onComplete(playerUnaided: boolean): void {
     back-to="/learn/concepts"
     back-label="返回概念"
     completion-mode="overlay"
-    @complete="onComplete"
+    @complete="onLessonDone"
+  />
+
+  <!-- 第三步＝判斷場（fork）：前兩步放手後，3 盤沉默判斷有沒有捉雙（spec §15）。 -->
+  <RecognitionGate
+    v-else-if="deepening && phase === 'recognition' && recognitionSet"
+    :set="recognitionSet"
+    :title="deepening.title"
+    back-to="/learn/concepts"
+    back-label="返回概念"
+    @complete="onRecognitionDone"
   />
 
   <!-- 深化收尾彈窗：棋盤留在後面，浮一張「回味精髓」的卡（非整頁切換、非慶祝彩帶）。 -->

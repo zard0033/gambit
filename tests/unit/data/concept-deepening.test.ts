@@ -41,8 +41,9 @@ describe('concept deepening catalog', () => {
     }
   })
 
-  // AC-V1: shape migration — variants field exists; all existing concepts have exactly 1 variant
-  // for the non-fork concepts; fork has 2 variants (MINIMAL noise-board addition).
+  // AC-V1: shape migration — variants field exists; every concept ships exactly 1 variant. fork's
+  // noise-board variant pool was replaced by the Recognition Gate, and its third (silent) step too,
+  // so fork is now a two-step lead-in (she shows → she only asks) before the gate (spec §15.2).
   it('test_catalog_variantsShapeIsValid', () => {
     for (const d of allDeepenings) {
       expect(Array.isArray(d.variants), `${d.conceptId}: variants must be an array`).toBe(true)
@@ -50,8 +51,8 @@ describe('concept deepening catalog', () => {
         expect(Array.isArray(variant), `${d.conceptId} variant${vi}: must be an array of steps`).toBe(true)
       }
     }
-    // fork specifically ships 2 variants (the MINIMAL noise-board gate)
-    expect(conceptDeepenings.fork.variants.length).toBe(2)
+    expect(conceptDeepenings.fork.variants.length).toBe(1)
+    expect(conceptDeepenings.fork.variants[0].length).toBe(2)
   })
 })
 

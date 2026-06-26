@@ -57,7 +57,9 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
     intro: '捉雙的深化，是在更亂的盤面第一眼看出那個「一石二鳥」的落點。',
     essence: '捉雙的精髓：一個落點，兩個威脅，對手只能救一個。',
     variants: [
-      // variant 0 — clean board (original)
+      // Two-step lead-in only (step0 she shows → step1 she only asks). The third step is now the
+      // Recognition Gate (data/concept-deepening/recognition.ts), a silent 3-board judgement field —
+      // it replaces the old silent single board AND the noise-board variant pool (spec §15.2).
       [
         {
           fen: '2q1k3/8/8/8/4N3/8/8/4K3 w - - 0 1',
@@ -84,63 +86,6 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
           expectedMove: { from: 'd1', to: 'd5' },
           hint: '找一個同時對著 g8 和 a8 兩條斜線的落點。',
           successText: '后的捉雙靠長射程：一個落點、兩條斜線。將軍逼王讓開，城堡就到手。',
-        },
-        {
-          fen: '2q3k1/8/8/3N4/8/8/P7/4K3 w - - 0 1',
-          text: '這一個，我不說了。盤上藏著一個「一子碰兩子」的落點——自己找找看。',
-          highlights: [],
-          arrows: [
-            { orig: 'd5', dest: 'e7' },
-            { orig: 'e7', dest: 'g8' },
-            { orig: 'e7', dest: 'c8' },
-          ],
-          expectedMove: { from: 'd5', to: 'e7' },
-          hint: '找騎士能跳到、且同時將軍 g8、又叉到 c8 后的那一格。',
-          successText: '將軍捉雙：王被將軍只能逃，你下一步白吃后。關鍵永遠是那個「一子碰兩子」的落點。',
-        },
-      ],
-      // variant 1 — noise board (spec §10–§11 MINIMAL; all 3 gates passed: chess.js ✓ / Stockfish
-      // pv1 matches ✓ / adversarial review ALL SOUND ✓). Knight-fork theme, rook targets instead of
-      // queen, ≤3 noise pawns (L1 noise), tactical skeleton frozen.
-      [
-        {
-          fen: '8/8/2r3k1/p7/7P/5N2/8/4K3 w - - 0 1',
-          text: '騎士的 L 形跳法不受其他子擋路。黑王 g6 和城堡 c6 站成一個 L 形——找那個能同時將軍、又叉到城堡的格子。',
-          highlights: ['g6', 'c6'],
-          arrows: [
-            { orig: 'f3', dest: 'e5' },
-            { orig: 'e5', dest: 'g6' },
-            { orig: 'e5', dest: 'c6' },
-          ],
-          expectedMove: { from: 'f3', to: 'e5' },
-          hint: '找騎士能跳到、且同時搆到 g6 王和 c6 城堡的那一格。',
-          successText: '將軍捉雙：對手忙著救王，你下一步就吃城堡。盤面再亂，L 形路徑還在。',
-        },
-        {
-          fen: '8/8/8/p7/6P1/1r3k2/8/1N5K w - - 0 1',
-          text: '換你看：騎士有個 L 形跳法，能同時將軍黑王、又叉到城堡——找出那一格。',
-          highlights: ['f3', 'b3'],
-          arrows: [
-            { orig: 'b1', dest: 'd2' },
-            { orig: 'd2', dest: 'f3' },
-            { orig: 'd2', dest: 'b3' },
-          ],
-          expectedMove: { from: 'b1', to: 'd2' },
-          hint: '找騎士能跳到、同時搆到 f3 王和 b3 城堡的那一格。',
-          successText: '騎士一跳，王和城堡都受威脅。對手只能救一個，另一個就是你的。',
-        },
-        {
-          fen: '8/6k1/p2q4/8/2p4N/8/P7/4K3 w - - 0 1',
-          text: '這一個，我不說了。盤上藏著一個「一子碰兩子」的落點——自己找找看。',
-          highlights: [],
-          arrows: [
-            { orig: 'h4', dest: 'f5' },
-            { orig: 'f5', dest: 'g7' },
-            { orig: 'f5', dest: 'd6' },
-          ],
-          expectedMove: { from: 'h4', to: 'f5' },
-          hint: '兩顆被叉的子站成 L 形——找到那個落點，騎士從哪兒跳過去？',
-          successText: '找到了。盤面再亂，捉雙的圖案還在——一個落點，兩個威脅，對手只能救一個。',
         },
       ],
     ],
