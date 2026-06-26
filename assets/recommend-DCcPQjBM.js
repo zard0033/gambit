@@ -1,1 +1,0 @@
-import{m as e}from"./index-Dl0U94FU.js";function t(t,n){return n.filter(n=>e[n.motif]===t).sort((e,t)=>e.order-t.order)}export{t};
