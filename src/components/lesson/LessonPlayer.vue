@@ -62,6 +62,8 @@ const wrongMove = ref<{ from: string; to: string } | null>(null)
 const everWrong = ref(false)
 const hintShown = ref(false)
 const answerRevealed = ref(false)
+// A legal-but-not-taught move (softRejects) → Neve's gentle redirect; not a mistake.
+const gentleNote = ref<string | null>(null)
 
 // Session-level (NOT reset per step): did the player lean on any aid — a wrong move, a hint, or the
 // answer reveal — anywhere in this run? Drives the deepen wrap-up's "you saw it unaided" line.
@@ -73,6 +75,7 @@ watch(stepIndex, async () => {
   everWrong.value = false
   hintShown.value = false
   answerRevealed.value = false
+  gentleNote.value = null
   // Force the board onto the new step's FEN even when it's an identical string to the previous
   // step (Vue won't re-fire watch(props.fen); the player's last move would otherwise stay on the
   // board — 上一步沒把棋子移回修正).
@@ -169,11 +172,21 @@ function handleMove(payload: MoveMadePayload): void {
     (exp.promotion === undefined || payload.promotion === exp.promotion)
   if (correct) {
     solved.value = true
-  } else {
-    wrongMove.value = { from: payload.from, to: payload.to }
-    everWrong.value = true
-    usedAidThisSession.value = true
+    gentleNote.value = null
+    return
   }
+  // Legal but not the taught move (e.g. d4 in the e4 lesson): gentle redirect, no penalty.
+  const soft = currentStep.value?.softRejects?.find(
+    (s) => s.from === payload.from && s.to === payload.to,
+  )
+  if (soft) {
+    gentleNote.value = soft.note
+    board.value?.resetPosition() // slide the piece home, board stays on the step's FEN
+    return
+  }
+  wrongMove.value = { from: payload.from, to: payload.to }
+  everWrong.value = true
+  usedAidThisSession.value = true
 }
 
 function retry(): void {
@@ -193,7 +206,7 @@ function scrollCoachToBottom(): void {
   if (el) el.scrollTop = el.scrollHeight
 }
 watch(
-  [stepIndex, hintShown, wrongMove, answerRevealed, solved],
+  [stepIndex, hintShown, wrongMove, answerRevealed, solved, gentleNote],
   async () => {
     await nextTick()
     scrollCoachToBottom()
@@ -352,6 +365,10 @@ function prev(): void {
             <!-- Hint text -->
             <div v-else-if="isInteractive && !solved" class="mt-3">
               <p class="mb-2 font-sans text-sm text-ink-muted">輪到你了——你執{{ turnLabel }}，在棋盤上走一步。</p>
+              <!-- 軟引導：走了合理但非本課的一步（如 e4 課走 d4），溫和帶回、不算錯 -->
+              <Alert v-if="gentleNote" variant="hint" class="mb-2">
+                <AlertDescription class="text-hint-fg">{{ gentleNote }}</AlertDescription>
+              </Alert>
               <Alert v-if="hintShown" variant="hint">
                 <AlertDescription class="text-hint-fg">{{ currentStep?.hint }}</AlertDescription>
                 <p v-if="answerRevealed" class="mt-2 text-sm text-hint">答案已畫在棋盤上——照著箭頭走走看。</p>

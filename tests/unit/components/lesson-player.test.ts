@@ -69,4 +69,26 @@ describe('LessonPlayer — complete(unaided)', () => {
     await runToFinish(wrapper)
     expect(wrapper.emitted('complete')?.[0]).toEqual([false])
   })
+
+  it('test_softReject_legalNonTaughtMove_showsNoteNoPenalty', async () => {
+    // Arrange: step 0's answer is b1→b7, but b1→b2 is a legal soft-reject (gentle redirect, no penalty).
+    const softSteps: LessonStep[] = [
+      { ...STEPS[0], softRejects: [{ from: 'b1', to: 'b2', note: 'b2 也可以，但這課我們走 b7' }] },
+      STEPS[1],
+    ]
+    const wrapper = mount(LessonPlayer, { props: { steps: softSteps, title: 'T', backTo: '/x', backLabel: 'b' } })
+    // Act: play the soft-rejected move (legal, not the taught answer)
+    await solveCurrent(wrapper, { from: 'b1', to: 'b2' })
+    // Assert: gentle note shown, NOT routed through the wrong-move penalty path
+    expect(wrapper.text()).toContain('這課我們走 b7')
+    expect(btn(wrapper, '重試')).toBeUndefined()
+    // Act: finish cleanly with the taught moves
+    await solveCurrent(wrapper, { from: 'b1', to: 'b7' })
+    await btn(wrapper, '下一步')!.trigger('click')
+    await flushPromises()
+    await solveCurrent(wrapper, STEPS[1].expectedMove!)
+    await btn(wrapper, '完成')!.trigger('click')
+    // Assert: a soft reject must NOT latch aid → the run is still unaided
+    expect(wrapper.emitted('complete')?.[0]).toEqual([true])
+  })
 })

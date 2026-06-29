@@ -128,7 +128,7 @@ function finishDeepening(unaided: boolean): void {
           class="mt-6 w-full justify-center text-sm"
           data-testid="concept-deepen-return"
           @click="router.push('/learn/concepts')"
-        >回概念地圖 <ArrowRight :size="16" :stroke-width="1.8" /></Button>
+        >回棋理地圖 <ArrowRight :size="16" :stroke-width="1.8" /></Button>
       </div>
     </div>
   </Transition>

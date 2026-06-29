@@ -15,7 +15,7 @@ export const recognitionSets: Partial<Record<ChessConcept, RecognitionSet>> = {
     intro:
       '之前我指給你看、也讓你自己找過。這次不一樣——下面幾盤，有的藏著捉雙，有的什麼也沒有。',
     prompt: '這一盤有沒有捉雙？',
-    missedHint: '還有一手在等你。回頭再看一遍——有一盤，藏著捉雙。',
+    missedHint: '還有一手在等你。再看一眼這一盤——捉雙就藏在這裡。',
     boards: [
       // real A — Ne5+ forks Kg6 + Rc6 (gap 1005cp). g7/f7-style noise: a5/b5/h7 pawns (L1).
       {

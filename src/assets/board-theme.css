@@ -30,6 +30,21 @@ body cg-board {
   height: auto !important;
 }
 
+/* ---- Guard vue3-chessboard's cg-wrap from PgnViewer's global aspect rule ----
+   lichess-pgn-viewer.css ships a GLOBAL `.cg-wrap { box-sizing:content-box; height:0;
+   padding-bottom:100% }` aspect trick for ITS own board. vue3-chessboard nests `.cg-wrap`
+   INSIDE its own `.main-board` aspect box (cg-wrap is absolute, already filling a square), so once
+   any 棋憶/複盤 view loads the lichess stylesheet, that rule stacks a SECOND 100% padding onto every
+   vue3-chessboard board → it renders double-height and overflows (棋憶失誤/試煉/深化盤跑版；症狀是
+   「進過棋憶後全站 vue3-chessboard 跟著壞」, because the lichess CSS is global + persistent).
+   vue3-chessboard's cg-wrap always sits under `.main-wrap`; PgnViewer's sits under `.lpv` — scope the
+   reset to `.main-wrap .cg-wrap` so it never touches the PgnViewer board. */
+.main-wrap .cg-wrap {
+  height: 100% !important;
+  padding-bottom: 0 !important;
+  box-sizing: border-box !important;
+}
+
 /* ---- Coordinate labels (a–h / 1–8) ----
    Native chessground coords (CSS-positioned → responsive). chessground's default
    colors wash out on this tea palette, so use a solid cream fill with a real dark

@@ -12,6 +12,7 @@ Desktop.ini
 # === Claude Code Local ===
 .claude/settings.local.json
 CLAUDE.local.md
+.serena/
 production/session-logs/
 production/session-state/*
 !production/session-state/active.md

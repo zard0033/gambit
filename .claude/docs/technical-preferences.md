@@ -81,6 +81,15 @@
   guest 登入即可進深化／試煉；棋憶 slideshow 仍需先有完整分析局才到得了。**已用此法本機驗過牽制深化三關
   unaided→epiphany 鏈 + board-fit 渲染**。→ B5 試煉互動、epiphany 等先前「待 iPhone 複看」項目，本機 Playwright
   即可截圖驗（純 drag 行為仍需實機）。
+- **node 直驅 Stockfish 驗任意 FEN（無需 dev server，比 @spike 輕）**：要快速驗一個 FEN 的最佳手／唯一解
+  （新增戰術局面、抓假將殺/假贏）時，不必開 dev server 或跑 Playwright uniqueness-spike。node 直接
+  `require('stockfish')`（factory）→ `factory('lite-single')` **回 Promise**，`.then(engine => …)`。命令走
+  `engine.postMessage('position fen <FEN>')` + `engine.postMessage('go depth 16')`（或 `go movetime 5000`）。
+  **此 build 的 UCI 輸出走 `console.log`、不走 `addMessageListener`**——攔法＝開頭覆寫 `console.log`，抓
+  `bestmove …` 與 `info … multipv N … score cp X … pv <移動序列>`。唯一解＝`setoption name MultiPV value 2`
+  後比 PV1／PV2 的 score gap。**script 寫進 scratchpad、用絕對路徑 `require('<repo>/node_modules/stockfish')`**
+  （require 從 script 所在目錄解析，scratchpad 無 node_modules）。已實證真A `8/7p/2r3k1/pp6/7P/5N2/P5P1/4K3 w`
+  → `bestmove f3e5`。閘門級唯一解仍以 `concept-deepening-uniqueness-spike`（@spike）為準，此法是設計階段的快速自驗。
 
 ## Board / chessground gotchas（vue3-chessboard，動棋盤幾何/易位/標註前先讀）
 
@@ -99,6 +108,20 @@
   三個消費端（對局/課程、賽後檢討、回放）共用此修正過的 `squareToRect`，端點/高亮本就對齊格子。
   `move-annotation-display.vue` 的 `squarePx`（只用於箭頭桿粗、不影響位置）也已從 cg-wrap/8 對齊到真實格子尺寸
   `squareToRect('a1').width` 並補 resize 反應。若日後又見偏移，root cause 在 `chess-board.vue::squareToRect` 或消費端傳錯 `squareToRect`，不在 overlay 元件。
+- **viewOnly 建立的盤永遠不能互動（已修，2026-06-29）**：chessground `bindBoard` 在 **建立時** `if(viewOnly) return`
+  跳過綁 `mousedown`/`touchstart` listener，且之後 `setConfig({viewOnly:false})` **不會重綁**（vendor 一次性綁定）。
+  carousel 等「非初始 active 盤」若 created viewOnly 就永遠拖不動子（dests/state 再對也沒用，因為沒 listener）。
+  解＝`chess-board.vue` 一律以 `viewOnly:false` 建立（讓 listener 綁上），`onBoardCreated` 後才 `setConfig` 套真實
+  viewOnly。**新增任何「初始 disabled 後才啟用」的盤都吃這個 fix，別退回 `viewOnly: props.disabled` 當初始 config。**
+  另：carousel 盤切 active 後還要 `reapplyFen()`（setPosition 重整 selectable），且須等 slide transition 結束再做
+  （見 `RecognitionBoard.vue` 的 360ms watch）。
+- **lichess PgnViewer CSS 全域汙染 vue3-chessboard（已修，2026-06-29）**：`lichess-pgn-viewer.css` 有全域
+  `.cg-wrap{box-sizing:content-box;height:0;padding-bottom:100%}`（它自己的 aspect trick）。一進**棋憶/複盤**載入此
+  stylesheet 後，該規則也套到 vue3-chessboard 的 `.cg-wrap`（它已 absolute 填滿自己 `.main-board` 的 aspect 框）
+  → 疊加第二層 100% padding → **棋盤高度雙倍、往下溢出**。症狀＝「進過棋憶後全站 vue3-chessboard 盤跟著壞」（失誤
+  slideshow／試煉／深化），因 lichess CSS 全域且常駐。解＝`board-theme.css` 加 `.main-wrap .cg-wrap` reset
+  （`height:100%;padding-bottom:0;box-sizing:border-box`）；scope `.main-wrap` 只命中 vue3-chessboard，PgnViewer 的在
+  `.lpv` 下不受影響。**勿移除此 reset**，否則複發。
 
 ## Deferred Cleanups（刻意保留、勿移除）
 

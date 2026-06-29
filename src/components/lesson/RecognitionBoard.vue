@@ -14,7 +14,7 @@
  * the `:fen` prop — chessground animates the single piece each step. Pure visual: no move-made emit,
  * no chess.js advance. The board freezes (viewOnly) during the demo, then snaps back to its FEN.
  */
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Chess } from 'chess.js'
 import ChessBoard from '@/components/chess-board.vue'
 import { useBoardFit } from '@/composables/use-board-fit'
@@ -46,10 +46,24 @@ const demoing = ref(false)
 
 const boardFit = ref<HTMLElement | null>(null)
 useBoardFit(boardFit)
-const boardCmp = ref<{ resetPosition: () => void } | null>(null)
+const boardCmp = ref<{ resetPosition: () => void; reapplyFen: () => void } | null>(null)
 
 // Disabled unless this is the active, unsolved board and no demo is running.
 const disabled = computed(() => !props.active || props.locked || demoing.value)
+
+// An off-screen carousel board is created disabled; chess-board always creates chessground
+// viewOnly:false (so its pointer listeners bind) then applies the real viewOnly. But chessground
+// still won't pick up a piece on this board until its position is re-synced once it becomes the
+// active board — so reapply the FEN on activation (setPosition refreshes chessground's selectable
+// state). It must run AFTER the carousel slide settles: re-syncing mid-transform doesn't take, so
+// wait out the 300ms slide. Without this the 2nd/3rd judgement boards can't be moved (誘餌盤無法移動修正).
+// ponytail: 360ms tracks RecognitionGate's duration-300 slide; switch to a transitionend hook if it drifts.
+watch(
+  () => props.active,
+  (active) => {
+    if (active) setTimeout(() => boardCmp.value?.reapplyFen(), 360)
+  },
+)
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -65,7 +79,7 @@ async function playRefutation(): Promise<void> {
   // Under reduced-motion (220ms) stepMs is below chess-board's internal move-anim timer (~316ms),
   // so a refutation FEN set mid-animation is queued and lands on that flush, not at 220ms — the
   // renderer's latest-wins queue self-heals, the two-step demo still reads correctly.
-  const stepMs = prefersReducedMotion.value ? 220 : 850
+  const stepMs = prefersReducedMotion.value ? 220 : 1300
   for (const mv of [props.board.temptMove, props.board.refutation]) {
     chess.move({ from: mv.from, to: mv.to })
     displayFen.value = chess.fen()

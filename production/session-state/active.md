@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: 概念深化頁 A 類 UX 重設計（Phase 2 收尾；棋憶 #22 全線已 ship）
-Task: 判斷場 MINIMAL 功能層 + redesign 完成（fork 3 盤過三道 gate、元件、串接、氣泡 redesign）。剩收尾：LessonPlayer 氣泡套同款層次、iPhone 實機驗演示/epiphany、push 前全套+review。**未 push。**
+Task: 2026-06-29 iPhone 反饋 11 項 bug＋內容批已修＋**已 push**（#2 誘餌盤/#10 棋憶破版＝兩真 bug、#3/#4/#7/#8、#5 維持無提示）。剩＝redesign 三項（#6 中心格高亮/#9 概念頁三狀態/#11+#1 課程氣泡層級+判斷場手勢滑，換對話 `/redesign` 再做）+ iPhone 複驗本批。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
@@ -56,11 +56,18 @@ Eason 對深化頁不滿（跟課程毫無二致、沒「更深一層」感）�
 - **redesign**（Eason「對話框很亂」→ `/redesign` H/M/L 全做）：氣泡收斂成「頂列(Neve+導航) + 主問(執色併提問『你執**白方**，這一盤有沒有捉雙？』) + 小字引導 + 鈕」單一精簡卡（內容高度、不撐滿）；intro 移進場一次性過場。本機 Playwright 截圖驗過渲染/carousel/演示/層次。
 - spec §15 固化（`concept-deepening-page.md`）。**vue-tsc 0、相關 40 測試綠**（新 recognition gate 7）。
 
-**剩收尾（未 push）：**
-1. **LessonPlayer 氣泡**套同款「Neve 旁白／控制面板」拆分（Eason 早期截圖嫌「好多文字」、影響入門課 21 課、單獨驗一輪）。
-2. **iPhone 實機驗**：演示節奏（騎士跳→停→兵吃看得清嗎）、epiphany 觸發+棋誌顯示、carousel slide 手感（合成事件本機測不到）。
-3. **push 前**：uniqueness spike 納入判斷場真盤、全套 vitest + E2E（改了路由目標 view）、五維+ponytail review、active.md 同步。
-4. **memory 待寫**（Eason 已同意）：node 直驅 Stockfish 驗任意 FEN 法 → `technical-preferences.md`。
+**判斷場 MINIMAL ＋ 2026-06-29 iPhone bug 批已 push**（含上方收尾項：Stockfish memory 已寫、五維+ponytail review 已過）。
+
+## 2026-06-29 iPhone 反饋 11 項（bug＋內容批已修＋push）
+
+Eason iPhone 實測判斷場/課程/棋憶。施工細節在 git；兩個真 bug 的 root cause 已固化進 `technical-preferences.md`「Board/chessground gotchas」：
+- **#2 誘餌盤不能動（真 bug）**：chessground `viewOnly` 建立時不綁 pointer listener 且永不重綁 → `chess-board.vue` 一律 created `viewOnly:false` + `onBoardCreated` 套真實 viewOnly；carousel 切 active 後 360ms `reapplyFen` 重整 selectable。本機 Playwright 實走誘餌觸發 trap 驗證。
+- **#10 棋憶破版（真 bug、全站汙染）**：lichess-pgn-viewer.css 全域 `.cg-wrap` aspect 規則汙染 vue3-chessboard（疊加 → 高度雙倍），進過棋憶後全站盤跟著壞。修＝`board-theme.css` scope `.main-wrap .cg-wrap` reset。本機 seed 局驗 312² 正方。
+- **#3** 演示 stepMs 850→1300、**#4** missedHint 改對當前盤、**#7** d4 軟引導（`LessonStep.softRejects` 資料驅動 + regression test）、**#8** tab 概念→棋理／分組棋局原則→棋局概念／回X地圖一致、**#5** 拍板維持無提示。五維 APPROVE + ponytail Lean、vue-tsc 0、vitest 826。
+
+**剩（換對話再做）：**
+1. **redesign 三項**（須先 `/redesign` 對真實畫面出 H/M/L 拍板再施工）：#6 中心格高亮更明顯（金色受限只給 reward）、#9 概念頁三狀態（未學/已學或已練/已學且已練）進階感、#11+#1 課程氣泡套深化頁文字層級 + 判斷場氣泡手勢左右滑。
+2. **iPhone 複驗本批**：#2 誘餌互動、#10 棋盤（含試煉、無痕分頁）、#7 走 d4 引導、演示節奏、epiphany；**逐手 PgnViewer「棋盤外藍框 + 座標小偏」**（本機 PgnViewer board 未渲染、待實機指認）。
 
 **待 Eason 拍板（第二批，需決策，未動工）：**
 - ~~**1-A 深化頁命運（最關鍵）**~~ ✅ **已拍板＝改「判斷場 / RecognitionGate」（見上方專段「深化頁重設計拍板」）**。下一步＝先設計 fork 3 盤再寫元件。

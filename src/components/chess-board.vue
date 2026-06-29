@@ -67,7 +67,11 @@ const boardConfig: BoardConfig = {
   // chessground's own coords overlay-print inside edge squares and clash with pieces on them. We
   // render coordinates ourselves on the wooden frame instead (see rankLabels / fileLabels).
   coordinates: false,
-  viewOnly: props.disabled,
+  // Always create interactive: chessground binds its pointer (mousedown/touchstart) listeners ONLY
+  // when created non-viewOnly, and never rebinds when viewOnly is later toggled off (vendor source).
+  // A board created viewOnly (e.g. an off-screen carousel board) would otherwise be permanently
+  // unmovable even after becoming active. onBoardCreated applies the real viewOnly immediately.
+  viewOnly: false,
   animation: { duration: PIECE_MOVE_ANIM_MS },
   // Native chessground dests: filled dots on quiet moves, rings on captures (chess.com style).
   movable: { free: false, color: props.playerColor, showDests: true },
@@ -81,6 +85,8 @@ const boardConfig: BoardConfig = {
 
 function onBoardCreated(api: BoardApi): void {
   boardApi.value = api
+  // Board is created viewOnly:false (so listeners bind); apply the real disabled state now.
+  if (props.disabled) api.setConfig({ viewOnly: true }, false)
 }
 
 function isPromotionMove(move: Move): boolean {

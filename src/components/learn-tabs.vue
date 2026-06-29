@@ -15,7 +15,7 @@ const emit = defineEmits<{ select: [index: number] }>()
 
 const tabs = [
   { label: '課程', icon: GraduationCap },
-  { label: '概念', icon: Compass },
+  { label: '棋理', icon: Compass },
 ] as const
 
 // Indicator position: live pan progress while swiping (follows the finger), else the active index.

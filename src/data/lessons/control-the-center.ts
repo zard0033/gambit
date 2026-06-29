@@ -32,6 +32,9 @@ export const controlTheCenter: Lesson = {
       text: '走出第一步，往中心插旗。哪個兵能一步踏進那四格之一？',
       arrows: [{ orig: 'e2', dest: 'e4' }],
       expectedMove: { from: 'e2', to: 'e4' },
+      softRejects: [
+        { from: 'd2', to: 'd4', note: 'd4 也是好棋，一樣牢牢佔住中心。這一課我們跟著 e4 這條線往下看，把 e4 走出來吧。' },
+      ],
       hint: '你想佔據的是 e4/d4 這類中心格。哪個兵第一步就能直接站上中心？（別忘了兵的第一步能走兩格。）',
       successText: '白兵牢牢站在中心，後面的子力也有了出路。',
     },

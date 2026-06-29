@@ -51,7 +51,7 @@ const CONCEPT_BLURB: Record<ChessConcept, string> = {
 const CONCEPT_GROUPS: { key: string; label: string; ids: ChessConcept[] }[] = [
   { key: 'core',       label: '核心目標', ids: ['material', 'mate'] },
   { key: 'tactics',   label: '戰術技巧', ids: ['fork', 'pin', 'skewer', 'discovered'] },
-  { key: 'principles', label: '棋局原則', ids: ['center', 'defense'] },
+  { key: 'principles', label: '棋局概念', ids: ['center', 'defense'] },
 ]
 
 // A puzzle counts as drilled whether cleared in the dungeon or practised from a lesson (GDD §4.2).
@@ -111,14 +111,14 @@ const maskStyle = (piece: string) => ({
 
 <template>
   <div class="mx-auto max-w-md lg:max-w-3xl pb-8">
-    <h1 class="sr-only" tabindex="-1">概念地圖</h1>
+    <h1 class="sr-only" tabindex="-1">棋理地圖</h1>
     <!-- 圖例：說明狀態圓點 -->
     <div class="flex items-center gap-4 px-[14px] pt-4 pb-1.5 font-sans text-[11px] text-ink-faint">
       <span class="inline-flex items-center gap-1.5"><span class="legend-dot legend-learned" aria-hidden="true" />已學</span>
       <span class="inline-flex items-center gap-1.5"><span class="legend-dot legend-practiced" aria-hidden="true" />已練</span>
     </div>
 
-    <!-- 概念分組：核心目標 / 戰術技巧 / 棋局原則 -->
+    <!-- 概念分組：核心目標 / 戰術技巧 / 棋局概念 -->
     <div class="flex flex-col gap-4 px-[14px] pt-1">
       <section v-for="group in conceptsByGroup" :key="group.key">
         <p class="mb-2 font-sans text-[11px] font-bold uppercase tracking-widest text-ink-faint">{{ group.label }}</p>

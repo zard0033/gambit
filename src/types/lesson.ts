@@ -35,6 +35,12 @@ export interface LessonStep {
   highlights?: string[]
   /** Present iff the step is interactive; the single move the player must play to advance. */
   expectedMove?: { from: string; to: string; promotion?: PromotionPiece }
+  /**
+   * Legal, reasonable moves that aren't the taught answer (e.g. d4 when the lesson drills e4).
+   * Playing one is NOT a mistake: the piece slides home, Neve gently redirects with `note`, and it
+   * counts as no aid (no ✗, no hint penalty). Anything not here and not `expectedMove` is a wrong move.
+   */
+  softRejects?: { from: string; to: string; note: string }[]
   /** Shown after a wrong-but-legal attempt on an interactive step. */
   hint?: string
   /** Shown after the correct move on an interactive step. */
