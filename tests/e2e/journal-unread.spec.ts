@@ -68,11 +68,13 @@ test.describe('Journal peek (story-005)', () => {
     expect(texts.some((t) => t.includes('PEEK-ENTRY-1'))).toBe(false)
   })
 
-  test('test_home_peek_hidden_when_no_entries', async ({ page }) => {
-    await openHome(page)  // no entries
+  test('test_home_peek_shows_derived_onset_for_fresh_guest', async ({ page }) => {
+    await openHome(page)  // no seeded entries
 
-    // Peek section and stat-card remain, but no peek entries
-    await expect(page.locator('[data-testid="journal-peek-entry"]')).toHaveCount(0)
+    // 2026-07-04 行為變更：Home mount 會跑 journal.evaluate()（settle 接線），全新 guest 首次
+    // 進站即推導 onset 開場條目——棋誌從第一天就活著，peek 恰好顯示這一筆（取代舊的「隱藏」斷言）。
+    const peek = page.locator('[data-testid="journal-peek-entry"]')
+    await expect(peek).toHaveCount(1)
   })
 
   test('test_home_peek_navigates_to_journal_on_tap', async ({ page }) => {
