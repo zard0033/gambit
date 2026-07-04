@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import type { GameHistoryEntry, Cursor } from '@/types/game-history'
 import { mapRowToEntry, buildCursor } from '@/utils/game-history-mappers'
 import { HISTORY_LOAD_LIMIT } from '@/config/history-config'
+import { useDataSyncStore } from '@/stores/data-sync'
 
 export type CacheState = 'cold' | 'valid' | 'dirty'
 
@@ -11,6 +12,7 @@ export type CacheState = 'cold' | 'valid' | 'dirty'
  * All Supabase calls go through useDataSyncStore().loadGameHistory().
  */
 export const useGameHistoryStore = defineStore('gameHistory', () => {
+  const dataSyncStore = useDataSyncStore()
   const entries = ref<GameHistoryEntry[]>([])
   const isLoading = ref(false)
   const isLoadingMore = ref(false)
@@ -31,9 +33,7 @@ export const useGameHistoryStore = defineStore('gameHistory', () => {
     error.value = null
 
     try {
-      // Deferred import avoids circular dependency (game-history ↔ data-sync)
-      const { useDataSyncStore } = await import('@/stores/data-sync')
-      const rows = await useDataSyncStore().loadGameHistory()
+      const rows = await dataSyncStore.loadGameHistory()
 
       if (myGeneration !== fetchGeneration.value) return  // stale fetch — discard
 
@@ -57,8 +57,7 @@ export const useGameHistoryStore = defineStore('gameHistory', () => {
     isLoadingMore.value = true
 
     try {
-      const { useDataSyncStore } = await import('@/stores/data-sync')
-      const rows = await useDataSyncStore().loadGameHistory(nextCursor.value)
+      const rows = await dataSyncStore.loadGameHistory(nextCursor.value)
 
       entries.value = [...entries.value, ...rows.map(mapRowToEntry)]
       hasMore.value = rows.length === HISTORY_LOAD_LIMIT
@@ -76,6 +75,12 @@ export const useGameHistoryStore = defineStore('gameHistory', () => {
     cacheState.value = 'dirty'
     fetchGeneration.value++  // invalidates any in-flight fetch
   }
+
+  // data-sync bumps syncVersion after every successful sync/flush; react by invalidating our
+  // cache instead of data-sync importing this store back (keeps data-sync a dependency-free leaf).
+  // flush: 'sync' preserves the previous behavior where invalidate() ran synchronously with the
+  // sync/flush success path, not on a later microtask tick.
+  watch(() => dataSyncStore.syncVersion, invalidate, { flush: 'sync' })
 
   /** Toggle expanded row; calling with the already-expanded id collapses it. */
   function setExpandedRow(id: string | null): void {

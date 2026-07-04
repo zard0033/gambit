@@ -78,23 +78,23 @@ describe('getLegalDestinations', () => {
 
 describe('squareAriaLabel — AC-7', () => {
   it('test_squareAriaLabel_e2_returnsWhitePawn', () => {
-    expect(squareAriaLabel('e2', STARTING_FEN)).toBe('e2, white pawn')
+    expect(squareAriaLabel('e2', STARTING_FEN)).toBe('e2，白方兵')
   })
 
   it('test_squareAriaLabel_g1_returnsWhiteKnight', () => {
-    expect(squareAriaLabel('g1', STARTING_FEN)).toBe('g1, white knight')
+    expect(squareAriaLabel('g1', STARTING_FEN)).toBe('g1，白方騎士')
   })
 
   it('test_squareAriaLabel_e4_returnsEmpty', () => {
-    expect(squareAriaLabel('e4', STARTING_FEN)).toBe('e4, empty')
+    expect(squareAriaLabel('e4', STARTING_FEN)).toBe('e4，空格')
   })
 
   it('test_squareAriaLabel_e7_returnsBlackPawn', () => {
-    expect(squareAriaLabel('e7', STARTING_FEN)).toBe('e7, black pawn')
+    expect(squareAriaLabel('e7', STARTING_FEN)).toBe('e7，黑方兵')
   })
 
   it('test_squareAriaLabel_a8_returnsBlackRook', () => {
-    expect(squareAriaLabel('a8', STARTING_FEN)).toBe('a8, black rook')
+    expect(squareAriaLabel('a8', STARTING_FEN)).toBe('a8，黑方城堡')
   })
 })
 
@@ -355,10 +355,10 @@ describe('useBoardKeyboard — AC-6: 100ms announcement merge', () => {
 
     // Trigger two "enter" events that both queue announcements within 100ms
     currentSquare.value = 'g1'
-    handleKeydown(makeKey('Enter')) // announces "Knight at g1 selected"
+    handleKeydown(makeKey('Enter')) // announces "已選取 g1 的白方騎士"
     handleKeydown(makeKey('Escape')) // back to IDLE
     currentSquare.value = 'e2'
-    handleKeydown(makeKey('Enter')) // announces "Pawn at e2 selected"
+    handleKeydown(makeKey('Enter')) // announces "已選取 e2 的白方兵"
 
     // Before timer fires: no announcement yet
     expect(deps.announced).toHaveLength(0)
@@ -368,6 +368,6 @@ describe('useBoardKeyboard — AC-6: 100ms announcement merge', () => {
 
     // Two announcements within 100ms → merged into one
     expect(deps.announced).toHaveLength(1)
-    expect(deps.announced[0]).toContain('selected')
+    expect(deps.announced[0]).toContain('已選取')
   })
 })

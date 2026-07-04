@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { renderNeveLine, renderMoment, type MomentText } from '@/modules/memory/templates'
-import { lintNeve } from '@/lib/memory/persona-lint'
+import { lintNeve } from '@/modules/memory/persona-lint'
 
 describe('renderNeveLine (F4)', () => {
   it('renders each signal kind, all 回顧態-lint-clean', () => {

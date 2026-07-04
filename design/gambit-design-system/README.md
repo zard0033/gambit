@@ -9,8 +9,8 @@
 - **UI language:** Traditional Chinese (繁體中文).
 - **Audience:** adult chess beginners, 25–50. Mature, not childish. Game-feel ≈ 7/10.
 - **Platforms:** PC Chrome/Edge + iPhone Safari (PWA). Mobile-first.
-- **Stack (production):** Vue 3 + Tailwind v3 (`tailwind.config.ts`) + shadcn-vue HSL vars (`src/assets/main.css`).
-- **Mentor persona:** *Beth Harmon* — mature, understated (bespoke illustration TBD, none exists yet).
+- **Stack (production):** Vue 3 + Tailwind v4 (CSS-first `@theme`, tokens in `src/assets/main.css` — no `tailwind.config.ts`) + shadcn-vue (reka-ui).
+- **Mentor persona:** *Neve* (original character) — mature, understated. SoT: `persona-neve.md` (bespoke illustration TBD, none exists yet).
 
 ---
 
@@ -27,7 +27,8 @@ consistent. If you have the repo, these are the canonical files the docs referen
 | `uploads/claude-design-seed-mockup.png` | Finished 4-screen reference (Home · Learn · Game · Review) → `assets/seed-mockup.png` | provided |
 | `design/gdd/game-concept-v2.md` | Game-concept GDD — chessboard/piece/annotation visual language (日本傳統色) | referenced, not provided |
 | `design/ux/accessibility-requirements.md` | A11y rules — **takes precedence** over visuals (contrast, reduced-motion, forced-colors) | referenced, not provided |
-| `tailwind.config.ts`, `src/assets/main.css`, `src/components/*.vue` | Production implementation | referenced, not provided |
+| `persona-neve.md` | Mentor persona SoT — Neve, original character | provided |
+| `src/assets/main.css`, `src/components/*.vue` | Production implementation (Tailwind v4 `@theme` tokens) | referenced, not provided |
 
 **Authority order when specs conflict:** accessibility-requirements > game-concept GDD / ADR / control-manifest > visual-design-system.
 
@@ -60,7 +61,7 @@ encouraging** without being cute — it treats the reader as a capable adult on 
 journey.
 
 - **Voice / person:** speaks *to* the player using **你** ("you"), warmly and directly. The mentor
-  (Beth Harmon) is understated, never chirpy. No exclamation-mark spam.
+  (Neve) is understated, never chirpy. No exclamation-mark spam.
 - **Tone:** premium, motivating, **low-pressure**. No urgency mechanics, no "don't break your streak!"
   guilt, no competitive trash-talk. The vibe is a quiet, elegant chess club at dusk.
 - **Casing / script:** Chinese has no case; Latin/numbers sit inline (e.g. `Lv.4`, `+0.6`, `12.c3`).
@@ -120,7 +121,7 @@ chessboard is the warm centerpiece; the app "world" (deep jade + gold + glass) f
 
 #### Font-family usage rules（Production binding）
 
-> Matches `tailwind.config.ts` (`fontFamily`) + `src/assets/main.css` (`.font-num` explicit override).
+> Matches `src/assets/main.css` (Tailwind v4 `@theme` `--font-*` tokens + `.font-num` explicit override).
 
 | Tailwind class | Font | Use | Never use for |
 | --- | --- | --- | --- |
@@ -210,7 +211,7 @@ chessboard is the warm centerpiece; the app "world" (deep jade + gold + glass) f
    aliased to SemiBold so labels have clear visual distinction from body (400 Regular).
 2. **Chess pieces + board:** Gioco Wood SVG set + `board/wood12.jpg` not provided → board mocked with
    styled Unicode pieces + CSS wood tones. Drop the real assets in `assets/` to finalize.
-3. **Brand logo / mentor art:** no logo SVG or Beth Harmon illustration exists yet → wordmark lockup
+3. **Brand logo / mentor art:** no logo SVG or Neve illustration exists yet → wordmark lockup
    approximated.
 4. **No codebase/Figma:** built from docs + mockup. If a repo exists, re-attach via Import for
    pixel-exact component recreations.

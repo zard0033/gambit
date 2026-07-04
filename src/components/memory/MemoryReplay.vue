@@ -5,7 +5,7 @@
  * chart → anchor ply by default; deep-linkable for the 棋誌 coupling, story-010). Reads the single
  * review instance from MemoryContext — runs NO analysis itself (ADR-0014).
  */
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useBoardFit } from '@/composables/use-board-fit'
 import { RouterLink } from 'vue-router'
 import { ChevronLeft, ChevronRight, Zap } from 'lucide-vue-next'
@@ -79,6 +79,7 @@ const _mq = typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px
 const isMobile = ref(_mq?.matches ?? false)
 function _onMqChange(e: MediaQueryListEvent) { isMobile.value = e.matches }
 if (_mq) _mq.addEventListener('change', _onMqChange)
+onUnmounted(() => { _mq?.removeEventListener('change', _onMqChange) })
 
 const currentEvaluation = computed<EvaluationInput | null>(() => {
   const i = review.cursor.value

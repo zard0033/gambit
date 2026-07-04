@@ -18,6 +18,14 @@ const PIECE_TYPE_NAMES: Record<string, PieceInfo['type']> = {
   k: 'king', q: 'queen', r: 'rook', b: 'bishop', n: 'knight', p: 'pawn',
 }
 
+const PIECE_TYPE_LABELS_ZH: Record<PieceInfo['type'], string> = {
+  king: '國王', queen: '后', rook: '城堡', bishop: '主教', knight: '騎士', pawn: '兵',
+}
+
+const PIECE_COLOR_LABELS_ZH: Record<PieceInfo['color'], string> = {
+  white: '白方', black: '黑方',
+}
+
 const FILES = 'abcdefgh'
 const RANKS = '12345678'
 
@@ -51,8 +59,8 @@ export function getLegalDestinations(fen: string, from: string): string[] {
 /** Compute the square aria-label for display. */
 export function squareAriaLabel(square: string, fen: string): string {
   const piece = getPieceAt(fen, square)
-  if (!piece) return `${square}, empty`
-  return `${square}, ${piece.color} ${piece.type}`
+  if (!piece) return `${square}，空格`
+  return `${square}，${PIECE_COLOR_LABELS_ZH[piece.color]}${PIECE_TYPE_LABELS_ZH[piece.type]}`
 }
 
 /** Move a square one step in a direction, clamping at edges (no wrap). */
@@ -196,8 +204,8 @@ export function useBoardKeyboard(deps: BoardKeyboardDeps) {
             selectedSquare.value = currentSquare.value
             keyboardState.value = 'PIECE_SELECTED'
             const piece = getPieceAt(deps.getFen(), currentSquare.value)
-            const pieceName = piece ? `${_capitalise(piece.type)} at ${currentSquare.value}` : currentSquare.value
-            _announce(`${pieceName} selected`)
+            const pieceName = piece ? `${currentSquare.value} 的${PIECE_COLOR_LABELS_ZH[piece.color]}${PIECE_TYPE_LABELS_ZH[piece.type]}` : currentSquare.value
+            _announce(`已選取${pieceName}`)
             deps.onPieceSelected(currentSquare.value, legalDests)
           }
         } else {
@@ -214,8 +222,8 @@ export function useBoardKeyboard(deps: BoardKeyboardDeps) {
             const legalDests = getLegalDestinations(deps.getFen(), currentSquare.value)
             selectedSquare.value = currentSquare.value
             const piece = getPieceAt(deps.getFen(), currentSquare.value)
-            const pieceName = piece ? `${_capitalise(piece.type)} at ${currentSquare.value}` : currentSquare.value
-            _announce(`${pieceName} selected`)
+            const pieceName = piece ? `${currentSquare.value} 的${PIECE_COLOR_LABELS_ZH[piece.color]}${PIECE_TYPE_LABELS_ZH[piece.type]}` : currentSquare.value
+            _announce(`已選取${pieceName}`)
             deps.onPieceSelected(currentSquare.value, legalDests)
           } else {
             // Not a legal destination and not own piece — cancel
@@ -237,10 +245,6 @@ export function useBoardKeyboard(deps: BoardKeyboardDeps) {
     selectedSquare.value = null
     keyboardState.value = 'IDLE'
     deps.onSelectionCleared()
-  }
-
-  function _capitalise(s: string): string {
-    return s.charAt(0).toUpperCase() + s.slice(1)
   }
 
   const currentSquareLabel = computed(() =>

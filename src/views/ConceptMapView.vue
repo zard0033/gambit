@@ -12,7 +12,7 @@
  */
 import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ChevronRight } from 'lucide-vue-next'
+import { Check, ChevronRight } from 'lucide-vue-next'
 import { concepts } from '@/data/concepts'
 import type { ChessConcept } from '@/types/concept'
 import { learned, practiced } from '@/modules/learning-loop/mastery'
@@ -59,14 +59,18 @@ function isSolved(id: string): boolean {
   return dungeonProgress.isSolved(id) || conceptProgress.isPracticeSolved(id)
 }
 
+/** Coin progression（三狀態進階感，2026-07-02 redesign）：
+ *  none = 未學（淡環）→ partial = 已學或已練（jade 環 = progress）→ full = 已學且已練
+ *  （金環 + ✓ 徽章 = reward，練過才配金；✓ 是 shape cue，狀態不只靠顏色）。 */
+type CoinStage = 'none' | 'partial' | 'full'
+
 interface ConceptVM {
   id: ChessConcept
   label: string
   blurb: string
   piece: string
   lit: boolean
-  isLearned: boolean
-  isPracticed: boolean
+  stage: CoinStage
   isDeepened: boolean
 }
 
@@ -81,8 +85,7 @@ const allVM = computed<ConceptVM[]>(() =>
       blurb: CONCEPT_BLURB[c.id],
       piece: CONCEPT_PIECE[c.id],
       lit: isLearned || isPracticed,
-      isLearned,
-      isPracticed,
+      stage: (isLearned && isPracticed ? 'full' : isLearned || isPracticed ? 'partial' : 'none') as CoinStage,
       isDeepened: conceptProgress.isDeepened(c.id),
     }
   }),
@@ -112,10 +115,10 @@ const maskStyle = (piece: string) => ({
 <template>
   <div class="mx-auto max-w-md lg:max-w-3xl pb-8">
     <h1 class="sr-only" tabindex="-1">棋理地圖</h1>
-    <!-- 圖例：說明狀態圓點 -->
+    <!-- 圖例：coin 環三階（未學＝淡環不列，安靜預設） -->
     <div class="flex items-center gap-4 px-[14px] pt-4 pb-1.5 font-sans text-[11px] text-ink-faint">
-      <span class="inline-flex items-center gap-1.5"><span class="legend-dot legend-learned" aria-hidden="true" />已學</span>
-      <span class="inline-flex items-center gap-1.5"><span class="legend-dot legend-practiced" aria-hidden="true" />已練</span>
+      <span class="inline-flex items-center gap-1.5"><span class="legend-ring legend-ring-partial" aria-hidden="true" />已學或已練</span>
+      <span class="inline-flex items-center gap-1.5"><span class="legend-ring legend-ring-full" aria-hidden="true" />已學且已練</span>
     </div>
 
     <!-- 概念分組：核心目標 / 戰術技巧 / 棋局概念 -->
@@ -138,24 +141,23 @@ const maskStyle = (piece: string) => ({
               class="concept-focus-ring pointer-events-none absolute inset-0 z-10 rounded-2xl border-2 border-gold"
               aria-hidden="true"
             />
-            <span :class="['coin', !v.lit && 'coin-dim']">
+            <span :class="['coin', v.stage === 'none' && 'coin-dim', v.stage === 'partial' && 'coin-learned', v.stage === 'full' && 'coin-full']">
               <span
                 class="block h-5 w-5"
                 :class="v.lit ? 'bg-primary' : 'bg-ink-faint'"
                 aria-hidden="true"
                 :style="{ ...maskStyle(v.piece), WebkitMaskRepeat:'no-repeat', maskRepeat:'no-repeat', WebkitMaskPosition:'center', maskPosition:'center', WebkitMaskSize:'contain', maskSize:'contain' }"
               />
+              <span v-if="v.stage === 'full'" class="coin-check" aria-hidden="true">
+                <Check :size="10" :stroke-width="3.5" />
+              </span>
             </span>
             <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-1.5">
-                <span
-                  class="truncate font-display text-[15px] font-bold leading-tight"
-                  :class="v.lit ? 'text-ink' : 'text-ink-muted'"
-                >{{ v.label }}</span>
-                <span v-if="v.isLearned" class="legend-dot legend-learned shrink-0" aria-hidden="true" />
-                <span v-if="v.isPracticed" class="legend-dot legend-practiced shrink-0" aria-hidden="true" />
-              </div>
-              <div class="mt-0.5 truncate font-sans text-[10px] text-ink-faint">{{ v.blurb }}</div>
+              <span
+                class="block truncate font-display text-[15px] font-bold leading-tight"
+                :class="v.lit ? 'text-ink' : 'text-ink-muted'"
+              >{{ v.label }}</span>
+              <div class="mt-0.5 truncate font-sans text-[11px] text-ink-faint">{{ v.blurb }}</div>
             </div>
             <span
               class="flex shrink-0 items-center gap-0.5 self-center font-sans text-[11px] text-ink-faint"
@@ -189,17 +191,30 @@ const maskStyle = (piece: string) => ({
   .concept-focus-ring { animation: none; opacity: 1; }
 }
 
+/* Coin 三階：dim（未學）→ jade 環（已學或已練＝progress）→ 金環＋✓（已學且已練＝reward）。 */
 .coin {
   position: relative; display: flex; height: 38px; width: 38px; flex: none;
   align-items: center; justify-content: center; border-radius: 9999px;
   background: #fcf9f3;
-  box-shadow: 0 0 0 2px #f8b500, 0 3px 10px rgba(61, 34, 16, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 .coin-dim {
   background: #f4ead8;
   box-shadow: 0 0 0 2px #e0d3bd, inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
-.legend-dot { display: inline-block; height: 8px; width: 8px; flex: none; border-radius: 9999px; }
-.legend-learned { background: #3ab894; box-shadow: 0 0 0 3px rgba(58, 184, 148, 0.18); }
-.legend-practiced { background: #f8b500; box-shadow: 0 0 0 3px rgba(248, 181, 0, 0.18); }
+.coin-learned {
+  box-shadow: 0 0 0 2px #1c7059, 0 3px 10px rgba(61, 34, 16, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.coin-full {
+  box-shadow: 0 0 0 2px #f8b500, 0 3px 10px rgba(61, 34, 16, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.coin-check {
+  position: absolute; right: -4px; bottom: -4px;
+  display: flex; align-items: center; justify-content: center;
+  height: 16px; width: 16px; border-radius: 9999px;
+  background: #f8b500; color: #3a2408;
+  box-shadow: 0 1px 3px rgba(61, 34, 16, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.legend-ring { display: inline-block; height: 10px; width: 10px; flex: none; border-radius: 9999px; background: #fcf9f3; }
+.legend-ring-partial { box-shadow: 0 0 0 2px #1c7059; }
+.legend-ring-full { box-shadow: 0 0 0 2px #f8b500; }
 </style>

@@ -23,4 +23,19 @@ test.describe('SPA deep-link redirect handling', () => {
     // Assert the Play view rendered (PlayView renders inside <main>)
     await expect(page.locator('main')).toBeVisible()
   })
+
+  // Regression: entering /play directly opens the setup modal on /play itself; confirming it used
+  // to bounce back home — the modal-dismiss guard saw pendingGame already consumed and
+  // isGameInProgress still false (only set on the first player move) and misread "started" as
+  // "cancelled". The guard now keys on lifecycle phase === 'SETUP' (never started this visit).
+  test('confirming setup after direct /play entry starts the game and stays on /play', async ({ page }) => {
+    await page.goto('/play', { waitUntil: 'domcontentloaded' })
+
+    // Setup modal opens in place (no pending game from Home). Confirm with defaults.
+    await page.getByRole('button', { name: '開始對局' }).click()
+
+    // The game must start on /play — no bounce back to home.
+    await expect(page.locator('cg-board')).toBeVisible()
+    await expect(page).toHaveURL('/play')
+  })
 })

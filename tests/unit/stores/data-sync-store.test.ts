@@ -153,6 +153,30 @@ describe('useDataSyncStore', () => {
       const keys = Object.keys(localStorage).filter(k => k.startsWith('chess:unsynced:'))
       expect(keys).toHaveLength(1)
     })
+
+    it('increments syncVersion on successful sync (drives game-history cache invalidation)', async () => {
+      mockFrom({ error: null })
+      const authStore = useAuthStore()
+      authStore.userId = 'uid-1'
+
+      const store = useDataSyncStore()
+      const before = store.syncVersion
+      await store.syncGame(makeGame())
+
+      expect(store.syncVersion).toBe(before + 1)
+    })
+
+    it('does not increment syncVersion when the upsert fails', async () => {
+      mockFrom({ error: { message: 'Network error' } })
+      const authStore = useAuthStore()
+      authStore.userId = 'uid-1'
+
+      const store = useDataSyncStore()
+      const before = store.syncVersion
+      await store.syncGame(makeGame())
+
+      expect(store.syncVersion).toBe(before)
+    })
   })
 
   // ── syncGame — not logged in ───────────────────────────────────────────
@@ -244,30 +268,94 @@ describe('useDataSyncStore', () => {
 
       expect(supabase.from).not.toHaveBeenCalled()
     })
+
+    it('increments syncVersion once the queue is fully flushed', async () => {
+      const authStore = useAuthStore()
+      authStore.userId = 'uid-1'
+
+      const id1 = 'aaaaaaaa-0000-0000-0000-000000000001'
+      localStorage.setItem(`chess:unsynced:${id1}`, JSON.stringify({ ...makeGame(), id: id1 }))
+      mockFrom({ error: null })
+
+      const store = useDataSyncStore()
+      const before = store.syncVersion
+      await store.flushUnsyncedQueue()
+
+      expect(store.syncVersion).toBe(before + 1)
+    })
+
+    it('does not increment syncVersion when a game fails to flush (queue not empty)', async () => {
+      const authStore = useAuthStore()
+      authStore.userId = 'uid-1'
+
+      const id1 = 'aaaaaaaa-0000-0000-0000-000000000001'
+      localStorage.setItem(`chess:unsynced:${id1}`, JSON.stringify({ ...makeGame(), id: id1 }))
+      mockFrom({ error: { message: 'Server error' } })
+
+      const store = useDataSyncStore()
+      const before = store.syncVersion
+      await store.flushUnsyncedQueue()
+
+      expect(store.syncVersion).toBe(before)
+    })
   })
 
   // ── Queue overflow ─────────────────────────────────────────────────────
 
   describe('queue overflow', () => {
-    it('drops oldest entry when writing the 51st game (UNSYNCED_QUEUE_MAX = 50)', async () => {
+    it('drops the entry with the oldest completedAt when writing the 51st game (UNSYNCED_QUEUE_MAX = 50), not the lexicographically-first key', async () => {
       const store = useDataSyncStore()
 
-      // Fill queue to 50
-      for (let i = 0; i < 50; i++) {
-        const id = `aaaaaaaa-0000-0000-0000-${String(i).padStart(12, '0')}`
-        localStorage.setItem(`chess:unsynced:${id}`, JSON.stringify({ ...makeGame(), id }))
+      // Fill queue to 50 with real random UUIDs (v4 has no time ordering) and completedAt
+      // timestamps shuffled independently of key sort order — this is what B1 exploited.
+      const entries = Array.from({ length: 50 }, (_, i) => ({
+        id: crypto.randomUUID(),
+        completedAt: 1_000_000 + i * 1000, // strictly increasing "true" age
+      }))
+      // Shuffle so key lexicographic order != completedAt order.
+      const shuffled = [...entries].sort(() => Math.random() - 0.5)
+      for (const { id, completedAt } of shuffled) {
+        localStorage.setItem(
+          `chess:unsynced:${id}`,
+          JSON.stringify({ ...makeGame({ completedAt }), id }),
+        )
       }
 
-      const oldestKey = Object.keys(localStorage)
-        .filter(k => k.startsWith('chess:unsynced:'))
-        .sort()[0]
+      // The genuinely oldest entry by completedAt — must be the one evicted.
+      const trueOldestKey = `chess:unsynced:${entries[0].id}`
 
-      // syncGame while not logged in → writes to queue (51st)
-      await store.syncGame(makeGame())
+      // syncGame while not logged in → writes to queue (51st), triggering eviction
+      await store.syncGame(makeGame({ completedAt: 9_999_999 }))
 
       const remaining = Object.keys(localStorage).filter(k => k.startsWith('chess:unsynced:'))
       expect(remaining).toHaveLength(50)
-      expect(remaining).not.toContain(oldestKey)
+      expect(remaining).not.toContain(trueOldestKey)
+      // Assert eviction tracked completedAt (not key sort): the minimum remaining completedAt
+      // should now be the *second*-oldest original entry's completedAt.
+      const remainingCompletedAts = remaining
+        .map((k) => JSON.parse(localStorage.getItem(k)!).completedAt as number)
+      expect(Math.min(...remainingCompletedAts)).toBe(entries[1].completedAt)
+    })
+
+    it('evicts a corrupt/missing-completedAt entry before any entry with a real completedAt', async () => {
+      const store = useDataSyncStore()
+
+      for (let i = 0; i < 49; i++) {
+        const id = crypto.randomUUID()
+        localStorage.setItem(
+          `chess:unsynced:${id}`,
+          JSON.stringify({ ...makeGame({ completedAt: 1_000_000 + i * 1000 }), id }),
+        )
+      }
+      const corruptId = crypto.randomUUID()
+      const corruptKey = `chess:unsynced:${corruptId}`
+      localStorage.setItem(corruptKey, '{not valid json')
+
+      await store.syncGame(makeGame({ completedAt: 9_999_999 }))
+
+      const remaining = Object.keys(localStorage).filter(k => k.startsWith('chess:unsynced:'))
+      expect(remaining).toHaveLength(50)
+      expect(remaining).not.toContain(corruptKey)
     })
   })
 

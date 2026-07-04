@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { lintBody, lintEntryBody } from '@/lib/journal/persona-lint'
+import { lintBody } from '@/lib/persona-lint'
+import { lintEntryBody } from '@/modules/journal/persona-lint'
 
 describe('lintBody — always-on rules', () => {
   it('passes clean Neve text', () => {

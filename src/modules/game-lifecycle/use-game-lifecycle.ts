@@ -13,6 +13,7 @@ import { Chess } from 'chess.js'
 import { useGameStore } from '../../stores/game-store'
 import type { CompletedGame } from '../../stores/game-store'
 import { useDataSyncStore } from '../../stores/data-sync'
+import { useJournalStore } from '../../stores/journal'
 import type { ResumePayload } from '../../types/resume'
 
 // ---- Types ----
@@ -148,7 +149,10 @@ export function useGameLifecycle(deps?: GameLifecycleDeps) {
     const game = assembleCompletedGame(t)
     _store.setCompletedGame(game)        // 1. write completed game to store
     _store.setGameInProgress(false)      // 2. disarm navigation guard (no await between 1 and 2)
-    void useDataSyncStore().syncGame(game) // 3. fire-and-forget: sets syncStatus before ReviewView mounts
+    // 3. sync 先行、settle 接續（整段仍 fire-and-forget，不擋導航）：evaluate 讀 game history，
+    //    鏈在 syncGame 之後（訪客＝佇列已寫入、登入＝upsert 已完成且 cache 已失效）剛結束的
+    //    這一局才會被 solace 連敗計數看見。
+    void useDataSyncStore().syncGame(game).finally(() => { void useJournalStore().evaluate() })
     if (_router) await _router.push('/review') // 4. navigate
   }
 

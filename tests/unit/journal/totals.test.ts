@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { daysTogether, totalsLine } from '@/lib/journal/totals'
+import { daysTogether, totalsLine } from '@/modules/journal/totals'
 
 // Noon timestamps keep day boundaries clear of ±1h DST shifts in any local timezone.
 const noon = (y: number, m: number, d: number): number => new Date(y, m - 1, d, 12, 0, 0).getTime()

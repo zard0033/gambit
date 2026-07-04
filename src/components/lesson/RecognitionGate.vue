@@ -1,3 +1,13 @@
+<script lang="ts">
+// Pure swipe-direction decision (extracted for unit testing, D2b). Horizontal displacement >48px
+// and greater than the vertical component counts as a swipe; dx<0 (finger moves left) → 'next',
+// dx>0 → 'prev'. Mirrors onBubbleTouchEnd's threshold exactly.
+export function shouldSwipe(dx: number, dy: number): 'prev' | 'next' | null {
+  if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) return dx < 0 ? 'next' : 'prev'
+  return null
+}
+</script>
+
 <script setup lang="ts">
 /**
  * Recognition Gate — the deepening's third step as a judgement field (quick-specs/
@@ -17,7 +27,7 @@ import { useRouter } from 'vue-router'
 import { ArrowLeft, ChevronLeft, ChevronRight, Ban } from 'lucide-vue-next'
 import RecognitionBoard from '@/components/lesson/RecognitionBoard.vue'
 import { Button } from '@/components/ui/button'
-import { COACH } from '@/types/lesson'
+import { COACH, COACH_AVATAR } from '@/types/lesson'
 import type { RecognitionSet } from '@/types/recognition'
 
 const props = withDefaults(
@@ -117,6 +127,22 @@ function go(delta: number): void {
   if (next >= 0 && next < boards.value.length) idx.value = next
 }
 
+// 氣泡卡上的左右滑切盤（M2）：手勢區放氣泡、不放棋盤——棋盤的 pointer 事件歸 chessground
+// （tap-to-move / drag）。水平位移 >48px 且大於垂直分量才算滑，按鈕點擊不受影響；chevron 保留。
+let touchX = 0
+let touchY = 0
+function onBubbleTouchStart(e: TouchEvent): void {
+  touchX = e.touches[0].clientX
+  touchY = e.touches[0].clientY
+}
+function onBubbleTouchEnd(e: TouchEvent): void {
+  const dx = e.changedTouches[0].clientX - touchX
+  const dy = e.changedTouches[0].clientY - touchY
+  const dir = shouldSwipe(dx, dy)
+  if (dir === 'next') go(1)
+  else if (dir === 'prev') go(-1)
+}
+
 // intro is a one-time entrance card (redesign H2): it carries the "this time it's different"
 // context once, so the bubble stays lean — just the current question + the action region.
 const showIntro = ref(true)
@@ -129,7 +155,7 @@ const showIntro = ref(true)
       <button
         type="button"
         :aria-label="backLabel"
-        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-white/8 text-ink-on-deep transition-colors hover:bg-white/[0.14] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold active:scale-95"
+        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] bg-white/8 text-ink-on-deep transition-colors hover:bg-white/[0.14] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold active:scale-95"
         @click="router.push(backTo)"
       ><ArrowLeft :size="20" :stroke-width="1.8" /></button>
       <h1 class="flex-1 truncate font-display text-lg font-bold text-ink-on-deep" tabindex="-1">{{ title }}</h1>
@@ -143,7 +169,7 @@ const showIntro = ref(true)
           class="flex transition-transform duration-300 ease-out motion-reduce:transition-none"
           :style="{ transform: `translateX(-${idx * 100}%)` }"
         >
-          <div v-for="(b, i) in boards" :key="i" class="flex w-full shrink-0 justify-center">
+          <div v-for="(b, i) in boards" :key="i" class="flex w-full shrink-0 justify-center" :inert="i !== idx">
             <RecognitionBoard
               :ref="(el) => setBoardRef(el, i)"
               :board="b"
@@ -159,21 +185,27 @@ const showIntro = ref(true)
       <!-- Neve bubble — 頂列(Neve+導航) + 主問(執色併提問一句) + 小字引導 + 鈕。內容高度、不撐滿
            (Eason: 別拉太大)。intro 在進場過場，不在這裡。 -->
       <div class="shrink-0 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2">
-        <div class="w-full rounded-[18px] bg-surface-card shadow-[0_6px_20px_rgba(8,24,18,0.28)]">
+        <div
+          class="w-full rounded-[18px] bg-surface-card shadow-[0_6px_20px_rgba(8,24,18,0.28)]"
+          @touchstart.passive="onBubbleTouchStart"
+          @touchend.passive="onBubbleTouchEnd"
+        >
           <!-- 頂列：Neve 頭像+名 ‖ carousel 導航（進度點 + 左右切換）。M4：導航併進頂列。 -->
           <div class="flex items-center justify-between gap-2 px-4 pb-2 pt-3.5">
             <span class="flex items-center gap-2">
-              <span
-                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary font-num text-[11px] leading-none text-primary-fg"
+              <img
+                class="h-6 w-6 shrink-0 rounded-full object-cover"
+                :src="COACH_AVATAR"
+                alt=""
                 aria-hidden="true"
-              ><span class="block translate-y-px">{{ COACH.name.charAt(0) }}</span></span>
+              >
               <span class="font-sans text-sm text-ink">{{ COACH.name }}</span>
             </span>
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-2">
               <button
                 type="button"
                 aria-label="上一盤"
-                class="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:text-ink disabled:opacity-30"
+                class="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors hover:text-ink disabled:opacity-30"
                 :disabled="idx === 0"
                 @click="go(-1)"
               ><ChevronLeft :size="18" :stroke-width="1.8" /></button>
@@ -191,7 +223,7 @@ const showIntro = ref(true)
               <button
                 type="button"
                 aria-label="下一盤"
-                class="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:text-ink disabled:opacity-30"
+                class="flex h-11 w-11 items-center justify-center rounded-full text-ink-muted transition-colors hover:text-ink disabled:opacity-30"
                 :disabled="idx === boards.length - 1"
                 @click="go(1)"
               ><ChevronRight :size="18" :stroke-width="1.8" /></button>
@@ -199,6 +231,12 @@ const showIntro = ref(true)
           </div>
 
           <div class="px-4 pb-4">
+            <!-- 常駐 live region：aria-live 只在「既存區域的內容變化」時播報，掛載即帶內容的
+                 v-if 元素常被 VoiceOver/NVDA 靜默跳過——所以視覺元素不掛 aria-live，改由這個
+                 永在 DOM 的 sr-only 容器換字（同 chess-board 鍵盤播報的 pattern）。 -->
+            <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+              {{ showMissedHint ? set.missedHint : (currentVerdict !== 'pending' ? feedback : '') }}
+            </div>
             <!-- 漏看提示（重判時，不點破哪盤）。 -->
             <p
               v-if="showMissedHint"
@@ -214,7 +252,7 @@ const showIntro = ref(true)
               <p class="mt-1 font-sans text-[13px] leading-relaxed text-ink-faint">有的話走出來，沒有的話就按「這裡沒有」。</p>
             </template>
 
-            <!-- 已判定：Neve 回饋（trap 仍可重判、見下方鈕）。 -->
+            <!-- 已判定：Neve 回饋（trap 仍可重判、見下方鈕）。播報走上方常駐 live region。 -->
             <p
               v-else
               data-testid="recognition-feedback"

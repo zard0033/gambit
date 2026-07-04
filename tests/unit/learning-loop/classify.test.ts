@@ -38,6 +38,34 @@ describe('classify — Signal M (mate, AC-5 / AC-7)', () => {
   })
 })
 
+describe('classify — CLASSIFIER_SIGNALS gating (GDD §7 tuning knob)', () => {
+  // A line that trips BOTH detectors — which one fires must follow the injected signal list.
+  const both = {
+    fen: '4k3/8/8/8/3p4/8/8/1N2K3 w - - 0 1',
+    playerMoveUci: 'b1c3',
+    opponentReplyUci: 'd4c3',
+    signals: { allowedForcedMate: true },
+  }
+
+  it('test_classify_mateSignalDisabled_fallsThroughToMaterial', () => {
+    expect(classify(both, ['material'])).toBe('material')
+  })
+
+  it('test_classify_materialSignalDisabled_hungPieceIsSilence', () => {
+    expect(classify({ ...both, signals: noMate }, ['mate'])).toBe('none')
+  })
+
+  it('test_classify_emptySignalList_alwaysSilence', () => {
+    expect(classify(both, [])).toBe('none')
+  })
+
+  it('test_classify_defaultSignals_matchConfigBehavior', () => {
+    // No explicit list → CLASSIFIER_SIGNALS（mate+material）；行為與接線前逐一相同。
+    expect(classify(both)).toBe('mate')
+    expect(classify({ ...both, signals: noMate })).toBe('material')
+  })
+})
+
 describe('classify — Signal H (material, AC-5)', () => {
   it('returns material when the player hangs an undefended piece the opponent then captures', () => {
     // White Nb1-c3?? into a pawn on d4; ...dxc3 takes the knight, no white recapture, no defender.

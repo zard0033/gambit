@@ -10,7 +10,6 @@ import type { ResumeSnapshot } from '@/types/resume'
 import type { JournalEntry } from '@/types/journal'
 import type { MemoryGameSummary } from '@/types/memory'
 import { MEMORY_SUMMARY_SCHEMA_VERSION } from '@/config/memory-config'
-import { buildPgn } from '@/modules/game-export/assembler'
 
 export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error'
 
@@ -51,16 +50,19 @@ function mapEndReason(r: CompletedGame['endReason']): string {
  * Real standard PGN (S11-03): round-trips to chess.js and external tools (lichess).
  * Never throw on a malformed move list — persistence must not lose a completed game.
  * On replay failure, degrade to the raw UCI movetext (the pre-S11-03 behavior).
+ * Dynamically imports the assembler (→ chess.js) so it never lands in the eager-loaded
+ * HomeView → data-sync startup chunk (B2).
  */
-function safePgn(game: QueuedGame): string {
+async function safePgn(game: QueuedGame): Promise<string> {
   try {
+    const { buildPgn } = await import('@/modules/game-export/assembler')
     return buildPgn(game)
   } catch {
     return game.moves.join(' ')
   }
 }
 
-function buildRow(game: QueuedGame, userId: string) {
+async function buildRow(game: QueuedGame, userId: string) {
   return {
     id: game.id,
     user_id: userId,
@@ -69,7 +71,7 @@ function buildRow(game: QueuedGame, userId: string) {
     player_color: game.playerColor,
     end_reason: mapEndReason(game.endReason),
     ai_difficulty: game.aiSkillLevel,
-    pgn: safePgn(game),
+    pgn: await safePgn(game),
     move_count: game.moves.length,
     opening_eco: null as string | null,
     opening_name: null as string | null,
@@ -142,6 +144,9 @@ function memorySummaryToRow(s: MemoryGameSummary, userId: string) {
 export const useDataSyncStore = defineStore('dataSync', () => {
   const syncStatus = ref<SyncStatus>('idle')
   const lastSyncedGameId = ref<string | null>(null)
+  /** Bumped after every successful sync/flush — game-history watches this to invalidate its
+   *  cache without data-sync importing game-history (keeps data-sync a dependency-free leaf). */
+  const syncVersion = ref(0)
 
   function _getUnsyncedKeys(): string[] {
     if (typeof localStorage === 'undefined') return []
@@ -155,7 +160,7 @@ export const useDataSyncStore = defineStore('dataSync', () => {
    * the cloud path work unchanged (訪客完局紀錄讀取). `created_at` is synthesised from `played_at`
    * (the queue has no separate insert time); ordering mirrors the cloud query — played_at desc, id asc.
    */
-  function _readUnsyncedRows(): Record<string, unknown>[] {
+  async function _readUnsyncedRows(): Promise<Record<string, unknown>[]> {
     const rows: Record<string, unknown>[] = []
     for (const key of _getUnsyncedKeys()) {
       const raw = localStorage.getItem(key)
@@ -163,7 +168,7 @@ export const useDataSyncStore = defineStore('dataSync', () => {
       try {
         const game = JSON.parse(raw) as QueuedGame
         const playedAt = new Date(game.completedAt).toISOString()
-        rows.push({ ...buildRow(game, ''), created_at: playedAt })
+        rows.push({ ...(await buildRow(game, '')), created_at: playedAt })
       } catch {
         // Skip a corrupt entry — a single bad row must not blank the whole history.
       }
@@ -177,11 +182,38 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     return rows
   }
 
+  /**
+   * The true oldest queued game by `completedAt`, not by key sort order — keys are
+   * `chess:unsynced:<uuid>` and uuid v4 is random, unrelated to time (B1). A missing or
+   * corrupt entry has no reliable completedAt and is treated as oldest (evict-first).
+   */
+  function _oldestUnsyncedKey(keys: string[]): string {
+    let oldestKey = keys[0]
+    let oldestTime = Number.POSITIVE_INFINITY
+    for (const key of keys) {
+      const raw = localStorage.getItem(key)
+      let completedAt = Number.NEGATIVE_INFINITY
+      if (raw) {
+        try {
+          const game = JSON.parse(raw) as QueuedGame
+          if (typeof game.completedAt === 'number') completedAt = game.completedAt
+        } catch {
+          // corrupt entry — stays at -Infinity, evicted first
+        }
+      }
+      if (completedAt < oldestTime) {
+        oldestTime = completedAt
+        oldestKey = key
+      }
+    }
+    return oldestKey
+  }
+
   function _writeToUnsyncedQueue(game: QueuedGame): void {
     if (typeof localStorage === 'undefined') return
     const keys = _getUnsyncedKeys()
     if (keys.length >= UNSYNCED_QUEUE_MAX) {
-      localStorage.removeItem(keys[0])
+      localStorage.removeItem(_oldestUnsyncedKey(keys))
     }
     localStorage.setItem(`${UNSYNCED_PREFIX}${game.id}`, JSON.stringify(game))
   }
@@ -193,13 +225,15 @@ export const useDataSyncStore = defineStore('dataSync', () => {
 
     if (!authStore.userId) {
       _writeToUnsyncedQueue(queued)
+      // 訪客的 history 就是本地佇列——新局進佇列等同雲端 upsert 成功，須讓 game-history 快取失效
+      syncVersion.value++
       return
     }
 
     syncStatus.value = 'syncing'
     const { error } = await supabase
       .from('game_sessions')
-      .upsert(buildRow(queued, authStore.userId), { onConflict: 'id', ignoreDuplicates: true })
+      .upsert(await buildRow(queued, authStore.userId), { onConflict: 'id', ignoreDuplicates: true })
 
     if (error) {
       _writeToUnsyncedQueue(queued)
@@ -207,9 +241,7 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     } else {
       lastSyncedGameId.value = queued.id
       syncStatus.value = 'synced'
-      // Deferred import to avoid circular dependency (data-sync ↔ game-history)
-      const { useGameHistoryStore } = await import('@/stores/game-history')
-      useGameHistoryStore().invalidate()
+      syncVersion.value++
     }
   }
 
@@ -233,16 +265,15 @@ export const useDataSyncStore = defineStore('dataSync', () => {
       }
       const { error } = await supabase
         .from('game_sessions')
-        .upsert(buildRow(game, authStore.userId), { onConflict: 'id', ignoreDuplicates: true })
+        .upsert(await buildRow(game, authStore.userId), { onConflict: 'id', ignoreDuplicates: true })
       if (!error) {
         localStorage.removeItem(key)
         lastSyncedGameId.value = game.id
       }
     }
     if (_getUnsyncedKeys().length === 0) {
-      // All queued games flushed — invalidate history cache
-      const { useGameHistoryStore } = await import('@/stores/game-history')
-      useGameHistoryStore().invalidate()
+      // All queued games flushed — bump syncVersion so game-history invalidates its cache
+      syncVersion.value++
     }
   }
 
@@ -256,7 +287,7 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     if (!authStore.userId) {
       // Guest: serve the local queue (the same games that flush to cloud on login). Paginate in
       // JS to mirror the cloud cursor semantics, so a guest with >1 page still loads more correctly.
-      let rows = _readUnsyncedRows()
+      let rows = await _readUnsyncedRows()
       if (cursor) {
         rows = rows.filter((r) => {
           const pa = r.played_at as string
@@ -295,7 +326,8 @@ export const useDataSyncStore = defineStore('dataSync', () => {
    */
   async function countGames(): Promise<number> {
     const authStore = useAuthStore()
-    if (!authStore.userId) return _readUnsyncedRows().length
+    // key 數即局數——別走 _readUnsyncedRows（它會對每局 chess.js 重放組 PGN，計數用不到）
+    if (!authStore.userId) return _getUnsyncedKeys().length
     const { count, error } = await supabase
       .from('game_sessions')
       .select('*', { count: 'exact', head: true })
@@ -698,6 +730,7 @@ export const useDataSyncStore = defineStore('dataSync', () => {
   return {
     syncStatus,
     lastSyncedGameId,
+    syncVersion,
     syncGame,
     flushUnsyncedQueue,
     loadGameHistory,

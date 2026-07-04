@@ -151,7 +151,11 @@ For each: attempt insert with ON CONFLICT DO NOTHING
 
 **Output**: boolean — true = trigger refresh, false = session still valid  
 **Default**: `TOKEN_REFRESH_BUFFER_MS = 300_000` (5 minutes before expiry)  
-**Note**: `supabase-js` handles this automatically via `onAuthStateChange('TOKEN_REFRESHED')`. This formula documents the observable threshold, not implementation code.
+**Note**: `supabase-js` handles this automatically via `onAuthStateChange('TOKEN_REFRESHED')`. This formula documents the observable threshold, not implementation code.  
+**Status note（2026-07-03）**：`TOKEN_REFRESH_BUFFER_MS` 與下方 Retry 公式的 `SYNC_BASE_DELAY_MS`／
+`SYNC_MAX_DELAY_MS` 已自 `sync-tuning.ts` 移除——三者從未被程式讀取（token 續期由 supabase-js
+內建；同步失敗由 unsynced queue 於下次啟動 flush 兜底，session 內退避重試未實作）。公式保留為
+設計參考；若日後實作再恢復常數。
 
 ---
 

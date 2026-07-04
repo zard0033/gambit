@@ -77,4 +77,15 @@ describe('useLessonProgressStore', () => {
     expect(store.isCompleted(lessonByOrder(1).id)).toBe(true)
     expect(store.isUnlocked(lessonByOrder(2))).toBe(true)
   })
+
+  it('test_completed_count_excludes_ids_not_in_current_curriculum', () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ completed: [lessonByOrder(1).id, 'stale-deleted-lesson-id'] }),
+    )
+    setActivePinia(createPinia())
+    const store = useLessonProgressStore()
+    expect(store.completedCount).toBe(1)
+    expect(store.completed.has('stale-deleted-lesson-id')).toBe(true)
+  })
 })

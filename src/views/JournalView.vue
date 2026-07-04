@@ -5,8 +5,8 @@ import { ArrowLeft, ChevronDown, ChevronRight } from 'lucide-vue-next'
 import { useJournalStore } from '@/stores/journal'
 import { useDataSyncStore } from '@/stores/data-sync'
 import type { JournalEntry } from '@/types/journal'
-import { getLastSeenAt, isUnread, markSeen } from '@/lib/journal/unread'
-import { daysTogether, totalsLine } from '@/lib/journal/totals'
+import { getLastSeenAt, isUnread, markSeen } from '@/modules/journal/unread'
+import { daysTogether, totalsLine } from '@/modules/journal/totals'
 import JournalLamp from '@/components/journal/JournalLamp.vue'
 import JournalEntryCard from '@/components/journal/JournalEntryCard.vue'
 
@@ -76,11 +76,17 @@ const monthGroups = computed<MonthGroup[]>(() => {
 })
 
 // 收合舊月份：近期（最新月份）預設展開，更早收成可點的細條（疊起來＝累積視覺）。
+// 只在資料首次到達時套用一次預設展開——不用 expanded.size===0 判斷，否則使用者手動全收合後
+// （size 也是 0）背景資料變動（如晚到的 evaluate() resolve）會強制重新展開最近月份。
 const expanded = ref<Set<string>>(new Set())
+let hasAppliedDefaultExpansion = false
 watch(
   monthGroups,
   (groups) => {
-    if (groups.length && expanded.value.size === 0) expanded.value = new Set([groups[0].key])
+    if (groups.length && !hasAppliedDefaultExpansion) {
+      expanded.value = new Set([groups[0].key])
+      hasAppliedDefaultExpansion = true
+    }
   },
   { immediate: true },
 )

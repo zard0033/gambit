@@ -74,7 +74,7 @@ function goToNextLesson(): void {
         </div>
 
         <!-- H2: 認定標語 + 課程名稱 -->
-        <p class="mt-3 font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-gold-dark">
+        <p class="mt-3 font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-ink-muted">
           · 課程完成 ·
         </p>
         <p class="mt-1 font-display text-xl font-bold text-ink">{{ lesson.title }}</p>

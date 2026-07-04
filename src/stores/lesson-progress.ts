@@ -89,7 +89,11 @@ export const useLessonProgressStore = defineStore('lessonProgress', () => {
     return completed.value.has(prev.id)
   }
 
-  const completedCount = computed(() => completed.value.size)
+  const lessonIds = new Set(lessons.map((l) => l.id))
+  /** Only counts ids that exist in the current curriculum — stale ids from deleted/renamed lessons don't inflate the count. */
+  const completedCount = computed(
+    () => [...completed.value].filter((id) => lessonIds.has(id)).length,
+  )
   const totalCount = lessons.length
   const progress = computed(() => (totalCount === 0 ? 0 : completedCount.value / totalCount))
 

@@ -1,16 +1,16 @@
 # Chess Training Companion
 
-給成人初學者的**單機西洋棋訓練 PWA**：對 AI 練棋、賽後覆盤學習，最終「畢業」到 chess.com / lichess 與真人對弈。框架為「棋之國度」——平靜、精緻、低壓力的學習旅程（無 streak、無計時、無排行榜）。
+給成人初學者的**單機西洋棋訓練 Web App**：對 AI 練棋、賽後覆盤學習，最終「畢業」到 chess.com / lichess 與真人對弈。框架為「棋之國度」——平靜、精緻、低壓力的學習旅程（無 streak、無計時、無排行榜）。
 
 - **UI 語言**：繁體中文
-- **平台**：PC Chrome / Edge / Firefox + iPhone Safari 16+（PWA，mobile-first）
+- **平台**：PC Chrome / Edge / Firefox + iPhone Safari 16+（mobile-first；PWA 規劃中，尚未安裝 `vite-plugin-pwa`）
 
 ## 技術棧
 
 | 層 | 技術 |
 |---|---|
 | 前端 | Vue 3 (Composition API) + Vue Router + Pinia |
-| 語言 / 建置 | TypeScript + Vite + vite-plugin-pwa |
+| 語言 / 建置 | TypeScript + Vite（PWA／service worker 規劃中，尚未安裝 `vite-plugin-pwa`） |
 | 樣式 | Tailwind CSS + shadcn-vue (reka-ui) |
 | 棋盤 | vue3-chessboard（chessground）+ chess.js |
 | 引擎 | Stockfish 18 Lite（單執行緒 WASM，NNUE） |
@@ -29,7 +29,7 @@ npm run test:e2e   # E2E 測試（Playwright）
 npm run typecheck  # 僅型別檢查
 ```
 
-> Node 22+ 必須（`src/lib/supabase.ts` 在 import 時即建立 Supabase client，需要原生 WebSocket）。
+> Node 26 必須（`src/lib/supabase.ts` 在 import 時即建立 Supabase client，需要原生 WebSocket；CI 硬鎖 Node 26）。
 
 ## 目錄
 

@@ -132,8 +132,11 @@ function consumePending(): void {
 watch(() => uiStore.pendingGame, (g) => { if (g) consumePending() })
 
 // If the modal is dismissed with no game started, leave the empty board → back home.
+// Guard on phase === 'SETUP'（本次 visit 從未開局）：直接進 /play 按「開始對局」時，
+// pendingGame watch（上方，註冊較早）已同步 startGame 把 phase 推離 SETUP，這裡才不會把
+// 「已開局」誤判成「取消」彈回首頁（isGameInProgress 要到玩家第一步才 true，靠它會誤判）。
 watch(() => uiStore.showPlaySetup, (open) => {
-  if (!open && !uiStore.pendingGame && !gameStore.isGameInProgress && phase.value !== 'GAME_OVER') {
+  if (!open && !uiStore.pendingGame && phase.value === 'SETUP') {
     router.push('/')
   }
 })

@@ -11,7 +11,7 @@ import { useUiStore } from '@/stores/ui-store'
 import { useResumeGameStore } from '@/stores/resume-game'
 import { useJournalStore } from '@/stores/journal'
 import { HOMEPAGE_PEEK_COUNT } from '@/config/journal-config'
-import { getLastSeenAt, isUnread } from '@/lib/journal/unread'
+import { getLastSeenAt, isUnread } from '@/modules/journal/unread'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { DarkPanel, ChapterBadge, StatCard, SectionLabel, ProgressBar } from '@/components/ui/gambit'
@@ -58,7 +58,9 @@ function continueLearning() {
 }
 
 onMounted(() => {
-  journal.load()
+  // evaluate() 內部自己 await load()，settle 完再 reload 一次——取代單純 load()，
+  // 讓首頁成為 onset/arrival/solace 的其中一個結算觸發點。
+  void journal.evaluate()
 })
 </script>
 

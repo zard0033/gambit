@@ -41,15 +41,19 @@ Postgres applies the omitted `WITH CHECK` from `USING`, so this also gates INSER
 own rows — no separate insert policy needed. Row existence = the monotonic fact
 (completed / solved); reconciliation is a union, so local and cloud never conflict.
 
+⏳ **`WITH CHECK` 顯式化 pending**：`20260830041917_add_explicit_rls_with_check.sql` 對全部
+9 張表的 policy 補上顯式 `WITH CHECK (user_id = auth.uid())`（不改變語意，只是把上面隱式
+default 寫明）。待 Eason 手動套用。
+
 ## Tables (applied to live DB)
 
 | Table | Migration | Notes |
 |-------|-----------|-------|
 | `game_sessions` | 20260821000000 | completed games (PGN + metadata) |
-| `skill_scores` | 20260821000001 | append-only skill snapshot per game |
+| `skill_scores` | 20260821000001 | append-only skill snapshot per game. ⏳ **PENDING DROP** — zero references in `src/`；`20260830053142_drop_unused_tables.sql` 拍板 2026-07-03，待 Eason 手動套用（套用後刪雲端既有資料）。 |
 | `lesson_progress` | 20260822000000 | `(user_id, lesson_id)` completed set |
 | `dungeon_progress` | 20260823000000 | puzzle solved set |
-| `lesson_side_learned` | 20260824000000 | concept side-door learned set. **DEPRECATED 2026-06-21** — side-door decommissioned (superseded by `concept_deepened`); table kept (not dropped) but no longer read/written. |
+| `lesson_side_learned` | 20260824000000 | concept side-door learned set. **DEPRECATED 2026-06-21** — side-door decommissioned (superseded by `concept_deepened`). ⏳ **PENDING DROP** — 同上 `20260830053142_drop_unused_tables.sql`，零程式碼引用、拍板 2026-07-03，待 Eason 手動套用（套用後刪雲端既有資料）。 |
 | `in_progress_game` | 20260825000000 | resume-in-progress game |
 | `journal_entries` | 20260826000000 | **棋誌** (ADR-0013) — append-only Neve entries. **Idempotency is event-level `UNIQUE(user_id, source_ref_id)`** (NOT row-UUID — that does not survive guest→login reconcile). `type` is `text` (NOT enum) so Phase 2 pens need no migration. Applied + RLS-verified 2026-06-16. |
 | `memory_summaries` | 20260828000000 | **棋憶** (ADR-0014) — one durable per-game summary feeding the F4 cross-game line (NOT a moment cache). Event-level `UNIQUE(user_id, game_id)` (`ON CONFLICT DO NOTHING`); `schema_version int` lets F4 ignore incompatible rows; `summary jsonb`; `game_id text` (no FK — guest games have no `game_sessions` row). Applied + RLS-verified 2026-06-20. |

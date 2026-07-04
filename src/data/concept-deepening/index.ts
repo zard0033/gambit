@@ -155,12 +155,17 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
           successText: '雙城堡「爬樓梯」：一個封排、一個將軍，輪流把王逼到邊線。殘局最可靠的殺法。',
         },
         {
-          fen: '7k/8/5K2/8/8/8/8/6Q1 w - - 0 1',
+          // 2026-07-03 換盤：原王翼盤（Qg7#）與試煉 l1-support-mate 逐字同盤——玩家先在試煉解過、
+          // 沉默關變成背答案，稀釋 epiphany。改盤兩輪：第一輪鏡到 a8 角被對抗審查否決（rules.ts
+          // 的 special-rules/rules-capstone 已用 Kc6+Qb7# 教過兩次）。定案＝h1 角（全資料集
+          // K+Q vs K 窮舉掃描唯一零使用的角落）：同殺型（后貼臉、王撐腰）、把王逼到棋盤下方。
+          // chess.js 窮舉 28 走法唯一 mate-in-1 = Qg2；Stockfish 唯一解閘門另驗。
+          fen: '6Q1/8/8/8/8/5K2/8/7k w - - 0 1',
           text: '這一個，我不說了。王已縮在角落，你的王罩住了他僅剩的逃生格——后只差貼上去那一步。',
           highlights: [],
-          arrows: [{ orig: 'g1', dest: 'g7' }],
-          expectedMove: { from: 'g1', to: 'g7' },
-          hint: '把后送到 g7 將軍——你的王 f6 罩著它，黑王吃不掉，逃生格也全被封。',
+          arrows: [{ orig: 'g8', dest: 'g2' }],
+          expectedMove: { from: 'g8', to: 'g2' },
+          hint: '把后沿直線俯衝到 g2 將軍——你的王 f3 罩著它，黑王吃不掉，逃生格也全被封。',
           successText: '后+王的基本殺：后將軍、王保護后並封逃生格。記住后不能單獨將殺，一定要王來幫忙。',
         },
       ],

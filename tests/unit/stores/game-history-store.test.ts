@@ -234,6 +234,43 @@ describe('useGameHistoryStore', () => {
     expect(historyStore.cacheState).toBe('dirty')
   })
 
+  // ── flushUnsyncedQueue success → gameHistory cacheState dirty (same syncVersion path as AC-13) ──
+
+  it('flushUnsyncedQueue success (queue fully drained) triggers useGameHistoryStore.invalidate() (cacheState becomes dirty)', async () => {
+    const authStore = useAuthStore()
+    authStore.userId = 'uid-1'
+
+    const id1 = 'aaaaaaaa-0000-0000-0000-000000000001'
+    localStorage.setItem(
+      `chess:unsynced:${id1}`,
+      JSON.stringify({
+        id: id1,
+        moves: ['e2e4', 'e7e5'],
+        playerColor: 'white',
+        result: '1-0',
+        endReason: 'checkmate',
+        completedAt: 1_700_000_000_000,
+        aiSkillLevel: 5,
+        playerMoveTimes: [1000, 2000],
+        isTerminal: true,
+      }),
+    )
+
+    const upsertFn = vi.fn().mockResolvedValueOnce({ error: null })
+    vi.mocked(supabase.from).mockReturnValueOnce({ upsert: upsertFn } as never)
+
+    const historyStore = useGameHistoryStore()
+    // Seed as valid to confirm it becomes dirty
+    historyStore.cacheState = 'valid'
+
+    const dataSyncStore = useDataSyncStore()
+    await dataSyncStore.flushUnsyncedQueue()
+
+    expect(historyStore.cacheState).toBe('dirty')
+
+    localStorage.removeItem(`chess:unsynced:${id1}`)
+  })
+
   // ── setExpandedRow (AC-12b single-row invariant) ──────────────────────
 
   it('setExpandedRow expands the given row', () => {

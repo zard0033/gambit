@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import { ref, watch, computed, onMounted, onBeforeUnmount } from 'vue'
-import { Chess } from 'chess.js'
+import { ref, watch, computed } from 'vue'
 import { TheChessboard } from 'vue3-chessboard'
 import type { BoardApi, BoardConfig } from 'vue3-chessboard'
 import type { Key, Elements } from 'chessground/types'
-import type { Move, Square } from 'chess.js'
+import type { Move } from 'chess.js'
 import type { MoveMadePayload } from '../composables/use-chess-board'
 import { validateFen, useBoardRenderer, PIECE_MOVE_ANIM_MS } from '../composables/use-board-renderer'
 import { BOARD_BRUSHES, buildLegalMoveShapes, buildAnimationDoneAt } from '../composables/use-board-input'
-import { squareToRect as computeSquareRect } from '../utils/board-geometry'
-import type { Rect } from '../utils/board-geometry'
 import PromotionDialog from './promotion-dialog.vue'
 import { useReducedMotion } from '../composables/use-reduced-motion'
 import { useBoardKeyboard } from '../composables/use-board-keyboard'
+import { useBoardGeometry } from '../composables/use-board-geometry'
+import { useBoardCheckRing } from '../composables/use-board-check-ring'
+import { useBoardCastleHints } from '../composables/use-board-castle-hints'
+import { useBoardPromotion } from '../composables/use-board-promotion'
+import { useBoardCoordinates } from '../composables/use-board-coordinates'
 
 const props = defineProps<{
   fen: string
@@ -41,20 +43,52 @@ const { prefersReducedMotion } = useReducedMotion()
 
 const { syncFen, onMoveMade } = useBoardRenderer(() => boardApi.value)
 
-// Promotion dialog state
-const pendingPromotion = ref<{ from: string; to: string } | null>(null)
-const promotionSquareRect = ref<Rect | null>(null)
+// squareToRect is the sole geometry source for every overlay (check ring, castle hints, coordinate
+// labels, keyboard focus cell) AND is re-exposed unchanged to external consumers (ADR-0009 §4).
+const { squareToRect } = useBoardGeometry(boardRef, () => props.playerColor)
 
-// Pawn → promoted-piece "transform" flourish, overlaid on the promotion square once a promotion
-// resolves. Only transform/opacity animate (Gambit motion rule); skipped under reduced-motion.
-const PROMOTION_MORPH_MS = 300
-const promotionMorph = ref<{ rect: Rect; isDark: boolean; pawnSrc: string; pieceSrc: string } | null>(null)
-let morphTimer: number | null = null
-const pieceAssetUrl = (code: string): string => `${import.meta.env.BASE_URL}pieces/${code}.svg`
+// Check ring: king-in-check square (drives the sr-only "將軍" region) + its overlay rect.
+const { kingInCheckSquare, checkRingRect } = useBoardCheckRing({
+  getFen: () => props.fen,
+  isReady: () => boardApi.value !== null,
+  squareToRect,
+})
 
-// Tracks the square chessground currently has selected (a tapped/picked-up piece). Drives the
-// chess.com-style castling hint: selecting the king reveals a dot on the rook square too.
-const selectedSquare = ref<string | null>(null)
+// Castling hints — owns the chessground selection square (set by events.select below).
+const { selectedSquare, castleHints, triggerCastle } = useBoardCastleHints({
+  getFen: () => props.fen,
+  isDisabled: () => props.disabled,
+  squareToRect,
+  requestMove: (from, to) => { boardApi.value?.move({ from: from as Key, to: to as Key }) },
+})
+
+// Promotion dialog + morph flourish (Deferred Cleanup fallback — behavior must not change).
+const {
+  pendingPromotion,
+  promotionSquareRect,
+  promotionMorph,
+  isPromotionMove,
+  beginPromotion,
+  startPromotionMorph,
+  handlePromotionSelect,
+  handlePromotionCancel,
+} = useBoardPromotion({
+  getFen: () => props.fen,
+  isDisabled: () => props.disabled,
+  prefersReducedMotion,
+  squareToRect,
+  getBoardApi: () => boardApi.value,
+  getBoardRef: () => boardRef.value,
+  onMoveMade,
+  emitMove: (payload) => emit('move-made', payload),
+})
+
+// Coordinate labels on the wooden frame (replaces chessground's in-square coords).
+const { rankLabels, fileLabels } = useBoardCoordinates({
+  boardRef,
+  getShowCoordinates: () => props.coordinates ?? false,
+  squareToRect,
+})
 
 function clearSelectionShapes(): void {
   boardApi.value?.setConfig({ drawable: { shapes: [], brushes: BOARD_BRUSHES } }, false)
@@ -89,21 +123,12 @@ function onBoardCreated(api: BoardApi): void {
   if (props.disabled) api.setConfig({ viewOnly: true }, false)
 }
 
-function isPromotionMove(move: Move): boolean {
-  // vue3-chessboard handles promotions internally before emitting @move;
-  // by the time onMove fires, move.promotion is already set.
-  // Only show our dialog if promotion wasn't already handled.
-  return move.flags.includes('p') && !move.promotion
-}
-
 function onMove(move: Move): void {
   selectedSquare.value = null
   clearSelectionShapes()
   if (isPromotionMove(move)) {
     // Freeze board and show dialog — don't emit yet
-    boardApi.value?.setConfig({ viewOnly: true }, false)
-    pendingPromotion.value = { from: move.from, to: move.to }
-    promotionSquareRect.value = squareToRect(move.to)
+    beginPromotion(move)
     return
   }
   if (move.promotion) startPromotionMorph(move)
@@ -116,58 +141,6 @@ function onMove(move: Move): void {
     fen,
     animationDoneAt: buildAnimationDoneAt(boardRef.value),
   })
-}
-
-function startPromotionMorph(move: Move): void {
-  if (prefersReducedMotion.value) return
-  const rect = squareToRect(move.to)
-  if (!rect) return
-  const cc = move.color === 'w' ? 'w' : 'b'
-  promotionMorph.value = {
-    rect,
-    isDark: move.color === 'b',
-    pawnSrc: pieceAssetUrl(cc + 'P'),
-    pieceSrc: pieceAssetUrl(cc + (move.promotion as string).toUpperCase()),
-  }
-  if (morphTimer) clearTimeout(morphTimer)
-  morphTimer = window.setTimeout(() => { promotionMorph.value = null }, PROMOTION_MORPH_MS + 40)
-}
-
-function handlePromotionSelect(piece: 'q' | 'r' | 'b' | 'n'): void {
-  const pending = pendingPromotion.value
-  if (!pending) return
-
-  // Compute correct FEN with user-chosen promotion piece
-  const chess = new Chess(props.fen)
-  chess.move({ from: pending.from, to: pending.to, promotion: piece })
-  const fen = chess.fen()
-
-  // Sync chessground with the corrected position
-  boardApi.value?.setPosition(fen)
-
-  const animationDoneAt = buildAnimationDoneAt(boardRef.value)
-
-  closePendingPromotion()
-  onMoveMade()
-  emit('move-made', {
-    from: pending.from,
-    to: pending.to,
-    promotion: piece,
-    fen,
-    animationDoneAt,
-  })
-}
-
-function handlePromotionCancel(): void {
-  // Snap pawn back by restoring pre-move position
-  boardApi.value?.setPosition(props.fen)
-  closePendingPromotion()
-}
-
-function closePendingPromotion(): void {
-  pendingPromotion.value = null
-  promotionSquareRect.value = null
-  boardApi.value?.setConfig({ viewOnly: props.disabled }, false)
 }
 
 watch(
@@ -209,49 +182,6 @@ watch(
     }, false)
   },
 )
-
-/**
- * Find the square of the king that is currently in check, or null if no check.
- * Used to position the check ring SVG overlay (story-006-visual-feedback.md AC-2).
- */
-const kingInCheckSquare = computed((): string | null => {
-  if (!boardApi.value) return null
-  try {
-    const chess = new Chess(props.fen)
-    if (!chess.inCheck()) return null
-    // King of the side-to-move (the side in check).
-    const [square] = chess.findPiece({ type: 'k', color: chess.turn() })
-    return square ?? null
-  } catch {
-    // Invalid FEN — no check
-  }
-  return null
-})
-
-const checkRingRect = computed((): Rect | null => {
-  const sq = kingInCheckSquare.value
-  if (!sq || !boardRef.value) return null
-  return squareToRect(sq)
-})
-
-/**
- * ADR-0009 Decision §4: board-local coordinates, orientation-corrected — measured against the ACTUAL
- * chessground board (cg-board), not the outer wrap. chessground rounds its board DOWN to a multiple of
- * 8 and centres it inside the wrap, so cg-board can be a few px smaller / offset; computing from the
- * wrap width left every overlay (annotations, arrows, check ring, castle hints) a few px off the
- * squares (全站標註/箭頭/提示對格偏移修正). We read cg-board's real size + its offset within the wrap.
- */
-function squareToRect(square: string): Rect | null {
-  const wrap = boardRef.value
-  if (!wrap) return null
-  const cgBoard = wrap.querySelector('cg-board') as HTMLElement | null
-  if (!cgBoard) return computeSquareRect(square, wrap.offsetWidth, props.playerColor)
-  const wr = wrap.getBoundingClientRect()
-  const br = cgBoard.getBoundingClientRect()
-  const rect = computeSquareRect(square, br.width, props.playerColor)
-  if (!rect) return null
-  return { x: rect.x + (br.left - wr.left), y: rect.y + (br.top - wr.top), width: rect.width, height: rect.height }
-}
 
 /**
  * Snap the board back to the current `fen` prop (undo a rejected move). MUST be called AFTER the
@@ -304,102 +234,23 @@ const keyboard = useBoardKeyboard({
 
 const focusCellRect = computed(() => squareToRect(keyboard.currentSquare.value))
 
-/**
- * chess.com / lichess-style castling: when the player picks up their king and castling is legal,
- * show a dot on the rook square (h/a file) in addition to chessground's native two-square dot (g/c).
- * Clicking the rook dot runs the standard king-two-square move (chess.js only accepts e1→g1/c1, never
- * e1→h1) — so we map each rook square back to its king destination here.
- */
-const castleHints = computed((): { rookSquare: string; kingDest: string; rect: Rect }[] => {
-  const sq = selectedSquare.value
-  if (!sq || props.disabled) return []
-  try {
-    const chess = new Chess(props.fen)
-    const piece = chess.get(sq as Square)
-    if (!piece || piece.type !== 'k') return []
-    const hints: { rookSquare: string; kingDest: string; rect: Rect }[] = []
-    for (const m of chess.moves({ square: sq as Square, verbose: true })) {
-      const kingside = m.flags.includes('k')
-      const queenside = m.flags.includes('q')
-      if (!kingside && !queenside) continue
-      const rookSquare = (kingside ? 'h' : 'a') + sq[1]
-      const rect = squareToRect(rookSquare)
-      if (rect) hints.push({ rookSquare, kingDest: m.to, rect })
-    }
-    return hints
-  } catch {
-    return []
-  }
+// ARIA grid position of the single roving focus cell (1-based; orientation-aware, matching the
+// board-geometry col/row convention). Feeds aria-rowindex / aria-colindex so assistive tech knows
+// where this one cell sits within the declared 8×8 grid.
+const focusCellRow = computed(() => {
+  const rank = parseInt(keyboard.currentSquare.value[1], 10)
+  return props.playerColor === 'white' ? 9 - rank : rank
 })
-
-function triggerCastle(kingDest: string): void {
-  const from = selectedSquare.value
-  if (!from || props.disabled) return
-  selectedSquare.value = null
-  boardApi.value?.move({ from: from as Key, to: kingDest as Key })
-}
-
-// ---- Coordinate labels on the wooden frame (replaces chessground's in-square coords) ----
-// geomTick forces the label positions to recompute once the board has a measurable size and again
-// whenever it resizes (squareToRect reads live DOM geometry, which isn't reactive on its own).
-const geomTick = ref(0)
-let geomRo: ResizeObserver | null = null
-
-const rankLabels = computed((): { label: string; y: number }[] => {
-  void geomTick.value
-  if (!props.coordinates) return []
-  const out: { label: string; y: number }[] = []
-  for (let r = 1; r <= 8; r++) {
-    const rect = squareToRect('a' + r)
-    if (rect) out.push({ label: String(r), y: rect.y + rect.height / 2 })
-  }
-  return out
-})
-
-const fileLabels = computed((): { label: string; x: number; y: number }[] => {
-  void geomTick.value
-  if (!props.coordinates) return []
-  // Bottom edge = the visually-lowest row (rank 1 for white, rank 8 for black).
-  const r1 = squareToRect('a1')
-  const r8 = squareToRect('a8')
-  if (!r1 || !r8) return []
-  // Centre the label in the bottom wood band (tray p-3 = 12px → half-band = 6px below the board edge).
-  const bottom = Math.max(r1.y, r8.y) + r1.height + 6
-  const out: { label: string; x: number; y: number }[] = []
-  for (const f of 'abcdefgh') {
-    const rect = squareToRect(f + '1')
-    if (rect) out.push({ label: f, x: rect.x + rect.width / 2, y: bottom })
-  }
-  return out
-})
-
-onMounted(() => {
-  const el = boardRef.value
-  if (el) {
-    geomRo = new ResizeObserver(() => { geomTick.value++ })
-    geomRo.observe(el)
-  }
-  geomTick.value++
-})
-
-onBeforeUnmount(() => {
-  geomRo?.disconnect()
-  geomRo = null
-  if (morphTimer) clearTimeout(morphTimer)
+const focusCellCol = computed(() => {
+  const file = keyboard.currentSquare.value.charCodeAt(0) - 96
+  return props.playerColor === 'white' ? file : 9 - file
 })
 
 defineExpose({ boardRef, squareToRect, resetPosition, reapplyFen })
 </script>
 
 <template>
-  <div
-    class="relative min-w-0 sm:min-w-[352px]"
-    role="grid"
-    aria-label="Chess board"
-    aria-rowcount="8"
-    aria-colcount="8"
-    tabindex="-1"
-  >
+  <div data-testid="chess-board-root" class="relative min-w-0 sm:min-w-[352px]">
     <TheChessboard
       :boardConfig="boardConfig"
       @boardCreated="onBoardCreated"
@@ -419,7 +270,8 @@ defineExpose({ boardRef, squareToRect, resetPosition, reapplyFen })
         :width="checkRingRect.width - 2"
         :height="checkRingRect.height - 2"
         rx="2"
-        fill="rgba(220,38,38,0.4)"
+        fill="var(--color-danger)"
+        fill-opacity="0.4"
         :class="prefersReducedMotion ? '' : 'check-glow-pulse'"
       />
       <!-- Border ring (always visible when in check, regardless of reduced-motion) -->
@@ -430,7 +282,7 @@ defineExpose({ boardRef, squareToRect, resetPosition, reapplyFen })
         :height="checkRingRect.height - 2"
         rx="2"
         fill="none"
-        stroke="#dc2626"
+        stroke="var(--color-danger)"
         stroke-width="3"
       />
     </svg>
@@ -483,7 +335,7 @@ defineExpose({ boardRef, squareToRect, resetPosition, reapplyFen })
       type="button"
       class="castle-hint absolute z-20 cursor-pointer border-0 bg-transparent p-0"
       :style="{ left: `${h.rect.x}px`, top: `${h.rect.y}px`, width: `${h.rect.width}px`, height: `${h.rect.height}px` }"
-      aria-label="王車易位"
+      aria-label="王城堡易位"
       @click="triggerCastle(h.kingDest)"
     />
 
@@ -507,17 +359,34 @@ defineExpose({ boardRef, squareToRect, resetPosition, reapplyFen })
       >{{ f.label }}</span>
     </template>
 
-    <!-- focus-cell: single roving tabindex cell (ADR-0009, S4-09) -->
+    <!-- Keyboard-navigable virtual grid (ADR-0009, S4-09): a transparent overlay carrying the grid
+         semantics so it holds ONLY the row → gridcell the grid role requires. The board and every
+         decorative overlay (check ring, live regions, promotion, castle hints, coordinates) stay
+         OUTSIDE the grid, so none of them count as disallowed grid children (WCAG
+         aria-required-children). inset-0 over the .relative root keeps the cell's board-local
+         coordinates valid; pointer-events-none lets piece drags pass through to chessground. -->
     <div
-      class="absolute opacity-0 pointer-events-none focus:outline-2 focus:outline-blue-500"
-      role="gridcell"
-      tabindex="0"
-      :aria-label="keyboard.currentSquareLabel.value"
-      :style="focusCellRect
-        ? { left: `${focusCellRect.x}px`, top: `${focusCellRect.y}px`, width: `${focusCellRect.width}px`, height: `${focusCellRect.height}px` }
-        : { display: 'none' }"
-      @keydown="keyboard.handleKeydown($event)"
-    />
+      class="absolute inset-0 pointer-events-none"
+      role="grid"
+      aria-label="西洋棋棋盤"
+      aria-rowcount="8"
+      aria-colcount="8"
+      tabindex="-1"
+    >
+      <div role="row" :aria-rowindex="focusCellRow">
+        <div
+          class="absolute opacity-0 pointer-events-none focus:outline-2 focus:outline-blue-500"
+          role="gridcell"
+          :aria-colindex="focusCellCol"
+          :tabindex="props.disabled ? -1 : 0"
+          :aria-label="keyboard.currentSquareLabel.value"
+          :style="focusCellRect
+            ? { left: `${focusCellRect.x}px`, top: `${focusCellRect.y}px`, width: `${focusCellRect.width}px`, height: `${focusCellRect.height}px` }
+            : { display: 'none' }"
+          @keydown="keyboard.handleKeydown($event)"
+        />
+      </div>
+    </div>
   </div>
 </template>
 

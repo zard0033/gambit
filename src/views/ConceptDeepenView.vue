@@ -111,7 +111,7 @@ function finishDeepening(unaided: boolean): void {
         data-testid="concept-deepen-completion"
         class="wrap-card relative flex w-full max-w-sm flex-col items-center rounded-[18px] bg-surface-card px-6 py-7 text-center shadow-[0_12px_40px_rgba(8,24,18,0.4)]"
       >
-        <p class="mb-2 font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-gold-dark">· 深化完成 ·</p>
+        <p class="mb-2 font-sans text-[11px] font-bold uppercase tracking-[0.14em] text-ink-muted">· 深化完成 ·</p>
         <p class="font-display text-xl font-bold text-ink">{{ deepening.title }}</p>
 
         <div class="my-4 flex w-full items-center gap-2 px-1" aria-hidden="true">

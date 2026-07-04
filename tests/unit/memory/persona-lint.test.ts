@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { lintNeve, MEMORY_BANNED_TOKENS } from '@/lib/memory/persona-lint'
+import { lintNeve, MEMORY_BANNED_TOKENS } from '@/modules/memory/persona-lint'
 
 describe('lintNeve (AC-11b)', () => {
   it('clean 回顧態 text → no violations', () => {

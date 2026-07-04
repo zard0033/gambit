@@ -10,7 +10,7 @@ import {
   type CompletedStage,
   type PlayedGame,
   type SettleSnapshot,
-} from '@/lib/journal/settle'
+} from '@/modules/journal/settle'
 
 function stage(stageId: string, volume: Volume): CompletedStage {
   return { stageId, volume, params: { 卷名: stageId } }

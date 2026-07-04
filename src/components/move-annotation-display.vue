@@ -133,8 +133,12 @@ const arrowGeometries = computed<ArrowGeometry[]>(() => {
 })
 
 interface HighlightGeometry {
+  square: string
   rect: Rect
   color: string
+  /** keySquare (「看這裡」) gets an opaque inset ring — a translucent tint alone is
+   *  invisible on the wood board (amber-on-brown blends into both square colours). */
+  ring: boolean
 }
 
 const highlightGeometries = computed<HighlightGeometry[]>(() => {
@@ -143,9 +147,12 @@ const highlightGeometries = computed<HighlightGeometry[]>(() => {
     if (a.kind !== 'highlight') return []
     const rect = props.squareToRect(a.square)
     if (!rect) return []
-    return [{ rect, color: ROLE_COLORS[a.role] ?? '#c4882a' }]
+    return [{ square: a.square, rect, color: ROLE_COLORS[a.role] ?? '#c4882a', ring: a.role === 'keySquare' }]
   })
 })
+
+// Ring stroke scales with the square (inset so it never bleeds onto neighbours).
+const ringStrokePx = computed(() => Math.max(2, squarePx.value * 0.06))
 </script>
 
 <template>
@@ -172,16 +179,31 @@ const highlightGeometries = computed<HighlightGeometry[]>(() => {
       </defs>
 
       <!-- Highlights (below arrows per z-order Rule 8) -->
-      <rect
-        v-for="(h, i) in highlightGeometries"
-        :key="`highlight-${i}`"
-        :x="h.rect.x"
-        :y="h.rect.y"
-        :width="h.rect.width"
-        :height="h.rect.height"
-        :fill="h.color"
-        opacity="0.30"
-      />
+      <!-- Keyed by square (not index): a new step's new square remounts → the ring's entrance
+           pulse replays; a resize only patches geometry → no spurious replay. Key also carries the
+           role facet (ring/plain): playedMove 與 keySquare 落同一格時（吃同格但用錯子）才不撞 key。 -->
+      <g v-for="h in highlightGeometries" :key="`highlight-${h.ring ? 'key' : 'played'}-${h.square}`">
+        <rect
+          :x="h.rect.x"
+          :y="h.rect.y"
+          :width="h.rect.width"
+          :height="h.rect.height"
+          :fill="h.color"
+          :opacity="h.ring ? 0.35 : 0.30"
+        />
+        <rect
+          v-if="h.ring"
+          class="key-square-ring"
+          :x="h.rect.x + ringStrokePx / 2"
+          :y="h.rect.y + ringStrokePx / 2"
+          :width="h.rect.width - ringStrokePx"
+          :height="h.rect.height - ringStrokePx"
+          fill="none"
+          :stroke="h.color"
+          :stroke-width="ringStrokePx"
+          opacity="0.9"
+        />
+      </g>
 
       <!-- Arrow shafts and heads -->
       <line
@@ -227,3 +249,19 @@ const highlightGeometries = computed<HighlightGeometry[]>(() => {
     {{ evalDisplay }}
   </div>
 </template>
+
+<style scoped>
+/* 進場單次柔和脈動（兩下、只動 opacity），落定在 0.9；respect reduced-motion。 */
+@keyframes key-square-pulse {
+  0%, 50%, 100% { opacity: 0.9; }
+  25%, 75% { opacity: 0.3; }
+}
+.key-square-ring {
+  animation: key-square-pulse 1.6s ease-in-out 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .key-square-ring {
+    animation: none;
+  }
+}
+</style>

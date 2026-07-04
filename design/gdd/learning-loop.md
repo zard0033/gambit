@@ -447,6 +447,12 @@ shownLinks  = first MISTAKE_CONCEPT_MAX_LINKS of classified                   (d
 | `CLASSIFIER_SIGNALS` | mate, material | subset | which signals Bridge 3 attempts in v1; fork/pin deferred to Phase C+ |
 | `SHOW_CONCEPT_MAP` | true | bool | Phase-B Concept Map on/off |
 
+> **Status note（2026-07-03）**：`LESSON_TO_PUZZLE_COUNT` 與 `SHOW_CONCEPT_MAP` 已自
+> `learning-loop-tuning.ts` 移除——兩者從未被程式讀取（Bridge-1 邀請數的消費端未實作；概念地圖
+> 已是常駐正式功能、無開關需求）。表中保留為設計參考；若日後實作再恢復常數。
+> `CLASSIFIER_SIGNALS` 同日已接線（Eason 拍板「接」）：`classify()` 依此清單決定啟用哪些偵測器，
+> 從清單移除訊號即停用；Phase C+ 擴 fork/pin 時擴充 `ClassifierSignal` union 並加入清單。
+
 `PUZZLE_FAIL_THRESHOLD` from the first draft is **removed** (Bridge-2 link is now always-visible, §3.3).
 The「在你對局中出現過」column knob is deferred with D3. All tuning lives in `learning-loop-tuning.ts`;
 the concept vocabulary lives in `src/types/concept.ts` + `src/data/concepts/`, never hardcoded in views.

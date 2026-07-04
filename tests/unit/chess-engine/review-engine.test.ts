@@ -82,6 +82,98 @@ describe('useReviewEngine — init()', () => {
 })
 
 // -----------------------------------------------------------------------
+// C2: concurrent init()/analyze() share one in-flight spawn (no Worker leak)
+// -----------------------------------------------------------------------
+
+describe('useReviewEngine — C2: concurrent spawn dedup', () => {
+  it('test_reviewEngine_concurrentInit_spawnsOnlyOneWorker', async () => {
+    // Arrange
+    let callCount = 0
+    const mocks: MockReviewWorker[] = []
+    const factory = () => {
+      const m = new MockReviewWorker()
+      mocks.push(m)
+      callCount++
+      return m as unknown as IStockfishWorker
+    }
+    const { state, init } = useReviewEngine(factory)
+
+    // Act — two overlapping init() calls before handshake resolves
+    const p1 = init()
+    const p2 = init()
+    expect(callCount).toBe(1) // only one Worker spawned synchronously
+    await handshake(mocks[0])
+    await Promise.all([p1, p2])
+
+    // Assert
+    expect(callCount).toBe(1)
+    expect(state.value).toBe('IDLE')
+  })
+
+  it('test_reviewEngine_concurrentAnalyze_spawnsOnlyOneWorker', async () => {
+    // Arrange
+    let callCount = 0
+    const mocks: MockReviewWorker[] = []
+    const factory = () => {
+      const m = new MockReviewWorker()
+      mocks.push(m)
+      callCount++
+      return m as unknown as IStockfishWorker
+    }
+    const { analyze } = useReviewEngine(factory)
+    const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
+    // Act — two overlapping analyze() calls before handshake resolves.
+    // Both race to spawn the engine, but only one Worker is ever created —
+    // that's the C2 fix under test. (The first call's continuation runs
+    // first once the shared spawn resolves, so it wins the IDLE state
+    // check and proceeds; the second finds the engine already THINKING
+    // and rejects — a pre-existing, separate concern from spawn dedup.)
+    const p1 = analyze({ fen, targetDepth: 1 })
+    const p2 = analyze({ fen, targetDepth: 1 })
+    expect(callCount).toBe(1) // only one Worker spawned synchronously
+    await handshake(mocks[0])
+    await Promise.resolve()
+    await Promise.resolve()
+    mocks[0].emit('info depth 1 score cp 10 pv e2e4')
+    mocks[0].emit('bestmove e2e4')
+    const result1 = await p1
+    await expect(p2).rejects.toThrow(EngineUnavailableError)
+
+    // Assert
+    expect(callCount).toBe(1)
+    expect(result1.bestMove).toBe('e2e4')
+  })
+
+  it('test_reviewEngine_spawnFailure_clearsInFlightPromiseForRetry', async () => {
+    // Arrange — factory throws on first call, succeeds on second
+    let callCount = 0
+    let mock: MockReviewWorker | null = null
+    const factory = () => {
+      callCount++
+      if (callCount === 1) throw new Error('spawn failed')
+      mock = new MockReviewWorker()
+      return mock as unknown as IStockfishWorker
+    }
+    const { state, init } = useReviewEngine(factory)
+
+    // Act — first init() fails
+    await expect(init()).rejects.toThrow('spawn failed')
+    expect(state.value).toBe('UNINITIALIZED')
+
+    // Retry — in-flight promise must have been cleared to allow a fresh spawn
+    const p2 = init()
+    expect(mock).not.toBeNull()
+    await handshake(mock!)
+    await p2
+
+    // Assert
+    expect(state.value).toBe('IDLE')
+    expect(callCount).toBe(2)
+  })
+})
+
+// -----------------------------------------------------------------------
 // AC-1: Auto-terminate after 30s idle
 // -----------------------------------------------------------------------
 
@@ -253,6 +345,36 @@ describe('useReviewEngine — AC-4: onProgress callback', () => {
 
     // Assert — rejected due to missing go args
     await expect(p).rejects.toThrow(EngineUnavailableError)
+  })
+})
+
+// -----------------------------------------------------------------------
+// C1: lowerbound/upperbound info lines must not pollute the final eval
+// -----------------------------------------------------------------------
+
+describe('useReviewEngine — C1: aspiration-window bound filtering', () => {
+  it('test_reviewEngine_analyze_ignoresLowerboundUpperboundInfoLines', async () => {
+    // Arrange
+    const mock = new MockReviewWorker()
+    const { init, analyze } = useReviewEngine(factoryFor(mock))
+    const initP = init()
+    mock.emit('uciok')
+    mock.emit('readyok')
+    await initP
+
+    // Act — a provisional lowerbound line arrives first (aspiration-window re-search),
+    // then the real depth-3 line, then movetime cuts off before a deeper line lands.
+    const p = analyze({ fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', movetimeMs: 100 })
+    await Promise.resolve()
+    mock.emit('info depth 3 score cp 9999 lowerbound pv e2e4')
+    mock.emit('info depth 3 score cp 42 pv e2e4')
+    mock.emit('info depth 4 score cp -9999 upperbound pv e2e4')
+    mock.emit('bestmove e2e4')
+    const result = await p
+
+    // Assert — bound lines did not overwrite the real eval or depth
+    expect(result.evalCp).toBe(42)
+    expect(result.depthReached).toBe(3)
   })
 })
 

@@ -6,7 +6,7 @@ import {
   journalTemplates,
   templatesById,
 } from '@/data/journal-templates'
-import { lintEntryBody } from '@/lib/journal/persona-lint'
+import { lintEntryBody } from '@/modules/journal/persona-lint'
 
 const VOLUMES: Volume[] = ['卷一規則', '卷二戰術', '卷三開局', '卷四殘局']
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { lessons } from '@/data/lessons'
-import { completedStages, unaidedDeepenedConcepts } from '@/lib/journal/stages'
+import { completedStages, unaidedDeepenedConcepts } from '@/modules/journal/stages'
 
 const rulesIds = lessons.filter((l) => l.category === 'rules').map((l) => l.id)
 

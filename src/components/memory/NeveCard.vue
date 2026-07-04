@@ -4,7 +4,7 @@
  * 深青卡 + 頭像 + font-lesson = Neve 視覺嗓音 (persona-neve §視覺嗓音). Text only: no number bar,
  * no score, no link — not in the tab order (story-006 spec).
  */
-import { COACH } from '@/types/lesson'
+import { COACH, COACH_AVATAR } from '@/types/lesson'
 
 defineProps<{ text: string }>()
 </script>
@@ -15,10 +15,12 @@ defineProps<{ text: string }>()
     aria-label="Neve 的回顧"
   >
     <div class="mb-2 flex items-center gap-2">
-      <span
-        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-num text-[12px] leading-none text-primary-fg"
+      <img
+        class="h-7 w-7 shrink-0 rounded-full object-cover"
+        :src="COACH_AVATAR"
+        alt=""
         aria-hidden="true"
-      ><span class="block translate-y-px">{{ COACH.name.charAt(0) }}</span></span>
+      >
       <span class="font-num text-[11px] tracking-[0.08em] text-ink-on-deep-dim">{{ COACH.name.toUpperCase() }}</span>
     </div>
     <p class="neve-line font-lesson text-[17px] leading-[1.9] text-ink-on-deep">{{ text }}</p>

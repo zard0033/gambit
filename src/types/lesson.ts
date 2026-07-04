@@ -113,3 +113,12 @@ export const LESSON_TIER_NUMERALS: Record<LessonTier, string> = { 1: '一', 2: '
  * design/gambit-design-system/persona-neve.md for the full persona SoT.
  */
 export const COACH = { name: 'Neve', nameEn: 'Neve' } as const
+
+/**
+ * Neve avatar shown beside her name (persona-neve「固定容器」— same image everywhere is the
+ * recognition mechanism). Badge-size derivative（192px, ~50KB）of the 1254px original kept at
+ * design/gambit-design-system/avatars/neve-main.png — regenerate to swap variants:
+ * `ffmpeg -y -i design/gambit-design-system/avatars/neve-main.png -vf "scale=192:192:flags=lanczos" public/avatars/neve-badge.png`
+ * BASE_URL 已烘進常數（GitHub Pages 子路徑護欄）——消費端直接 `:src="COACH_AVATAR"`，不得再自行拼前綴。
+ */
+export const COACH_AVATAR = import.meta.env.BASE_URL + 'avatars/neve-badge.png'

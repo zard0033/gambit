@@ -223,13 +223,16 @@ async loadGameHistory(cursor?: Cursor): Promise<GameSession[]> {
 }
 ```
 
-### Deferred cross-store call in syncGame() (data-sync.ts)
+### Cross-store invalidation in syncGame() (data-sync.ts)
+
+> 2026-07-03 更新：原「動態 import game-history 反向呼叫 invalidate()」設計已改為事件式——
+> data-sync 只在 sync/flush 成功後 `syncVersion.value++`（保持葉節點、不知道 game-history），
+> game-history 靜態 import data-sync 並 `watch(syncVersion, invalidate, { flush: 'sync' })`。
+> 依賴恢復單向，循環依賴消除。
 
 ```typescript
-// Inside syncGame() action body — after successful upsert:
-const { useGameHistoryStore } = await import('@/stores/game-history')
-useGameHistoryStore().invalidate()
-// Same pattern in flushUnsyncedQueue() after all upserts complete
+// Inside syncGame() / flushUnsyncedQueue() — after successful upsert(s):
+syncVersion.value++  // game-history watches this and invalidates itself
 ```
 
 ### Pure formula functions (game-history-mappers.ts)

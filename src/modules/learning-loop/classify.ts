@@ -8,9 +8,13 @@
  */
 import { Chess, type Move } from 'chess.js'
 import type { ChessConcept } from '../../types/concept'
+import { CLASSIFIER_SIGNALS } from '../../config/learning-loop-tuning'
 
 /** Outcome of classification: a concept tag, or `'none'` (the silent, default, correct case). */
 export type ClassifyResult = ChessConcept | 'none'
+
+/** Signals the classifier knows how to detect. fork/pin are v1-deferred (GDD §3.4, pv unreliable). */
+export type ClassifierSignal = 'mate' | 'material'
 
 /** Signals #7's review already computed for the player's move i (reused, not recomputed). */
 export interface MistakeSignals {
@@ -90,10 +94,15 @@ export function hungUndefendedMaterial(
 /**
  * Classify a player mistake into a concept tag, or `'none'` (GDD §4.4). Mate precedes material
  * (EC-5: the larger error). Everything else — fork/pin (v1-deferred), positional, time — is silence.
+ * Which detectors run is data-driven by `CLASSIFIER_SIGNALS`（GDD §7 tuning knob）；injectable for tests.
  */
-export function classify(input: ClassifyInput): ClassifyResult {
-  if (input.signals.allowedForcedMate) return 'mate'
+export function classify(
+  input: ClassifyInput,
+  signals: readonly ClassifierSignal[] = CLASSIFIER_SIGNALS,
+): ClassifyResult {
+  if (signals.includes('mate') && input.signals.allowedForcedMate) return 'mate'
   if (
+    signals.includes('material') &&
     input.opponentReplyUci &&
     hungUndefendedMaterial(input.fen, input.playerMoveUci, input.opponentReplyUci)
   ) {

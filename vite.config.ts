@@ -21,12 +21,14 @@ export default defineConfig({
     exclude: ['stockfish'],
   },
   assetsInclude: ['**/*.wasm'],
+  // manualChunks 只留 chess-openings 一條：1.17MB 純資料包、永不變動，獨立成塊才不會
+  // 跟著 MemoryView 的程式碼改動一起快取失效。其餘不設——vite 8 的 rolldown shim 會把
+  // @vue runtime 誤併進含 UI 依賴的命名 chunk（實測 vue 被塞進 chess-board 塊、entry 因此
+  // preload 整包 207KB 棋盤庫）；rolldown 自動分塊依可達性拆，chess 庫自然不進首屏。
   build: {
     rollupOptions: {
       output: {
-        // 函式形式（vite 8 / rolldown 只支援函式，不支援物件 map）。維持原本分塊。
         manualChunks(id: string) {
-          if (/[\\/]node_modules[\\/](vue3-chessboard|chessground|chess\.js)[\\/]/.test(id)) return 'chess-board'
           if (/[\\/]node_modules[\\/]chess-openings[\\/]/.test(id)) return 'chess-openings'
           return undefined
         },

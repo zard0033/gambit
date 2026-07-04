@@ -40,6 +40,11 @@ dist/
 # === Test & Coverage Output ===
 test-results/
 playwright-report/
+.playwright-mcp/
+
+# === Skill Workdirs (tool-generated, not project content) ===
+garden-gpt-image-2/
+.claude/agent-memory/
 *.dll
 *.so
 *.dylib

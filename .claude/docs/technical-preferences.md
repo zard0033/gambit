@@ -66,6 +66,10 @@
   script，`npm install` 會跳 `npm warn allow-scripts stockfish / vue-demi …`。本專案**無害、不用 approve**：
   Stockfish WASM 已 committed 在 `public/stockfish/`（非靠 postinstall 產生）、vue-demi 自偵 Vue 3。
   CI 在 Node 26 全綠已證實。看到此警告不要以為壞了。
+- **vitest 全檔掛掉但「no tests / import 0ms」＝暫時性快取衝突，不是 code 壞**：與其他 vite 程序（dev server、
+  playwright webServer、緊接的前一次 vitest）並行或緊鄰執行時，Windows 上會搶 `node_modules/.vite` 快取導致
+  全部測試檔載入失敗（86/87 files failed、Tests no tests、import 0ms 的特徵組合）。**單獨重跑一次即綠**；
+  看到此特徵先重跑再診斷，別浪費時間追假根因（2026-07-03 兩度誤警）。
 - **Node 26 vitest localStorage shim（`tests/setup-node26-compat.ts`，vitest.config 已 `setupFiles` 指向）**：
   Node 26 把 `localStorage` 加進原生 globals（實驗性 Web Storage），但無 `--localstorage-file` 時它是
   getter-only 的 undefined，happy-dom 用 plain assignment 覆寫在 strict mode 會靜默失敗 → 全測試
@@ -84,10 +88,15 @@
 - **node 直驅 Stockfish 驗任意 FEN（無需 dev server，比 @spike 輕）**：要快速驗一個 FEN 的最佳手／唯一解
   （新增戰術局面、抓假將殺/假贏）時，不必開 dev server 或跑 Playwright uniqueness-spike。node 直接
   `require('stockfish')`（factory）→ `factory('lite-single')` **回 Promise**，`.then(engine => …)`。命令走
-  `engine.postMessage('position fen <FEN>')` + `engine.postMessage('go depth 16')`（或 `go movetime 5000`）。
-  **此 build 的 UCI 輸出走 `console.log`、不走 `addMessageListener`**——攔法＝開頭覆寫 `console.log`，抓
-  `bestmove …` 與 `info … multipv N … score cp X … pv <移動序列>`。唯一解＝`setoption name MultiPV value 2`
-  後比 PV1／PV2 的 score gap。**script 寫進 scratchpad、用絕對路徑 `require('<repo>/node_modules/stockfish')`**
+  `engine.sendCommand('position fen <FEN>')` + `engine.sendCommand('go depth 16')`（或 `go movetime 5000`）
+  （stockfish@18.0.8 起是 `sendCommand`，**沒有** `postMessage`——舊筆記寫 postMessage 是 18.0.7 殘留，
+  2026-07-03 實測修正）。**UCI 輸出設 `engine.listener = (line) => …` 接**（不設 listener 才 fallback 到
+  console.log），抓 `bestmove …` 與 `info … multipv N … score cp X … pv <移動序列>`。唯一解＝
+  `setoption name MultiPV value 2` 後比 PV1／PV2 的 score gap。
+  **mate 題更強的唯一解驗法＝chess.js 窮舉**：列全部合法走法逐一 `isCheckmate()`，「恰好一個」是決定性證明，
+  比引擎 PV 更硬。**改教學盤除了驗 FEN 字面重複，還要掃「終局殺型」跨資料集重複**（lessons/puzzles/deepening
+  的 K+Q vs K 全列出比對角落與殺著——2026-07-03 換深化 mate 盤第一輪就因只查 FEN、漏掉 rules.ts 用同殺型
+  教過兩次而被對抗審查退回）。**script 寫進 scratchpad、用絕對路徑 `require('<repo>/node_modules/stockfish')`**
   （require 從 script 所在目錄解析，scratchpad 無 node_modules）。已實證真A `8/7p/2r3k1/pp6/7P/5N2/P5P1/4K3 w`
   → `bestmove f3e5`。閘門級唯一解仍以 `concept-deepening-uniqueness-spike`（@spike）為準，此法是設計階段的快速自驗。
 
@@ -115,6 +124,11 @@
   viewOnly。**新增任何「初始 disabled 後才啟用」的盤都吃這個 fix，別退回 `viewOnly: props.disabled` 當初始 config。**
   另：carousel 盤切 active 後還要 `reapplyFen()`（setPosition 重整 selectable），且須等 slide transition 結束再做
   （見 `RecognitionBoard.vue` 的 360ms watch）。
+  **第二層（已修，2026-07-03）——stale bounds**：chessground 建立時 memo 棋盤 bounds；在 translateX 偏移處建立的
+  carousel 盤切 active 後 memo 不失效（ResizeObserver 只看尺寸、位移不觸發），點擊座標→格子換算全錯、整盤點不動。
+  解＝同一個 360ms watch 內 `reapplyFen()` 後補 `window.dispatchEvent(new Event('resize'))`——這是 chessground 自己
+  的 `bounds.clear()` 監聽路徑（vendor 支援、不碰 private `board.redrawAll`）。新增任何「建立時不在最終位置」的盤
+  （carousel／隱藏 tab）都吃這兩層修法。
 - **lichess PgnViewer CSS 全域汙染 vue3-chessboard（已修，2026-06-29）**：`lichess-pgn-viewer.css` 有全域
   `.cg-wrap{box-sizing:content-box;height:0;padding-bottom:100%}`（它自己的 aspect trick）。一進**棋憶/複盤**載入此
   stylesheet 後，該規則也套到 vue3-chessboard 的 `.cg-wrap`（它已 absolute 填滿自己 `.main-board` 的 aspect 框）
@@ -130,6 +144,10 @@
   而非結構保證，又接在核心 `onMove`，移除＝拔 fallback。升變無法只靠 vue-tsc/vitest 驗（要瀏覽器真走一步
   升變），故待能實機測升變再移除。
 - **`recommend.ts` 的 `recommended()`**：有測試/文件、與 candidates/practiceTarget 成套的保留 API，刻意不刪。
+- **`src/modules/game-export/use-game-export.ts` 整組**（composable + state machine + 尺寸警告）：待接分享
+  UI 的已完成後端，勿刪（見 `design/gdd/game-export-share.md`）。
+- **`src/components/opening-knowledge-card.vue` + `src/data/opening-knowledge-cards.ts`**（20 張開局知識卡）：
+  待接 UI 的完整功能，勿刪。
 
 ## 手寫 `var()` 顏色 token（SVG / inline-style 前先讀）
 
@@ -152,14 +170,15 @@ settle 管線，照以下五步（以 2026-06-23 加的 `epiphany`＝沉默關�
 1. **持久化觸發來源**：把觸發事實寫進某個 store 的持久欄位（如 concept-progress 的 `deepenedUnaided`，
    localStorage-only 即可——**真正的跨裝置 SoT 是寫出去的 journal entry**，它會經 journal queue 同步）。
 2. **`Pen` 型別**（`types/journal.ts`）加新值；`journal_entries.type` 是自由文字欄、**無需 migration**。
-3. **SettleSnapshot**（`lib/journal/settle.ts`）加兩個欄位：可寫清單 + 已寫的 `recorded…RefIds`（dedup）；
+3. **SettleSnapshot**（`modules/journal/settle.ts`）加兩個欄位：可寫清單 + 已寫的 `recorded…RefIds`（dedup）；
    在 `deriveCandidates` 推 candidate，`PRIORITY` 給優先序。snapshot 必須「全部來自持久狀態」（R5 無暫存）。
 4. **模板**（`data/journal-templates/<pen>.ts`，≥5 變體）＋註冊進 index；**過 persona-lint**——若是情感/肯定類
-   pen，在 `lib/journal/persona-lint.ts` 的 `lintEntryBody` 併入嚴格規則（無 blame/digit，如 solace/epiphany）。
+   pen，在 `modules/journal/persona-lint.ts` 的 `lintEntryBody` 併入嚴格規則（無 blame/digit，如 solace/epiphany）；
+   共用詞表與通用規則（emoji／xiangqi 用字）在 `lib/persona-lint.ts`（跨功能基建，journal／memory 共用）。
 5. **journal store `evaluate()`** 組 snapshot 新欄位（從 store + 既有 entries 推），view 在事件點呼叫
    `journal.evaluate()`（idempotent，dedup 保證不重複）。
 
-volume 別自己發明映射——concept 走 `teaches[0]` 課程的 category → `CATEGORY_VOLUME`（`lib/journal/stages.ts`），
+volume 別自己發明映射——concept 走 `teaches[0]` 課程的 category → `CATEGORY_VOLUME`（`modules/journal/stages.ts`），
 與 arrival 同一 SoT。**chessground 互動觸發的 pen 本機/Playwright 測不到**（合成事件），邏輯靠 unit 全綠，
 實際觸發＋棋誌顯示待實機點一輪。
 
@@ -205,17 +224,28 @@ volume 別自己發明映射——concept 走 `teaches[0]` 課程的 category �
 
 ## Architecture Decisions Log
 
-- [No ADRs yet — use `/architecture-decision` to create one]
+ADRs live in `docs/architecture/adr-NNNN-*.md`. Existing (adr-0001–adr-0014):
 
-### Required ADRs (to author before Production phase)
+1. **ADR-0001** — Stockfish Build Source, Version, and HCE/NNUE Split
+2. **ADR-0002** — Web Worker Isolation and UCI Communication Protocol
+3. **ADR-0003** — chess-openings Dataset Version Pin and EPD Index Build
+4. **ADR-0004** — Vue Router History Mode and GitHub Pages SPA Fallback
+5. **ADR-0005** — Pinia Store Module Boundaries and CompletedGame Transport
+6. **ADR-0006** — Move Annotation Rendering Substrate
+7. **ADR-0007** — Post-Game Review Analysis Loop and sessionStorage Schema
+8. **ADR-0008** — Content Security Policy Headers and WASM Deployment Configuration
+9. **ADR-0009** — Chess Board Substrate, vue3-chessboard Integration, and Custom Roving-Tabindex Keyboard Model
+10. **ADR-0010** — Game Export Tier-1/2/3 Delivery and Synchronous User-Gesture Clipboard Contract
+11. **ADR-0011** — Supabase Authentication and Data Sync Strategy
+12. **ADR-0012** — Bidirectional Lesson-to-Game Linking via a Shared Concept Tag
+13. **ADR-0013** — Journal (棋誌) Data Model, Idempotency, and Session Boundary
+14. **ADR-0014** — 棋憶 (Memory) Data Model and Post-Game Review Consumption Boundary
 
-1. **Stockfish integration strategy** — Web Worker vs main thread, UCI message protocol
-2. **Supabase schema design** — Tables for games, moves, skill scores, lessons
-3. **State management boundaries** — What lives in Pinia vs Vue Router vs Supabase
-4. **Bidirectional lesson-to-game linking** — How positions are indexed and matched
-5. **Skill scoring formula** — How tactics/opening/endgame scores are computed
-6. **PWA caching strategy** — What's cached for offline use, what isn't
-7. **Phase 2 backend boundary** — When to introduce Edge Functions for Claude API
+### Required ADRs (not yet written)
+
+1. **Skill scoring formula** — How tactics/opening/endgame scores are computed
+2. **PWA caching strategy** — What's cached for offline use, what isn't（見 backlog：PWA 尚未安裝）
+3. **Phase 2 backend boundary** — When to introduce Edge Functions for Claude API
 
 ## Engine Specialists
 

@@ -1,7 +1,7 @@
 # Story 005: Keyboard Navigation — useBoardKeyboard Composable
 
 > **Epic**: Chess Board & Move System
-> **Status**: Complete
+> **Status**: Complete (AC-1 exception — see below: E2E spec is now a real axe-core assertion but has never been run)
 > **Layer**: Foundation (Core — chess board substrate)
 > **Type**: Logic
 > **Estimate**: L (5–8 hours — roving tabindex + ARIA live regions is complex)
@@ -34,7 +34,7 @@
 
 *From GDD `design/gdd/chess-board-and-move-system.md` — accessibility ACs:*
 
-- [x] **GIVEN** a Playwright test with `@axe-core/playwright`, **WHEN** the board mounts in the starting position, **THEN** no axe violations of impact `serious` or `critical` are reported. (E2E spec created — pending CI run)
+- [ ] **GIVEN** a Playwright test with `@axe-core/playwright`, **WHEN** the board mounts in the starting position, **THEN** no axe violations of impact `serious` or `critical` are reported. (`@axe-core/playwright` is now installed and `tests/e2e/chess-board-a11y.spec.ts` is a real assertion — scans the ChessBoard's `role="grid"` root on `/learn/pawn-basics`, excluding vendor-owned `.cg-wrap` internals. Not yet run locally or in CI; do not check this box until it has actually passed once.)
 - [x] **GIVEN** the board has keyboard focus, **WHEN** arrow keys are pressed, **THEN** the focused square indicator moves one square in the corresponding direction (does NOT wrap at board edges — confirm via test).
 - [x] **GIVEN** the board has keyboard focus on an own piece, **WHEN** Enter is pressed, **THEN** PIECE_SELECTED is entered AND legal dots/rings appear AND the assertive live region announces `"[Piece] at [square] selected"`.
 - [x] **GIVEN** PIECE_SELECTED is active, **WHEN** Enter is pressed on a legal destination square, **THEN** the move commits via `boardApi.move()`.
@@ -123,7 +123,7 @@
 - `tests/unit/chess-board/keyboard-nav.test.ts` — must exist and all tests pass
 - `tests/e2e/chess-board-a11y.spec.ts` — Playwright axe-core test (can be in existing toolchain spec)
 
-**Status**: [x] `tests/unit/chess-board/keyboard-nav.test.ts` — 37 tests, all pass (2026-05-30); `tests/e2e/chess-board-a11y.spec.ts` — spec created, pending CI (advisory)
+**Status**: [x] `tests/unit/chess-board/keyboard-nav.test.ts` — 37 tests, all pass (2026-05-30); [ ] `tests/e2e/chess-board-a11y.spec.ts` — `@axe-core/playwright` installed, spec is now a real assertion (no more `test.skip`), but has never actually run locally or in CI — pending first run (advisory)
 
 ---
 

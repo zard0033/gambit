@@ -16,7 +16,7 @@ import ChessBoard from '@/components/chess-board.vue'
 import MoveAnnotationDisplay from '@/components/move-annotation-display.vue'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { COACH } from '@/types/lesson'
+import { COACH, COACH_AVATAR } from '@/types/lesson'
 import type { LessonStep } from '@/types/lesson'
 import type { Annotation } from '@/modules/move-annotation/annotation-types'
 import type { MoveMadePayload } from '@/composables/use-chess-board'
@@ -248,7 +248,7 @@ function prev(): void {
       <button
         type="button"
         :aria-label="backLabel"
-        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-white/8 text-ink-on-deep transition-colors hover:bg-white/[0.14] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold active:scale-95"
+        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] bg-white/8 text-ink-on-deep transition-colors hover:bg-white/[0.14] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold active:scale-95"
         @click="router.push(backTo)"
       ><ArrowLeft :size="20" :stroke-width="1.8" /></button>
       <h1 class="flex-1 truncate font-display text-lg font-bold text-ink-on-deep" tabindex="-1">{{ title }}</h1>
@@ -296,12 +296,12 @@ function prev(): void {
           <rect
             :x="wrongGeom.from.x" :y="wrongGeom.from.y"
             :width="wrongGeom.from.width" :height="wrongGeom.from.height"
-            fill="#dc2626" opacity="0.18"
+            fill="var(--color-danger)" opacity="0.18"
           />
           <rect
             :x="wrongGeom.to.x" :y="wrongGeom.to.y"
             :width="wrongGeom.to.width" :height="wrongGeom.to.height"
-            fill="#dc2626" opacity="0.32"
+            fill="var(--color-danger)" opacity="0.32"
           />
         </svg>
 
@@ -331,10 +331,12 @@ function prev(): void {
           <!-- 釘頂 header：頭像 + Neve + 步數，捲動時永遠可見（完成頁不需要，收起） -->
           <div v-if="!finished" class="flex shrink-0 items-center justify-between gap-2 px-4 pb-2.5 pt-3.5 font-sans text-xs font-medium text-ink-muted">
             <span class="flex items-center gap-2">
-              <span
-                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary font-num text-[11px] leading-none text-primary-fg"
+              <img
+                class="h-6 w-6 shrink-0 rounded-full object-cover"
+                :src="COACH_AVATAR"
+                alt=""
                 aria-hidden="true"
-              ><span class="block translate-y-px">{{ COACH.name.charAt(0) }}</span></span>
+              >
               <span class="text-sm text-ink">{{ COACH.name }}</span>
             </span>
             <span class="shrink-0 font-num text-ink-faint">{{ stepIndex + 1 }} / {{ steps.length }}</span>
@@ -347,10 +349,11 @@ function prev(): void {
               class="mb-3 border-l-2 border-primary/40 pl-3 font-lesson text-[15px] leading-relaxed text-ink-muted"
             >{{ scenario }}</p>
 
-            <!-- Step narration：直接顯示（不再逐字打字機）。完成後棋盤與敘述都收起，只留收尾卡。 -->
+            <!-- Step narration：直接顯示（不再逐字打字機）。完成後棋盤與敘述都收起，只留收尾卡。
+                 層級與判斷場氣泡同構：主文 font-lesson、行動引導收成小字尾（見下方輪到你了行）。 -->
             <p
               v-if="!finished"
-              class="font-sans text-base leading-loose text-ink"
+              class="font-lesson text-base leading-loose text-ink"
             >{{ currentStep?.text }}</p>
 
             <!-- Wrong-move feedback (按鈕在下方釘底動作列) -->
@@ -364,7 +367,7 @@ function prev(): void {
 
             <!-- Hint text -->
             <div v-else-if="isInteractive && !solved" class="mt-3">
-              <p class="mb-2 font-sans text-sm text-ink-muted">輪到你了——你執{{ turnLabel }}，在棋盤上走一步。</p>
+              <p class="mb-2 font-sans text-base leading-relaxed text-ink-muted">你執<span class="font-bold text-ink-muted">{{ turnLabel }}</span>，在棋盤上走一步。</p>
               <!-- 軟引導：走了合理但非本課的一步（如 e4 課走 d4），溫和帶回、不算錯 -->
               <Alert v-if="gentleNote" variant="hint" class="mb-2">
                 <AlertDescription class="text-hint-fg">{{ gentleNote }}</AlertDescription>

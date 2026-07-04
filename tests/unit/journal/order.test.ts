@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { JournalEntry } from '@/types/journal'
-import { compareForTimeline, mergeAndOrder } from '@/lib/journal/order'
+import { compareForTimeline, mergeAndOrder } from '@/modules/journal/order'
 
 function entry(o: Partial<JournalEntry> = {}): JournalEntry {
   return {

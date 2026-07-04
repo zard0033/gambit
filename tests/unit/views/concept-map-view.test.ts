@@ -75,16 +75,17 @@ describe('ConceptMapView', () => {
     expect(w.find('[data-testid="concept-practise-cta"]').exists()).toBe(false)
   })
 
-  it('test_conceptMap_learnedConcept_showsLearnedChipOnly', async () => {
+  it('test_conceptMap_learnedConcept_showsPartialCoinOnly', async () => {
     // Arrange: fork lesson completed, no fork puzzles solved.
     seed({ lessons: ['fork'] })
     // Act
     const { wrapper: w } = await mountAt()
     const forkTile = tileWithText(w, 'concept-tile-lit', '捉雙')
-    // Assert: 已學 chip present, 已練 absent.
+    // Assert: partial coin stage (jade ring), full stage (gold + ✓) absent.
     expect(forkTile).toBeTruthy()
-    expect(forkTile.find('.legend-learned').exists()).toBe(true)
-    expect(forkTile.find('.legend-practiced').exists()).toBe(false)
+    expect(forkTile.find('.coin-learned').exists()).toBe(true)
+    expect(forkTile.find('.coin-full').exists()).toBe(false)
+    expect(forkTile.find('.coin-check').exists()).toBe(false)
   })
 
   it('test_conceptMap_learnedReadsLinearCompletionOnly', async () => {
@@ -97,17 +98,18 @@ describe('ConceptMapView', () => {
     expect(w.find('[data-concept="pin"]').attributes('data-testid')).toBe('concept-tile-dormant')
   })
 
-  it('test_conceptMap_practicedConcept_showsBothChips', async () => {
+  it('test_conceptMap_learnedAndPracticedConcept_showsFullCoin', async () => {
     // Arrange: material lesson done + a capture puzzle solved.
     const cap = firstPuzzleOfConcept('material')
     seed({ lessons: ['king-and-value'], solved: [cap.id] })
     // Act
     const { wrapper: w } = await mountAt()
     const materialTile = tileWithText(w, 'concept-tile-lit', '子力')
-    // Assert: both 已學 and 已練 chips.
+    // Assert: full coin stage — gold ring + ✓ badge (shape cue, state never colour-only).
     expect(materialTile).toBeTruthy()
-    expect(materialTile.find('.legend-learned').exists()).toBe(true)
-    expect(materialTile.find('.legend-practiced').exists()).toBe(true)
+    expect(materialTile.find('.coin-full').exists()).toBe(true)
+    expect(materialTile.find('.coin-check').exists()).toBe(true)
+    expect(materialTile.find('.coin-learned').exists()).toBe(false)
   })
 
   it('test_conceptMap_lessonOnlyConcept_neverShowsPractisedOrUnmet', async () => {
@@ -116,10 +118,10 @@ describe('ConceptMapView', () => {
     // Act
     const { wrapper: w } = await mountAt()
     const skewerTile = tileWithText(w, 'concept-tile-lit', '串擊')
-    // Assert
+    // Assert: lesson-only concepts cap at the partial stage — full (gold) stays reachable-honest.
     expect(skewerTile).toBeTruthy()
-    expect(skewerTile.find('.legend-learned').exists()).toBe(true)
-    expect(skewerTile.find('.legend-practiced').exists()).toBe(false)
+    expect(skewerTile.find('.coin-learned').exists()).toBe(true)
+    expect(skewerTile.find('.coin-full').exists()).toBe(false)
     expect(w.text()).not.toContain('未達成')
   })
 

@@ -50,7 +50,7 @@ const isGood = computed(() => props.visualKind === 'bright')
         <span data-testid="cmp-played" :style="{ color: 'var(--color-ink-muted)', fontWeight: 400 }">
           你走了 {{ phrase(played) }}
         </span>
-        <span data-testid="cmp-better" :style="{ color: 'var(--color-gold-dark)', fontWeight: 600 }">
+        <span data-testid="cmp-better" :style="{ color: 'var(--color-hint-dark)', fontWeight: 600 }">
           更好的是 {{ phrase(best) }}
         </span>
       </template>

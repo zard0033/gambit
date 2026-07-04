@@ -1,11 +1,6 @@
 /** Maximum number of unsynced games stored in localStorage before oldest is dropped. */
 export const UNSYNCED_QUEUE_MAX = 50
 
-/** Base delay for exponential backoff on sync retry (ms). */
-export const SYNC_BASE_DELAY_MS = 1_000
-
-/** Maximum delay cap for exponential backoff (ms). */
-export const SYNC_MAX_DELAY_MS = 30_000
-
-/** Refresh JWT this many ms before it expires. */
-export const TOKEN_REFRESH_BUFFER_MS = 300_000
+// 2026-07-03 移除三個從未接線的常數（SYNC_BASE_DELAY_MS / SYNC_MAX_DELAY_MS / TOKEN_REFRESH_BUFFER_MS）：
+// token 續期由 supabase-js autoRefreshToken 內建；同步失敗靠 unsynced queue 下次啟動 flush 兜底。
+// 若日後實作 session 內退避重試，設計參數見 design/gdd/supabase-integration.md §Retry。

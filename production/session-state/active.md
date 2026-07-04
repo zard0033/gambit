@@ -1,13 +1,45 @@
 <!-- STATUS -->
 Epic: 差異化重構
-Feature: 概念深化頁 A 類 UX 重設計（Phase 2 收尾；棋憶 #22 全線已 ship）
-Task: 2026-06-29 iPhone 反饋 11 項 bug＋內容批已修＋**已 push**（#2 誘餌盤/#10 棋憶破版＝兩真 bug、#3/#4/#7/#8、#5 維持無提示）。剩＝redesign 三項（#6 中心格高亮/#9 概念頁三狀態/#11+#1 課程氣泡層級+判斷場手勢滑，換對話 `/redesign` 再做）+ iPhone 複驗本批。
+Feature: 全專案體檢修復 + 概念深化頁收尾（Phase 2）
+Task: 7-03 全面 review + 全部拍板事項 ✅ 修畢；precommit deep review 12 findings 亦全修（aria-live 常駐化、solace 時序、COACH_AVATAR 烘 base、5.3MB 原圖出 public…）。vitest 868 綠 / vue-tsc 0 / axe 綠。**待 commit+push**（訊息已擬、等 Eason 確認）→ iPhone 複驗。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
 > **差異化北極星 = `production/gambit-differentiation-vision.md`**——提任何功能/重構/UI 前**先讀**。
 
 ---
+
+## 2026-07-03 全面體檢（12 維度審查 + 修復 ✅，未 commit）
+
+三個 workflow（12 維度審查 45→對抗驗證後 33 條確認、盲點補掃 +8 條、8 批並行修復+fresh-context 逐批驗收）。**基準 826 綠 → 現 864 綠（+38 測試，含拍板批）、vue-tsc 0、build 乾淨、axe a11y 綠、UI Playwright 驗過（mobile viewport，含實走 fork 深化進判斷場）**。施工細節在 git diff，重點：
+
+- **[critical] 棋誌管線接線**：`evaluate()` 原本全 app 只有深化 unaided 一處呼叫（onset/arrival/solace 永不出現）→ HomeView mount + game-lifecycle 終局補呼叫。併發安全已獨立驗證（持久層 sourceRefId 判重 + Supabase UNIQUE，不需 mutex）。
+- **資料遺失**：離線佇列滿 50 筆「刪最舊」實為 UUID 字典序刪隨機一局 → 改依 completedAt。
+- **賽後引擎**：UCI lowerbound/upperbound 未過濾（污染最大失誤）+ init() 併發 spawn 洩漏 Worker → 皆修+測試。
+- **首屏 -207KB（根修）**：vite 8 rolldown 的 manualChunks shim 會把 @vue runtime 誤併進 chess-board 命名 chunk（sourcemap 實證）→ 移除 manualChunks 只留 chess-openings 一條；chess.js/棋盤庫不再進 modulepreload。
+- **設計系統/a11y 批**：#dc2626→danger token、觸控目標 36→44px（LessonPlayer/RecognitionGate/dialog ×5）、aria-label「王車易位」→「王城堡易位」、鍵盤導覽播報英文→繁中（后/城堡/騎士…）、disabled 盤退出 tab 順序、非 active carousel 盤 inert、RecognitionGate 回饋 aria-live、進度條 clamp+scaleX+progressbar ARIA、MemoryReplay matchMedia 洩漏、redesign diff 裡指示行 ink-faint 13px 退步改回 ink-muted 16px。
+- **lesson-progress 根因修**：completedCount 只計現存課程 id（殘留 id 不再出現 20/18）。
+- **文件對齊現實 ×7**：README（PWA 假宣稱/Node 26）、設計系統 README（Beth Harmon→Neve、Tailwind v3→v4）、technical-preferences（「No ADRs yet」→列出實有的 adr-0001~0014）、directory-structure（引擎範本→真實結構）、a11y E2E 空殼與 story-005 AC-1 誠實標注、active.md 兩處過時。
+- 安全面審查乾淨：9 表 RLS 全 PASS、onConflict 7/7 相符、無金鑰洩漏、CSP 已設。`.gitignore` 加 `.playwright-mcp/`。
+
+**拍板結果（Eason 2026-07-03）＋執行狀態：**
+- **已執行 ✅**（vitest 864 綠、vue-tsc 0、axe 綠）：
+  - #5 chess-board god-component 拆分：606→474 行薄殼 + 5 個新 composables（use-board-geometry/check-ring/castle-hints/promotion/coordinates），props/emits/expose 逐位元不變；**順手修掉 axe 首跑抓到的兩條 critical**（aria-required-children/parent——grid role 改掛專用 pointer-events-none overlay，row→gridcell 結構合規）。
+  - #6 lib/ vs modules/ 統一：src/lib/journal/ 全數搬 src/modules/journal/、persona-lint 共用核心抽 src/lib/persona-lint.ts（詞表單一定義）、**ADR-0015** 定判準（「刪掉其他所有 feature 仍成立＝lib/」）。
+  - #7 循環依賴解耦：data-sync 加 `syncVersion` 計數器成純葉節點，game-history 靜態 import + `watch({flush:'sync'})`，雙側動態 import 移除。
+  - #8 金字三處：兩個 11px 徽章→`text-ink-muted`、MomentCard→`--color-hint-dark`（hint 語意色，不受 gold large-only 限制）。
+  - #10 a11y E2E 真實化：`@axe-core/playwright@4.12.1` 已裝、spec 真斷言（掃 /learn/pawn-basics、exclude .cg-wrap vendor 層）、**首跑即抓到 ARIA grid 兩條 critical → 已修 → 綠**。
+  - #11 加固：兩份 workflow 全部 action pin 40 字 SHA；`20260830041917_add_explicit_rls_with_check.sql`（9 表）。
+  - #12 清表：`20260830053142_drop_unused_tables.sql`（skill_scores + lesson_side_learned）。**兩個 migration 皆未套用 live**——Eason 手動 Dashboard SQL 跑，DROP 會永久刪該兩表資料。
+  - #1 game-export、#4 開局知識卡＝**待接 UI 的功能，勿刪**——已寫進 technical-preferences「Deferred Cleanups」。
+- **Neve 頭像接入 ✅（Eason 2026-07-03 交辦）**：三處文字徽章（LessonPlayer/RecognitionGate 24px、NeveCard 28px）換 `<img>`；圖走 `COACH_AVATAR` 常數（types/lesson.ts，單點換圖）+ BASE_URL 前綴 + object-cover 圓裁。**效能**：原圖 1254px/1.8MB 只顯示 24–28px → ffmpeg 產 192px 徽章縮圖 `public/avatars/neve-badge.png`（~54KB），原圖保留、換 variant 只重產縮圖。三處截圖驗收 PASS（含實打一局進棋憶驗 NeveCard）、零破圖。
+- **/play 直連彈回 bug ✅（截圖驗收 agent 路過抓到）**：直接 URL 進 /play → 按「開始對局」→ 被 modal-dismiss guard 誤判取消而彈回首頁（pendingGame 已被消費、isGameInProgress 要到第一步才 true）。修＝guard 改語意判準 `phase === 'SETUP'`（本 visit 從未開局）；spa-deep-link.spec.ts 加回歸測試。完整 E2E（CI 等效、chromium+webkit）24 passed / 0 failed。
+- **加碼修復 ✅（UI 驗收 agent 抓到的既有潛伏 bug，非 refactor 回歸）**：判斷場 carousel 第 3 盤 **stale bounds**——chessground 建立時 memo bounds，translateX 偏移處建立的盤切 active 後點擊座標全錯、整盤點不動（實機上可能被 URL bar 收合的 resize 掩蓋）。修＝`RecognitionBoard.vue` activation watch 內 reapplyFen 後補 `window.dispatchEvent(new Event('resize'))`（chessground 自己的 bounds.clear 路徑）；已固化進 technical-preferences「viewOnly 盤」gotcha 第二層。
+- **#2/#3/#9 拍板執行結果（2026-07-03 晚）**：
+  - #3 ✅ sync-tuning 三死常數已刪（`UNSYNCED_QUEUE_MAX` 保留）；GDD supabase-integration 補 status note。
+  - #2 ✅：`SHOW_CONCEPT_MAP`、`LESSON_TO_PUZZLE_COUNT` 已刪 + GDD learning-loop 補注。`CLASSIFIER_SIGNALS` Eason 拍板「接」→ 已接線：`classify(input, signals = CLASSIFIER_SIGNALS)` 依賴注入、兩偵測分支各自 gate，4 個新 gating 測試（停用 mate→落到 material、停用 material→靜默、空清單→全靜默、預設＝原行為）。
+  - #9 ✅ 深化 mate 沉默關換盤，**兩輪**才定案：第一輪 a8 角（Kc6+Qb7#）被教學對抗審查退回——終局殺型撞 rules.ts 兩堂必修課（只查 FEN 字面重複不夠，殺型也要跨資料集掃）。定案＝**h1 角**（bKh1/wKf3/wQg8→Qg2#，全資料集 K+Q vs K 窮舉掃描唯一零使用角落；上下翻轉破壞「往上攻」圖式、比鏡像更真的遷移測試）。過全部閘門：chess.js 窮舉 28 走法唯一殺、uniqueness spike 3/3、棋理+教學雙對抗審查 PASS。驗盤方法已固化 technical-preferences（stockfish 18.0.8 sendCommand API、chess.js 窮舉、殺型跨集掃描）。
+  - 審查附帶三個未來項：① mate 沉默關文案「王罩住逃生格—后貼上去」洩題傾向（舊有）② mate 第三關長期可比照 fork 升級 Recognition Gate ③ 新盤 Qg3 是緊鄰正解的**逼和陷阱**——若日後 fail feedback 想特判「這是逼和」是好教學點。
 
 ## 2026-06-25 iPhone 實機反饋（第一批已修，待 push 部署後複驗）
 
@@ -65,9 +97,16 @@ Eason iPhone 實測判斷場/課程/棋憶。施工細節在 git；兩個真 bug
 - **#10 棋憶破版（真 bug、全站汙染）**：lichess-pgn-viewer.css 全域 `.cg-wrap` aspect 規則汙染 vue3-chessboard（疊加 → 高度雙倍），進過棋憶後全站盤跟著壞。修＝`board-theme.css` scope `.main-wrap .cg-wrap` reset。本機 seed 局驗 312² 正方。
 - **#3** 演示 stepMs 850→1300、**#4** missedHint 改對當前盤、**#7** d4 軟引導（`LessonStep.softRejects` 資料驅動 + regression test）、**#8** tab 概念→棋理／分組棋局原則→棋局概念／回X地圖一致、**#5** 拍板維持無提示。五維 APPROVE + ponytail Lean、vue-tsc 0、vitest 826。
 
-**剩（換對話再做）：**
-1. **redesign 三項**（須先 `/redesign` 對真實畫面出 H/M/L 拍板再施工）：#6 中心格高亮更明顯（金色受限只給 reward）、#9 概念頁三狀態（未學/已學或已練/已學且已練）進階感、#11+#1 課程氣泡套深化頁文字層級 + 判斷場氣泡手勢左右滑。
-2. **iPhone 複驗本批**：#2 誘餌互動、#10 棋盤（含試煉、無痕分頁）、#7 走 d4 引導、演示節奏、epiphany；**逐手 PgnViewer「棋盤外藍框 + 座標小偏」**（本機 PgnViewer board 未渲染、待實機指認）。
+**redesign 三項 ✅ 施工完（2026-07-03 凌晨，未 commit）**——`/redesign` 審查（H/M/L）→ Eason 拍板全做（含 L2）→ 施工＋本機 Playwright 驗證（手機+桌機 viewport 截圖）全過。改動 4 元件＋1 測試檔：
+- **#6（H1+L2）**`move-annotation-display.vue`：keySquare 高亮加**同色琥珀高不透明內縮描邊環**（寬=格寬6%、fill 0.30→0.35；原半透明 tint 在木紋盤上實測完全看不見）＋進場單次雙脈動（只動 opacity、respect reduced-motion、key 改 per-square 使 resize 不重播）。scope 只 keySquare（棋憶 choreography 的 keySquare 同受益、playedMove 灰 tint 不動）。
+- **#9（H2+M1+L1）**`ConceptMapView.vue`：拿掉標題旁 inline 小點（修「子…」截斷）；coin 三階進階感＝未學淡環 → 已學或已練 **jade 環** → 已學且已練 **金環+✓徽章**（金=reward 正用、✓=shape cue 解 color-only；金用量比舊版「lit 全金」反而減少）；圖例改環樣式；blurb 10→11px。測試同步改 coin-stage 標記（`concept-map-view.test.ts`）。
+- **#11（H3）**`LessonPlayer.vue`：課程氣泡套判斷場層級——step 主文 `font-sans`→`font-lesson`（同時修正 SoT 偏離：設計系統本規定 lesson body 用 LXGW）；「輪到你了」行改「你執**白方**，在棋盤上走一步」13px ink-faint 小字尾、執色粗體。
+- **#1（M2）**`RecognitionGate.vue`：氣泡卡原生 touch 左右滑切盤（>48px 水平且 |dx|>|dy|；手勢區不放棋盤——pointer 歸 chessground）；chevron 保留。合成 TouchEvent 本機驗過 track 正確位移。
+
+**剩（後續）：**
+1. **commit 前**：跑 `precommit-review` workflow（本輪只施工未 review）→ 修 findings → commit。vitest 826 已全綠（commit 時照規矩再跑）。
+2. **redesign 遺留一小項（待拍板）**：「控制中心」標題在 tile 上截成「控…」——**pre-existing**（4 字標題＋深入 affordance 擠壓，手機桌機都有、與本次 inline 點無關）。選項：縮短 label／標題允許兩行／深入改純 icon。低優先。
+3. **iPhone 複驗（併 6-29 批）**：本批＝#6 高亮環+脈動實機觀感、#9 三階 coin、#11 課程氣泡 font-lesson 觀感、#1 判斷場真手指滑手感；6-29 批＝#2 誘餌互動、#10 棋盤（含試煉、無痕分頁）、#7 走 d4 引導、演示節奏、epiphany；**逐手 PgnViewer「棋盤外藍框 + 座標小偏」**（本機 PgnViewer board 未渲染、待實機指認）。
 
 **待 Eason 拍板（第二批，需決策，未動工）：**
 - ~~**1-A 深化頁命運（最關鍵）**~~ ✅ **已拍板＝改「判斷場 / RecognitionGate」（見上方專段「深化頁重設計拍板」）**。下一步＝先設計 fork 3 盤再寫元件。
@@ -119,7 +158,7 @@ Eason iPhone 實測判斷場/課程/棋憶。施工細節在 git；兩個真 bug
 - **Phase 3 — 沉浸感 + 旅程 IA**：等心臟+引擎好了再包。
 - **商業模式**（訂閱/付費深度/BYOK）＝最後。
 
-**關鍵架構事實**（細節在 ADR/git）：**ADR-0013**（journal）＋ **ADR-0014**（memory `memory_summaries`）皆 Accepted、migration 已套 live + RLS PASS；Supabase 現 **8 張 live 表**。
+**關鍵架構事實**（細節在 ADR/git）：**ADR-0013**（journal）＋ **ADR-0014**（memory `memory_summaries`）皆 Accepted、migration 已套 live + RLS PASS；Supabase 現 **9 張 live 表**。
 
 ---
 
@@ -155,6 +194,8 @@ Eason iPhone 實測判斷場/課程/棋憶。施工細節在 git；兩個真 bug
 - **B5 試煉互動**：log 累積對錯、inline 達成、答錯滑回、換步不 remount、揭曉箭頭走子後消失（chessground 合成事件 Playwright 測不到，需實機，背景見 technical-preferences）。
 
 ### 未來獨立任務
+
+- **🎨 Neve 頭像 presence 加大（redesign 待辦，Eason 2026-07-03 提出）**：頭像圖剛接入三處（課程/判斷場氣泡 24px、棋憶 NeveCard 28px），Eason 實感偏小、想讓這個元素更有存在感。屆時照鐵則走 `/redesign` 對真實畫面出報告 → 拍板 → 施工，候選方向：單純加大尺寸／氣泡頂列頭像+名字排版重整／出場動效。另一併考慮：截圖驗收發現深青底（棋憶 NeveCard）上頭像整體偏暗、與 deep-jade 底色調接近，24–28px 下辨識度比 cream 底低——可能要加細邊框或提亮。素材注意：徽章縮圖 `public/avatars/neve-badge.png` 為 192px（撐到約 64px@3x 顯示都夠）；三張 1254px 原圖在 `design/gambit-design-system/avatars/`（precommit review 把它們移出 public/——5.3MB 零引用死重量不該進每次 deploy），要更大就重產：`ffmpeg -y -i design/gambit-design-system/avatars/neve-main.png -vf "scale=<N>:<N>:flags=lanczos" public/avatars/neve-badge.png`。
 
 - **Phase C+/D**：捉雙/牽制賽後偵測（需精準度實測）；Claude API 動態講解/BYOK（最後）。
 - **PWA / Add-to-Home-Screen ⏸ 未實作**：目前零 service worker、零 manifest、`vite-plugin-pwa` 沒裝（CLAUDE.md

@@ -1,32 +1,39 @@
 /**
- * E2E accessibility tests for the chess board keyboard navigation.
+ * @axe-core/playwright is installed (package.json devDependencies, 2026-07-03).
  * Story: chess-board/story-005-keyboard-nav (AC-1)
- * Requires: @axe-core/playwright
  *
- * Run manually: npx playwright test tests/e2e/chess-board-a11y.spec.ts
- * (Excluded from vitest — Playwright-only)
+ * Scope: the ChessBoard component root (`[data-testid="chess-board-root"]` in
+ * src/components/chess-board.vue) — covers ALL of our own a11y markup: the ARIA grid overlay
+ * (row → roving gridcell), the two aria-live announcement regions, castle-hint buttons and
+ * coordinate labels. Only `.cg-wrap` (chessground's vendor-rendered squares/pieces/drag layer)
+ * is excluded: it's upstream (vue3-chessboard/chessground) code, not ours to fix
+ * (see CLAUDE.md board gotchas).
  */
-import { test } from '@playwright/test'
-
-// AC-1: No axe violations of impact serious or critical on the chess board.
-// This test is a placeholder — requires the app running on localhost:5173
-// and @axe-core/playwright installed.
-//
-// To enable:
-//   npm install --save-dev @axe-core/playwright
-//   Then uncomment the checkA11y call below.
+import { test, expect } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright'
 
 test.describe('ChessBoard accessibility — AC-1', () => {
-  test.skip('axe-core: no serious/critical violations on board mount', async ({ page }) => {
-    await page.goto('http://localhost:5173/')
-    // Start a game first so the board renders
-    // await page.getByRole('button', { name: /play/i }).click()
+  test('test_chess_board_a11y_no_serious_or_critical_violations', async ({ page }) => {
+    // Guest browsing: opt past the landing gate so /learn/pawn-basics is reachable without
+    // signing in (same pattern as journal-view.spec.ts / spa-deep-link.spec.ts).
+    await page.addInitScript(() => sessionStorage.setItem('gambit:guest-entry', '1'))
 
-    // const { checkA11y } = await import('@axe-core/playwright')
-    // await checkA11y(
-    //   page.locator('[data-testid="chess-board"]'),
-    //   { includedImpacts: ['serious', 'critical'] },
-    // )
-    // expect(violations).toHaveLength(0)
+    // pawn-basics has order:1 in the curriculum, so lesson-progress.ts's isUnlocked() always
+    // allows it — the board renders immediately, unlike /play which requires a color/skill
+    // setup modal before a game (and thus a board) exists.
+    await page.goto('/learn/pawn-basics', { waitUntil: 'domcontentloaded' })
+
+    const board = page.getByRole('grid', { name: '西洋棋棋盤' })
+    await expect(board).toBeVisible()
+
+    const results = await new AxeBuilder({ page })
+      .include('[data-testid="chess-board-root"]')
+      .exclude('.cg-wrap')
+      .analyze()
+
+    const seriousOrCritical = results.violations.filter(
+      (v) => v.impact === 'serious' || v.impact === 'critical',
+    )
+    expect(seriousOrCritical).toEqual([])
   })
 })

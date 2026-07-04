@@ -4,7 +4,7 @@ import {
   recordSolaceSession,
   sessionsSinceLastSolace,
   touchSession,
-} from '@/lib/journal/session'
+} from '@/modules/journal/session'
 
 const MIN = 60_000
 const T0 = 1_700_000_000_000

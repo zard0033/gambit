@@ -5,10 +5,10 @@ import { useDataSyncStore } from '@/stores/data-sync'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
 import { useGameHistoryStore } from '@/stores/game-history'
 import { useConceptProgressStore } from '@/stores/concept-progress'
-import { mergeAndOrder } from '@/lib/journal/order'
-import { completedStages, unaidedDeepenedConcepts } from '@/lib/journal/stages'
-import { recordSolaceSession, sessionsSinceLastSolace, touchSession } from '@/lib/journal/session'
-import { outcomeFromResult, planEntries, type PlayedGame, type SettleSnapshot } from '@/lib/journal/settle'
+import { mergeAndOrder } from '@/modules/journal/order'
+import { completedStages, unaidedDeepenedConcepts } from '@/modules/journal/stages'
+import { recordSolaceSession, sessionsSinceLastSolace, touchSession } from '@/modules/journal/session'
+import { outcomeFromResult, planEntries, type PlayedGame, type SettleSnapshot } from '@/modules/journal/settle'
 
 /**
  * Journal (棋誌) store — owns the merged, timeline-ordered view (ADR-0005, ADR-0013).
@@ -40,7 +40,9 @@ export const useJournalStore = defineStore('journal', () => {
     const conceptProgress = useConceptProgressStore()
 
     await load()
-    if (gameHistory.entries.length === 0) {
+    // cold＝從沒抓過、dirty＝有新局後被 syncVersion 失效——都要重抓；valid（含「抓過但為空」）跳過，
+    // 零局玩家每次回首頁才不會重發註定回空的查詢。
+    if (gameHistory.cacheState !== 'valid') {
       try {
         await gameHistory.fetchHistory()
       } catch {

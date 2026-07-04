@@ -61,7 +61,14 @@ const disabled = computed(() => !props.active || props.locked || demoing.value)
 watch(
   () => props.active,
   (active) => {
-    if (active) setTimeout(() => boardCmp.value?.reapplyFen(), 360)
+    if (active) setTimeout(() => {
+      boardCmp.value?.reapplyFen()
+      // chessground memos board bounds at creation; a board created off-screen (translateX'd
+      // carousel slide) keeps the stale offset once active, so pointer→square mapping is dead
+      // (ResizeObserver only fires on size change, not position). window resize is chessground's
+      // own bounds.clear() path — vendor-supported, no private API.
+      window.dispatchEvent(new Event('resize'))
+    }, 360)
   },
 )
 

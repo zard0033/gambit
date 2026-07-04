@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { hashInt, pickTemplate, render } from '@/lib/journal/render'
+import { hashInt, pickTemplate, render } from '@/modules/journal/render'
 import { arrivalParamsForVolume } from '@/data/journal-templates'
 
 describe('hashInt', () => {

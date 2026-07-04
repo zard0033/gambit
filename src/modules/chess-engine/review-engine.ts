@@ -85,6 +85,7 @@ export function useReviewEngine(factory: WorkerFactory = defaultFactory) {
   let _requestId = 0
   let _idleTimer: ReturnType<typeof setTimeout> | null = null
   let _ucinewgameNeeded = true // send ucinewgame before first analyze() of each new session
+  let _spawnPromise: Promise<void> | null = null // in-flight spawn — shared so concurrent callers don't double-spawn
 
   // ---- Idle timer ----
 
@@ -132,13 +133,35 @@ export function useReviewEngine(factory: WorkerFactory = defaultFactory) {
   }
 
   /**
+   * Spawn + handshake, sharing an in-flight promise across concurrent callers
+   * so two overlapping init()/analyze() calls never spawn a second Worker.
+   * Returns the raw spawnAndHandshake() promise (not a wrapped derivative) so
+   * callers observe the same resolution timing as calling it directly; the
+   * in-flight cache is cleared via a side-chain that doesn't affect callers.
+   */
+  function ensureSpawned(): Promise<void> {
+    if (_spawnPromise) return _spawnPromise
+    const spawning = spawnAndHandshake()
+    _spawnPromise = spawning
+    spawning.then(
+      () => {
+        if (_spawnPromise === spawning) _spawnPromise = null
+      },
+      () => {
+        if (_spawnPromise === spawning) _spawnPromise = null
+      },
+    )
+    return spawning
+  }
+
+  /**
    * Explicitly initialise the engine (idempotent — safe to call multiple times).
    * Can be used to show a loading state before the first analyze() call.
    */
   async function init(): Promise<void> {
     if (state.value === 'DISPOSED') throw new EngineDisposedError()
     if (state.value === 'IDLE' || state.value === 'THINKING') return
-    await spawnAndHandshake()
+    await ensureSpawned()
   }
 
   // ---- Analyze ----
@@ -156,13 +179,12 @@ export function useReviewEngine(factory: WorkerFactory = defaultFactory) {
 
     // Spawn if not running
     if (state.value === 'UNINITIALIZED' || state.value === 'IDLE_TERMINATED') {
-      await spawnAndHandshake()
+      await ensureSpawned()
     }
 
-    // Wait if handshake in progress
-    // (For simplicity: re-use init() which is idempotent for LOADING/HANDSHAKING states)
+    // Wait if handshake in progress (shares the same in-flight spawn promise)
     if (state.value === 'LOADING' || state.value === 'HANDSHAKING') {
-      await init()
+      await ensureSpawned()
     }
 
     if (state.value !== 'IDLE') {
@@ -246,7 +268,12 @@ export function useReviewEngine(factory: WorkerFactory = defaultFactory) {
       worker.onmessage = (ev: MessageEvent<string>) => {
         const line = ev.data
 
-        if (line.startsWith('info ') && !line.includes('string')) {
+        if (
+          line.startsWith('info ') &&
+          !line.includes('string') &&
+          !line.includes('lowerbound') &&
+          !line.includes('upperbound')
+        ) {
           const depthMatch = line.match(/\bdepth (\d+)/)
           const cpMatch = line.match(/\bscore cp (-?\d+)/)
           const mateMatch = line.match(/\bscore mate (-?\d+)/)
