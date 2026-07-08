@@ -1,1 +1,0 @@
-import{m as e}from"./index-DaSS5UJT.js";function t(t,n){return n.filter(n=>e[n.motif]===t).sort((e,t)=>e.order-t.order)}var n=[`mate`,`material`];export{t as n,n as t};
