@@ -103,7 +103,7 @@ onBeforeUnmount(() => {
 
     <div
       ref="trackEl"
-      class="learn-track flex flex-1 snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain"
+      class="learn-track relative flex flex-1 snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain"
       @scroll="onScroll"
     >
       <section

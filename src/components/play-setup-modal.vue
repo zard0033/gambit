@@ -71,7 +71,7 @@ function start(): void {
             v-for="lvl in LEVELS"
             :key="lvl"
             type="button"
-            class="relative h-10 rounded-btn text-sm font-semibold tabular-nums transition-colors"
+            class="relative h-10 rounded-btn text-sm font-semibold tabular-nums transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
             :class="
               selectedLevel === lvl
                 ? 'bg-primary text-primary-fg shadow-button'
@@ -104,7 +104,7 @@ function start(): void {
             v-for="side in SIDES"
             :key="side.value"
             type="button"
-            class="flex flex-col items-center gap-1.5 rounded-card border py-3 transition-colors"
+            class="flex flex-col items-center gap-1.5 rounded-card border py-3 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
             :class="
               selectedSide === side.value
                 ? 'border-primary bg-primary/10 text-ink'

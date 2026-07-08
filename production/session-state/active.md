@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: Phase 2 收尾（全專案體檢已 ship）
-Task: 7edc660 全面體檢+拍板批已 push；CI 紅燈修復（onset 新行為 E2E 斷言）本 commit。下一步＝Supabase 兩 migration 手動 apply + iPhone 複驗。
+Task: 視覺回歸守門上線（tests/e2e/visual-regression.spec.ts：13 路由×2 viewport 結構不變量 CI 硬閘＋像素回歸本機閘＋棋憶 CSS 汙染跨導航回歸）；順修 /learn 桌機橫向溢出、對局設定按鈕金色 focus ring。下一步＝Supabase 兩 migration 手動 apply + iPhone 複驗。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
@@ -13,6 +13,9 @@ Task: 7edc660 全面體檢+拍板批已 push；CI 紅燈修復（onset 新行為
 
 - **核心動線**：對局 → 賽後檢討（棋憶）→ 課程 / 試煉 / 深化（判斷場），Google OAuth + 跨裝置同步，guest local-first。
 - **測試**：vitest 868 綠、vue-tsc 0、axe a11y 綠、E2E CI 等效全綠（總數以實跑為準，勿照抄）。
+  **視覺回歸守門**（`tests/e2e/visual-regression.spec.ts`）：每路由結構不變量（橫向溢出／var() 色票變純黑／
+  非方棋盤／JS 例外）＝CI 硬閘、決定性；像素回歸 `toHaveScreenshot`＝本機 push 前跑（基準圖 chromium-win32、
+  依平台而異故 CI skip）。改 UI 後基準圖需 `--update-snapshots` 重生並目視確認。
 - **7edc660（2026-07-03 全面體檢，94 檔）已 push**：12 維度審查 41 findings 修復（棋誌 settle 接線、離線佇列
   completedAt 淘汰、賽後引擎 lowerbound/spawn、首屏 -207KB、a11y/設計系統批、文件對齊 ×7）＋七項拍板
   （chess-board 拆分 606→474+5 composables、journal 搬家 modules/+ADR-0015、data-sync 解耦 syncVersion、
