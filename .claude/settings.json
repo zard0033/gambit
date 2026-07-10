@@ -1,9 +1,5 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "statusLine": {
-    "type": "command",
-    "command": "bash .claude/statusline.sh"
-  },
   "permissions": {
     "allow": [
       "Bash(git status*)",
@@ -31,7 +27,9 @@
       "mcp__playwright__browser_close",
       "mcp__playwright__browser_resize",
       "mcp__playwright__browser_drag",
-      "mcp__playwright__browser_console_messages"
+      "mcp__playwright__browser_console_messages",
+      "mcp__serena__find_symbol",
+      "mcp__serena__initial_instructions"
     ],
     "deny": [
       "Bash(rm -rf *)",
@@ -171,5 +169,9 @@
         ]
       }
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash .claude/statusline.sh"
   }
 }
