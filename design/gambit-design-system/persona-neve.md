@@ -83,6 +83,21 @@ Gambit 是一座亙古就存在的棋盤。**Neve 是它的化身**——以銀�
 - **`font-num`（Cubic 11 點陣字）只當小「NEVE」名牌／區塊標籤的像素識別**（如「NEVE 的長期觀察」這種小標）；**內文絕不排 Cubic 11**——它是數字／棋譜字（≥11px、短資料），長中文會鋸齒難讀，且 8-bit 復古感與 Neve 的平靜／殿堂人格相悖（對標 Calm，非 chess.com）。
 - 中性文字（概念定義、UI 標籤）維持 `font-sans` 與既有字型規則，**不套** Neve 嗓音。
 
+### 頭像規範（`NeveAvatar` 共用元件，`src/components/ui/gambit/neve-avatar.vue`）
+
+「固定容器」的頭像本身也要夠大、夠清楚才撐得起存在感——三處消費端（課程／深化頂列、棋憶卡）一律走
+共用元件，不再各自 inline `<img>`。
+
+- **尺寸階**：`md`＝32px（課程／試煉頂列，cream 底）、`lg`＝36px（棋憶深青卡）。不臨時加第三階。
+- **深底辨識度**：`surface="deep"` 套白色約 25% 不透明度細 ring ＋ 微提亮（brightness 1.05–1.1），
+  補深青底上頭像偏暗的辨識度落差；`surface="cream"` 用既有 `line` 色細 ring。**絕不用金色**
+  （`#F8B500` 只留給 focus / reward）。
+- **進場動效**：掛載時單次 fade＋scale（0.96→1，約 220ms），只動 `transform`/`opacity`；
+  尊重 `prefers-reduced-motion`（降級為直接顯示，無動畫）；不做無限循環或重複觸發的動效。
+- **素材**：runtime 只用徽章縮圖 `public/avatars/neve-badge.png`（192px，撐到 64px@3x）；1254px 原圖在
+  `design/gambit-design-system/avatars/`（**勿放回 public/**——5.3MB 零引用死重量會進每次 deploy）。重產：
+  `ffmpeg -y -i design/gambit-design-system/avatars/neve-main.png -vf "scale=<N>:<N>:flags=lanczos" public/avatars/neve-badge.png`。
+
 ---
 
 ## 試煉 brief 撰寫規則（解題態）

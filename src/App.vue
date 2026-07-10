@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, watch, computed } from 'vue'
+import { onMounted, watch, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useDataSyncStore } from '@/stores/data-sync'
@@ -32,6 +32,17 @@ function onSetupStart(payload: PendingGame): void {
 }
 function onSetupClose(): void {
   uiStore.closePlaySetup()
+}
+
+// a11y focus reset, mirrored from router/index.ts's afterEach: with the journey Transition now
+// wrapping RouterView, afterEach's nextTick fires before the new view finishes mounting (it still
+// focuses the outgoing view's h1 — a11y regression). after-enter fires once the new view is actually
+// in the DOM, so it takes over for transitioned navigations; afterEach stays as-is for the very first
+// load (mode="out-in" has no enter transition on initial mount, so after-enter never fires there).
+function focusRouteHeading(): void {
+  nextTick(() => {
+    document.querySelector('h1')?.focus({ preventScroll: true })
+  })
 }
 
 // 沉浸式全屏頁（登入）不套 app chrome：無頂部品牌列、無底部 tab。
@@ -97,7 +108,11 @@ onMounted(() => {
   <div class="min-h-dvh flex flex-col">
     <AppNav v-if="!fullBleed" />
     <main class="flex-1" :class="[fullBleed || isLearnPager ? '' : 'pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0', pageBg]">
-      <RouterView :key="routeKey" />
+      <RouterView v-slot="{ Component }">
+        <Transition name="journey" mode="out-in" @after-enter="focusRouteHeading">
+          <component :is="Component" :key="routeKey" />
+        </Transition>
+      </RouterView>
     </main>
 
     <!-- Global play-setup modal — opens over the current page (Dialog portals above everything). -->
@@ -109,3 +124,34 @@ onMounted(() => {
     />
   </div>
 </template>
+
+<!-- Route transition — slow, calm journey fade. Not scoped: the transitioning element is the
+     routed view's own root, which does not carry App.vue's scope id. transform/opacity only;
+     fully disabled under prefers-reduced-motion. -->
+<style>
+.journey-enter-active,
+.journey-leave-active {
+  transition:
+    opacity 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.journey-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.journey-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .journey-enter-active,
+  .journey-leave-active {
+    transition: none;
+  }
+  .journey-enter-from,
+  .journey-leave-to {
+    opacity: 1;
+    transform: none;
+  }
+}
+</style>

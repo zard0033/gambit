@@ -161,12 +161,19 @@ export const conceptDeepenings: Record<ChessConcept, ConceptDeepening> = {
           // K+Q vs K 窮舉掃描唯一零使用的角落）：同殺型（后貼臉、王撐腰）、把王逼到棋盤下方。
           // chess.js 窮舉 28 走法唯一 mate-in-1 = Qg2；Stockfish 唯一解閘門另驗。
           fen: '6Q1/8/8/8/8/5K2/8/7k w - - 0 1',
-          text: '這一個，我不說了。王已縮在角落，你的王罩住了他僅剩的逃生格——后只差貼上去那一步。',
+          text: '這一個，我不說了。牠被逼到角落，退路本就不多——哪一步能讓牠一格也逃不掉，自己看出來。',
           highlights: [],
           arrows: [{ orig: 'g8', dest: 'g2' }],
           expectedMove: { from: 'g8', to: 'g2' },
           hint: '把后沿直線俯衝到 g2 將軍——你的王 f3 罩著它，黑王吃不掉，逃生格也全被封。',
           successText: '后+王的基本殺：后將軍、王保護后並封逃生格。記住后不能單獨將殺，一定要王來幫忙。',
+          // Qg3 (g8→g3) 是緊鄰正解的逼和陷阱：黑王動不了、又沒被將軍＝和棋。chess.js 實證 isStalemate。
+          // 專屬回饋由 LessonPlayer 依 trapFeedback.{from,to} 比對答錯的手觸發（資料驅動）。
+          trapFeedback: {
+            from: 'g8',
+            to: 'g3',
+            text: '看牠——黑王一格也動不了了，可是牠並沒有被將軍。這叫逼和，算和棋，到手的勝勢就這樣溜走。越接近勝利，越要留意對方是不是還剩一步合法的棋。',
+          },
         },
       ],
     ],

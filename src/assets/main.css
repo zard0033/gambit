@@ -254,3 +254,38 @@
     outline: none;
   }
 }
+
+/* ============================================================
+   ATMOSPHERIC HOME SCENE — time-of-day sky tokens (additive)
+   Every bucket departs from the deep-jade anchor #103029, shifted
+   only in colour temperature/lightness. Low saturation throughout;
+   the warm "light" is desaturated cream/amber — NEVER brand gold
+   (#F8B500 is reserved for focus / reward). Defined here so the
+   NeveSceneHeader references loaded var() tokens (no black fallback).
+   sky-a = top of sky · sky-b = deep base anchor · glow = soft light ·
+   vignette = warm-dark edge (never pure black).
+   ============================================================ */
+[data-scene='night'] {
+  --scene-sky-a: #123029;
+  --scene-sky-b: #0a1f1a;
+  --scene-glow: rgba(155, 189, 177, 0.16); /* faint cool moon-teal */
+  --scene-vignette: rgba(6, 18, 14, 0.42);
+}
+[data-scene='morning'] {
+  --scene-sky-a: #163a2f;
+  --scene-sky-b: #0e2721;
+  --scene-glow: rgba(217, 196, 158, 0.2); /* low-sat warm dawn cream */
+  --scene-vignette: rgba(8, 22, 17, 0.34);
+}
+[data-scene='afternoon'] {
+  --scene-sky-a: #1a4436;
+  --scene-sky-b: #102b24;
+  --scene-glow: rgba(206, 222, 205, 0.18); /* clean pale daylight */
+  --scene-vignette: rgba(8, 22, 17, 0.3);
+}
+[data-scene='evening'] {
+  --scene-sky-a: #123128;
+  --scene-sky-b: #0b211b;
+  --scene-glow: rgba(198, 150, 106, 0.22); /* low-sat warm dusk amber */
+  --scene-vignette: rgba(6, 16, 12, 0.44);
+}

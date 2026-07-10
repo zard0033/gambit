@@ -27,7 +27,8 @@ import { useRouter } from 'vue-router'
 import { ArrowLeft, ChevronLeft, ChevronRight, Ban } from 'lucide-vue-next'
 import RecognitionBoard from '@/components/lesson/RecognitionBoard.vue'
 import { Button } from '@/components/ui/button'
-import { COACH, COACH_AVATAR } from '@/types/lesson'
+import { COACH } from '@/types/lesson'
+import { NeveAvatar } from '@/components/ui/gambit'
 import type { RecognitionSet } from '@/types/recognition'
 
 const props = withDefaults(
@@ -193,12 +194,7 @@ const showIntro = ref(true)
           <!-- 頂列：Neve 頭像+名 ‖ carousel 導航（進度點 + 左右切換）。M4：導航併進頂列。 -->
           <div class="flex items-center justify-between gap-2 px-4 pb-2 pt-3.5">
             <span class="flex items-center gap-2">
-              <img
-                class="h-6 w-6 shrink-0 rounded-full object-cover"
-                :src="COACH_AVATAR"
-                alt=""
-                aria-hidden="true"
-              >
+              <NeveAvatar size="md" surface="cream" />
               <span class="font-sans text-sm text-ink">{{ COACH.name }}</span>
             </span>
             <div class="flex items-center gap-2">

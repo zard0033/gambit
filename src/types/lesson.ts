@@ -45,6 +45,13 @@ export interface LessonStep {
   hint?: string
   /** Shown after the correct move on an interactive step. */
   successText?: string
+  /**
+   * A specific wrong move that deserves its own teaching feedback instead of the generic「這一步不是答案」
+   * hint (e.g. a stalemate trap one square from the mate). When the player's wrong move matches
+   * `{from,to}`, LessonPlayer shows `text` in place of the step hint. Purely additive — steps without
+   * it behave exactly as before.
+   */
+  trapFeedback?: { from: string; to: string; text: string }
 }
 
 /**

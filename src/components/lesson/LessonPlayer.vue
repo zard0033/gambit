@@ -16,7 +16,8 @@ import ChessBoard from '@/components/chess-board.vue'
 import MoveAnnotationDisplay from '@/components/move-annotation-display.vue'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { COACH, COACH_AVATAR } from '@/types/lesson'
+import { COACH } from '@/types/lesson'
+import { NeveAvatar } from '@/components/ui/gambit'
 import type { LessonStep } from '@/types/lesson'
 import type { Annotation } from '@/modules/move-annotation/annotation-types'
 import type { MoveMadePayload } from '@/composables/use-chess-board'
@@ -194,6 +195,15 @@ function retry(): void {
   board.value?.resetPosition() // snap the wrong piece home without remounting (no entry-animation replay)
 }
 
+// A wrong move that matches this step's trapFeedback → show its bespoke teaching in place of the
+// generic hint (e.g. the Qg3 stalemate one square from mate). null for any other wrong move.
+const trapNote = computed<string | null>(() => {
+  const wm = wrongMove.value
+  const tf = currentStep.value?.trapFeedback
+  if (!wm || !tf) return null
+  return wm.from === tf.from && wm.to === tf.to ? tf.text : null
+})
+
 const canAdvance = computed(() => !isInteractive.value || solved.value)
 const lightbulbGlowing = computed(
   () => everWrong.value && !wrongMove.value && !solved.value && !hintShown.value,
@@ -331,12 +341,7 @@ function prev(): void {
           <!-- 釘頂 header：頭像 + Neve + 步數，捲動時永遠可見（完成頁不需要，收起） -->
           <div v-if="!finished" class="flex shrink-0 items-center justify-between gap-2 px-4 pb-2.5 pt-3.5 font-sans text-xs font-medium text-ink-muted">
             <span class="flex items-center gap-2">
-              <img
-                class="h-6 w-6 shrink-0 rounded-full object-cover"
-                :src="COACH_AVATAR"
-                alt=""
-                aria-hidden="true"
-              >
+              <NeveAvatar size="md" surface="cream" />
               <span class="text-sm text-ink">{{ COACH.name }}</span>
             </span>
             <span class="shrink-0 font-num text-ink-faint">{{ stepIndex + 1 }} / {{ steps.length }}</span>
@@ -359,7 +364,8 @@ function prev(): void {
             <!-- Wrong-move feedback (按鈕在下方釘底動作列) -->
             <Alert v-if="wrongMove" variant="danger" class="mt-3">
               <AlertTitle class="text-danger">這一步不是答案</AlertTitle>
-              <AlertDescription v-if="currentStep?.hint" class="text-ink">{{ currentStep.hint }}</AlertDescription>
+              <AlertDescription v-if="trapNote" class="text-ink">{{ trapNote }}</AlertDescription>
+              <AlertDescription v-else-if="currentStep?.hint" class="text-ink">{{ currentStep.hint }}</AlertDescription>
               <p v-if="answerRevealed" class="mt-2 text-sm text-hint">
                 答案箭頭已畫在棋盤上——點「重試」後照著走。
               </p>

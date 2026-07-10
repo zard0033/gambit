@@ -59,6 +59,10 @@ function scanDefects(): { overflow: number; blackTokens: string[]; badBoards: st
 
 test.describe('UI 視覺守門', () => {
   test.beforeEach(async ({ page }) => {
+    // 首頁時段場景（NeveSceneHeader）依 new Date().getHours() 選天色 bucket，會讓像素基準隨本機時刻漂移。
+    // 固定到 15:00（afternoon bucket，clean pale daylight）使基準決定性。setFixedTime 只釘死 Date、
+    // 不凍結 setTimeout/rAF，故進場淡入動畫照跑（reducedMotion 下本就直接點亮）。須在 goto 前設。
+    await page.clock.setFixedTime(new Date('2026-07-10T15:00:00'))
     // 訪客模式進站（跳過 landing gate），並關動效讓截圖穩定
     await page.addInitScript(() => sessionStorage.setItem('gambit:guest-entry', '1'))
     await page.emulateMedia({ reducedMotion: 'reduce' })

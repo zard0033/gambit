@@ -11,6 +11,7 @@ import { renderNeveLine } from '@/modules/memory/templates'
 import { MEMORY_ANALYZING_COPY } from '@/config/memory-config'
 import { useMemoryContext } from './memory-context'
 import NeveCard from './NeveCard.vue'
+import RecognitionSignpost from './RecognitionSignpost.vue'
 import EvalShapeChart from './EvalShapeChart.vue'
 import MomentList from './MomentList.vue'
 import EmptyMemory from './EmptyMemory.vue'
@@ -33,6 +34,9 @@ const analysisProgress = computed(() => {
 
 <template>
   <div class="flex w-full max-w-md flex-col gap-4">
+    <!-- 0. 判斷場路標：只有存在「你自己漏看的將殺」時才現身，邀你回到那個局面重新認一次。 -->
+    <RecognitionSignpost />
+
     <!-- 1. Neve — opening voice at COMPLETE; present-tense "looking with you" while analyzing.
          One card throughout (it transforms, never vanishes — EC-3). -->
     <NeveCard :text="isComplete ? neveText : MEMORY_ANALYZING_COPY" />

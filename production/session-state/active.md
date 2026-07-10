@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 差異化重構
-Feature: Phase 2 收尾（全專案體檢已 ship）
-Task: 視覺回歸守門上線（tests/e2e/visual-regression.spec.ts：13 路由×2 viewport 結構不變量 CI 硬閘＋像素回歸本機閘＋棋憶 CSS 汙染跨導航回歸）；順修 /learn 桌機橫向溢出、對局設定按鈕金色 focus ring。下一步＝Supabase 兩 migration 手動 apply + iPhone 複驗。
+Feature: Phase 2 收尾 + Phase 3 A 路線（氛圍首頁）
+Task: 四磚已施工＋全驗證、在工作樹**待 commit**（氛圍首頁 IA-A／PWA／mate 深化磚＋棋憶 signpost／Neve 頭像）。下一步＝Eason 核准 commit+push、iPhone 四批複驗。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
@@ -9,10 +9,10 @@ Task: 視覺回歸守門上線（tests/e2e/visual-regression.spec.ts：13 路由
 
 ---
 
-## 現況（產品全線可用；2026-07-04）
+## 現況（產品全線可用；2026-07-10）
 
 - **核心動線**：對局 → 賽後檢討（棋憶）→ 課程 / 試煉 / 深化（判斷場），Google OAuth + 跨裝置同步，guest local-first。
-- **測試**：vitest 868 綠、vue-tsc 0、axe a11y 綠、E2E CI 等效全綠（總數以實跑為準，勿照抄）。
+- **測試**：vitest 893 綠、vue-tsc 0、axe a11y 綠、E2E CI 等效全綠（總數以實跑為準，勿照抄）。
   **視覺回歸守門**（`tests/e2e/visual-regression.spec.ts`）：每路由結構不變量（橫向溢出／var() 色票變純黑／
   非方棋盤／JS 例外）＝CI 硬閘、決定性；像素回歸 `toHaveScreenshot`＝本機 push 前跑（基準圖 chromium-win32、
   依平台而異故 CI skip）。改 UI 後基準圖需 `--update-snapshots` 重生並目視確認。
@@ -21,6 +21,36 @@ Task: 視覺回歸守門上線（tests/e2e/visual-regression.spec.ts：13 路由
   （chess-board 拆分 606→474+5 composables、journal 搬家 modules/+ADR-0015、data-sync 解耦 syncVersion、
   axe E2E 真實化、Actions pin SHA、RLS WITH CHECK + DROP 兩表 migration）＋ Neve 頭像接入、判斷場 stale
   bounds、/play 直連彈回、深化 mate 換盤 h1 角、死常數清理+CLASSIFIER_SIGNALS 接線。細節＝git log + ADR-0015。
+- **Supabase 兩 migration 已套 live（2026-07-10，Eason 於 Dashboard SQL editor 手動跑）**：RLS 顯式
+  WITH CHECK＋DROP `skill_scores`/`lesson_side_learned`。PostgREST 已驗：兩表回 PGRST205（確實消失）、
+  餘 7 表 RLS 正常擋 anon。WITH CHECK 行為中立、僅間接驗證；要鐵證在 SQL editor 查
+  `pg_policies` 的 `with_check is not null`（7 行全 true 即過）。
+- **2026-07-10 四磚（工作樹已施工＋全驗證，待 commit）**：
+  ① **氛圍首頁 IA-A**：`NeveSceneHeader` 四時段天色（night/morning/afternoon/evening，`timeBucketForHour` 純函式）
+  ＋緩亮 620ms（唯一允許超過 300ms 的氛圍例外）＋全站 `journey` 路由轉場（App.vue Transition out-in 200ms）；
+  h1 focus 因 out-in 時序改掛 `@after-enter`（router afterEach 保留管首次載入）。
+  ② **PWA**：`vite-plugin-pwa` autoUpdate＋**ADR-0016**（precache app shell 73 項/2.6MB；stockfish/fonts 排除
+  precache 走 runtime CacheFirst；Supabase 永不快取）。bash 跑帶 base 的 build 要 `MSYS_NO_PATHCONV=1`
+  （MSYS 會把 `/gambit/` 改寫成 Windows 路徑、silent 壞 base）。
+  ③ **mate 深化磚**：沉默關文案去洩題；判斷場 3 盤（悶殺 Nf7#／雙城堡樓梯 Rb8#／底線假殺 decoy Rd8+→Rxd8），
+  全過 chess.js 窮舉唯一性＋3-lens 對抗棋理審查＋uniqueness spike 3/3；Qg3 逼和特判（`trapFeedback` 資料驅動，
+  LessonStep 新選配欄位）。
+  ④ **棋憶 signpost→判斷場接真實對局 v1**（mate-only）：review COMPLETE 時 `selectMissedMates` 擷取
+  （**關鍵語意：classifier 的 mate 訊號＝「放任被將死」，missed-mate＝新偵測器，勿混用**）→
+  `recognition-source` store（localStorage、冪等、consumed FIFO 300、只留最近 3 局）→ 棋憶 signpost 卡 →
+  `/learn/concept/mate?source=recognition` 動態組全 real 判斷場。**擷取硬閘（precommit-review critical 修復）：
+  只收 `evalMate===1` 且 chess.js 窮舉「恰好一個殺著、且＝引擎手」的局面**——否則「一步將死?」的 prompt 會對
+  二步殺說謊、多殺著局面會把玩家的真殺著誤判 missed。v1 守衛：white-only（黑方翻盤+tap 座標未驗）、跳過升變
+  殺著；升級路徑=黑方 orientation、material 概念、跨裝置同步走 journal/data-sync。
+  ⑤ **Neve 頭像**：共用 `NeveAvatar`（ui/gambit/）24→32、28→36px，深底 ring+提亮，單次進場動效；
+  persona-neve.md 已補頭像視覺規範。
+  驗證足跡：vitest 898/898、vue-tsc 0、E2E CI 等效 96 綠、視覺結構不變量全綠、7 項中央驗證 findings＋
+  precommit-review deep 11 confirmed（1C/2M/8m）修 10——1 項不修（HomeView 淡入未抽 composable＝美化債）。
+  已知 flaky：全量 vitest 在重負載（VSCode 重建索引）下 auth-guard timeout 與 opening-lookup 20ms 效能斷言
+  會間歇紅，隔離單跑全綠；`--maxWorkers=4` 降競爭即 898 全綠。
+- **視覺回歸 spec 已固定時鐘 15:00**（首頁天色隨時段變，不固定像素基準不決定性）；4 張基準圖重生已目視
+  （desktop/mobile-home、mobile-lesson、mobile-concept-deepen）。已知 pre-existing advisory：/play 像素
+  間歇 0.47 漂移＝board-fit settle race，非本輪造成。
 - **行為變更注意**：Home mount / 對局終局現在會跑 `journal.evaluate()`——**全新玩家首次進站即有 onset 開場
   條目**（首頁 peek 顯示 1 筆是設計行為，對應 E2E 斷言已改）。
 - **已完成里程碑**（細節在 git）：試煉道場 #19、學習迴圈 #20、課程四階 21 課、UI Redesign Phase 0–4、
@@ -30,15 +60,12 @@ Task: 視覺回歸守門上線（tests/e2e/visual-regression.spec.ts：13 路由
 
 ## 待辦
 
-### ① 立即（Eason 手動）
+### ① iPhone 實機複驗（累積四批，deploy 後用無痕分頁）
 
-- **Supabase 兩個 migration 未套 live**（Dashboard SQL editor 依檔名順序跑）：
-  1. `20260830041917_add_explicit_rls_with_check.sql`——9 表 RLS 補顯式 WITH CHECK（無資料風險）。
-  2. `20260830053142_drop_unused_tables.sql`——**DROP `skill_scores` + `lesson_side_learned`，會永久刪除
-     該兩表既有資料**（程式碼零引用、Eason 2026-07-03 拍板清；跑之前最後確認一次不留）。
-
-### ② iPhone 實機複驗（累積三批，deploy 後用無痕分頁）
-
+- **7-10 批（四磚）**：氛圍首頁四時段觀感＋緩亮＋journey 轉場手感；頭像 32/36px 與深青底 ring 辨識度
+  （棋憶 NeveCard 最關鍵）；mate 判斷場三盤裸點擊手感＋故意走 Qg3 看逼和回饋；signpost 全流程
+  （下一盤真的錯過將殺 → 複盤到底 → 棋憶出卡 → 判斷場＝自己的局面 → 解完卡消失）；PWA 加到主畫面
+  ＋離線開啟＋下次 deploy 後自動更新（autoUpdate 不鎖舊版）。
 - **7-03 批**：Neve 頭像三處觀感（課程/判斷場 24px、棋憶 28px）；判斷場第 3 盤裸點擊＋真手指滑動；深化
   mate 新盤（h1 角 Qg2#）手感；redesign 三項＝#6 keySquare 高亮環+脈動、#9 概念地圖三階 coin、#11 課程
   氣泡 font-lesson。
@@ -47,7 +74,7 @@ Task: 視覺回歸守門上線（tests/e2e/visual-regression.spec.ts：13 路由
 - **更早**：棋憶賽後 UX 批（`e11d3c6`：失誤動畫節奏、重開同盤 cache 命中）；B5 試煉互動（log 累積、答錯
   滑回、揭曉箭頭）；逐手 PgnViewer「棋盤外藍框 + 座標小偏」（本機渲染不到、待實機指認）。
 
-### ③ 待 Eason 拍板（未動工）
+### ② 待 Eason 拍板（未動工）
 
 - **重置對局記錄**（原 iPhone 反饋 item 4）：實為跨 store 破壞性刪除（Supabase + localStorage + journal/
   memory 衍生資料）。待 scope：只清 list？連 concept-progress/journal 重置？guest-only vs 含雲端？
@@ -55,30 +82,22 @@ Task: 視覺回歸守門上線（tests/e2e/visual-regression.spec.ts：13 路由
 - **賽後 loading 結合 Neve「思考中」對話框**（2(a)）：小工程。
 - **「控制中心」tile 標題截斷**（pre-existing）：縮短 label／允許兩行／深入改純 icon，三選一。
 
-### ④ 深化頁後續磚
+### ③ 深化頁後續磚
 
-- **階段二＝接棋憶 signpost（北極星歸宿）**：RecognitionGate 換觸發源（真實對局偵測到錯過的概念機會）。
-  受 classifier 只可靠偵測 mate+material 限制（8 概念覆蓋 2）；訊號清單已接線成真開關
-  （`CLASSIFIER_SIGNALS`），擴 fork/pin 屬 Phase C+（pv 不可靠是已知難題）。開放問題：誘餌造題工時、
-  unaided/epiphany 門檻鬆緊。
+- ✅ **階段二 signpost v1 已施工**（2026-07-10，見現況四磚④）：mate-only、white-only、localStorage、
+  無 decoy。後續磚：黑方 orientation（先驗判斷場黑方翻盤＋tap 座標）、material 概念擴充、動態 decoy
+  造題（工時未估）、unaided/epiphany 門檻鬆緊（沿用既有，未調）。
+- ✅ **mate 沉默關三項已施工**（2026-07-10，見現況四磚③）：去洩題文案／判斷場（比照 fork）／Qg3 逼和特判。
 - **擴池 or HOLD**：依實機手感決定其他概念要不要加 variant／判斷場；懷疑論者長期提醒＝真正歸宿在
-  signpost，養肥後再評估深化頁獨立存在的必要。
-- **mate 沉默關三個未來項**（2026-07-03 對抗審查附帶）：① 文案「王罩住逃生格—后貼上去」有洩題傾向（舊有）
-  ② 長期可比照 fork 升級 Recognition Gate ③ 新盤 Qg3 是緊鄰正解的**逼和陷阱**——fail feedback 特判
-  「這是逼和」是好教學點。
+  signpost（已落地 v1），養肥後再評估深化頁獨立存在的必要。
 
-### ⑤ 未來獨立任務
+### ④ 未來獨立任務
 
-- **🎨 Neve 頭像 presence 加大（redesign 待辦，Eason 2026-07-03 提出）**：三處頭像（24–28px）實感偏小、
-  想更有存在感。照鐵則走 `/redesign` 對真實畫面出報告 → 拍板 → 施工；候選：加大尺寸／頂列排版重整／
-  出場動效。一併考慮：深青底（棋憶）上頭像偏暗、辨識度比 cream 底低——可能要細邊框或提亮。素材：徽章縮圖
-  `public/avatars/neve-badge.png`（192px，撐到 64px@3x）；1254px 原圖在 `design/gambit-design-system/avatars/`
-  （勿放回 public/——5.3MB 零引用死重量會進每次 deploy），重產：
-  `ffmpeg -y -i design/gambit-design-system/avatars/neve-main.png -vf "scale=<N>:<N>:flags=lanczos" public/avatars/neve-badge.png`。
+- ✅ **Neve 頭像 presence**（2026-07-10 已施工，見現況四磚⑤）：實機辨識度（尤其深青底）待 7-10 批複驗；
+  頭像素材位置與 ffmpeg 重產指令已記入 `design/gambit-design-system/persona-neve.md` 頭像規範節。
 - **Phase C+/D**：捉雙/牽制賽後偵測（需精準度實測）；Claude API 動態講解/BYOK（最後）。
-- **PWA / Add-to-Home-Screen ⏸ 未實作**：零 SW、零 manifest、`vite-plugin-pwa` 沒裝。要做時：① 裝套件+
-  manifest+圖示（pwa-192 已有）② **必用 `registerType: 'autoUpdate'`**（否則 SW 鎖死舊版）③ 先寫 Required
-  ADR 第 6「PWA caching strategy」。觸發＝離線/裝成 App 需求出現。非 Phase 2 關鍵路徑。
+- ✅ **PWA 已實作**（2026-07-10，autoUpdate＋ADR-0016，見現況四磚②）：首次 deploy 後所有訪客開始吃 SW；
+  之後每次 deploy 由 autoUpdate 自癒，「舊畫面＝裝置快取」的排查註記仍適用於未升級的舊訪客一次。
 - **epics/index 兩張彙總表過時**（沒納入 journal/memory/dungeon/learning-loop），獨立重算、刻意未動。
 - **🎨 第二主題（noir / "Dusk"）⏸ 低優先**：設計定案、spec 已固化 SoT（`colors_and_type.css`
   `[data-theme="noir"]` 區塊）；demo＝`design/demos/{theme-tokens-mockup,ink-noir-explore}.html`。production
@@ -112,10 +131,11 @@ Task: 視覺回歸守門上線（tests/e2e/visual-regression.spec.ts：13 路由
 **三階（鐵律：一次蓋一塊磚，每塊能單獨上線、單獨證明靈魂）：**
 
 - **Phase 1 — 棋誌**（心臟）：✅ 已上線（settle 管線 2026-07-03 起全面接線：onset/arrival/solace/epiphany 都活了）。
-- **Phase 2 — 課程長在你自己的棋上**：✅ 棋憶全線 ship；✅ 深化頁重設計（判斷場 MINIMAL + 四磚）ship。
-  🚧 剩 iPhone 複驗定案 + 階段二 signpost 評估（見待辦 ②④）。
-- **Phase 3 — 沉浸感 + 旅程 IA**：等心臟+引擎好了再包。
+- **Phase 2 — 課程長在你自己的棋上**：✅ 棋憶全線 ship；✅ 深化頁重設計（判斷場 MINIMAL + 四磚）ship；
+  ✅ 階段二 signpost v1 施工完（判斷場接真實對局，mate-only）。🚧 剩 iPhone 複驗定案（見待辦 ①③）。
+- **Phase 3 — 沉浸感 + 旅程 IA**：🚧 A 路線（氛圍首頁＋全站轉場）已施工待複驗；B 路線（tab→路/地圖
+  IA 重構）未動、待 A 驗證後評估。
 - **商業模式**（訂閱/付費深度/BYOK）＝最後。
 
 **關鍵架構事實**（細節在 ADR/git）：ADR-0013（journal）+ ADR-0014（memory）+ ADR-0015（lib/modules 判準）
-皆 Accepted；Supabase 現 9 張 live 表（兩張 pending drop，見待辦 ①）。
+皆 Accepted；Supabase 現 7 張 live 表（2026-07-10 起，兩張 unused 已 drop）。

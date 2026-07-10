@@ -21,10 +21,12 @@
   - Must work in Safari iOS 16+
   - Touch targets ≥ 44×44px
   - No hover-only interactions (mobile has no hover state)
-  - PWA（Add to Home Screen／離線）**尚未實作**——目前無 service worker、無 manifest。部署＝GitHub Pages
-    純靜態，靠 HTTP 快取（index.html 約 10 分鐘 max-age）自癒；**測試剛部署的版本若看到舊畫面＝裝置快取**，
-    用無痕分頁、或設定→Safari→進階→網站資料刪該站即可。若日後實作 PWA，務必用 autoUpdate 策略，否則
-    service worker 會把舊版鎖死、部署更新卡住（2026-06-25 就因誤以為有 PWA 而繞路兩輪）。
+  - PWA（Add to Home Screen／離線）**已實作（2026-07-10，ADR-0016）**：`vite-plugin-pwa`、
+    `registerType: 'autoUpdate'`（**勿改成 prompt**，否則 service worker 把舊版鎖死、部署更新卡住），
+    precache＝app shell；stockfish／fonts 刻意排除 precache、走 runtime CacheFirst；Supabase 永不快取。
+    **測試剛部署的版本若看到舊畫面＝裝置快取**，用無痕分頁、或設定→Safari→進階→網站資料刪該站即可
+    （autoUpdate 會在下次載入自癒）。bash 跑帶 base 的 build 要 `MSYS_NO_PATHCONV=1`（MSYS 會把
+    `/gambit/` 靜默改寫成 Windows 絕對路徑、壞掉 manifest base）。
   - Audio playback requires user gesture on iOS
 
 ## Naming Conventions
@@ -197,6 +199,7 @@ volume 別自己發明映射——concept 走 `teaches[0]` 課程的 category �
 | `pinia` ^3.x | State management | Vue official |
 | `typescript` ^6.x | Programming language | Microsoft |
 | `vite` ^8.x | Dev server + bundler | Community |
+| `vite-plugin-pwa` ^1.x | PWA (SW + manifest, autoUpdate; ADR-0016) | Community |
 | `tailwindcss` ^4.x | Utility-first CSS | Community |
 | `vue3-chessboard` ^1.x | Chess board Vue component (wraps chessground) | qwerty084 |
 | `chess.js` | Chess rules (bundled with vue3-chessboard) | Community |
@@ -224,7 +227,7 @@ volume 別自己發明映射——concept 走 `teaches[0]` 課程的 category �
 
 ## Architecture Decisions Log
 
-ADRs live in `docs/architecture/adr-NNNN-*.md`. Existing (adr-0001–adr-0014):
+ADRs live in `docs/architecture/adr-NNNN-*.md`. Existing (adr-0001–adr-0016):
 
 1. **ADR-0001** — Stockfish Build Source, Version, and HCE/NNUE Split
 2. **ADR-0002** — Web Worker Isolation and UCI Communication Protocol
@@ -240,12 +243,13 @@ ADRs live in `docs/architecture/adr-NNNN-*.md`. Existing (adr-0001–adr-0014):
 12. **ADR-0012** — Bidirectional Lesson-to-Game Linking via a Shared Concept Tag
 13. **ADR-0013** — Journal (棋誌) Data Model, Idempotency, and Session Boundary
 14. **ADR-0014** — 棋憶 (Memory) Data Model and Post-Game Review Consumption Boundary
+15. **ADR-0015** — lib/ vs modules/ Placement Criteria
+16. **ADR-0016** — PWA Caching Strategy (autoUpdate; precache app shell, runtime CacheFirst for stockfish/fonts)
 
 ### Required ADRs (not yet written)
 
 1. **Skill scoring formula** — How tactics/opening/endgame scores are computed
-2. **PWA caching strategy** — What's cached for offline use, what isn't（見 backlog：PWA 尚未安裝）
-3. **Phase 2 backend boundary** — When to introduce Edge Functions for Claude API
+2. **Phase 2 backend boundary** — When to introduce Edge Functions for Claude API
 
 ## Engine Specialists
 

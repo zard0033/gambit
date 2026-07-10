@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { ArrowRight, Target, BookOpen, Library, Swords } from 'lucide-vue-next'
@@ -15,6 +15,8 @@ import { getLastSeenAt, isUnread } from '@/modules/journal/unread'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { DarkPanel, ChapterBadge, StatCard, SectionLabel, ProgressBar } from '@/components/ui/gambit'
+import NeveSceneHeader from '@/components/home/NeveSceneHeader.vue'
+import { useReducedMotion } from '@/composables/use-reduced-motion'
 
 const router = useRouter()
 const progress = useLessonProgressStore()
@@ -43,6 +45,11 @@ const resumeInfo = computed(() => {
 const greeting = computed(greetingForNow)
 const lessonOrdinal = computed(() => progress.completedCount + 1)
 
+// Blocks below the scene fade-rise once on mount (≤300ms, small stagger).
+// prefers-reduced-motion skips the animation (CSS media query forces the lit state).
+const { prefersReducedMotion } = useReducedMotion()
+const ready = ref(false)
+
 function startGame() {
   // Open the setup modal over the home page; navigation to /play happens after the player confirms.
   uiStore.openPlaySetup()
@@ -61,19 +68,22 @@ onMounted(() => {
   // evaluate() 內部自己 await load()，settle 完再 reload 一次——取代單純 load()，
   // 讓首頁成為 onset/arrival/solace 的其中一個結算觸發點。
   void journal.evaluate()
+
+  if (prefersReducedMotion.value) {
+    ready.value = true
+    return
+  }
+  requestAnimationFrame(() => requestAnimationFrame(() => (ready.value = true)))
 })
 </script>
 
 <template>
   <div class="max-w-2xl md:max-w-4xl mx-auto px-[18px] pt-[18px] pb-6">
-    <!-- 問候 -->
-    <p class="font-sans text-base font-medium text-ink-muted">{{ greeting }}</p>
-    <h1 class="font-display font-bold text-[26px] md:text-[30px] leading-tight text-ink mt-0.5" tabindex="-1">
-      棋盤未曾離開，你來了。
-    </h1>
+    <!-- 氛圍首屏：Neve 在場的時段場景帶（取代舊問候區，保留既有標題 h1[tabindex=-1]） -->
+    <NeveSceneHeader :greeting="greeting" />
 
     <!-- 主區：桌機 hero | 繼續學習 雙欄等高；手機堆疊 -->
-    <div class="mt-4 md:mt-6 md:grid md:grid-cols-2 md:gap-5 md:items-stretch">
+    <div class="fade-rise mt-4 md:mt-6 md:grid md:grid-cols-2 md:gap-5 md:items-stretch" :class="{ 'is-in': ready }">
       <!-- 進行中對局 → 繼續對局卡；否則 開始新對局卡（深青瓷焦點卡，桌機填滿欄高、內容垂直置中） -->
       <DarkPanel
         v-if="resumeInfo"
@@ -166,6 +176,7 @@ onMounted(() => {
     </div>
 
     <!-- 總覽（全寬） -->
+    <div class="fade-rise" :class="{ 'is-in': ready }" style="transition-delay: 60ms">
     <SectionLabel>總覽</SectionLabel>
     <div class="grid grid-cols-3 gap-2.5">
       <RouterLink to="/learn" class="block rounded-card focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold" aria-label="學習進度">
@@ -190,8 +201,9 @@ onMounted(() => {
         />
       </RouterLink>
     </div>
+    </div>
     <!-- 棋誌 peek（總覽下方，露最近 HOMEPAGE_PEEK_COUNT 筆；有新筆才顯示此區塊） -->
-    <template v-if="peekEntries.length > 0">
+    <div v-if="peekEntries.length > 0" class="fade-rise" :class="{ 'is-in': ready }" style="transition-delay: 120ms">
       <SectionLabel class="mt-5">棋誌</SectionLabel>
       <div class="space-y-2">
         <RouterLink
@@ -210,6 +222,29 @@ onMounted(() => {
           <p class="flex-1 font-lesson text-[13.5px] leading-[1.65] text-ink-muted line-clamp-2">{{ entry.body }}</p>
         </RouterLink>
       </div>
-    </template>
+    </div>
   </div>
 </template>
+
+<style scoped>
+/* Below-scene blocks: single fade-rise on mount (≤300ms), small stagger via
+   inline transition-delay. transform/opacity only. */
+.fade-rise {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 280ms cubic-bezier(0, 0, 0.2, 1),
+    transform 280ms cubic-bezier(0, 0, 0.2, 1);
+}
+.fade-rise.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fade-rise {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+</style>

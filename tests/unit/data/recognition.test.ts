@@ -71,3 +71,33 @@ describe('recognition-gate chess-validity', () => {
     }
   })
 })
+
+// 將殺 recognition gate: the concept's tactic IS checkmate, so a real board's expectedMove must be
+// mate-in-1 and a decoy's tempt must NOT be mate (a check that only looks like one). Mirrors
+// concept-deepening.test.ts::test_mateDeepening_expectedMoveDeliversCheckmate. Stockfish uniqueness
+// (real: the ONLY mate) is the @spike gate; chess.js exhaustive-mate proof lives in the scratchpad script.
+describe('recognition-gate mate boards deliver checkmate', () => {
+  const mate = recognitionSets.mate
+
+  it('test_mate_setExists', () => {
+    expect(mate, 'mate recognition set missing').toBeTruthy()
+  })
+
+  it('test_mate_realBoardExpectedMoveIsCheckmate', () => {
+    for (const b of mate?.boards ?? []) {
+      if (b.kind !== 'real') continue
+      const chess = new Chess(b.fen)
+      chess.move({ from: b.expectedMove.from, to: b.expectedMove.to })
+      expect(chess.isCheckmate(), `mate real "${b.fen}": ${b.expectedMove.from}${b.expectedMove.to} is not checkmate`).toBe(true)
+    }
+  })
+
+  it('test_mate_decoyTemptMoveIsNotCheckmate', () => {
+    for (const b of mate?.boards ?? []) {
+      if (b.kind !== 'decoy') continue
+      const chess = new Chess(b.fen)
+      chess.move({ from: b.temptMove.from, to: b.temptMove.to })
+      expect(chess.isCheckmate(), `mate decoy "${b.fen}": temptMove must only LOOK like mate`).toBe(false)
+    }
+  })
+})

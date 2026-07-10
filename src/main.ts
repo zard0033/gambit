@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { registerSW } from 'virtual:pwa-register'
 import { createAppRouter } from './router'
 import { useAuthStore } from './stores/auth'
 import App from './App.vue'
@@ -12,6 +13,10 @@ const redirect = new URLSearchParams(window.location.search).get('redirect')
 if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
   window.history.replaceState(null, '', redirect)
 }
+
+// ADR-0016: autoUpdate + immediate — a new deploy takes effect on next load, never locking
+// a device onto a stale service worker.
+registerSW({ immediate: true })
 
 const app = createApp(App)
 app.use(createPinia())

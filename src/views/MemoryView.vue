@@ -17,6 +17,9 @@ import { useMemoryStore } from '@/stores/memory'
 import { usePostGameReview, buildFenSequence, type StoredAnalysisEntry } from '@/modules/post-game-review/use-post-game-review'
 import { useReviewEngine } from '@/modules/chess-engine/review-engine'
 import { classify, type ClassifyResult } from '@/modules/learning-loop/classify'
+import { selectMissedMates } from '@/modules/learning-loop/missed-mate'
+import { useRecognitionSourceStore } from '@/stores/recognition-source'
+import { RECOGNITION_MISSED_MATE_ENABLED } from '@/config/learning-loop-tuning'
 import { identifyOpening, type OpeningResult } from '@/modules/opening-id/opening-index'
 import { selectMoments, gatedCandidates } from '@/modules/memory/selection'
 import { evalWhiteSeries } from '@/modules/memory/derive'
@@ -33,6 +36,7 @@ const router = useRouter()
 const route = useRoute()
 const gameStore = useGameStore()
 const memory = useMemoryStore()
+const recognitionSource = useRecognitionSourceStore()
 const review = usePostGameReview()
 const engine = useReviewEngine()
 
@@ -117,8 +121,26 @@ function recordSummary(): void {
   })
   void memory.recordGame(summary).catch(() => { /* persistence best-effort; gated by story-011 live DB */ })
 }
+
+// Forward-only capture (ADR-0014 rationale): analysisResults holds bestMove/evalMate only during THIS
+// review session, so lift the missed forced mates into the recognition-source store at COMPLETE — the
+// signpost/judgement-field seed. Risk #1 (design): black-orientation tap geometry is unverified, so v1
+// captures white-to-move games only; the FEN's side-to-move then matches the player (all 'w').
+function captureMissedMates(): void {
+  if (!RECOGNITION_MISSED_MATE_ENABLED) return
+  const g = game.value
+  if (!g || orientation.value !== 'white') return
+  const mates = selectMissedMates({
+    analysisResults: results.value,
+    fens: fens.value,
+    moves: g.moves,
+    isPlayerMove: review.isPlayerMove,
+  })
+  if (mates.length > 0) recognitionSource.captureMate(g.completedAt.toString(), orientation.value, mates)
+}
+
 watch(() => review.phase.value, (p) => {
-  if (p === 'COMPLETE' && !recorded) { recorded = true; recordSummary() }
+  if (p === 'COMPLETE' && !recorded) { recorded = true; recordSummary(); captureMissedMates() }
 })
 
 // ---- Shallow-stack navigation (history-backed; GDD Rule 2) ----

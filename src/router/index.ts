@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, START_LOCATION } from 'vue-router'
 import { nextTick, watch } from 'vue'
 import type { RouterScrollBehavior } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
@@ -72,16 +72,23 @@ export function createAppRouter() {
     return undefined
   })
 
-  router.afterEach(() => {
+  router.afterEach((_to, from) => {
     // A navigation succeeded → clear the one-shot reload guard so a *later* chunk-load failure in
     // this session (e.g. a redeploy changed the hashes) can still self-heal with one reload.
     sessionStorage.removeItem('routerReloadAttempted')
-    nextTick(() => {
-      // preventScroll: this is an a11y focus reset to the page heading, not a viewport move —
-      // without it, focusing a top-of-page h1 yanks the scroll up and fights any view that
-      // positions its own initial scroll (e.g. DungeonMapView centring the current node).
-      document.querySelector('h1')?.focus({ preventScroll: true })
-    })
+    // Only the very first navigation (from === START_LOCATION) has no enter transition, so
+    // App.vue's @after-enter never fires for it — this is the sole case that needs the focus
+    // reset here. Every later navigation goes through the journey Transition and is handled by
+    // App.vue's focusRouteHeading (@after-enter); doing it here too would focus the outgoing
+    // view's h1 before the new one mounts (a11y regression — screen readers hear the old title).
+    if (from === START_LOCATION) {
+      nextTick(() => {
+        // preventScroll: this is an a11y focus reset to the page heading, not a viewport move —
+        // without it, focusing a top-of-page h1 yanks the scroll up and fights any view that
+        // positions its own initial scroll (e.g. DungeonMapView centring the current node).
+        document.querySelector('h1')?.focus({ preventScroll: true })
+      })
+    }
   })
 
   router.onError(() => {
