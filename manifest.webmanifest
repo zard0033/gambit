@@ -1,0 +1,1 @@
+{"name":"Gambit","short_name":"Gambit","description":"跟著 Neve 學西洋棋——從基礎規則到戰術實戰","start_url":"/gambit/","display":"standalone","background_color":"#103029","theme_color":"#103029","lang":"en","scope":"/gambit/","icons":[{"src":"pwa-192.png","sizes":"192x192","type":"image/png","purpose":"any"},{"src":"pwa-512.png","sizes":"512x512","type":"image/png","purpose":"any"}]}
