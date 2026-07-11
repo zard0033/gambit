@@ -1,7 +1,9 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: Phase 2 收尾 + Phase 3 A 路線（氛圍首頁）
-Task: 四磚已施工＋全驗證、在工作樹**待 commit**（氛圍首頁 IA-A／PWA／mate 深化磚＋棋憶 signpost／Neve 頭像）。下一步＝Eason 核准 commit+push、iPhone 四批複驗。
+Task: 四磚已 push＋deploy 上線（8366f82，CI 全綠，PWA 產物已驗）；signpost 黑方擷取已解鎖（Playwright
+驗證翻盤＋tap＋evalMate side-to-move 語意後移除 white-only 守衛，本地 commit 待下次 push）。
+下一步＝iPhone 四批複驗（DC notify 已提醒）。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
@@ -84,9 +86,11 @@ Task: 四磚已施工＋全驗證、在工作樹**待 commit**（氛圍首頁 IA
 
 ### ③ 深化頁後續磚
 
-- ✅ **階段二 signpost v1 已施工**（2026-07-10，見現況四磚④）：mate-only、white-only、localStorage、
-  無 decoy。後續磚：黑方 orientation（先驗判斷場黑方翻盤＋tap 座標）、material 概念擴充、動態 decoy
-  造題（工時未估）、unaided/epiphany 門檻鬆緊（沿用既有，未調）。
+- ✅ **階段二 signpost v1 已施工**（2026-07-10，見現況四磚④）：mate-only、localStorage、無 decoy。
+  ✅ **黑方擷取已解鎖**（2026-07-11）：Playwright 實測黑方翻盤＋tap 座標端到端可用（playerColor 一路傳到
+  chessground orientation）、evalMate＝side-to-move 慣例（ADR-0007）黑方不需反號 → 移除 MemoryView
+  white-only 守衛。後續磚：material 概念擴充、動態 decoy 造題（工時未估）、unaided/epiphany 門檻鬆緊
+  （沿用既有，未調）。
 - ✅ **mate 沉默關三項已施工**（2026-07-10，見現況四磚③）：去洩題文案／判斷場（比照 fork）／Qg3 逼和特判。
 - **擴池 or HOLD**：依實機手感決定其他概念要不要加 variant／判斷場；懷疑論者長期提醒＝真正歸宿在
   signpost（已落地 v1），養肥後再評估深化頁獨立存在的必要。
