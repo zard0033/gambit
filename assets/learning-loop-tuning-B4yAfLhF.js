@@ -1,1 +1,0 @@
-var e=[`mate`,`material`];export{e as t};

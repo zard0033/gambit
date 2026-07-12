@@ -1,0 +1,1 @@
+var e=[`mate`,`material`],t=1400;export{t as n,e as t};
