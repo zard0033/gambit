@@ -1,8 +1,8 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: Phase 2 收尾 + Phase 3 A 路線（氛圍首頁）
-Task: 四磚已 push＋deploy 上線（8366f82，CI 全綠）；第二批（黑方解鎖＋招呼框 V3＋四小項＋完成彈窗留白）
-已施工全驗證、待 push。下一步＝push 後 iPhone 補測氛圍首頁（V3 版）；slideshow 入口 follow-up 待拍板。
+Task: 四磚＋第二批（黑方解鎖、招呼框 V3、重置對局、棋憶雙門、判斷場留白）全部 push 上線（bed83ae，
+precommit-review ×2 過）。下一步＝iPhone 補測氛圍首頁 V3 與 PWA；之後的磚＝signpost material 設計案。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
