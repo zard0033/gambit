@@ -22,13 +22,14 @@ export function shouldSwipe(dx: number, dy: number): 'prev' | 'next' | null {
  * 「還有一手在等你」(without naming which) and reopens the missed board. `complete(unaided)` fires
  * once all boards are correct; unaided = no miss, no trap, no aid the whole way (drives epiphany).
  */
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft, ChevronLeft, ChevronRight, Ban } from 'lucide-vue-next'
 import RecognitionBoard from '@/components/lesson/RecognitionBoard.vue'
 import { Button } from '@/components/ui/button'
 import { COACH } from '@/types/lesson'
 import { NeveAvatar } from '@/components/ui/gambit'
+import { RECOGNITION_COMPLETE_LINGER_MS } from '@/config/learning-loop-tuning'
 import type { RecognitionSet } from '@/types/recognition'
 
 const props = withDefaults(
@@ -120,8 +121,13 @@ function checkRound(): void {
 function finish(): void {
   if (_completed) return
   _completed = true
-  emit('complete', !everMisjudged.value)
+  // Let the final board's feedback bubble breathe before the wrap-up overlay covers it
+  // (iPhone 複驗 2026-07-11). Pacing, not motion — kept under prefers-reduced-motion too.
+  _lingerTimer = window.setTimeout(() => emit('complete', !everMisjudged.value), RECOGNITION_COMPLETE_LINGER_MS)
 }
+
+let _lingerTimer: number | undefined
+onBeforeUnmount(() => { if (_lingerTimer !== undefined) window.clearTimeout(_lingerTimer) })
 
 function go(delta: number): void {
   const next = idx.value + delta

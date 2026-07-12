@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, type Component } from 'vue'
+import { computed, ref, type Component } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   BarChart3,
@@ -11,11 +11,14 @@ import {
   LogIn,
   ChevronRight,
   Star,
+  RotateCcw,
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
+import ResetHistoryDialog from '@/components/reset-history-dialog.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const showResetDialog = ref(false)
 
 const isGuest = computed(() => !authStore.userId)
 const displayName = computed(() => authStore.email?.split('@')[0] ?? '訪客')
@@ -60,6 +63,12 @@ const menuGroups = computed<{ title: string; rows: MenuRow[] }[]>(() => [
       isGuest.value
         ? { icon: LogIn, label: '登入', to: '/sign-in' }
         : { icon: LogOut, label: '登出', destructive: true, onClick: handleSignOut },
+    ],
+  },
+  {
+    title: '資料',
+    rows: [
+      { icon: RotateCcw, label: '重置對局記錄', destructive: true, onClick: () => { showResetDialog.value = true } },
     ],
   },
 ])
@@ -173,5 +182,7 @@ function handleRow(row: MenuRow) {
         </button>
       </div>
     </div>
+
+    <ResetHistoryDialog v-if="showResetDialog" @close="showResetDialog = false" />
   </div>
 </template>

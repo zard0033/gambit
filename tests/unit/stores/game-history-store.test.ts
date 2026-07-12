@@ -299,4 +299,42 @@ describe('useGameHistoryStore', () => {
     store.setExpandedRow(null)
     expect(store.expandedRowId).toBeNull()
   })
+
+  // ── resetHistory (ProfileView "重置對局記錄") ──────────────────────────
+
+  it('resetHistory: success empties the list and leaves cacheState valid', async () => {
+    const authStore = useAuthStore()
+    authStore.userId = 'uid-1'
+    mockSupabaseSelect([makeRow()])
+
+    const store = useGameHistoryStore()
+    await store.fetchHistory()
+    expect(store.entries).toHaveLength(1)
+
+    const eq = vi.fn().mockResolvedValueOnce({ error: null })
+    const del = vi.fn().mockReturnValueOnce({ eq })
+    vi.mocked(supabase.from).mockReturnValueOnce({ delete: del } as never)
+
+    expect(await store.resetHistory()).toBe(true)
+    expect(store.entries).toHaveLength(0)
+    expect(store.hasMore).toBe(false)
+    expect(store.nextCursor).toBeNull()
+    expect(store.cacheState).toBe('valid')
+  })
+
+  it('resetHistory: cloud error returns false and leaves the list untouched', async () => {
+    const authStore = useAuthStore()
+    authStore.userId = 'uid-1'
+    mockSupabaseSelect([makeRow()])
+
+    const store = useGameHistoryStore()
+    await store.fetchHistory()
+
+    const eq = vi.fn().mockResolvedValueOnce({ error: { message: 'boom' } })
+    const del = vi.fn().mockReturnValueOnce({ eq })
+    vi.mocked(supabase.from).mockReturnValueOnce({ delete: del } as never)
+
+    expect(await store.resetHistory()).toBe(false)
+    expect(store.entries).toHaveLength(1)
+  })
 })

@@ -76,6 +76,22 @@ export const useGameHistoryStore = defineStore('gameHistory', () => {
     fetchGeneration.value++  // invalidates any in-flight fetch
   }
 
+  /**
+   * ProfileView "重置對局記錄": delete the cloud/local game_sessions rows via data-sync, then clear
+   * the in-memory list so the UI reflects it immediately without a refetch. Returns false (list left
+   * untouched) on a delete failure so the caller can surface a retry.
+   */
+  async function resetHistory(): Promise<boolean> {
+    const ok = await dataSyncStore.deleteGameHistory()
+    if (!ok) return false
+    entries.value = []
+    hasMore.value = false
+    nextCursor.value = null
+    cacheState.value = 'valid'
+    fetchGeneration.value++
+    return true
+  }
+
   // data-sync bumps syncVersion after every successful sync/flush; react by invalidating our
   // cache instead of data-sync importing this store back (keeps data-sync a dependency-free leaf).
   // flush: 'sync' preserves the previous behavior where invalidate() ran synchronously with the
@@ -100,6 +116,7 @@ export const useGameHistoryStore = defineStore('gameHistory', () => {
     fetchHistory,
     loadMore,
     invalidate,
+    resetHistory,
     setExpandedRow,
   }
 })

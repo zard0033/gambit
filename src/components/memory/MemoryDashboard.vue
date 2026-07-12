@@ -1,9 +1,13 @@
 <script setup lang="ts">
 /**
  * 棋憶 Dashboard (story-007) — the calm landing view. DOM order (GDD Rule 3 / AC-1):
- * Neve line → shape-of-game eval view → moment list (or zero-state). NO verdict/score/"weakest"
- * node is rendered (AC-1 asserts its absence). Progressive pre-COMPLETE (EC-3): selection runs
- * only at COMPLETE, so a card never appears then vanishes.
+ * Neve line → shape-of-game eval view (or zero-state). NO verdict/score/"weakest" node is
+ * rendered (AC-1 asserts its absence). Progressive pre-COMPLETE (EC-3): selection runs only
+ * at COMPLETE, so a card never appears then vanishes.
+ * 重點步 list (MomentList) was removed per user feedback; drill-in is now two complementary
+ * doors — the eval chart (self-serve: tap any point on the curve to jump replay there) and
+ * MomentSlideshowDoor (Neve-guided: single quiet card → mistake slideshow via openMoment(0);
+ * 2026-07-11 拍板,取代整排清單而非恢復它).
  */
 import { computed } from 'vue'
 import { useMemoryStore } from '@/stores/memory'
@@ -13,7 +17,7 @@ import { useMemoryContext } from './memory-context'
 import NeveCard from './NeveCard.vue'
 import RecognitionSignpost from './RecognitionSignpost.vue'
 import EvalShapeChart from './EvalShapeChart.vue'
-import MomentList from './MomentList.vue'
+import MomentSlideshowDoor from './MomentSlideshowDoor.vue'
 import EmptyMemory from './EmptyMemory.vue'
 
 const ctx = useMemoryContext()
@@ -21,7 +25,6 @@ const memory = useMemoryStore()
 
 const neveText = computed(() => renderNeveLine(memory.neveLine()))
 const isComplete = computed(() => ctx.review.phase.value === 'COMPLETE')
-const moves = computed(() => ctx.game.value?.moves ?? [])
 // Two-pass progress (preview then deep): preview fills every slot before deep begins, so a non-null
 // count would hit 100% after preview and freeze through the longer deep pass. Count both passes.
 const analysisProgress = computed(() => {
@@ -43,7 +46,7 @@ const analysisProgress = computed(() => {
 
     <!-- COMPLETE: reveal the game-specific surfaces together — nothing tappable-incomplete (EC-3) -->
     <template v-if="isComplete">
-      <!-- 2. Shape-of-game eval view (→ replay) -->
+      <!-- 2. Shape-of-game eval view — click any point on the curve to jump replay there -->
       <EvalShapeChart
         :series="ctx.series.value"
         :moments="ctx.moments.value"
@@ -51,15 +54,10 @@ const analysisProgress = computed(() => {
         :orientation="ctx.orientation.value"
         @open="(ply) => ctx.openReplay(ply)"
       />
-      <!-- 3. Moment list / zero-state -->
-      <MomentList
-        v-if="ctx.moments.value.length > 0"
-        :moments="ctx.moments.value"
-        :fens="ctx.fens.value"
-        :moves="moves"
-        @open="(i) => ctx.openMoment(i)"
-      />
-      <EmptyMemory v-else />
+      <!-- 3. Neve 陪看門:有重點步才現身,單一安靜入口進失誤 slideshow -->
+      <MomentSlideshowDoor v-if="ctx.moments.value.length > 0" @open="ctx.openMoment(0)" />
+      <!-- 4. Zero-state (steady game, no key moments) -->
+      <EmptyMemory v-if="ctx.moments.value.length === 0" />
     </template>
 
     <!-- ANALYZING: Neve's words carry the "still looking" cue above; here just a quiet progress bar

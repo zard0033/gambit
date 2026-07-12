@@ -336,6 +336,26 @@ export const useDataSyncStore = defineStore('dataSync', () => {
   }
 
   /**
+   * Reset 對局記錄 (ProfileView "重置對局記錄"): delete every game_sessions row owned by this user
+   * (RLS already scopes deletes to the caller; `.eq('user_id', userId)` mirrors deleteResumeGame's
+   * belt-and-suspenders style). The local unsynced queue is dropped in BOTH branches: for a guest
+   * it IS their history; for a logged-in user a residual chess:unsynced:* entry (left by a failed
+   * upsert in syncGame) would otherwise be re-uploaded by flushUnsyncedQueue on the next app mount,
+   * silently resurrecting a history the reset dialog promised was irreversibly gone.
+   * Never touches journal_entries / memory_summaries / lesson or dungeon progress — those are
+   * separate tables/keys, untouched by design. Returns false on a cloud error so the caller can
+   * surface a retry, never throws (mirrors the other delete/upsert helpers here).
+   */
+  async function deleteGameHistory(): Promise<boolean> {
+    const authStore = useAuthStore()
+    const userId = authStore.userId
+    for (const key of _getUnsyncedKeys()) localStorage.removeItem(key)
+    if (!userId) return true
+    const { error } = await supabase.from('game_sessions').delete().eq('user_id', userId)
+    return !error
+  }
+
+  /**
    * Fetch the user's completed lesson ids. Returns [] when not logged in or on error
    * (lesson progress degrades to the local cache; a read failure must never surface).
    * All lesson_progress supabase.from() calls live here per ADR-0011.
@@ -735,6 +755,7 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     flushUnsyncedQueue,
     loadGameHistory,
     countGames,
+    deleteGameHistory,
     loadResumeGame,
     upsertResumeGame,
     deleteResumeGame,

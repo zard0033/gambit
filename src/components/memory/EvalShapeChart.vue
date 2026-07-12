@@ -6,7 +6,7 @@
  * drift-guarded, keyboard-focusable <button> (EC-12). Selected-moment dots are a redundant color
  * cue only — NOT tap targets (AC-7 / EC-14).
  */
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { LayoutGrid } from 'lucide-vue-next'
 import type { Moment } from '@/types/memory'
 import { momentVisualKind } from '@/modules/memory/describe'
@@ -85,24 +85,48 @@ const dots = computed(() =>
 const DRIFT_THRESHOLD = 10
 let startX = 0
 let startY = 0
+let lastX = 0
 let moved = false
+let hasPointerPosition = false
+const svgRef = ref<SVGSVGElement | null>(null)
+
+/** Nearest ply for a viewport clientX, or null when the SVG has no real layout yet (e.g. unit
+ *  tests without a layout engine) — callers fall back to anchorPly in that case. */
+function plyAtClientX(clientX: number): number | null {
+  const el = svgRef.value
+  if (!el || n.value === 0) return null
+  const rect = el.getBoundingClientRect()
+  if (rect.width <= 0) return null
+  const relX = ((clientX - rect.left) / rect.width) * W
+  if (n.value <= 1) return 0
+  const t = (relX - PAD_L) / plotW
+  return Math.max(0, Math.min(n.value - 1, Math.round(t * (n.value - 1))))
+}
 
 function onPointerDown(e: PointerEvent): void {
   startX = e.clientX
   startY = e.clientY
+  lastX = e.clientX
   moved = false
+  hasPointerPosition = true
 }
 function onPointerMove(e: PointerEvent): void {
+  lastX = e.clientX
   if (Math.hypot(e.clientX - startX, e.clientY - startY) > DRIFT_THRESHOLD) moved = true
 }
 function onActivate(): void {
   // click fires for both pointer tap and keyboard Enter/Space. A keyboard activation has no
-  // preceding pointermove → moved stays false → opens. A scroll-drag sets moved → ignored.
+  // preceding pointerdown → hasPointerPosition stays false → opens at the anchor ply. A
+  // scroll-drag sets moved → ignored. A clean pointer tap jumps to the ply under the tap
+  // (task: "點走勢圖上的點/位置 → 回放跳到該手"), falling back to the anchor ply off-layout.
   if (moved) {
     moved = false
+    hasPointerPosition = false
     return
   }
-  emit('open', props.anchorPly ?? 0)
+  const ply = hasPointerPosition ? plyAtClientX(lastX) : null
+  hasPointerPosition = false
+  emit('open', ply ?? props.anchorPly ?? 0)
 }
 </script>
 
@@ -124,6 +148,7 @@ function onActivate(): void {
     </div>
 
     <svg
+      ref="svgRef"
       :viewBox="`0 0 ${W} ${H}`"
       class="w-full"
       role="img"

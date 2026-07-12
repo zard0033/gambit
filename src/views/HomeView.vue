@@ -78,10 +78,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="max-w-2xl md:max-w-4xl mx-auto px-[18px] pt-[18px] pb-6">
-    <!-- 氛圍首屏：Neve 在場的時段場景帶（取代舊問候區，保留既有標題 h1[tabindex=-1]） -->
+  <div>
+    <!-- 氛圍首屏：Neve 在場的時段場景帶（取代舊問候區，保留既有標題 h1[tabindex=-1]）。
+         留在 max-w 容器之外＝full-bleed：此 div 不設寬度限制，NeveSceneHeader 因此天然貼齊
+         viewport 左右與 AppNav 底部（main 對 home 無 padding-top）。內容寬度改由
+         NeveSceneHeader 內部自己的 max-w 容器對齊，見該元件。 -->
     <NeveSceneHeader :greeting="greeting" />
 
+  <div class="max-w-2xl md:max-w-4xl mx-auto px-[18px] pb-6">
     <!-- 主區：桌機 hero | 繼續學習 雙欄等高；手機堆疊 -->
     <div class="fade-rise mt-4 md:mt-6 md:grid md:grid-cols-2 md:gap-5 md:items-stretch" :class="{ 'is-in': ready }">
       <!-- 進行中對局 → 繼續對局卡；否則 開始新對局卡（深青瓷焦點卡，桌機填滿欄高、內容垂直置中） -->
@@ -223,6 +227,7 @@ onMounted(() => {
         </RouterLink>
       </div>
     </div>
+  </div>
   </div>
 </template>
 

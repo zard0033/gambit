@@ -759,5 +759,64 @@ describe('useDataSyncStore', () => {
         expect(eq).toHaveBeenCalledWith('user_id', 'uid-1')
       })
     })
+
+    describe('deleteGameHistory (ProfileView "重置對局記錄")', () => {
+      it('logged in: deletes the user-scoped game_sessions rows and returns true', async () => {
+        const eq = vi.fn().mockResolvedValueOnce({ error: null })
+        const del = vi.fn().mockReturnValueOnce({ eq })
+        vi.mocked(supabase.from).mockReturnValueOnce({ delete: del } as never)
+        useAuthStore().userId = 'uid-1'
+
+        const store = useDataSyncStore()
+        expect(await store.deleteGameHistory()).toBe(true)
+        expect(supabase.from).toHaveBeenCalledWith('game_sessions')
+        expect(eq).toHaveBeenCalledWith('user_id', 'uid-1')
+      })
+
+      it('logged in: cloud error returns false', async () => {
+        const eq = vi.fn().mockResolvedValueOnce({ error: { message: 'boom' } })
+        const del = vi.fn().mockReturnValueOnce({ eq })
+        vi.mocked(supabase.from).mockReturnValueOnce({ delete: del } as never)
+        useAuthStore().userId = 'uid-1'
+
+        const store = useDataSyncStore()
+        expect(await store.deleteGameHistory()).toBe(false)
+      })
+
+      it('guest: clears the local unsynced queue, no Supabase call', async () => {
+        localStorage.setItem('chess:unsynced:aaaa', JSON.stringify(makeGame()))
+        localStorage.setItem('chess:unsynced:bbbb', JSON.stringify(makeGame()))
+
+        const store = useDataSyncStore()
+        expect(await store.deleteGameHistory()).toBe(true)
+        expect(supabase.from).not.toHaveBeenCalled()
+        expect(localStorage.getItem('chess:unsynced:aaaa')).toBeNull()
+        expect(localStorage.getItem('chess:unsynced:bbbb')).toBeNull()
+      })
+
+      it('guest: does not touch journal or lesson-progress local storage keys', async () => {
+        localStorage.setItem('chess:unsynced:aaaa', JSON.stringify(makeGame()))
+        localStorage.setItem('chess:journal:entries', JSON.stringify([{ id: 'j1' }]))
+
+        const store = useDataSyncStore()
+        await store.deleteGameHistory()
+        expect(localStorage.getItem('chess:journal:entries')).not.toBeNull()
+      })
+
+      // Regression (precommit-review 2026-07-11): a residual chess:unsynced:* entry (failed upsert)
+      // survived a logged-in reset and was re-uploaded by flushUnsyncedQueue on the next mount —
+      // resurrecting a history the dialog promised was irreversibly gone.
+      it('logged in: also clears the local unsynced queue so a later flush cannot resurrect history', async () => {
+        localStorage.setItem('chess:unsynced:aaaa', JSON.stringify(makeGame()))
+        const eq = vi.fn().mockResolvedValueOnce({ error: null })
+        const del = vi.fn().mockReturnValueOnce({ eq })
+        vi.mocked(supabase.from).mockReturnValueOnce({ delete: del } as never)
+        useAuthStore().userId = 'uid-1'
+
+        const store = useDataSyncStore()
+        expect(await store.deleteGameHistory()).toBe(true)
+        expect(localStorage.getItem('chess:unsynced:aaaa')).toBeNull()
+      })
+    })
   })
 })

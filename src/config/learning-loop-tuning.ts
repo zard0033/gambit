@@ -56,3 +56,11 @@ export const RECOGNITION_SOURCE_GAMES_MAX = 3
  * the list is this long.
  */
 export const RECOGNITION_CONSUMED_MAX = 300
+
+/**
+ * Pause between the judgement field's final correct verdict and the deepening wrap-up overlay
+ * (iPhone 複驗 2026-07-11: the overlay covered Neve's last feedback bubble before it could be
+ * read). Pacing, not motion — applies regardless of prefers-reduced-motion. Safe range
+ * 800–2000ms; 0 restores the old instant cut.
+ */
+export const RECOGNITION_COMPLETE_LINGER_MS = 1400

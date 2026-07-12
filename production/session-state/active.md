@@ -1,9 +1,8 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: Phase 2 收尾 + Phase 3 A 路線（氛圍首頁）
-Task: 四磚已 push＋deploy 上線（8366f82，CI 全綠，PWA 產物已驗）；signpost 黑方擷取已解鎖（Playwright
-驗證翻盤＋tap＋evalMate side-to-move 語意後移除 white-only 守衛，本地 commit 待下次 push）。
-下一步＝iPhone 四批複驗（DC notify 已提醒）。
+Task: 四磚已 push＋deploy 上線（8366f82，CI 全綠）；第二批（黑方解鎖＋招呼框 V3＋四小項＋完成彈窗留白）
+已施工全驗證、待 push。下一步＝push 後 iPhone 補測氛圍首頁（V3 版）；slideshow 入口 follow-up 待拍板。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
@@ -64,10 +63,9 @@ Task: 四磚已 push＋deploy 上線（8366f82，CI 全綠，PWA 產物已驗）
 
 ### ① iPhone 實機複驗（累積四批，deploy 後用無痕分頁）
 
-- **7-10 批（四磚）**：氛圍首頁四時段觀感＋緩亮＋journey 轉場手感；頭像 32/36px 與深青底 ring 辨識度
-  （棋憶 NeveCard 最關鍵）；mate 判斷場三盤裸點擊手感＋故意走 Qg3 看逼和回饋；signpost 全流程
-  （下一盤真的錯過將殺 → 複盤到底 → 棋憶出卡 → 判斷場＝自己的局面 → 解完卡消失）；PWA 加到主畫面
-  ＋離線開啟＋下次 deploy 後自動更新（autoUpdate 不鎖舊版）。
+- **7-10 批（四磚）複驗進度（2026-07-11 Eason 回報）**：✅ 頭像；✅ mate 判斷場（節奏反饋「完成彈窗
+  太快」已修＝留白 1.4s）；✅ signpost 全流程；⏳ 氛圍首頁——**等 V3 接天空 push 上線後再測**（原版
+  已被反饋「招呼框太突兀」並重做）；⏳ PWA 加到主畫面＋離線＋autoUpdate 更新（未回報）。
 - **7-03 批**：Neve 頭像三處觀感（課程/判斷場 24px、棋憶 28px）；判斷場第 3 盤裸點擊＋真手指滑動；深化
   mate 新盤（h1 角 Qg2#）手感；redesign 三項＝#6 keySquare 高亮環+脈動、#9 概念地圖三階 coin、#11 課程
   氣泡 font-lesson。
@@ -76,13 +74,17 @@ Task: 四磚已 push＋deploy 上線（8366f82，CI 全綠，PWA 產物已驗）
 - **更早**：棋憶賽後 UX 批（`e11d3c6`：失誤動畫節奏、重開同盤 cache 命中）；B5 試煉互動（log 累積、答錯
   滑回、揭曉箭頭）；逐手 PgnViewer「棋盤外藍框 + 座標小偏」（本機渲染不到、待實機指認）。
 
-### ② 待 Eason 拍板（未動工）
+### ② 待 Eason 拍板
 
-- **重置對局記錄**（原 iPhone 反饋 item 4）：實為跨 store 破壞性刪除（Supabase + localStorage + journal/
-  memory 衍生資料）。待 scope：只清 list？連 concept-progress/journal 重置？guest-only vs 含雲端？
-- **走勢圖「重點步」list 無用**（2(e)）：建議改「點圖轉折→跳該手」或拿掉。
-- **賽後 loading 結合 Neve「思考中」對話框**（2(a)）：小工程。
-- **「控制中心」tile 標題截斷**（pre-existing）：縮短 label／允許兩行／深入改純 icon，三選一。
+- ✅ **失誤 slideshow 入口**（2026-07-11 拍板＝單一安靜入口）：新 `MomentSlideshowDoor`（cream 底
+  Neve 卡，走勢圖下方、有重點步才現身）→ openMoment(0) 進 slideshow。與點圖跳手互補
+  （工具 vs Neve 陪看），不恢復整排 list。
+- ✅ 已施工（2026-07-11 第二批，細節在 git）：重置對局記錄（拍板 scope＝只清對局列表；ProfileView
+  「資料」區＋二次確認 dialog，登入清 Supabase game_sessions＋本機、訪客清本機；棋誌/棋憶/進度不動）、
+  走勢圖點圖跳手（EvalShapeChart plyAtClientX，MomentList 已刪）、控制中心 tile line-clamp-2
+  （真身在 ConceptMapView）、賽後 Neve loading（查明既有實作，免改）、判斷場完成彈窗留白
+  （RECOGNITION_COMPLETE_LINGER_MS=1400，iPhone 複驗反饋）、招呼框 V3 接天空
+  （結構性 full-bleed：HomeView root 拆兩層，nav-join #183e35 三段漸層淡出到 cream，vignette 移除）。
 
 ### ③ 深化頁後續磚
 
@@ -92,8 +94,9 @@ Task: 四磚已 push＋deploy 上線（8366f82，CI 全綠，PWA 產物已驗）
   white-only 守衛。後續磚：material 概念擴充、動態 decoy 造題（工時未估）、unaided/epiphany 門檻鬆緊
   （沿用既有，未調）。
 - ✅ **mate 沉默關三項已施工**（2026-07-10，見現況四磚③）：去洩題文案／判斷場（比照 fork）／Qg3 逼和特判。
-- **擴池 or HOLD**：依實機手感決定其他概念要不要加 variant／判斷場；懷疑論者長期提醒＝真正歸宿在
-  signpost（已落地 v1），養肥後再評估深化頁獨立存在的必要。
+- **擴池＝HOLD（2026-07-11 Eason 拍板）**：不再手工造罐頭 variant；深化題真正歸宿=signpost
+  （mate 已通、黑方已解鎖）。下一步是擴 signpost 概念覆蓋（material，需先過設計——「唯一最佳」
+  無 chess.js 級證明、review 引擎無 MultiPV，勿直接寫 code），等真實使用數週看出卡頻率再回頭評估罐頭池。
 
 ### ④ 未來獨立任務
 

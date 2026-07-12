@@ -27,9 +27,13 @@ onMounted(() => {
 </script>
 
 <template>
+  <!-- Full-bleed by structural placement, not negative-margin/vw hacks: HomeView renders this
+       as the first child of an unconstrained root (the max-w/px content container starts only
+       after this section), and App.vue's <main> carries no top padding for the home route — so
+       a plain block-level <section> already spans the viewport edge-to-edge and touches AppNav's
+       bottom with zero gap. See HomeView.vue for the container split. -->
   <section class="scene" :data-scene="bucket" :class="{ 'is-lit': lit }">
-    <div class="scene-vignette" aria-hidden="true" />
-    <div class="scene-content">
+    <div class="scene-content max-w-2xl md:max-w-4xl mx-auto px-[18px]">
       <div class="flex items-center gap-3">
         <img
           :src="COACH_AVATAR"
@@ -54,12 +58,21 @@ onMounted(() => {
 .scene {
   position: relative;
   overflow: hidden;
-  border-radius: var(--radius-lg-card, 1rem);
-  padding: 22px 20px 24px;
-  /* Soft radial light over a jade sky that departs from the #103029 anchor. */
+  width: 100%;
+  padding: 26px 0 96px;
+  /* Sky = the page's own atmosphere, not a card: nav-join anchors the top edge to AppNav's
+     bottom colour (#183E35, no jump), sky-a/sky-b carry the time-of-day temperature, and the
+     final stop fades all the way to the cream content colour so the content area reads as
+     "beneath the sky" rather than a panel sitting on top of it. */
   background:
-    radial-gradient(120% 78% at 50% 8%, var(--scene-glow), transparent 58%),
-    linear-gradient(180deg, var(--scene-sky-a) 0%, var(--scene-sky-b) 100%);
+    radial-gradient(120% 70% at 50% 6%, var(--scene-glow), transparent 55%),
+    linear-gradient(
+      180deg,
+      var(--scene-nav-join) 0%,
+      var(--scene-sky-a) 16%,
+      var(--scene-sky-b) 60%,
+      var(--color-surface-base) 100%
+    );
   /* Entrance: single opacity fade-up, ~620ms ease-out (atmospheric exception). */
   opacity: 0;
   transition: opacity 620ms cubic-bezier(0, 0, 0.2, 1);
@@ -68,16 +81,10 @@ onMounted(() => {
   opacity: 1;
 }
 
-/* Warm-dark vignette (never pure black) to seat text and add depth. */
-.scene-vignette {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    130% 120% at 50% 34%,
-    transparent 52%,
-    var(--scene-vignette) 100%
-  );
+@media (min-width: 768px) {
+  .scene {
+    padding: 34px 0 120px;
+  }
 }
 
 .scene-content {
