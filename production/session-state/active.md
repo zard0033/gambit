@@ -111,8 +111,11 @@ iPhone 實機四批 Eason 拍板延後一次測。
 - ✅ **mate 沉默關三項已施工**（2026-07-10，見現況四磚③）：去洩題文案／判斷場（比照 fork）／Qg3 逼和特判。
 - **擴池＝HOLD（2026-07-11 Eason 拍板）**：不再手工造罐頭 variant；深化題真正歸宿=signpost
   （mate 已通、黑方已解鎖）。material 擴充**設計案已 Accepted（2026-07-13，D1–D6 照推薦）**；
-  施工前置＝D6 離線量測腳本（Supabase 樣本＋node 直驅 Stockfish depth16+，推翻率 ≤5% 才開旗），
-  之後 selector→store 泛化→signpost 接線（工時估 3–4 sessions，見 spec §6.2）。
+  施工前置＝D6 離線量測（推翻率 ≤5% 才開旗），之後 selector→store 泛化→signpost 接線（估 3–4 sessions）。
+  **量測腳本已就緒但樣本歸零**（scratchpad `measure-missed-material.mjs`，fixtures 8/8＋engine smoke 過；
+  anon key＋session 驗證 auth 正常，但 `game_sessions` 0 筆——「重置對局」實機驗收把雲端清空了）。
+  **續點**＝Eason 登入態累積新對局（建議 ≥10 局）後重跑腳本；或 iPhone 歷史清單若仍有舊局，用 game-export
+  匯 PGN 餵腳本（需加 `--pgn-dir` 小改）。
 
 ### ④ 未來獨立任務
 
