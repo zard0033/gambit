@@ -1,9 +1,9 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: Phase 2 收尾 + Phase 3 A 路線（氛圍首頁）
-Task: signpost material 設計案 ✅ Accepted（D1–D6 照推薦拍板 2026-07-13）＋文件現實對帳 backfill 105 筆
-＋4 筆 ambiguous 裁決施行＋epics/index 重算，未 push。下一步＝D6 離線量測腳本（≤5% 才開旗施工）；
-iPhone 實機四批 Eason 拍板延後一次測。
+Task: 2026-07-13 全批已 push 上線（42a4791）：設計案 Accepted、對帳 backfill、拍板施行、vitest 假紅根治。
+**現在球在 Eason**：iPhone 實機四批一次複驗 ＋ 登入態累積 ≥10 局（拍板選路 1）→ feedback 後重跑 D6 量測
+（腳本就緒在 scratchpad）→ ≤5% 開旗施工 material selector。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
@@ -11,19 +11,24 @@ iPhone 實機四批 Eason 拍板延後一次測。
 
 ---
 
-## 2026-07-13（公司電腦）本日產出（未 push）
+## 2026-07-13（公司電腦）本日產出（已 push，`4de2633`…`42a4791`）
 
-- **signpost material 概念擴充設計案 DRAFT**（`6509da5`）＝`design/quick-specs/signpost-material-expansion.md`。
-  18-agent workflow（5 盤點→4 提案→8 對抗審查→綜合）。建議路線＝「無守衛之子」chess.js 可證明子集 v1
-  （零引擎呼叫、零 schema 侵入；MultiPV 補算降為 v2 條件路徑）。**待 Eason 拍板 §5 的 D1–D6**，拍板前不施工。
+- **signpost material 概念擴充設計案 → Accepted**（`6509da5` 產出、`6d44489` 拍板）＝
+  `design/quick-specs/signpost-material-expansion.md`。18-agent workflow（5 盤點→4 提案→8 對抗審查→綜合）。
+  路線＝「無守衛之子」chess.js 可證明子集 v1（零引擎呼叫、零 schema 侵入；MultiPV 補算＝v2 條件路徑）。
+  D1–D6 全數照推薦（D2 推翻率門檻 5%、D4 召回 <1 次/5 局）。
 - **文件現實對帳 backfill**（`a83d4e7`，68 檔 105 筆）：全 repo epic/story/ADR/GDD/spec 狀態宣稱對齊上線現實，
-  全部低報回填、零高報；69-agent 審計＋逐筆核證＋fresh-context 驗收 PASS。**4 筆 ambiguous 待拍板**（見待辦②）。
+  全部低報回填、零高報；69-agent 審計＋逐筆核證＋fresh-context 驗收 PASS；4 筆 ambiguous 同日裁決施行。
 - **epics/index 彙總表重算**（`4de2633`）：18 epics／87 stories／113 TR-IDs／16 ADRs，補漏列 5 epic＋主表 4 格誤植。
+- **vitest 假紅根治**：`.vite` dep-optimizer 快取損毀型假紅（91 檔全掛、重跑不會好）＝搬走快取重建即綠；
+  處方入 technical-preferences、`maxWorkers: 4` 入 vitest.config（治另一種 timeout 間歇紅）。
+- **precommit-review deep 過**（1 major 修＋2 minor 入 backlog）；環境順修＝`precommit-review.js` CRLF→LF、
+  executor role 加「禁止再委派」鐵則。
 
 ## 現況（產品全線可用；2026-07-10）
 
 - **核心動線**：對局 → 賽後檢討（棋憶）→ 課程 / 試煉 / 深化（判斷場），Google OAuth + 跨裝置同步，guest local-first。
-- **測試**：vitest 893 綠、vue-tsc 0、axe a11y 綠、E2E CI 等效全綠（總數以實跑為準，勿照抄）。
+- **測試**：vitest 907 綠（2026-07-13 實跑）、vue-tsc 0、axe a11y 綠、E2E CI 等效全綠（總數以實跑為準，勿照抄）。
   **視覺回歸守門**（`tests/e2e/visual-regression.spec.ts`）：每路由結構不變量（橫向溢出／var() 色票變純黑／
   非方棋盤／JS 例外）＝CI 硬閘、決定性；像素回歸 `toHaveScreenshot`＝本機 push 前跑（基準圖 chromium-win32、
   依平台而異故 CI skip）。改 UI 後基準圖需 `--update-snapshots` 重生並目視確認。
@@ -114,8 +119,8 @@ iPhone 實機四批 Eason 拍板延後一次測。
   施工前置＝D6 離線量測（推翻率 ≤5% 才開旗），之後 selector→store 泛化→signpost 接線（估 3–4 sessions）。
   **量測腳本已就緒但樣本歸零**（scratchpad `measure-missed-material.mjs`，fixtures 8/8＋engine smoke 過；
   anon key＋session 驗證 auth 正常，但 `game_sessions` 0 筆——「重置對局」實機驗收把雲端清空了）。
-  **續點**＝Eason 登入態累積新對局（建議 ≥10 局）後重跑腳本；或 iPhone 歷史清單若仍有舊局，用 game-export
-  匯 PGN 餵腳本（需加 `--pgn-dir` 小改）。
+  **續點（Eason 2026-07-13 拍板＝選路 1）**：登入態自然累積新對局（≥10 局）、實際玩過給 feedback 後
+  重跑腳本出命中率／推翻率；session token 在 scratchpad `sb-session.json`（過期就請 Eason 重貼）。
 
 ### ④ 未來獨立任務
 
