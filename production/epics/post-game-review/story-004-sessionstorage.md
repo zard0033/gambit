@@ -1,7 +1,7 @@
 # Story 004: sessionStorage Persistence — Throttled Writes, pv Stripped
 
 > **Epic**: Post-Game Review
-> **Status**: Complete
+> **Status**: Complete（2026-06-22 起後端已被取代：sessionStorage→localStorage，見 use-post-game-review.ts:48-59；本 story 的 sessionStorage 細節為歷史紀錄，不再是目前實作）
 > **Layer**: Feature
 > **Type**: Logic
 > **Estimate**: S (2 hours)
@@ -30,7 +30,7 @@
 
 ## Acceptance Criteria
 
-- [x] sessionStorage key is `pgr:analysis:<completedGame.completedAt.toString()>`.
+- [x] ~~sessionStorage key is `pgr:analysis:<completedGame.completedAt.toString()>`~~ —已取代：localStorage key 現為 `pgr:analysis:v2:<completedGame.completedAt.toString()>`（版本前綴，見 use-post-game-review.ts:56-59），另有索引 key `pgr:analysis:index:v2` 供 30 局 FIFO 上限。
 - [x] Persisted records strip the `pv` field: `{ bestMove, evalCp?, evalMate?, depthReached, pass }` only.
 - [x] Writes are debounced/throttled — multiple `analysisResults` updates within 500ms result in at most one `setItem` call.
 - [x] Every `sessionStorage.setItem` call is inside a `try/catch`; on `QuotaExceededError` or any other error, `persistenceAvailable` is set to `false` and no error is shown to the player.

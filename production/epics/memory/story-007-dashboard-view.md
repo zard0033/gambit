@@ -85,7 +85,7 @@ src/components/memory/EmptyMemory.vue     ← zero-state component (EC-1)
 
 **Story Type**: UI
 **Required evidence**: `tests/e2e/memory-dashboard.spec.ts` (DOM order, zero-state, chart tap, 0-analysis) + manual screenshot of Neve card / chart / list per `production/qa/evidence/memory-dashboard-evidence.md`.
-**Status**: [ ] Not yet created
+**Status**: [x] DOM/unit + visual rendering verified 2026-06-20 — 見 `production/qa/evidence/memory-dashboard-evidence.md`（實際自動化測試在 `tests/unit/views/`、`tests/unit/components/`，非 e2e spec）
 
 ---
 

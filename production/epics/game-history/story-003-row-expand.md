@@ -2,7 +2,7 @@
 
 > **Epic**: game-history
 > **Sprint Task**: S8-05
-> **Status**: Complete
+> **Status**: Complete (S8-05) — superseded same day by S10-02 (commit 08aa3a3): row tap now navigates to /review?gameId= instead of expanding in place; `setExpandedRow`/expanded panel remain in the store/component as dead code exercised only by isolated unit tests
 > **Layer**: MVP Feature — UI Interaction
 > **Type**: UI (Vue component interaction)
 > **Estimate**: S (4 hours)

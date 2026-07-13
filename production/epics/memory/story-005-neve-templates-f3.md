@@ -1,7 +1,7 @@
 # Story 005: Zero-AI Neve Templates (F3 + F4 fill) + Register / Banned-Token Lint
 
 > **Epic**: memory
-> **Status**: Ready
+> **Status**: Done — Shipped 2026-06-18 (`a3caa1d`)
 > **Layer**: Feature — Phase 2 Differentiation ① — Logic
 > **Type**: Logic (deterministic template render + persona lint)
 > **Estimate**: M (3–4 hours)
@@ -90,7 +90,7 @@ F4 (line):
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/memory/{templates,persona-lint}.test.ts` pass (BLOCKING).
-**Status**: [ ] Not yet created
+**Status**: [x] `tests/unit/memory/{templates,persona-lint}.test.ts` — 7 tests, all passing
 
 ---
 

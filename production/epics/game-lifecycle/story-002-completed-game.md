@@ -89,7 +89,7 @@
 **Story Type**: Logic
 **Required evidence**: `tests/unit/game-lifecycle/completed-game.test.ts`
 
-**Status**: [ ] Not yet created
+**Status**: ✅ Created — 12 tests, all pass
 
 ---
 

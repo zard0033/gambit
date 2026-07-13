@@ -2,7 +2,7 @@
 
 > **Epic**: dungeon-puzzle
 > **Sprint**: S13-07 (Must Have)
-> **Status**: Code complete (2026-06-05) — migration NOT yet applied to Supabase (needs Eason)
+> **Status**: Complete (2026-06-07 — migration applied live)
 > **Layer**: Feature / Persistence
 > **Type**: Migration + Sync methods
 > **Estimate**: M (4 hours)

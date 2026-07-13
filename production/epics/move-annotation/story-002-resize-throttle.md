@@ -79,7 +79,7 @@
 **Story Type**: Logic
 **Required evidence**: `tests/unit/move-annotation/resize-throttle.test.ts`
 
-**Status**: [ ] Not yet created
+**Status**: [x] `tests/unit/move-annotation/resize-throttle.test.ts` — 6 tests, all pass (2026-05-29)
 
 ---
 

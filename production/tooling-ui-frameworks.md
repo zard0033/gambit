@@ -8,7 +8,7 @@
 ## 一句話結論
 
 **不採用清單裡任何「整包元件框架」。** Gambit 已有對的地基＝
-`reka-ui`（headless，Radix 的 Vue 版）＋ Tailwind 3 ＋ `class-variance-authority` ＋ `tailwind-merge`
+`reka-ui`（headless，Radix 的 Vue 版）＋ Tailwind 4（CSS-first）＋ `class-variance-authority` ＋ `tailwind-merge`
 ＝ **shadcn-vue 模式**（copy-paste、自己上樣式、不鎖版本）。整包框架會把**自己的設計語言強加上來**，
 跟 Gambit 鎖定的配色／字型／金色規則與平靜魂對沖。需要時只「**偷 copy-paste 來源的單一元件 + reskin 成 Gambit**」。
 

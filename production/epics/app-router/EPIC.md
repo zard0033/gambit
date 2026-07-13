@@ -3,15 +3,15 @@
 > **Layer**: Foundation
 > **GDD**: design/gdd/navigation-and-routing.md
 > **Architecture Module**: AppRouter
-> **Status**: Ready
+> **Status**: Complete — both stories implemented and tested (Sprint 2, 2026-05-29)
 > **Stories**: 2 stories created
 
 ## Stories
 
 | # | Story | Type | Status | Primary ADR |
 |---|-------|------|--------|-------------|
-| 001 | [Route Table, Lazy Loading, and GitHub Pages SPA Fallback](story-001-route-table.md) | Logic | Ready | ADR-0004 |
-| 002 | [Navigation Guards — In-Game Guard, beforeunload, and Popstate](story-002-navigation-guards.md) | Logic | Ready | ADR-0004/0005 |
+| 001 | [Route Table, Lazy Loading, and GitHub Pages SPA Fallback](story-001-route-table.md) | Logic | Complete | ADR-0004 |
+| 002 | [Navigation Guards — In-Game Guard, beforeunload, and Popstate](story-002-navigation-guards.md) | Logic | Complete | ADR-0004/0005 |
 
 ## Overview
 
@@ -54,4 +54,4 @@ This epic is complete when:
 
 ## Next Step
 
-Run `/create-stories app-router` to break this epic into implementable stories.
+Epic complete — both stories (001, 002) implemented, tested, and marked Complete. No further story creation needed.

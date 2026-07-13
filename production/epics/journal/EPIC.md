@@ -29,7 +29,7 @@
 | ADR-0011: Supabase Auth + Data Sync | journal persistence lives on `useDataSyncStore`; RLS `user_id=auth.uid()`; offline queue; union reconcile | Accepted | LOW |
 | ADR-0005: Pinia Store Boundaries | `useJournalStore` is its own store; does not expand gameStore/data-sync state; no supabase import | Accepted | LOW |
 
-> **UNBLOCKED (2026-06-16)**: ADR-0013 is **Accepted**; `journal_entries` applied to live DB and verified (GET 200 `[]` / unauth POST 401 `42501`). story-007 is **Complete**. story-001…006 are **Ready** — implement in dependency order (003 templates → 001 data layer → 002 settle → 004 UI → 005 peek → 006 reconcile).
+> **UNBLOCKED (2026-06-16)**: ADR-0013 is **Accepted**; `journal_entries` applied to live DB and verified (GET 200 `[]` / unauth POST 401 `42501`). story-007 is **Complete**. story-001…006 are all **Implemented** (2026-06-16, same day as 007 — see Stories table).
 
 ## GDD Requirements (AC → Story map)
 
@@ -50,8 +50,8 @@
 | 001 | Journal data layer (table + data-sync methods + store) | Integration | **Implemented** (2026-06-16) | ADR-0013, ADR-0011, ADR-0005 |
 | 002 | Settle engine — F1 gates + F2 cap=3 | Logic | **Implemented** (2026-06-16) | ADR-0013 |
 | 003 | Zero-AI templates + persona lint | Logic | **Implemented** (2026-06-16, 26 tests green) | ADR-0013 |
-| 004 | Journal overview UI (/journal) | UI | Ready | ADR-0013 |
-| 005 | Homepage peek + unread watermark | UI | Ready | ADR-0013 |
+| 004 | Journal overview UI (/journal) | UI | **Implemented** (2026-06-16) | ADR-0013 |
+| 005 | Homepage peek + unread watermark | UI | **Implemented** (2026-06-16) | ADR-0013 |
 | 006 | Guest→login reconcile | Integration | **Implemented** (2026-06-16) | ADR-0013, ADR-0011 |
 | 007 | ADR-0013 Accepted + live migration | Config/Process | **Complete** (2026-06-16) | ADR-0013 |
 
@@ -68,5 +68,5 @@
 
 ## Enables (Downstream)
 
-- **Phase 2 ① epiphany / ② move** — once #18 emits per-answer motif+hintUsed and #7 emits a per-move calm-move signal; add `replay_*` columns (additive).
+- **Phase 2 ① epiphany** — Implemented 2026-06-23 via concept-deepening 的沉默零求助偵測（df5402d；非原規劃的 #18 motif+hintUsed 訊號路徑）。**② move** 仍待 #7 emits a per-move calm-move signal；add `replay_*` columns (additive) when ready.
 - **課程長在你棋上 / 蘇格拉底賽後** — read journal entries as teaching material.

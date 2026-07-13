@@ -3,8 +3,8 @@
 > **Layer**: Feature (Phase 2)
 > **GDD**: design/gdd/dungeon-puzzle-mode.md (Approved 2026-06-05)
 > **Architecture Module**: DungeonMapView + DungeonPuzzleView (Vue) + useDungeonProgressStore + use-dungeon-puzzle composable + static puzzle data
-> **Status**: In Design — scheduled for S13 implementation
-> **Stories**: story-001 through story-006 (S13)
+> **Status**: Complete — 全 7 個 story（S13-01~07）皆已交付並上線，2026-06-05~09（`c69bd18`／`beae144`／`29a99a9`）；`dungeon_progress` migration 已套用 live DB（見 `supabase/README.md`）
+> **Stories**: story-001 through story-007 (S13)
 > **Visual blueprint**: design/gambit-design-system/ui_kits/app/DungeonScreen.jsx (minus streak)
 
 ## Overview
@@ -110,7 +110,7 @@ This epic is complete when:
 
 **Phase 2a (S10)**: Game Replay MVP ✓
 **Phase 2c (S12)**: Lesson System — static scripted concept lessons ✓ (built)
-**Phase 2d (S13)**: Dungeon Puzzle Mode (this epic) — static tactics puzzles
+**Phase 2d (S13)**: Dungeon Puzzle Mode (this epic) — static tactics puzzles ✓ (built)
 
 ## Success Metrics
 

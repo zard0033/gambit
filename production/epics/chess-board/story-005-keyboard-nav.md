@@ -1,7 +1,7 @@
 # Story 005: Keyboard Navigation — useBoardKeyboard Composable
 
 > **Epic**: Chess Board & Move System
-> **Status**: Complete (AC-1 exception — see below: E2E spec is now a real axe-core assertion but has never been run)
+> **Status**: Complete (AC-1 verified — `tests/e2e/chess-board-a11y.spec.ts` passes; runs in CI on every push via `npm run test:e2e`)
 > **Layer**: Foundation (Core — chess board substrate)
 > **Type**: Logic
 > **Estimate**: L (5–8 hours — roving tabindex + ARIA live regions is complex)
@@ -123,7 +123,7 @@
 - `tests/unit/chess-board/keyboard-nav.test.ts` — must exist and all tests pass
 - `tests/e2e/chess-board-a11y.spec.ts` — Playwright axe-core test (can be in existing toolchain spec)
 
-**Status**: [x] `tests/unit/chess-board/keyboard-nav.test.ts` — 37 tests, all pass (2026-05-30); [ ] `tests/e2e/chess-board-a11y.spec.ts` — `@axe-core/playwright` installed, spec is now a real assertion (no more `test.skip`), but has never actually run locally or in CI — pending first run (advisory)
+**Status**: [x] `tests/unit/chess-board/keyboard-nav.test.ts` — 37 tests, all pass (2026-05-30); [x] `tests/e2e/chess-board-a11y.spec.ts` — passes (verified 2026-07-13; runs in CI every push, not tagged `@spike`)
 
 ---
 

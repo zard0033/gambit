@@ -3,15 +3,16 @@
 > **Layer**: Core
 > **GDD**: design/gdd/game-lifecycle.md
 > **Architecture Module**: GameLifecycle
-> **Status**: Ready
-> **Stories**: 2 stories created
+> **Status**: Shipped (S3)
+> **Stories**: 3 stories created
 
 ## Stories
 
 | # | Story | Type | Status | Primary ADR |
 |---|-------|------|--------|-------------|
-| 001 | [Game State Machine and Terminal Detection](story-001-state-machine.md) | Logic | Ready | ADR-0005 |
-| 002 | [CompletedGame Assembly and Pinia Transport](story-002-completed-game.md) | Logic | Ready | ADR-0005 |
+| 001 | [Game State Machine and Terminal Detection](story-001-state-machine.md) | Logic | Complete | ADR-0005 |
+| 002 | [CompletedGame Assembly and Pinia Transport](story-002-completed-game.md) | Logic | Complete | ADR-0005 |
+| 003 | [PlayView.vue ← useGameLifecycle Integration](story-003-play-view-integration.md) | UI | Complete | ADR-0005 |
 
 ## Overview
 

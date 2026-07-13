@@ -353,6 +353,8 @@ import nnueUrl from 'stockfish/src/nn-5af11540bbfe.nnue?url';
 
 ## Post-Implementation Notes
 
+> **Superseded (2026-06-02, S10-06)**：本節描述的是遷移前 SF16 的 NNUE 部署計畫。引擎已改為 Stockfish 18 Lite 單執行緒版（NNUE 內嵌於 WASM），已無獨立的 `nn-5af11540bbfe.nnue` 檔案可部署，Review 目前已在瀏覽器內真正跑 NNUE。詳見本 ADR 頂部的 amendment。
+
 **Current deployment state (as of Sprint 6, 2026-05-30):**
 `nn-5af11540bbfe.nnue` has NOT been deployed. The review engine is running in HCE mode
 as a temporary fallback. The desktop HCE baseline (depth 27–29 per position) was

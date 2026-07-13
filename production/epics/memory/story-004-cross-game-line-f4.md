@@ -1,7 +1,7 @@
 # Story 004: Cross-Game Neve Line (F4) — rule-based, zero-AI, no weakness verdict
 
 > **Epic**: memory
-> **Status**: Ready
+> **Status**: Done — Shipped 2026-06-18 (`a3caa1d`)
 > **Layer**: Feature — Phase 2 Differentiation ① — Logic
 > **Type**: Logic (per-game tagging + window + signal selection + template fill)
 > **Estimate**: M (4 hours)
@@ -92,7 +92,7 @@ pickNeveLine:
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/memory/{cross-game,summary}.test.ts` pass (BLOCKING).
-**Status**: [ ] Not yet created
+**Status**: [x] `tests/unit/memory/{cross-game,summary}.test.ts` — 9 tests, all passing
 
 ---
 

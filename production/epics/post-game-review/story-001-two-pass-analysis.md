@@ -16,10 +16,10 @@
 **Requirements**: `TR-post-game-review-001`, `TR-post-game-review-007`
 
 **ADR Governing Implementation**: ADR-0007: Post-Game Review Analysis Loop and sessionStorage Schema
-**ADR Decision Summary**: Two sequential passes — Pass 1 (Preview: depth-12, movetime-1500ms, ALL positions, never cut) → Pass 2 (Deep: depth-22 provisional, movetime-10000ms, cut at `REVIEW_TOTAL_TIME_BUDGET_MS = 90s`). Each result stamped `pass: 'preview' | 'deep'`. `AbortController` must be `markRaw(new AbortController())` — NEVER `ref()` or `reactive()`.
+**ADR Decision Summary**: Two sequential passes — Pass 1 (Preview: depth-12, movetime-1000ms, ALL positions, never cut) → Pass 2 (Deep: depth-16, movetime-4000ms, cut at `REVIEW_TOTAL_TIME_BUDGET_MS = 12s` — retuned from depth-22/movetime-10000ms/90s on 2026-06-25 for iPhone review-speed UX, see ADR-0007 status note). Each result stamped `pass: 'preview' | 'deep'`. `AbortController` must be `markRaw(new AbortController())` — NEVER `ref()` or `reactive()`.
 
 **Engine**: stockfish-nnue-16.wasm | **Risk**: HIGH
-**Engine Notes**: ADR-0007 `REVIEW_TARGET_DEPTH = 22` is PROVISIONAL — real iPhone Safari depth-22 reachability spike still pending. Stories should note depth may be reduced. Sprint 1 confirmed `reviewEngine.init()` explicit call pattern (ADR-0002 §C-3 fix).
+**Engine Notes**: ADR-0007 OQ-5 桌機 spike 已確認 `REVIEW_TARGET_DEPTH = 22` 可達（2026-05-30）；量產值已於 2026-06-25 為 iPhone 體驗獨立下調至 16（real-iPhone depth/memory 量測仍是 ADR-0007 開放項目）。Sprint 1 confirmed `reviewEngine.init()` explicit call pattern (ADR-0002 §C-3 fix).
 
 **Control Manifest Rules (Feature layer)**:
 - Required: Two-pass sequential; Pass 1 ALWAYS completes all N positions; Pass 2 cut at 90s
@@ -128,7 +128,7 @@ async function runPass2() {
 **Story Type**: Logic
 **Required evidence**: `tests/unit/post-game-review/two-pass-analysis.test.ts`
 
-**Status**: [x] `tests/unit/post-game-review/two-pass-analysis.test.ts` — 30/30 pass
+**Status**: [x] `tests/unit/post-game-review/two-pass-analysis.test.ts` — 31/31 pass（`e11d3c6` 新增快取重開回歸測試後由 30 增為 31）
 
 ---
 

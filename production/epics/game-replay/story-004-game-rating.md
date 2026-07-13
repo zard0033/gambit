@@ -2,7 +2,7 @@
 
 > **Epic**: game-replay
 > **Sprint**: S10-04 (Should Have)
-> **Status**: Done (2026-06-02)
+> **Status**: Done (2026-06-02) — 退役 2026-06-22（`66e17ae`）：game-replay-rating.vue 隨 ReplayView 一併全刪，未見替代功能
 > **Layer**: Feature / User Data
 > **Type**: UI + LocalStorage
 > **Estimate**: S (4 hours)

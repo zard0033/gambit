@@ -3,8 +3,8 @@
 > **Layer**: Feature (Phase 2)
 > **GDD**: design/gdd/game-replay.md (pending design-review)
 > **Architecture Module**: ReplayView (Vue component) + review-engine integration
-> **Status**: In Design — ready for S10 implementation
-> **Stories**: story-001 through story-005 (S10)
+> **Status**: Shipped（S10 — QA APPROVED 2026-06-02；story-001~004 Done、story-005 動畫 polish deferred、story-006 非規劃內引擎遷移 Done）——2026-06-22 已退役（`66e17ae`）：ReplayView 全鏈刪除，回放功能併入 MemoryView（見 memory epic）
+> **Stories**: story-001 through story-006 (S10；story-006 為 S10-03 瀏覽器 QA 期間浮現的非規劃內故事)
 
 ## Overview
 

@@ -110,7 +110,7 @@
 **Required evidence**:
 - `production/qa/evidence/chess-board-visual-feedback-evidence.md` — screenshots of check indicator, last-move highlight, reduced-motion behavior + sign-off
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `production/qa/evidence/chess-board-visual-feedback-evidence.md` — PARTIAL SIGN-OFF (AC-1+AC-2 verified 2026-05-29; AC-3–AC-6 still pending)
 
 ---
 

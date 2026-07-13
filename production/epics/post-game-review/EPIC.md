@@ -19,8 +19,8 @@
 ## Overview
 
 Implements the `PostGameReview` module: the v0 flagship feature. Runs a two-pass Stockfish
-analysis (Pass 1: preview depth-12, Pass 2: deep depth-22, bounded by
-`REVIEW_TOTAL_TIME_BUDGET_MS = 90s`), writes `analysisResults[]` progressively to a reactive
+analysis (Pass 1: preview depth-12, Pass 2: deep depth-16, bounded by
+`REVIEW_TOTAL_TIME_BUDGET_MS = 12s` — retuned from depth-22/90s on 2026-06-25 for iPhone review-speed UX, see ADR-0007 status note), writes `analysisResults[]` progressively to a reactive
 cursor-driven UI. Computes `biggestSwingCursor` (once at COMPLETE — never moves), uses F2
 cpLoss formula (`max(0, E[i] + E[i+1])`), enforces the depth-comparability guard
 (`|depth[i] - depth[i+1]| ≤ DEPTH_MISMATCH_TOLERANCE`), persists analysis to sessionStorage
@@ -32,7 +32,7 @@ on viewports < 768px (best-move arrow only; no played-move arrow, no eval bar).
 
 | ADR | Decision Summary | Engine Risk |
 |-----|-----------------|-------------|
-| ADR-0007: Post-Game Review Analysis Loop and sessionStorage Schema | Two-pass loop parameters; `REVIEW_TARGET_DEPTH` default 22 (provisional — real-device spike still pending); sessionStorage key schema, size guard, quota fallback | HIGH |
+| ADR-0007: Post-Game Review Analysis Loop and sessionStorage Schema | Two-pass loop parameters; `REVIEW_TARGET_DEPTH` = 16（OQ-5 桌機已於 2026-05-30 確認 depth-22 可達，量產值 2026-06-25 為 iPhone 體驗獨立下調至 16，見 ADR-0007 status note）; 持久化後端已改 localStorage（2026-06-22 起，版本化＋30 局 FIFO 上限），size guard, quota fallback | HIGH |
 | ADR-0005: Pinia Store Boundaries | `gameStore.completedGame` is the sole handoff from GameLifecycle — PostGameReview reads it on mount | LOW |
 | ADR-0002: Web Worker Isolation | `reviewEngine.analyze()` API + `reviewEngine.init()` explicit call for loading state | HIGH |
 
@@ -46,14 +46,15 @@ on viewports < 768px (best-move arrow only; no played-move arrow, no eval bar).
 | TR-post-game-review-004 | Depth-comparability guard: \|depth[i] − depth[i+1]\| ≤ DEPTH_MISMATCH_TOLERANCE | ADR-0007 ✅ |
 | TR-post-game-review-005 | sessionStorage persistence: pv stripped, key pgr:analysis:<gameId>, throttled write | ADR-0007 ✅ |
 | TR-post-game-review-006 | Mobile calm default: best-move arrow only; no played-move arrow, no eval bar (<768px) | ADR-0007 ✅ |
-| TR-post-game-review-007 | REVIEW_TOTAL_TIME_BUDGET_MS = 90s hard ceiling on Pass 2 | ADR-0007 ✅ |
+| TR-post-game-review-007 | REVIEW_TOTAL_TIME_BUDGET_MS = 12s hard ceiling on Pass 2（2026-06-25 由 90s 下調，見 ADR-0007 status note） | ADR-0007 ✅ |
 
 **Untraced Requirements**: None — 7/7 covered by ADR-0007.
 
-> ⚠️ **High-Risk Advisory**: ADR-0007 `REVIEW_TARGET_DEPTH = 22` is provisional. Real iPhone
-> Safari depth-22 reachability spike is still pending (ADR-0008 spike deferred — needs real
-> device). Stories for Pass 2 depth should include a note: "Depth may be lowered after iPhone
-> spike — see ADR-0007 open question."
+> ⚠️ **Advisory (updated 2026-06-25)**: ADR-0007 OQ-5 桌機 spike 已確認 `REVIEW_TARGET_DEPTH = 22`
+> 可達（2026-05-30）；真正待補的是 real-iPhone depth/memory measurement（見 ADR-0007 open items）。
+> 獨立於可達性，量產 Pass 2 深度已於 2026-06-25 為 iPhone 體驗調速下調 22→16
+> （`REVIEW_TOTAL_TIME_BUDGET_MS` 90s→12s），見 ADR-0007 status note 完整理由。
+> （原文交叉引用的「ADR-0008」為誤植——ADR-0008 主題是 CSP headers/WASM 部署，與此 spike 無關。）
 
 ## Definition of Done
 

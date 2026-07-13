@@ -3,14 +3,14 @@
 > **Layer**: Foundation
 > **GDD**: design/gdd/opening-identification.md
 > **Architecture Module**: OpeningIndex
-> **Status**: Ready
+> **Status**: Shipped (S2)
 > **Stories**: 1 story created
 
 ## Stories
 
 | # | Story | Type | Status | Primary ADR |
 |---|-------|------|--------|-------------|
-| 001 | [Opening Identification — ECO.lookupSync and identifyOpening()](story-001-opening-lookup.md) | Logic | Ready | ADR-0003 |
+| 001 | [Opening Identification — ECO.lookupSync and identifyOpening()](story-001-opening-lookup.md) | Logic | Complete | ADR-0003 |
 
 ## Overview
 

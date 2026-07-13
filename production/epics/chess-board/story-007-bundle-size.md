@@ -103,7 +103,7 @@
 **Required evidence**:
 - `production/qa/smoke-chess-board-bundle.md` — record of build output showing bundle size ≤ 120 KB
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `production/qa/smoke-chess-board-bundle.md` — AC-1 PASS (56.33 kB gzip / 120 kB budget, 2026-05-30); AC-2/AC-3 deferred, not yet implemented
 
 ---
 

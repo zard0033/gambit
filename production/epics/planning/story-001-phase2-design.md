@@ -2,7 +2,7 @@
 
 > **Epic**: Planning
 > **Sprint**: S9-04 (Should Have)
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Architecture / Product Direction
 > **Type**: Design Spike + Decision
 > **Estimate**: M (4 hours)
@@ -142,4 +142,4 @@ S11-04: Progress tracking + badges (T: 1d)
 - Epic: `production/epics/lesson-system/EPIC.md` with stories S12-01…05
 - TR-IDs: `TR-lesson-system-001…010` in `docs/architecture/tr-registry.yaml`
 
-Implementation is scheduled for S12 (run `/sprint-plan new` when S12 starts).
+Implementation shipped in S12（2026-06-12，`02e1133`）——四階 21 課已完成上線，詳見 `production/epics/lesson-system/EPIC.md`。

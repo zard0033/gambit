@@ -28,7 +28,7 @@
 
 ---
 
-## Phase 0 — 共用語言　✅ DONE（未 commit）
+## Phase 0 — 共用語言　✅ DONE（已 commit，見 git log）
 
 - `src/assets/main.css`：加 `.glass-panel`（半透白+blur+hairline+top sheen+暖陰影）。
 - `src/assets/main.css`：**修 `.font-num` 全站 bug** — Tailwind 對 `num` key 產空規則，全站 Cubic 11（eval/棋譜/stats）一直退回 Sarasa；比照 `.font-display` 手動補顯式字串。**這是全站視覺變更**（首頁 stat 0/15、學習/試煉進度數字現在都變 Cubic 點陣字）。
@@ -36,7 +36,7 @@
 
 ---
 
-## Phase 1 — 對局 PlayView　✅ DONE（未 commit）
+## Phase 1 — 對局 PlayView　✅ DONE（已 commit，見 git log）
 
 - 桌機**兩欄置中群組**；棋盤 `md:w-[min(74vh,calc(100vw-26rem),56rem)]`（隨視窗高放大、不溢出、上限 56rem）、側板 `md:w-[20rem]` 緊貼右；手機堆疊。1280–2560 無重疊/溢出。
 - `:deep(.main-wrap/.main-board/.cg-wrap)` → `width:100% + aspect-ratio:1`（否則 vue3-chessboard 吃 70vh 溢出木框）。
@@ -48,7 +48,7 @@
 
 ---
 
-## Phase 2 — 首頁 HomeView　✅ DONE（未 commit）
+## Phase 2 — 首頁 HomeView　✅ DONE（已 commit，見 git log）
 
 主檔：`src/views/HomeView.vue`。`/redesign` skill 對 1280/375/320 實審後施工。
 
@@ -59,7 +59,7 @@
 - 共用元件動到：`section-label.vue` 加 `class` 透傳（桌機覆寫 `md:mt-0`，Phase 3/4 沿用）；`stat-card.vue` 加 Lock + locked 改 icon 頂對齊 + 文字置中、`label` 改 optional。
 - 注意：首頁「開始新對局」卡 `@click` 開全域 modal（Phase 1），未改回 router.push。
 
-## Phase 3 — 學習 LearnView + ConceptMapView + LessonView　✅ DONE（未 commit）
+## Phase 3 — 學習 LearnView + ConceptMapView + LessonView　✅ DONE（已 commit，見 git log）
 
 `/redesign` 對 375/1280 實審後施工。vue-tsc 0、645 passed、Playwright 雙寬三頁實測。
 
@@ -79,5 +79,5 @@
 
 ## 收尾待辦（全 Phase 後）
 
-- **全站字體使用規則 redesign**（Eason 指定）：`.font-num` 修好後全站數字第一次真用 Cubic；需逐頁判斷哪裡用 Cubic vs Sarasa，必要處設例外，最後寫回 Gambit 字型章節。
+- **全站字體使用規則 redesign**（Eason 指定）：✅ 已完成（`a4bf8c7`，design system README 已補字型使用規則表）。
 - commit 策略：每 Phase 獨立 commit（繁中、Conventional Commits）；push 前列 commit message 等 Eason 確認，`git push origin main`。

@@ -83,7 +83,7 @@ curl -s -X POST "$URL/rest/v1/journal_entries" -H "apikey: $KEY" -H "Authorizati
 
 **Story Type**: Config/Data (process gate)
 **Required evidence**: `production/qa/smoke-journal-migration-<date>.md` — probe outputs pasted; ADR-0013 acceptance note.
-**Status**: [ ] Not yet created
+**Status**: [x] Done — `production/qa/smoke-journal-migration-2026-06-16.md`（probe outputs + ADR-0013 acceptance note，2026-06-16）。
 
 ---
 

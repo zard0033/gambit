@@ -1,6 +1,6 @@
 # Opening Identification
 
-> **Status**: Designed (pending review)
+> **Status**: Approved & Shipped (v0)
 > **Author**: Eason + Claude
 > **Last Updated**: 2026-05-27
 > **Implements Pillar**: Pillar 2 (Knowledge Connects to Play) — turns an abstract move sequence into a named opening the player can recognize and study

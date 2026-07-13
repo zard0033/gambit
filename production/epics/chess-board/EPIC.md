@@ -3,19 +3,19 @@
 > **Layer**: Foundation
 > **GDD**: design/gdd/chess-board-and-move-system.md
 > **Architecture Module**: ChessBoard
-> **Status**: Ready
+> **Status**: Shipped
 > **Stories**: 7 stories created
 
 ## Stories
 
 | # | Story | Type | Status | Primary ADR |
 |---|-------|------|--------|-------------|
-| 001 | [FEN Rendering and Position Sync](story-001-fen-rendering.md) | Logic | Ready | ADR-0009 |
-| 002 | [Dual Input — Drag-and-Drop, Tap-Tap, move-made Event](story-002-input.md) | Logic | Ready | ADR-0009 |
-| 003 | [Promotion Dialog — Deliberate Selection Only](story-003-promotion.md) | UI | Ready | ADR-0009 |
-| 004 | [squareToRect() Geometry Contract](story-004-square-to-rect.md) | Logic | Ready | ADR-0009 |
-| 005 | [Keyboard Navigation — useBoardKeyboard Composable](story-005-keyboard-nav.md) | Logic | Ready | ADR-0009 |
-| 006 | [Visual Feedback — Check Indicator, Last-Move Highlight, Reduced Motion](story-006-visual-feedback.md) | Visual/Feel | Ready | ADR-0009 |
+| 001 | [FEN Rendering and Position Sync](story-001-fen-rendering.md) | Logic | Complete | ADR-0009 |
+| 002 | [Dual Input — Drag-and-Drop, Tap-Tap, move-made Event](story-002-input.md) | Logic | Complete | ADR-0009 |
+| 003 | [Promotion Dialog — Deliberate Selection Only](story-003-promotion.md) | UI | Complete | ADR-0009 |
+| 004 | [squareToRect() Geometry Contract](story-004-square-to-rect.md) | Logic | Complete | ADR-0009 |
+| 005 | [Keyboard Navigation — useBoardKeyboard Composable](story-005-keyboard-nav.md) | Logic | Complete | ADR-0009 |
+| 006 | [Visual Feedback — Check Indicator, Last-Move Highlight, Reduced Motion](story-006-visual-feedback.md) | Visual/Feel | Complete | ADR-0009 |
 | 007 | [Bundle Size and Performance Budget Verification](story-007-bundle-size.md) | Config/Data | Ready | ADR-0009 |
 
 ## Overview
@@ -59,4 +59,4 @@ This epic is complete when:
 
 ## Next Step
 
-Run `/create-stories chess-board` to break this epic into implementable stories.
+Epic 已 Shipped，7 個 story 皆已建立並實作，無需再跑 /create-stories。

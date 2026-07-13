@@ -73,7 +73,7 @@
 
 **Story Type**: Config/Data
 **Required evidence**: `production/qa/evidence/memory-migration-gate.md` — probe output (GET 200 `[]`, POST 401 `42501`) + ADR-0014 Accepted commit reference.
-**Status**: [ ] Not yet created
+**Status**: [x] PASSED 2026-06-20 — 見 `production/qa/evidence/memory-migration-gate.md`（GET 200 `[]`／POST 401 `42501`；ADR-0014 Accepted）
 
 ---
 

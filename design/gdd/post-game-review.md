@@ -1,6 +1,6 @@
 # Post-Game Review
 
-> **Status**: In Design (round-2 review applied — 3 blockers resolved in-session; advisory follow-ups tracked in review log)
+> **Status**: Approved & Shipped (v0；持續調校，見 Tuning Knobs OQ-5 2026-06-25 更新記錄)
 > **Author**: Eason + Claude
 > **Last Updated**: 2026-05-28
 > **Implements Pillar**: Pillar 3 (Single Player, No Pressure) — primary; Pillar 1 (Accumulation Over Sessions); **prepares for** Pillar 2 (Knowledge Connects to Play — v0 *names* the opening but does not yet *connect* knowledge to study; full connection is Phase 2)

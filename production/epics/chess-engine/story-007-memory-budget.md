@@ -63,7 +63,7 @@
 **Story Type**: Config/Data
 **Required evidence**: `production/qa/evidence/chess-engine-memory-evidence.md`
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `production/qa/evidence/chess-engine-memory-evidence.md`（2026-05-30，AC-1/AC-2 estimated pass；AC-3 iPhone RSS 仍待實機補測）
 
 ---
 

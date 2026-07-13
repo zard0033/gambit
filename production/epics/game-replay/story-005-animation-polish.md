@@ -2,7 +2,7 @@
 
 > **Epic**: game-replay
 > **Sprint**: S10-05 (Nice to Have)
-> **Status**: Deferred (2026-06-02) — nice-to-have, shipped without
+> **Status**: Deferred (2026-06-02) — nice-to-have, shipped without；2026-06-22（`66e17ae`）隨 ReplayView 退役而作廢：本 story 所指的 replay-analysis-overlay.vue 已全刪，不再有未來 polish sprint 可補做的對象
 > **Layer**: Feature / Polish
 > **Type**: Animation
 > **Estimate**: S (4 hours)

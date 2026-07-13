@@ -1,7 +1,7 @@
 # Story 004: Journal Overview UI (/journal)
 
 > **Epic**: journal
-> **Status**: Ready (ADR-0013 Accepted 2026-06-16)
+> **Status**: Implemented (2026-06-16 — shipped in 30dc4fa alongside story-001~003/006/007; tests/e2e/journal-view.spec.ts green; pending /story-done review)
 > **Layer**: Phase 1 Differentiation — UI
 > **Type**: UI (route + view + states)
 > **Estimate**: M (4 hours)
@@ -88,7 +88,7 @@ tests/e2e/journal-view.spec.ts            ← order, empty state, no-edit, reduc
 
 **Story Type**: UI
 **Required evidence**: `production/qa/evidence/journal-overview-evidence.md` (Playwright walkthrough + screenshot) OR `tests/e2e/journal-view.spec.ts`.
-**Status**: [ ] Not yet created
+**Status**: [x] Done — `tests/e2e/journal-view.spec.ts`（2026-06-16，commit 30dc4fa）。
 
 ---
 

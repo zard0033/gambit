@@ -83,7 +83,7 @@
 **Story Type**: Logic
 **Required evidence**: `tests/unit/chess-engine/review-engine.test.ts`
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing (15 tests)
 
 ---
 

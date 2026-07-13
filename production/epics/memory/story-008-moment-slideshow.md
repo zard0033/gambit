@@ -85,7 +85,7 @@ src/config/memory-config.ts                       ← animation timings (already
 
 **Story Type**: Visual/Feel
 **Required evidence**: `production/qa/evidence/memory-slideshow-evidence.md` (motion sign-off, screenshots) + `tests/unit/memory/move-comparison.test.ts` (AC-10/AC-9 computable halves).
-**Status**: [ ] Not yet created
+**Status**: [x] 自動化 + 視覺渲染已驗證 2026-06-20（見 `production/qa/evidence/memory-slideshow-evidence.md`）；動效手感 iPhone sign-off (OQ-2) 仍待實機
 
 ---
 

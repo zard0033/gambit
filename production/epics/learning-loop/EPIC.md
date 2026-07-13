@@ -3,8 +3,8 @@
 > **Layer**: Feature (Phase 2, connective system #20)
 > **GDD**: design/gdd/learning-loop.md (**Approved round 2, 2026-06-06**)
 > **Architecture Module**: concept SoT (`src/types/concept.ts` + `src/data/concepts/`) + `MOTIF_TO_CONCEPT` + a `concept-progress` store + 3 bridge insertions into existing views + a new Concept Map view
-> **Status**: In Design — Phase A scheduled for S14 implementation
-> **Stories**: S14-01 … (Phase A first; B/C/C+/D follow per GDD §3.6)
+> **Status**: Phase A/B/C Shipped（S14-01…04 Complete 2026-06-06，含橋2＋概念地圖＋橋3 mate/material 分類器 —— `b44bd43`／`1577c22`）；Phase D（Claude API 動態評語）尚未排程
+> **Stories**: S14-01…04（Phase A，Complete）；Phase B/C 已上線但無獨立 story 檔（見 Status）；Phase C+/D 尚未排程
 > **Governing ADR**: ADR-0012 (Bidirectional lesson-to-game linking)
 
 ## Overview
@@ -83,10 +83,8 @@ local progress; the side-door reuses the existing routing + Pinia + localStorage
 | S14-03 | `concept-progress` store + Dungeon side-door practice entry (`?from=lesson`, zero dungeon mutation) | Logic | M | S14-01 |
 | S14-04 | Bridge-1: lesson completion card + `recommended`/`practiceTarget` pure fns + CTA wiring | Integration | M | S14-01, S14-03 |
 
-> **Phase B** (later sprint): Bridge 2 + Concept Map view (**Concept Map gets a ui-ux-pro-max
-> mockup + Eason review before code** — it is the only genuinely-new screen).
-> **Phase C**: Bridge 3 (mate + material classifier). **Phase C+**: fork/pin game-mistake detection
-> after a precision spike. **Phase D** (optional): Claude API dynamic Beth commentary.
+> **Phase B** shipped（橋2＋概念地圖 `/learn/concepts`，`b44bd43`／`1577c22`）。
+> **Phase C** shipped（橋3：mate + material 分類器，`src/modules/learning-loop/classify.ts`，`b44bd43`）。**Phase C+**：fork/pin game-mistake 判定待精準度 spike 後才排程（尚未開始）。**Phase D**（optional）：Claude API 動態 Beth 評語，尚未排程。
 
 ## Definition of Done (Phase A)
 

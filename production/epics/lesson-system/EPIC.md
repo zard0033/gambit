@@ -3,7 +3,7 @@
 > **Layer**: Feature (Phase 2)
 > **GDD**: design/gdd/lesson-system.md (pending design-review)
 > **Architecture Module**: LessonsView + LessonView (Vue components) + useLessonProgressStore + static lesson data
-> **Status**: In Design — scheduled for S12 implementation
+> **Status**: Shipped — S12-01…05 全數交付並測試：`9192bad`（2026-06-02，型別/loader、progress store 含 Supabase 同步、LearnView 課程清單、LessonView 教練播放器）；`02e1133`（2026-06-12，內容擴充為四階 21 課，超出原訂 3–4 課範圍）。元件後續演進為 LearnPager + `LessonPlayer.vue`（與 concept-deepening 共用）。
 > **Stories**: story-001 through story-005 (S12)
 
 ## Overview

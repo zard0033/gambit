@@ -22,8 +22,8 @@ Vue 3 動畫元件庫，React 圈 Aceternity UI / Magic UI 的 Vue 版。技術�
 - **要多裝 `motion-v`**：Inspira UI 動畫依賴它。Gambit Phase 1 lib 清單沒有，且 CLAUDE.md 有
   guardrail「Phase 1 MVP 沒 ship 前不加新 lib」。→ **能用純 CSS transition 做到的氛圍（緩亮、漸顯）
   優先用 CSS，不為了一個效果引入整個動畫 runtime。** 真要 `motion-v` 再單獨評估、走加 lib 流程。
-- **Tailwind 版本**：Gambit 鎖 **Tailwind 3**，Inspira UI 新版往 Tailwind 4 靠。複製來的元件若用到
-  v4 才有的 utility / `@theme`，要手動翻成 v3 寫法 + `tailwind.config`。
+- **Tailwind 版本**：Gambit 現已在 **Tailwind 4**（CSS-first + `@theme`，`08ab9e4` 已完成 codemod）。
+  複製 Inspira UI 新版（v4）元件可直接沿用其 utility / `@theme` 寫法，不需再翻譯回 v3。
 - **部署 base path**：氛圍元件常含背景圖／`mask-image`／inline `url()`——依 repo 鐵則
   **JS/inline-style 資產路徑必加 `import.meta.env.BASE_URL`**，否則部署到 `/gambit/` 子路徑 404。
 

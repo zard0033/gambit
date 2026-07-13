@@ -3,8 +3,8 @@
 > **Layer**: Foundation
 > **GDD**: design/gdd/chess-engine-integration.md
 > **Architecture Module**: ChessEngine
-> **Status**: Ready
-> **Stories**: 7 stories created
+> **Status**: Shipped (S2, NNUE S9)
+> **Stories**: 9 stories created
 
 ## Stories
 

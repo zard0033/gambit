@@ -1,7 +1,7 @@
 # Story 002: Key-Moment Selection (F1) — pure, zero new analysis
 
 > **Epic**: memory
-> **Status**: Ready
+> **Status**: Done — Shipped 2026-06-18 (`a3caa1d`)
 > **Layer**: Feature — Phase 2 Differentiation ① — Logic
 > **Type**: Logic (candidate gather + merge + gate + force-include + cap + order)
 > **Estimate**: M (4 hours)
@@ -97,7 +97,7 @@ Step 5 re-sort kept set by ply asc (anchor keeps flag, not reordered)
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/memory/selection.test.ts` pass (BLOCKING) incl. the worked-example fixture.
-**Status**: [ ] Not yet created
+**Status**: [x] `tests/unit/memory/selection.test.ts` — 11 tests, all passing (incl. worked-example fixture)
 
 ---
 

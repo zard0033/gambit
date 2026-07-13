@@ -36,10 +36,10 @@ Lichess open-source components (chessground, stockfish.wasm, chess-openings) pro
 | 12 | Game History | Gameplay | MVP | Approved | [game-history.md](./game-history.md) ([review log](./reviews/game-history-review-log.md)) | Game Lifecycle, Data Sync |
 | 13 | Skill Scoring | Progression | MVP | Not Started | — | Post-Game Review, Data Sync |
 | 14 | Level Progression | Progression | MVP | Not Started | — | Skill Scoring, Difficulty System |
-| 15 | PWA Support | Meta | Polish | Not Started | — | — |
+| 15 | PWA Support | Meta | Polish | Shipped (2026-07-10, vite-plugin-pwa + ADR-0016) | — | — |
 | 16 | Audio System | Audio | Polish | Not Started | — | — |
 | 17 | Settings | UI | Polish | Not Started | — | Multiple |
-| 18 | Lesson System | Gameplay | Phase 2 | In Design | [lesson-system.md](./lesson-system.md) | Chess Board, Navigation & Routing |
+| 18 | Lesson System | Gameplay | Phase 2 | Shipped (四階 21 課) | [lesson-system.md](./lesson-system.md) | Chess Board, Navigation & Routing |
 | 19 | Dungeon Puzzle Mode | Gameplay | Phase 2 | Approved | [dungeon-puzzle-mode.md](./dungeon-puzzle-mode.md) ([review log](./reviews/dungeon-puzzle-mode-review-log.md)) | Chess Board, Navigation & Routing, Lesson System (pattern) |
 | 20 | Learning Loop (Concept Linking) | Gameplay (connective) | Phase 2 | Approved | [learning-loop.md](./learning-loop.md) ([review log](./reviews/learning-loop-review-log.md)) | Lesson System (#18), Dungeon Puzzle Mode (#19), Post-Game Review (#7) |
 | 21 | Journal (棋誌) | Gameplay (differentiation) | Phase 1 (diff) | Designed (v1: onset/arrival/solace) | [journal.md](./journal.md) ([review log](./reviews/journal-review-log.md)) | Lesson System (#18), Game History (#12), Data Sync (#11); Post-Game Review (#7) → Phase 2 only |

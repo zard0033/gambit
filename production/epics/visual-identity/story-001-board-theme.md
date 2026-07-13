@@ -109,7 +109,7 @@ If piece SVGs are referenced via `url()` in CSS, Vite handles them automatically
 - Contrast ratio: light vs dark square measurement
 - Sign-off table (solo dev signs all roles)
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created — `production/qa/evidence/board-theme-evidence.md` (2026-05-30), all sign-offs complete (APPROVED)
 
 ---
 

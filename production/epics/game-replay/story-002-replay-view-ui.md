@@ -2,7 +2,7 @@
 
 > **Epic**: game-replay
 > **Sprint**: S10-02 (Must Have)
-> **Status**: Done (2026-06-02)
+> **Status**: Done (2026-06-02) — 退役 2026-06-22（`66e17ae`）：ReplayView.vue 全刪，回放流程併入 MemoryView
 > **Layer**: Feature / UI
 > **Type**: View Component + Navigation
 > **Estimate**: L (8 hours)

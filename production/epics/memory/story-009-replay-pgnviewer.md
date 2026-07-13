@@ -79,7 +79,7 @@ src/components/memory/ReplayEvalChart.vue   ← self-drawn SVG (evalWhiteSeries,
 
 **Story Type**: UI
 **Required evidence**: `tests/e2e/memory-replay.spec.ts` (move list, PgnViewer root, BASE_URL) + `production/qa/evidence/memory-replay-evidence.md` (board fidelity, animation).
-**Status**: [ ] Not yet created
+**Status**: [x] 自動化半綠 + Wood12/Gioco 保真已驗證 2026-06-20（見 `production/qa/evidence/memory-replay-evidence.md`）；prev/next 滑動手感仍待實機
 
 ---
 

@@ -2,7 +2,7 @@
 
 > **Epic**: dungeon-puzzle
 > **Sprint**: S13-06 (Must Have)
-> **Status**: Backlog
+> **Status**: Complete (2026-06-07)
 > **Layer**: Feature / Config-Data
 > **Type**: Content + small UI wiring
 > **Estimate**: M (5 hours)

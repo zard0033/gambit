@@ -115,7 +115,7 @@ function handleReview() {
 **Story Type**: UI
 **Required evidence**: Manual browser walkthrough — screenshot in `production/qa/evidence/s4-01-game-over-overlay.png`
 
-**Status**: [ ] Not yet created
+**Status**: ✅ Created — 7 browser screenshots, Playwright-verified
 
 ---
 

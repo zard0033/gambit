@@ -2,7 +2,7 @@
 
 > **Epic**: game-history
 > **Sprint Task**: S8-06 (carry from S7-08)
-> **Status**: Ready (Nice to Have — requires Eason iPhone)
+> **Status**: Complete — Magic Link verified end-to-end on iOS Safari (browser mode, S8-06, commit 530a05b); PWA Deep Link (email → installed PWA) deferred as an iOS architectural constraint, documented in ADR-0011
 > **Layer**: MVP — Auth / ADR Acceptance
 > **Type**: Verification + ADR Update
 > **Estimate**: XS (2 hours)

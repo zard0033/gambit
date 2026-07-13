@@ -3,15 +3,15 @@
 > **Layer**: Feature
 > **GDD**: design/gdd/game-export-share.md
 > **Architecture Module**: GameExport
-> **Status**: Ready
+> **Status**: Shipped (S4)
 > **Stories**: 2 stories created
 
 ## Stories
 
 | # | Story | Type | Status | Primary ADR |
 |---|-------|------|--------|-------------|
-| 001 | [PGN Serialization and Claude.ai Prompt Assembly](story-001-pgn-prompt-assembly.md) | Logic | Ready | ADR-0010 |
-| 002 | [Tier-1/2/3 Clipboard Delivery State Machine](story-002-tier-delivery.md) | Logic | Ready | ADR-0010 |
+| 001 | [PGN Serialization and Claude.ai Prompt Assembly](story-001-pgn-prompt-assembly.md) | Logic | Complete | ADR-0010 |
+| 002 | [Tier-1/2/3 Clipboard Delivery State Machine](story-002-tier-delivery.md) | Logic | Complete | ADR-0010 |
 
 ## Overview
 

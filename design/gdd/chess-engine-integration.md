@@ -7,7 +7,7 @@
 > external network, always-NNUE (no `Use NNUE` toggle). The HCE/NNUE-split rules, OQ#6, and the
 > two-build memory budget below are historical. Current engine of record: ADR-0001 (amendment 2026-06-02).
 >
-> **Status**: Approved (pending OQ#6 spike — confirm HCE build availability before v0 implementation)
+> **Status**: Superseded (2026-06-02) — OQ#6/HCE spike moot under the current design; engine of record is Stockfish 18 Lite single build (ADR-0001 amendment), shipped and in production
 > **Author**: Eason + Claude
 > **Last Updated**: 2026-05-27
 > **Implements Pillar**: Pillar 2 (Knowledge Connects to Play) — the engine is what makes every move legible and every review meaningful

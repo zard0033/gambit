@@ -1,6 +1,6 @@
 # Journal（棋誌 · Neve 記憶的可見載體）
 
-> **Status**: In Design
+> **Status**: Shipped (v1: onset/arrival/solace/epiphany 全數上線；settle 管線 2026-07-03 起全面接線)
 > **Author**: Eason + Claude（design-system, lean mode）
 > **Last Updated**: 2026-06-16（design-review 後 v1 範圍收斂為 啟程＋④＋⑤）
 > **Implements Pillar**: 差異化北極星 ②（靈魂教練 Neve）＋ ③（安靜文學式旅程）

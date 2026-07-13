@@ -4,7 +4,7 @@
 > **GDD**: design/gdd/game-history.md (complete — APPROVED 2026-06-01)
 > **Architecture Module**: useGameHistoryStore (Pinia) + useDataSyncStore.loadGameHistory()
 > **Status**: Ready — GDD APPROVED, ADR coverage confirmed, stories created (Sprint 8)
-> **Stories**: story-001-data-layer.md, story-002-history-view.md, story-003-row-expand.md, story-004-adr-accepted.md
+> **Stories**: story-001-data-layer.md, story-002-history-view.md, story-003-row-expand.md, story-004-adr-accepted.md, story-005-visual-polish.md
 
 ## Overview
 

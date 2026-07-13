@@ -1,6 +1,6 @@
 # Game Concept v2 — Chess Training Companion
 
-*修訂日期：2026-06-04　·　Status: Draft（待 Eason 確認）*
+*修訂日期：2026-06-04　·　Status: Confirmed & Shipped（視覺方向已全站套用，見 design/gambit-design-system/）*
 
 > 本文是 `game-concept.md`（v1）的**調性／視覺識別／遊戲化**修訂。v1 是 2026-05-27 臨時起意寫的，產品骨架紮實，但「平靜極簡 lichess 工具」的美學北極星與 Eason 真正想要的方向不符。v2 **只改 tone / 視覺 / 遊戲化 / 敘事**；v1 的營運細節（MVP、loop、風險、技術、雙向連結 hook）仍然有效。
 

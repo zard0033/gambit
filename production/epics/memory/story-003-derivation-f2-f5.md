@@ -1,7 +1,7 @@
 # Story 003: Derivation — White-normalized Eval (F2) + Stage Classification (F5)
 
 > **Epic**: memory
-> **Status**: Ready
+> **Status**: Done — Shipped 2026-06-18 (`a3caa1d`)
 > **Layer**: Feature — Phase 2 Differentiation ① — Logic
 > **Type**: Logic (pure derivation: eval series + favorable swing + stage)
 > **Estimate**: S (2–3 hours)
@@ -93,7 +93,7 @@ classifyStage (order matters):
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/memory/{derive,stage}.test.ts` pass (BLOCKING).
-**Status**: [ ] Not yet created
+**Status**: [x] `tests/unit/memory/{derive,stage}.test.ts` — 12 tests, all passing
 
 ---
 

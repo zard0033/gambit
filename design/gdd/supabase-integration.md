@@ -61,6 +61,8 @@ No other store reads Supabase session directly — all auth state flows through 
 | `opening_name` | `text` | Opening name string (nullable) |
 | `created_at` | `timestamptz` DEFAULT `now()` | Server-side insert time |
 
+> **2026-07-10 更新**：`skill_scores` 因 Skill Scoring 系統從未實作，已由 migration DROP；以下 schema 僅供歷史設計參考，非目前 live 結構。
+
 **Table: `skill_scores`**
 
 | Column | Type | Notes |

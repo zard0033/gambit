@@ -74,17 +74,17 @@ durable summary is **not** a per-game moment cache.
 
 | # | Story | Type | Status | ADR | Depends on |
 |---|-------|------|--------|-----|-----------|
-| 001 | Memory data layer (table + data-sync + store + guest reconcile) | Integration | Ready (live verify ← 011) | ADR-0014, 0011, 0005 | — |
-| 002 | Key-moment selection F1 (pure, 0 analysis) | Logic | Ready | ADR-0014, 0007 | — |
-| 003 | Derivation: E_white F2 + stage F5 (pure) | Logic | Ready | ADR-0014, 0007, 0003 | — |
-| 004 | Cross-game Neve line F4 (no weak-stage) | Logic | Ready | ADR-0014, 0005 | 001, 002, 003 |
-| 005 | Zero-AI templates F3 + persona/banned-token lint | Logic | Ready | ADR-0014 | 002, 004 |
-| 006 | UX/a11y spec (fix #5) — **precedes 007/008** | UI (spec) | Ready | ADR-0014 | — |
-| 007 | 棋憶 dashboard view + zero-state | UI | Ready (recordGame ← 011) | ADR-0014, 0007, 0006 | 002, 003, 004, 005, 006, 001 |
-| 008 | Moment slideshow + animation | Visual/Feel | Ready | ADR-0014, 0006 | 002, 005, 006, 007 |
-| 009 | Move-by-move replay (PgnViewer reuse) | UI | Ready | ADR-0014, 0006 | 003, 007 |
-| 010 | 棋誌 coupling + (gameId, ply) deep-link | Integration | Ready (live verify ← 011) | ADR-0014, 0013, 0011 | 007, 009, 001 |
-| 011 | ADR-0014 Accepted + live migration gate | Config/Process | Ready | ADR-0014 | 001 |
+| 001 | Memory data layer (table + data-sync + store + guest reconcile) | Integration | Done | ADR-0014, 0011, 0005 | — |
+| 002 | Key-moment selection F1 (pure, 0 analysis) | Logic | Done | ADR-0014, 0007 | — |
+| 003 | Derivation: E_white F2 + stage F5 (pure) | Logic | Done | ADR-0014, 0007, 0003 | — |
+| 004 | Cross-game Neve line F4 (no weak-stage) | Logic | Done | ADR-0014, 0005 | 001, 002, 003 |
+| 005 | Zero-AI templates F3 + persona/banned-token lint | Logic | Done | ADR-0014 | 002, 004 |
+| 006 | UX/a11y spec (fix #5) — **precedes 007/008** | UI (spec) | Done | ADR-0014 | — |
+| 007 | 棋憶 dashboard view + zero-state | UI | Done | ADR-0014, 0007, 0006 | 002, 003, 004, 005, 006, 001 |
+| 008 | Moment slideshow + animation | Visual/Feel | Done | ADR-0014, 0006 | 002, 005, 006, 007 |
+| 009 | Move-by-move replay (PgnViewer reuse) | UI | Done | ADR-0014, 0006 | 003, 007 |
+| 010 | 棋誌 coupling + (gameId, ply) deep-link | Integration | Done | ADR-0014, 0013, 0011 | 007, 009, 001 |
+| 011 | ADR-0014 Accepted + live migration gate | Config/Process | Done | ADR-0014 | 001 |
 
 > **Recommended start**: 002 → 003 (pure, zero-dep, instant red→green) → 005 → 004 → 001 → 006 → 007 → 008/009 → 010 → 011.
 > Pure-logic stories (002–005) run against the Proposed ADR; persistence/integration verification (001/010) and the dashboard `recordGame` write wait on story-011 (ADR-0014 Accepted). story-006 (UX spec) must be `/ux-review` APPROVED before 007/008.

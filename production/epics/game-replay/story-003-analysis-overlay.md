@@ -2,7 +2,7 @@
 
 > **Epic**: game-replay
 > **Sprint**: S10-03 (Must Have)
-> **Status**: Done (2026-06-02)
+> **Status**: Done (2026-06-02) — 退役 2026-06-22（`66e17ae`）：replay-analysis-overlay.vue／use-replay-analysis.ts 全刪，分析 overlay 併入 MemoryReplay
 > **Layer**: Feature / Analysis
 > **Type**: Integration with Existing Engine
 > **Estimate**: M (6 hours)

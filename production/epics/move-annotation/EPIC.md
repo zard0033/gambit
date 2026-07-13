@@ -3,15 +3,15 @@
 > **Layer**: Core
 > **GDD**: design/gdd/move-annotation-display.md
 > **Architecture Module**: MoveAnnotationDisplay
-> **Status**: Ready
+> **Status**: Shipped (S3) — story-001 & story-002 Complete（見 production/epics/index.md）
 > **Stories**: 2 stories created
 
 ## Stories
 
 | # | Story | Type | Status | Primary ADR |
 |---|-------|------|--------|-------------|
-| 001 | [Custom SVG Overlay — Arrows, Highlights, and Eval Bar](story-001-svg-overlay.md) | Logic | Ready | ADR-0006 |
-| 002 | [rAF-Coalesced Resize Throttle](story-002-resize-throttle.md) | Logic | Ready | ADR-0006 |
+| 001 | [Custom SVG Overlay — Arrows, Highlights, and Eval Bar](story-001-svg-overlay.md) | Logic | Complete | ADR-0006 |
+| 002 | [rAF-Coalesced Resize Throttle](story-002-resize-throttle.md) | Logic | Complete | ADR-0006 |
 
 ## Overview
 

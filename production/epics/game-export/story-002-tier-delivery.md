@@ -135,7 +135,7 @@ export function useGameExport() {
 **Story Type**: Logic
 **Required evidence**: `tests/unit/game-export/tier-delivery.test.ts`
 
-**Status**: [x] `tests/unit/game-export/tier-delivery.test.ts` — 11 tests, all pass (2026-05-30)
+**Status**: [x] `tests/unit/game-export/tier-delivery.test.ts` — 13 tests, all pass（原記 11 tests／2026-05-30；2026-07-13 複驗）
 
 ---
 

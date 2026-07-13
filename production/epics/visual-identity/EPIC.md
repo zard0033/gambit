@@ -10,7 +10,7 @@
 
 | # | Story | Type | Status | Primary ADR |
 |---|-------|------|--------|-------------|
-| 001 | [Board Theme — Custom Piece Set & Board Colors](story-001-board-theme.md) | Visual/Feel | Backlog | ADR-0009 |
+| 001 | [Board Theme — Custom Piece Set & Board Colors](story-001-board-theme.md) | Visual/Feel | Complete | ADR-0009 |
 
 ## Overview
 

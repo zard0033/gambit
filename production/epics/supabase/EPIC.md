@@ -3,7 +3,7 @@
 > **Layer**: Persistence (Foundation + Core)
 > **GDD**: design/gdd/supabase-integration.md (complete — all 8 sections authored)
 > **Architecture Module**: useAuthStore + useDataSyncStore (Pinia) + src/lib/supabase.ts
-> **Status**: Ready — GDD complete, ADR-0011 Proposed, stories created (Sprint 7)
+> **Status**: Shipped — ADR-0011 Accepted 2026-06-01（S8-06 iOS 驗證通過）；story-001–007 Complete，story-008（ADR-accepted 驗證 spike）AC-S8-04 尚未補（見 story-008）
 > **Stories**: story-001-project-setup.md, story-002-auth-store.md, story-003-migration.md, story-004-data-sync-store.md, story-005-route-guards.md, story-006-sign-in-ui.md, story-007-sync-badge.md, story-008-adr-accepted.md
 
 ## Overview
@@ -56,4 +56,4 @@ This epic is complete when:
 
 - **Game History** (#12) — reads via `useDataSyncStore.loadGameHistory()`
 - **Skill Scoring** (#13) — writes via `useDataSyncStore.syncSkillScore()`
-- **Level Progression** (#14) — reads skill_scores via Skill Scoring
+- ~~**Level Progression**（#14）~~ — Superseded：依賴的 skill_scores 表已 DROP（2026-07-10 migration），此下游 epic 不再成立

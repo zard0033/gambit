@@ -1,6 +1,6 @@
 # Lesson System (GDD)
 
-> **Status**: Draft — pending design-review (S12)
+> **Status**: Approved & Shipped (四階 21 課)
 > **Tier**: Phase 2 (Feature layer)
 > **Category**: Gameplay (Feature layer)
 > **Depends on**: Chess Board & Move System (#1), Navigation & Routing (#4)

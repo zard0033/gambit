@@ -99,7 +99,7 @@ export const ENDGAME_MATERIAL = 12, OPENING_PLY_MAX = 16, OPENING_MATERIAL = 56
 
 **Story Type**: Integration
 **Required evidence**: `tests/unit/memory/{data-sync-memory,store-reconcile}.test.ts` pass (BLOCKING); live RLS probe recorded in story-011.
-**Status**: [ ] Not yet created
+**Status**: [x] `tests/unit/stores/data-sync-memory.test.ts` (12 tests) + `tests/unit/stores/memory-store.test.ts` (4 tests) — 16 tests, all passing; live RLS probe PASSED 2026-06-20（見 story-011 evidence）
 
 ---
 

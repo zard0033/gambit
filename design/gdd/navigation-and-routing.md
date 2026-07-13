@@ -1,6 +1,6 @@
 # Navigation & Routing
 
-> **Status**: Designed (pending review)
+> **Status**: Approved & Shipped (v0；路由表已擴充至 Phase 1/2，見 src/router/index.ts)
 > **Author**: Eason + Claude
 > **Last Updated**: 2026-05-27
 > **Implements Pillar**: Pillar 3 (Single Player, No Pressure) — navigation is invisible scaffolding; screen transitions never interrupt the player's thinking, and an in-progress game is never lost to a careless tap

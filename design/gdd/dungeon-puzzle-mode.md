@@ -20,8 +20,7 @@ transferable principle. Puzzles are grouped into **levels** shown as a vertical 
 map** (a bottom-to-top serpentine path that recedes into perspective toward a distant
 summit); clearing puzzles unlocks the next node linearly. v0 scope: static, clean-room
 authored puzzle data (no AI, no backend engine call required for validation) with
-localStorage progress that mirrors the Lesson System's progress-store pattern (optional
-Supabase sync deferred to a follow-up story).
+localStorage progress that mirrors the Lesson System's progress-store pattern, plus Supabase sync (`dungeon_progress` table, shipped — see §3.6).
 
 **Per the Gambit design rule (`無 streak / timer / leaderboard`), this mode has NO
 streak counter, NO timer, and NO leaderboard.** The blueprint's「連殺」streak is

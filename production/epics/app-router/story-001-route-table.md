@@ -83,7 +83,7 @@
 - `tests/unit/app-router/route-table.test.ts`
 - `tests/e2e/spa-deep-link.spec.ts` (Playwright)
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created and passing (10/10 unit + 3 e2e tests)
 
 ---
 

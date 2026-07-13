@@ -1,6 +1,6 @@
 # 棋憶 (Memory)
 
-> **Status**: Draft (revised after design-review 2026-06-18 — MAJOR REVISION applied)
+> **Status**: Shipped（全 Done，含 signpost v1 + 黑方擷取解鎖 2026-07-11 延伸）
 > **System**: #22 (Phase 2 differentiation — the moat)
 > **Design SoT (approved demo)**: [design/demos/highlight-replay-demo.html](../demos/highlight-replay-demo.html) (v9, 7 rounds, Eason approved 2026-06-17)
 > **Differentiation north star**: [production/gambit-differentiation-vision.md](../../production/gambit-differentiation-vision.md)

@@ -76,7 +76,7 @@ tests/e2e/journal-unread.spec.ts ← marker shows then clears; never a count; pe
 
 **Story Type**: UI
 **Required evidence**: `production/qa/evidence/journal-peek-unread-evidence.md` OR `tests/e2e/journal-unread.spec.ts`.
-**Status**: [ ] Not yet created
+**Status**: [x] Done — `tests/e2e/journal-unread.spec.ts`（2026-06-16，commit f8f2614）。
 
 ---
 

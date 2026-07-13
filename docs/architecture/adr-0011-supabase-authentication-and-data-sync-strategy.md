@@ -115,6 +115,8 @@ Only `src/stores/auth.ts` and `src/stores/data-sync.ts` import from `src/lib/sup
 | `opening_name` | `text` | Opening name (nullable) |
 | `created_at` | `timestamptz` DEFAULT `now()` | Server-side insert time |
 
+> **Amendment (2026-07-03 拍板／2026-07-10 套用 live)**：`skill_scores` 已被移除（`supabase/migrations/20260830053142_drop_unused_tables.sql`）——`src/` 下零引用，從未接上任何讀寫路徑。本 ADR 原本啟用的 Skill Scoring epic（#13）／Level Progression epic（#14）並未在此 schema 下實作；若日後重啟，需要一份新的 schema 決策。
+
 **`skill_scores`** — append-only snapshot per game:
 
 | Column | Type | Notes |

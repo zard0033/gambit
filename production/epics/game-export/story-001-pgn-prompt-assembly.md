@@ -116,7 +116,7 @@ export function assembleExportPayload(game: CompletedGame, config: ExportConfig)
 **Story Type**: Logic
 **Required evidence**: `tests/unit/game-export/pgn-prompt-assembly.test.ts`
 
-**Status**: [x] `tests/unit/game-export/pgn-prompt-assembly.test.ts` — 14 tests, all pass (2026-05-30)
+**Status**: [x] `tests/unit/game-export/pgn-prompt-assembly.test.ts` — 27 tests, all pass（原記 14 tests／2026-05-30；因 S11-02 GDD 對齊修正增加測試，2026-07-13 複驗）
 
 ---
 
