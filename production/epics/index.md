@@ -60,9 +60,9 @@
 - **Shipped**: 13 (9 v0 + supabase + game-history + game-replay + dungeon-puzzle core)
 - **Built**: lesson-system（S01–04 已實作 + 測試；S05 內容撰寫 ongoing）
 - **In Progress / Partial**: memory（001–005+007–010 已 shipped/unit-green，story-011 gate PASSED，待手動視覺 sign-off）；learning-loop（Phase A Shipped 2026-06-06；Phase B/C/D 待排）；journal（story-007 已完成 table+RLS；story-001–006 Ready to implement，尚未實作）
-- **Backlog**: 1 (visual-identity — 棋盤主題 GDD + ADR pending)
+- **Backlog**: 0（visual-identity 2026-07-13 改判 Complete——story-001 完成簽核，主題由 design system Wood12+Gioco 承接，原訂 GDD/ADR 路線不再推進）
 - **Total TR-IDs**: 113 (55 v0 + 13 MVP supabase + 27 MVP game-history + 7 journal + 11 memory) + Phase 2 TRs (game-replay / lesson-system / dungeon-puzzle / learning-loop, in GDDs)
-- **ADRs**: 16 Accepted/Proposed (ADR-0001…0016; ADR-0007/0008/0012 仍 Proposed; ADR-0011 supabase → Accepted pending S8-06 iOS 補測)
+- **ADRs**: 16 Accepted/Proposed (ADR-0001…0016; ADR-0007/0008 仍 Proposed; ADR-0012 → Accepted 2026-07-13; ADR-0011 supabase → Accepted pending S8-06 iOS 補測)
 
 ## Layer Order (implementation sequence)
 

@@ -121,7 +121,10 @@ iPhone 實機四批 Eason 拍板延後一次測。
 - **Phase C+/D**：捉雙/牽制賽後偵測（需精準度實測）；Claude API 動態講解/BYOK（最後）。
 - ✅ **PWA 已實作**（2026-07-10，autoUpdate＋ADR-0016，見現況四磚②）：首次 deploy 後所有訪客開始吃 SW；
   之後每次 deploy 由 autoUpdate 自癒，「舊畫面＝裝置快取」的排查註記仍適用於未升級的舊訪客一次。
-- **epics/index 兩張彙總表過時**（沒納入 journal/memory/dungeon/learning-loop），獨立重算、刻意未動。
+- **死碼清理**（precommit-review 2026-07-13 點名）：game-history `setExpandedRow`/expanded panel 已被
+  row-tap-to-navigate 取代、只剩孤立 unit test 在養（story-003 有記載）——獨立小掃除。
+- **opening-lookup 20ms wall-clock 斷言違反 determinism 標準**（coding-standards「no time-dependent
+  assertions」）：改 op-count bound 或 fake timers；auth-guard timeout 斷言同查。maxWorkers:4 只是降機率。
 - **🎨 第二主題（noir / "Dusk"）⏸ 低優先**：設計定案、spec 已固化 SoT（`colors_and_type.css`
   `[data-theme="noir"]` 區塊）；demo＝`design/demos/{theme-tokens-mockup,ink-noir-explore}.html`。production
   0 實作、刻意延後。屆時排序：token 層 → toggle（ProfileView+同步）→ 深區 hex 逐頁 tokenize → CI WCAG gate。
