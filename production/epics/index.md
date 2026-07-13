@@ -9,10 +9,10 @@
 | Epic | Layer | Module | GDD | TR-IDs | ADR Coverage | Stories | Status |
 |------|-------|--------|-----|--------|--------------|---------|--------|
 | [chess-board](chess-board/EPIC.md) | Foundation | ChessBoard | chess-board-and-move-system.md | 7 | 7/7 ✅ | 7 stories | **Shipped** (S2) |
-| [chess-engine](chess-engine/EPIC.md) | Foundation | ChessEngine | chess-engine-integration.md | 9 | 9/9 ✅ | 7 stories | **Shipped** (S2, NNUE S9) |
+| [chess-engine](chess-engine/EPIC.md) | Foundation | ChessEngine | chess-engine-integration.md | 9 | 9/9 ✅ | 9 stories | **Shipped** (S2, NNUE S9) |
 | [opening-id](opening-id/EPIC.md) | Foundation | OpeningIndex | opening-identification.md | 4 | 4/4 ✅ | 1 story | **Shipped** (S2) |
 | [app-router](app-router/EPIC.md) | Foundation | AppRouter | navigation-and-routing.md | 6 | 6/6 ✅ | 2 stories | **Shipped** (S2) |
-| [game-lifecycle](game-lifecycle/EPIC.md) | Core | GameLifecycle | game-lifecycle.md | 5 | 5/5 ✅ | 2 stories | **Shipped** (S3) |
+| [game-lifecycle](game-lifecycle/EPIC.md) | Core | GameLifecycle | game-lifecycle.md | 5 | 5/5 ✅ | 3 stories | **Shipped** (S3) |
 | [move-annotation](move-annotation/EPIC.md) | Core | MoveAnnotationDisplay | move-annotation-display.md | 5 | 5/5 ✅ | 2 stories | **Shipped** (S3) |
 | [post-game-review](post-game-review/EPIC.md) | Feature | PostGameReview | post-game-review.md | 7 | 7/7 ✅ | 5 stories | **Shipped** (S4) |
 | [game-export](game-export/EPIC.md) | Feature | GameExport | game-export-share.md | 4 | 4/4 ✅ | 2 stories | **Shipped** (S4) |
@@ -24,13 +24,13 @@
 | Epic | Layer | Module | GDD | TR-IDs | ADR Coverage | Stories | Status |
 |------|-------|--------|-----|--------|--------------|---------|--------|
 | [supabase](supabase/EPIC.md) | Persistence | useAuthStore + useDataSyncStore | supabase-integration.md | 13 | 13/13 (ADR-0011) | 8 stories | **Shipped** (S7) |
-| [game-history](game-history/EPIC.md) | MVP Feature | useGameHistoryStore + HistoryView | game-history.md | 27 | ADR-0005 + ADR-0011 | 4 stories | **Shipped** (S8, QA approved w/ conditions — S8-06 iOS Magic Link 實機補測待辦) |
+| [game-history](game-history/EPIC.md) | MVP Feature | useGameHistoryStore + HistoryView | game-history.md | 27 | ADR-0005 + ADR-0011 | 5 stories | **Shipped** (S8, QA approved w/ conditions — S8-06 iOS Magic Link 實機補測待辦) |
 
 ## Phase 2 Epics
 
 | Epic | Layer | Module | GDD | ADR Coverage | Stories | Status |
 |------|-------|--------|-----|--------------|---------|--------|
-| [game-replay](game-replay/EPIC.md) | Feature (Phase 2) | ReplayView + review-engine | game-replay.md | ADR-0001/0003/0005 (no new ADR) | 5 stories | **Shipped** (S10 — QA APPROVED 2026-06-02；S10-01…04 done；S10-05 動畫 polish deferred) |
+| [game-replay](game-replay/EPIC.md) | Feature (Phase 2) | ReplayView + review-engine | game-replay.md | ADR-0001/0003/0005 (no new ADR) | 6 stories | **Shipped** (S10 — QA APPROVED 2026-06-02；S10-01…04 done；S10-05 動畫 polish deferred) |
 | [lesson-system](lesson-system/EPIC.md) | Feature (Phase 2) | LearnView + LessonView + useLessonProgressStore | lesson-system.md | ADR-0005 (no new ADR for v0) | 5 stories | **Built** (S01–04 shipped + tested：LearnView/LessonView/progress store/lessons data；S05 內容撰寫 ongoing) |
 | [dungeon-puzzle](dungeon-puzzle/EPIC.md) | Feature (Phase 2) | DungeonMapView + DungeonPuzzleView + useDungeonProgressStore + use-dungeon-puzzle | dungeon-puzzle-mode.md | ADR-0005 (no new ADR for v0) | 7 stories (S13) | **Shipped (core)** — S13-01…05 done (map/solver/store/composable, Playwright-verified)；S13-06 謎題集撰寫 + Home 入口 **Backlog**；S13-07 sync code-complete，migration 待套 live |
 | [learning-loop](learning-loop/EPIC.md) | Feature (Phase 2 connective) | concept SoT + 3 bridges (lesson↔puzzle↔game) + Concept Map | learning-loop.md | ADR-0012 | Phase A: 4 stories (S14)；B–D 待排 | **Phase A Shipped** — S14-01…04 done 2026-06-06（concept SoT + Bridge 1 完成卡 + D1 側門練習，zero dungeon mutation）；Phase B（Bridge 2 + Concept Map）/ C（Bridge 3）/ D 待排 |
@@ -56,13 +56,13 @@
 
 ## Summary
 
-- **Feature/system epics**: 14 (10 v0 + 2 MVP + 2 Phase 2)
-- **Shipped**: 12 (9 v0 + supabase + game-history + game-replay)
-- **In Progress**: 0（game-replay S10 已 QA APPROVED 2026-06-02；S10-05 動畫 polish deferred）
+- **Feature/system epics**: 18 (10 v0 + 2 MVP + 4 Phase 2 + 1 Phase 1 diff + 1 Phase 2 diff)
+- **Shipped**: 13 (9 v0 + supabase + game-history + game-replay + dungeon-puzzle core)
 - **Built**: lesson-system（S01–04 已實作 + 測試；S05 內容撰寫 ongoing）
+- **In Progress / Partial**: memory（001–005+007–010 已 shipped/unit-green，story-011 gate PASSED，待手動視覺 sign-off）；learning-loop（Phase A Shipped 2026-06-06；Phase B/C/D 待排）；journal（story-007 已完成 table+RLS；story-001–006 Ready to implement，尚未實作）
 - **Backlog**: 1 (visual-identity — 棋盤主題 GDD + ADR pending)
-- **Total TR-IDs**: 89 (49 v0 + 13 MVP supabase + 27 MVP game-history) + Phase 2 TRs (game-replay / lesson-system, in GDDs)
-- **ADRs**: 11 Accepted/Proposed (ADR-0001…0011; ADR-0011 supabase → Accepted pending S8-06 iOS 補測)
+- **Total TR-IDs**: 113 (55 v0 + 13 MVP supabase + 27 MVP game-history + 7 journal + 11 memory) + Phase 2 TRs (game-replay / lesson-system / dungeon-puzzle / learning-loop, in GDDs)
+- **ADRs**: 16 Accepted/Proposed (ADR-0001…0016; ADR-0007/0008/0012 仍 Proposed; ADR-0011 supabase → Accepted pending S8-06 iOS 補測)
 
 ## Layer Order (implementation sequence)
 
@@ -81,13 +81,16 @@ Presentation:                      visual-identity (board theme) — Sprint TBD,
 
 | Layer | Epics | Total Stories |
 |-------|-------|---------------|
-| Foundation | chess-board (7), chess-engine (7), opening-id (1), app-router (2) | 17 |
-| Core | game-lifecycle (2), move-annotation (2) | 4 |
+| Foundation | chess-board (7), chess-engine (9), opening-id (1), app-router (2) | 19 |
+| Core | game-lifecycle (3), move-annotation (2) | 5 |
 | Feature | post-game-review (5), game-export (2), opening-knowledge-cards (2) | 9 |
+| Presentation | visual-identity (1) | 1 |
 | Persistence (MVP) | supabase (8) | 8 |
-| MVP Feature | game-history (4) | 4 |
-| Phase 2 | game-replay (5), lesson-system (5) | 10 |
-| **Total** | **14 feature epics** | **52 stories** |
+| MVP Feature | game-history (5) | 5 |
+| Phase 2 | game-replay (6), lesson-system (5), dungeon-puzzle (7), learning-loop (4) | 22 |
+| Phase 1 (diff) | journal (7) | 7 |
+| Phase 2 (diff) | memory (11) | 11 |
+| **Total** | **18 feature epics** | **87 stories** |
 
 ## Next Steps
 
