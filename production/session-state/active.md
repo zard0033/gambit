@@ -1,14 +1,23 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: Phase 2 收尾 + Phase 3 A 路線（氛圍首頁）
-Task: 四磚＋第二批（黑方解鎖、招呼框 V3、重置對局、棋憶雙門、判斷場留白）全部 push 上線（bed83ae，
-precommit-review ×2 過）。下一步＝iPhone 補測氛圍首頁 V3 與 PWA；之後的磚＝signpost material 設計案。
+Task: signpost material 設計案 DRAFT 完成（6509da5，待拍板 D1–D6）＋文件現實對帳 backfill 105 筆
+（a83d4e7）＋epics/index 重算（4de2633），本機三 commit 未 push。iPhone 實機四批 Eason 拍板延後一次測。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
 > **差異化北極星 = `production/gambit-differentiation-vision.md`**——提任何功能/重構/UI 前**先讀**。
 
 ---
+
+## 2026-07-13（公司電腦）本日產出（未 push）
+
+- **signpost material 概念擴充設計案 DRAFT**（`6509da5`）＝`design/quick-specs/signpost-material-expansion.md`。
+  18-agent workflow（5 盤點→4 提案→8 對抗審查→綜合）。建議路線＝「無守衛之子」chess.js 可證明子集 v1
+  （零引擎呼叫、零 schema 侵入；MultiPV 補算降為 v2 條件路徑）。**待 Eason 拍板 §5 的 D1–D6**，拍板前不施工。
+- **文件現實對帳 backfill**（`a83d4e7`，68 檔 105 筆）：全 repo epic/story/ADR/GDD/spec 狀態宣稱對齊上線現實，
+  全部低報回填、零高報；69-agent 審計＋逐筆核證＋fresh-context 驗收 PASS。**4 筆 ambiguous 待拍板**（見待辦②）。
+- **epics/index 彙總表重算**（`4de2633`）：18 epics／87 stories／113 TR-IDs／16 ADRs，補漏列 5 epic＋主表 4 格誤植。
 
 ## 現況（產品全線可用；2026-07-10）
 
@@ -76,6 +85,13 @@ precommit-review ×2 過）。下一步＝iPhone 補測氛圍首頁 V3 與 PWA�
 
 ### ② 待 Eason 拍板
 
+- **signpost material 設計案 D1–D6**（`design/quick-specs/signpost-material-expansion.md` §5）：D1 收錄門檻
+  V≥3＋全值域唯一含兵、D2 preview ply＋離線推翻率 ≤5% 開旗前置、D3 store shim、D4 mate 優先＋召回門檻數字、
+  D5 觸發率計數 lite、D6 量測樣本走 Supabase 腳本。每點文件內附推薦。
+- **docs 對帳 4 筆 ambiguous**（對帳 workflow 判證據不足以自動改，原文與建議見 wf_aaa04f41 結果）：
+  ① visual-identity EPIC Status（story-001 完成但原訂和茶系路線被 Wood12+Gioco 取代，Complete 措辭需人裁）
+  ② ADR-0012 是否轉 Accepted（自訂觸發條件早已跨過）③ ADR-0007「deferred to Sprint 6」排程措辭過期
+  （iPhone 真機量測至今未做）④ vision 文件「已規劃的概念深化頁」→「已上線」措辭。
 - ✅ **失誤 slideshow 入口**（2026-07-11 拍板＝單一安靜入口）：新 `MomentSlideshowDoor`（cream 底
   Neve 卡，走勢圖下方、有重點步才現身）→ openMoment(0) 進 slideshow。與點圖跳手互補
   （工具 vs Neve 陪看），不恢復整排 list。
@@ -95,8 +111,8 @@ precommit-review ×2 過）。下一步＝iPhone 補測氛圍首頁 V3 與 PWA�
   （沿用既有，未調）。
 - ✅ **mate 沉默關三項已施工**（2026-07-10，見現況四磚③）：去洩題文案／判斷場（比照 fork）／Qg3 逼和特判。
 - **擴池＝HOLD（2026-07-11 Eason 拍板）**：不再手工造罐頭 variant；深化題真正歸宿=signpost
-  （mate 已通、黑方已解鎖）。下一步是擴 signpost 概念覆蓋（material，需先過設計——「唯一最佳」
-  無 chess.js 級證明、review 引擎無 MultiPV，勿直接寫 code），等真實使用數週看出卡頻率再回頭評估罐頭池。
+  （mate 已通、黑方已解鎖）。material 擴充**設計案已完成（2026-07-13，DRAFT `6509da5`）**、
+  等 D1–D6 拍板才施工；等真實使用數週看出卡頻率再回頭評估罐頭池。
 
 ### ④ 未來獨立任務
 
