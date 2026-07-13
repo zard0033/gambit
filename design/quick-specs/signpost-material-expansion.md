@@ -1,7 +1,7 @@
 # 棋憶 signpost 概念擴充 — material「無守衛之子」可證明子集 v1
 
 > **性質**：概念擴充設計案。回應 Eason 2026-07-11 拍板：「擴 signpost 概念覆蓋（material）需先過設計——『唯一最佳』無 chess.js 級證明、review 引擎無 MultiPV，勿直接寫 code」（`production/session-state/active.md:97-99`）。本文件即該設計案。
-> **狀態**：**DRAFT——待 Eason 拍板。本文件不授權施工。** 拍板後仍須依序過 §3.3 上線前置（含離線量測門檻）才進實作。
+> **狀態**：**Accepted——2026-07-13 Eason 拍板，D1–D6 全數照推薦定案**（含 D2 推翻率門檻 5%、D4 召回門檻「數週內平均 <1 次/5 局即檢討」兩個數字正式生效）。施工前仍須依序過 §3.3 上線前置——**下一步＝D6 離線量測腳本**（推翻率 ≤5% 才開旗施工）。
 > **輸入**：5 份現況盤點（pipeline／classifier／engine／gate／vision）＋ 4 份路線提案（provable／engine／ux／skeptic）＋ 8 份雙 lens 對抗審查（honesty／engineering，全數 MAJOR-REVISE、零 KILL）。本文件＝總編收斂稿：provable 為骨架、ux 的提問語意與文案紀律、skeptic 的量測前置、engine 派降為 v2 條件路徑；全部 critical 發現的修正已內建為規格條件（對照表 §2.3；替代案去處 §4）。
 > **北極星依據**：`production/gambit-differentiation-vision.md:62-65` 決策②-①「課程長在你自己的棋上」；mate signpost 全鏈已通（active.md:44-45）。
 
@@ -186,7 +186,7 @@ material 一個概念、動態路徑 only（符合擴池 HOLD 拍板，active.md
 
 擴池 HOLD 拍板明文否決手工罐頭 variant（active.md:97）；且罐頭路徑強制 real+decoy 契約（recognition.test.ts:28-34）＝吞下誘餌造題這個「全案最大未知」（`design/quick-specs/concept-deepening-page.md` §15.11）。
 
-## 5. Eason 決策點
+## 5. Eason 決策點（✅ 2026-07-13 全數拍板＝照推薦；D2 取 5%、D4 取 <1 次/5 局）
 
 - **D1 收錄門檻與兵**：目標子 V≥3（兵不當目標），但唯一性排除全值域含兵（另有免費兵即整筆 skip）。推薦照此；理由：兵目標教學張力低、雜訊高，但不做全值域排除會讓「吃免費兵」這個字面真答案被判錯。
 - **D2 深度政策與推翻率門檻**：v1 收 preview ply、以離線量測「depth16+ 推翻率 ≤5%」為開旗硬前置；超標走 v2 引擎補算。推薦照此；理由：deep-only 在 iPhone 結構性近死（12s 前綴截斷），誠實主張已由 chess.js 承擔，5% 是初始值需拍板。

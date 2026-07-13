@@ -3,7 +3,7 @@
 > **Layer**: Presentation
 > **GDD**: `design/gdd/visual-identity.md` *(not yet authored — see below)*
 > **Architecture Module**: BoardTheme
-> **Status**: Backlog
+> **Status**: Complete — story-001 已於 2026-05-30 完成並簽核（`production/qa/evidence/board-theme-evidence.md`）；棋盤視覺主題其後由 Gambit Design System 承接為 Wood12 + Gioco Wood（`src/assets/board-theme.css`），本 epic 原訂的和茶系自製 SVG／正式 GDD 路線未再推進
 > **Stories**: 1 story
 
 ## Stories

@@ -1,8 +1,12 @@
 # ADR-0012: Bidirectional Lesson-to-Game Linking via a Shared Concept Tag
 
 ## Status
-Proposed
+Accepted (2026-07-13)
 
+> **2026-07-13 Eason 裁決轉 Accepted（回填）**：本 ADR 自訂的觸發條件早已跨過——Learning Loop GDD
+> `/design-review` 於 2026-06-06 判 APPROVED（`design/gdd/reviews/learning-loop-review-log.md`），
+> Phase A–C 已上線（`b44bd43`）。Phase D 未實作、另行追蹤。
+>
 > Realises the long-standing **Required ADR #4「Bidirectional lesson-to-game linking」**
 > (technical-preferences.md, "Required ADRs to author before Production phase"). Authored alongside
 > `design/gdd/learning-loop.md` (system #20). Move to **Accepted** after `/design-review` of the

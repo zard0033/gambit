@@ -1,8 +1,9 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: Phase 2 收尾 + Phase 3 A 路線（氛圍首頁）
-Task: signpost material 設計案 DRAFT 完成（6509da5，待拍板 D1–D6）＋文件現實對帳 backfill 105 筆
-（a83d4e7）＋epics/index 重算（4de2633），本機三 commit 未 push。iPhone 實機四批 Eason 拍板延後一次測。
+Task: signpost material 設計案 ✅ Accepted（D1–D6 照推薦拍板 2026-07-13）＋文件現實對帳 backfill 105 筆
+＋4 筆 ambiguous 裁決施行＋epics/index 重算，未 push。下一步＝D6 離線量測腳本（≤5% 才開旗施工）；
+iPhone 實機四批 Eason 拍板延後一次測。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
@@ -85,13 +86,11 @@ Task: signpost material 設計案 DRAFT 完成（6509da5，待拍板 D1–D6）�
 
 ### ② 待 Eason 拍板
 
-- **signpost material 設計案 D1–D6**（`design/quick-specs/signpost-material-expansion.md` §5）：D1 收錄門檻
-  V≥3＋全值域唯一含兵、D2 preview ply＋離線推翻率 ≤5% 開旗前置、D3 store shim、D4 mate 優先＋召回門檻數字、
-  D5 觸發率計數 lite、D6 量測樣本走 Supabase 腳本。每點文件內附推薦。
-- **docs 對帳 4 筆 ambiguous**（對帳 workflow 判證據不足以自動改，原文與建議見 wf_aaa04f41 結果）：
-  ① visual-identity EPIC Status（story-001 完成但原訂和茶系路線被 Wood12+Gioco 取代，Complete 措辭需人裁）
-  ② ADR-0012 是否轉 Accepted（自訂觸發條件早已跨過）③ ADR-0007「deferred to Sprint 6」排程措辭過期
-  （iPhone 真機量測至今未做）④ vision 文件「已規劃的概念深化頁」→「已上線」措辭。
+- ✅ **signpost material 設計案 D1–D6**（2026-07-13 拍板＝全數照推薦，含 D2 推翻率 5%、D4 召回門檻
+  <1 次/5 局）：定案記錄在 `design/quick-specs/signpost-material-expansion.md` §0/§5。施工前置＝D6 離線量測。
+- ✅ **docs 對帳 4 筆 ambiguous**（2026-07-13 拍板＝照建議施行）：① visual-identity EPIC → Complete＋
+  被 Wood12+Gioco 承接註記 ② ADR-0012 → Accepted（觸發條件早已跨過，回填理由在檔內）③ ADR-0007
+  排程措辭更新（真機量測 outstanding as of 2026-07-13）④ vision「已規劃」→「已上線的概念深化頁（判斷場）」。
 - ✅ **失誤 slideshow 入口**（2026-07-11 拍板＝單一安靜入口）：新 `MomentSlideshowDoor`（cream 底
   Neve 卡，走勢圖下方、有重點步才現身）→ openMoment(0) 進 slideshow。與點圖跳手互補
   （工具 vs Neve 陪看），不恢復整排 list。
@@ -111,8 +110,9 @@ Task: signpost material 設計案 DRAFT 完成（6509da5，待拍板 D1–D6）�
   （沿用既有，未調）。
 - ✅ **mate 沉默關三項已施工**（2026-07-10，見現況四磚③）：去洩題文案／判斷場（比照 fork）／Qg3 逼和特判。
 - **擴池＝HOLD（2026-07-11 Eason 拍板）**：不再手工造罐頭 variant；深化題真正歸宿=signpost
-  （mate 已通、黑方已解鎖）。material 擴充**設計案已完成（2026-07-13，DRAFT `6509da5`）**、
-  等 D1–D6 拍板才施工；等真實使用數週看出卡頻率再回頭評估罐頭池。
+  （mate 已通、黑方已解鎖）。material 擴充**設計案已 Accepted（2026-07-13，D1–D6 照推薦）**；
+  施工前置＝D6 離線量測腳本（Supabase 樣本＋node 直驅 Stockfish depth16+，推翻率 ≤5% 才開旗），
+  之後 selector→store 泛化→signpost 接線（工時估 3–4 sessions，見 spec §6.2）。
 
 ### ④ 未來獨立任務
 

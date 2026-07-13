@@ -1,7 +1,7 @@
 # ADR-0007: Post-Game Review Analysis Loop and sessionStorage Schema
 
 ## Status
-Proposed — OQ-5 desktop spike RESOLVED (2026-05-30); real-iPhone measurement deferred to Sprint 6.
+Proposed — OQ-5 desktop spike RESOLVED (2026-05-30); real-iPhone measurement still outstanding as of 2026-07-13（下方 2026-06-25 production retune 已為 iPhone UX 主動降規，但真機耗時／記憶體量測仍未做）.
 
 > **Production retune (2026-06-25)** — independent of OQ-5 reachability (depth 22 *is* reachable):
 > the live Pass-2 knobs were lowered for iPhone review-speed UX — `REVIEW_TARGET_DEPTH` 22→16,
