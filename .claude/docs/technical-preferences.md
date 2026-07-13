@@ -68,10 +68,14 @@
   script，`npm install` 會跳 `npm warn allow-scripts stockfish / vue-demi …`。本專案**無害、不用 approve**：
   Stockfish WASM 已 committed 在 `public/stockfish/`（非靠 postinstall 產生）、vue-demi 自偵 Vue 3。
   CI 在 Node 26 全綠已證實。看到此警告不要以為壞了。
-- **vitest 全檔掛掉但「no tests / import 0ms」＝暫時性快取衝突，不是 code 壞**：與其他 vite 程序（dev server、
-  playwright webServer、緊接的前一次 vitest）並行或緊鄰執行時，Windows 上會搶 `node_modules/.vite` 快取導致
-  全部測試檔載入失敗（86/87 files failed、Tests no tests、import 0ms 的特徵組合）。**單獨重跑一次即綠**；
-  看到此特徵先重跑再診斷，別浪費時間追假根因（2026-07-03 兩度誤警）。
+- **vitest 全檔掛掉但「no tests / import 0ms」＝`node_modules/.vite` 快取問題，不是 code 壞**：特徵組合＝
+  9x/9x files failed、Tests no tests、import 0ms、`Cannot read properties of undefined (reading 'config')`、
+  pgn-viewer 報 `Cannot find module …dist/config`（dep optimizer 沒作用時原生 ESM 解析不了無副檔名 import）。
+  兩種毒法：① 與其他 vite 程序（dev server、playwright webServer、緊接的前一次 vitest）並行搶快取——
+  **單獨重跑一次即綠**（2026-07-03 兩度誤警）；② 快取檔本體損毀——**重跑不會好、帶不帶 `--maxWorkers` 都紅**
+  （2026-07-13 公司電腦 5 連紅實證），修法＝把 `node_modules/.vite` 搬走讓 vite 重建
+  （`mv node_modules/.vite node_modules/.vite-poisoned-<date>`，用 mv 不用 rm 以避開刪除保險絲），一次即綠。
+  看到特徵先重跑一次分流①②，別追假根因。
 - **Node 26 vitest localStorage shim（`tests/setup-node26-compat.ts`，vitest.config 已 `setupFiles` 指向）**：
   Node 26 把 `localStorage` 加進原生 globals（實驗性 Web Storage），但無 `--localstorage-file` 時它是
   getter-only 的 undefined，happy-dom 用 plain assignment 覆寫在 strict mode 會靜默失敗 → 全測試
