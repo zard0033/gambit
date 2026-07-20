@@ -88,6 +88,37 @@ function finishDeepening(unaided: boolean): void {
   // a11y: move focus into the dialog (aria-modal needs focus inside; Esc / scrim-click then dismiss).
   nextTick(() => wrapOverlay.value?.focus())
 }
+
+function closeWrapUp(): void {
+  router.push('/learn/concepts')
+}
+
+// Minimal focus trap for this self-authored wrap-up dialog. We keep the bespoke overlay (rather than
+// swapping in the shared ui/dialog) to preserve the wrap-fade spring entrance + custom essence card —
+// DialogContent would replace them with its own zoom-in animation and inject an X-close button. So the
+// trap is hand-rolled: Esc/scrim dismiss stay, and Tab/Shift+Tab cycle within the overlay so keyboard
+// focus can't slip behind the modal (aria-modal already hides the rest from AT).
+function onWrapKeydown(e: KeyboardEvent): void {
+  if (e.key === 'Escape') { closeWrapUp(); return }
+  if (e.key !== 'Tab') return
+  const root = wrapOverlay.value
+  if (!root) return
+  const focusables = Array.from(
+    root.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
+    ),
+  )
+  if (focusables.length === 0) { e.preventDefault(); return }
+  const first = focusables[0]
+  const last = focusables[focusables.length - 1]
+  const active = document.activeElement
+  if (e.shiftKey) {
+    if (active === first || active === root) { e.preventDefault(); last.focus() }
+  } else if (active === last) {
+    e.preventDefault()
+    first.focus()
+  }
+}
 </script>
 
 <template>
@@ -125,8 +156,8 @@ function finishDeepening(unaided: boolean): void {
         aria-modal="true"
         aria-label="深化完成"
         tabindex="-1"
-        @keydown.esc="router.push('/learn/concepts')"
-        @click.self="router.push('/learn/concepts')"
+        @keydown="onWrapKeydown"
+        @click.self="closeWrapUp"
       >
         <div
           data-testid="concept-deepen-completion"

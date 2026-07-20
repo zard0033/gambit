@@ -13,7 +13,7 @@ defineProps<{ count: number; current: number }>()
     <span
       v-for="i in count"
       :key="i"
-      class="h-1.5 rounded-full bg-ink-faint/40 transition-all"
+      class="h-1.5 rounded-full bg-ink-faint/40 transition-[width,background-color]"
       :class="i - 1 === current ? 'w-5 bg-primary' : 'w-1.5'"
     />
   </div>

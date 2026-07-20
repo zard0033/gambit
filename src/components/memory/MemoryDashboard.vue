@@ -67,7 +67,7 @@ const analysisProgress = computed(() => {
       <div class="flex items-center gap-3">
         <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-hover">
           <div
-            class="h-full rounded-full bg-primary transition-all duration-300"
+            class="h-full rounded-full bg-primary transition-[width] duration-300"
             :style="{ width: `${analysisProgress}%` }"
           />
         </div>

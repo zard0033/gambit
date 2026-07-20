@@ -55,7 +55,7 @@ function continueAsGuest() {
       <div class="mx-auto flex max-w-sm flex-col">
         <div class="mb-4 flex items-center gap-3 text-ink-on-deep-dim/35">
           <span class="h-px flex-1 bg-current"></span>
-          <span class="font-sans text-xs">或</span>
+          <span class="font-sans text-xs text-ink-on-deep-dim/75">或</span>
           <span class="h-px flex-1 bg-current"></span>
         </div>
         <button

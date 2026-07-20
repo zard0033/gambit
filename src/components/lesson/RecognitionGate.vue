@@ -215,7 +215,7 @@ const showIntro = ref(true)
                 <span
                   v-for="(v, i) in verdicts"
                   :key="i"
-                  class="h-2 w-2 rounded-full transition-all"
+                  class="h-2 w-2 rounded-full transition-colors"
                   :class="[
                     v === 'pending' ? 'bg-ink/15' : 'bg-primary',
                     i === idx ? 'ring-2 ring-primary/40 ring-offset-1 ring-offset-surface-card' : '',

@@ -106,8 +106,12 @@ onMounted(() => {
 
 <template>
   <div class="min-h-dvh flex flex-col">
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:min-h-[44px] focus:items-center focus:rounded-btn focus:border focus:border-line focus:bg-surface-card focus:px-4 focus:font-sans focus:text-sm focus:font-semibold focus:text-ink focus:shadow-card focus:outline-hidden focus:ring-2 focus:ring-gold"
+    >跳至主要內容</a>
     <AppNav v-if="!fullBleed" />
-    <main class="flex-1" :class="[fullBleed || isLearnPager ? '' : 'pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0', pageBg]">
+    <main id="main-content" tabindex="-1" class="flex-1" :class="[fullBleed || isLearnPager ? '' : 'pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0', pageBg]">
       <RouterView v-slot="{ Component }">
         <Transition name="journey" mode="out-in" @after-enter="focusRouteHeading">
           <component :is="Component" :key="routeKey" />

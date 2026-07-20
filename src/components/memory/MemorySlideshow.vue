@@ -151,7 +151,7 @@ onBeforeUnmount(() => { clearTimers(); boardRO?.disconnect(); boardRO = null })
 </script>
 
 <template>
-  <div ref="rootRef" class="relative flex w-full max-w-md flex-col gap-3 outline-none" tabindex="0" @keydown="onKeydown">
+  <div ref="rootRef" class="relative flex w-full max-w-md flex-col gap-3 rounded-2xl outline-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base" tabindex="0" @keydown="onKeydown">
     <!-- Board re-plays the moment; tap skips to the end-state -->
     <div class="rounded-[12px] bg-[linear-gradient(160deg,#6f4b30,#523722)] p-3 ring-1 ring-black/30" @click="skipToEnd">
       <div ref="boardFit" class="board-fit relative">

@@ -71,7 +71,7 @@ function start(): void {
             v-for="lvl in LEVELS"
             :key="lvl"
             type="button"
-            class="relative h-10 rounded-btn text-sm font-semibold tabular-nums transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
+            class="relative flex min-h-[44px] items-center justify-center rounded-btn text-sm font-semibold tabular-nums transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
             :class="
               selectedLevel === lvl
                 ? 'bg-primary text-primary-fg shadow-button'

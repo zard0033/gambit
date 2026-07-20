@@ -220,7 +220,7 @@ function goNext(): void {
       >
         <ArrowLeft :size="16" :stroke-width="1.8" /> {{ isPractice ? '課程' : '地圖' }}
       </button>
-      <span class="font-num text-[11px] text-ink-on-deep-dim/65">{{ progress.solvedCount }}/{{ progress.totalCount }}</span>
+      <span class="font-num text-[11px] text-ink-on-deep-dim/70">{{ progress.solvedCount }}/{{ progress.totalCount }}</span>
     </div>
 
     <!-- 關卡銘牌：道場匾額 —「第 N 關」+ 金色 motif kicker + 細金分隔線 -->

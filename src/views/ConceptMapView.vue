@@ -157,7 +157,7 @@ const maskStyle = (piece: string) => ({
                 class="block line-clamp-2 font-display text-[15px] font-bold leading-tight"
                 :class="v.lit ? 'text-ink' : 'text-ink-muted'"
               >{{ v.label }}</span>
-              <div class="mt-0.5 truncate font-sans text-[11px] text-ink-faint">{{ v.blurb }}</div>
+              <div class="mt-0.5 font-sans text-[11px] leading-snug text-ink-faint">{{ v.blurb }}</div>
             </div>
             <span
               class="flex shrink-0 items-center gap-0.5 self-center font-sans text-[11px] text-ink-faint"
