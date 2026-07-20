@@ -61,18 +61,21 @@ onMounted(() => {
   width: 100%;
   padding: 26px 0 96px;
   /* Sky = the page's own atmosphere, not a card: nav-join anchors the top edge to AppNav's
-     bottom colour (#183E35, no jump), sky-a/sky-b carry the time-of-day temperature, and the
-     final stop fades all the way to the cream content colour so the content area reads as
-     "beneath the sky" rather than a panel sitting on top of it. */
+     bottom colour (#183E35, no jump), sky-a/sky-b carry the time-of-day temperature. The colour
+     transition is compressed into the top 40% of the band and sky-b holds solid for the rest —
+     a long fade down to the cream content colour banded visibly on iPhone displays, so the
+     bottom edge cuts straight to cream instead, with a hairline inset shadow standing in for
+     the soft edge a fade used to provide. */
   background:
     radial-gradient(120% 70% at 50% 6%, var(--scene-glow), transparent 55%),
     linear-gradient(
       180deg,
       var(--scene-nav-join) 0%,
       var(--scene-sky-a) 16%,
-      var(--scene-sky-b) 60%,
-      var(--color-surface-base) 100%
+      var(--scene-sky-b) 40%,
+      var(--scene-sky-b) 100%
     );
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.22);
   /* Entrance: single opacity fade-up, ~620ms ease-out (atmospheric exception). */
   opacity: 0;
   transition: opacity 620ms cubic-bezier(0, 0, 0.2, 1);
