@@ -45,46 +45,6 @@ body cg-board {
   box-sizing: border-box !important;
 }
 
-/* ---- Coordinate labels (a–h / 1–8) ----
-   Native chessground coords (CSS-positioned → responsive). chessground's default
-   colors wash out on this tea palette, so use a solid cream fill with a real dark
-   text-stroke (not a blur) for crisp legibility on both square shades. Ranks are
-   moved to the left edge per design (1–8 on the leftmost column, a–h on the bottom). */
-.cg-wrap coords coord {
-  /* !important overrides chessground's higher-specificity per-square nth-child colors */
-  color: #3d2210 !important;
-  opacity: 1;
-  font-weight: 700;
-  font-size: 12px;
-  text-shadow: none;
-  -webkit-text-stroke: 1px #f4ead8;
-  paint-order: stroke fill;
-}
-
-.cg-wrap coords.ranks {
-  left: 1px;
-  right: auto;
-  align-items: flex-start;
-  padding-top: 1px;
-}
-
-.cg-wrap coords.files {
-  left: 0;
-  right: 0;
-  padding: 0;
-  /* Lift the row up off the board's bottom edge — chessground's thin bottom strip + the 12px
-     glyph's line-height otherwise hangs a–h ~6px below the board. translateY seats them inside
-     the bottom rank. (padding/bottom don't move it — the glyph overflows a fixed-height strip.) */
-  transform: translateY(-9px);
-}
-
-/* a–h in each square's bottom-right corner (lichess / chess.com style). No container side-padding
-   so the 8 coord cells map 1:1 onto the 8 squares; a small right inset sits the letter in the corner. */
-.cg-wrap coords.files coord {
-  text-align: right;
-  padding-right: 3px;
-}
-
 /* ---- White pieces ---- */
 body .cg-wrap piece.pawn.white   { background-image: url('/pieces/wP.svg'); }
 body .cg-wrap piece.bishop.white { background-image: url('/pieces/wB.svg'); }

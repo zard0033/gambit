@@ -195,11 +195,12 @@ const maskStyle = (piece: string) => ({
 .coin {
   position: relative; display: flex; height: 38px; width: 38px; flex: none;
   align-items: center; justify-content: center; border-radius: 9999px;
-  background: #fcf9f3;
+  background: #fcf9f3; box-sizing: border-box;
 }
+/* 未學＝虛線描邊（拍板見 2026-07-20 coin 三階選項比較）：讀作「輪廓已在、還沒填滿」，
+   不加色只加形狀，避免跟 learned/full 的金綠環搶戲。 */
 .coin-dim {
-  background: #f4ead8;
-  box-shadow: 0 0 0 2px #e0d3bd, inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  border: 2px dashed #a88c76;
 }
 .coin-learned {
   box-shadow: 0 0 0 2px #1c7059, 0 3px 10px rgba(61, 34, 16, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.9);

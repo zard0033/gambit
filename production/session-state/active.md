@@ -13,11 +13,42 @@ Task: 2026-07-14 家用機收線：D3 招呼框 banding 修復已推；**materia
 
 ---
 
+## 2026-07-20 iPhone 複驗回合（三真 bug 修復＋待回報項清空）
+
+Eason 用 iPhone 走完 4 批複驗清單逐項回報，逐一分流：多數 OK；三項是真 bug，已修＋驗證；兩項澄清為
+設計本來如此（清單描述過期，非退步）；一項 backlog。**尚未 push。**
+
+- **PgnViewer（棋憶回放）座標終於對齊木框**（待實機指認項終於複現，真 bug）：根因＝
+  `@lichess-org/pgn-viewer` 用 snabbdom `patch()` 掛載，會把傳進去的 DOM 節點整個**替換**成它自己蓋的新節點
+  （remove+insert，不是就地寫入）——Vue 的 `ref` 綁的是原本那個被丟棄的節點，座標讀取一直讀到孤兒節點、
+  回傳空陣列。修法＝`pgn-viewer.vue` 改用 `frameRef`（外層永不被替換的 wrapper）取代 `containerRef` 做
+  幾何量測與 `:deep()` CSS 錨點；關閉原生 chessground 座標（`coordinates:false`）、自繪 rank/file 標籤到
+  木框上，跟試煉/課程/對局統一（不再是 lichess 風格印在格內角）；`.lpv__board` 補 12px padding 讓標籤有地方
+  站；`board-theme.css` 移除變成死碼的原生座標樣式區塊。黑方/白方 orientation 皆已 Playwright 實測正確翻轉。
+- **課程「控制中心」d4/e4 內容矛盾**：第一個互動步的 `text`／`hint` 都寫「e4/d4 這類中心格」暗示兩者等價，
+  但 `expectedMove` 只認 e4（d4 只觸發 softReject 溫和帶回，不算過關），跟 `objectives` 早就寫的
+  「練習用 e4」矛盾。改法＝`text`／`hint` 收斂成明確指向 e4，不再暗示 d4 同樣算完成。
+- **概念地圖「未學」coin 改虛線描邊**：原本刻意做成幾乎看不見的淡環（安靜預設），但 Eason 反饋認不出第三階；
+  出 3 個方案 demo 拍板選虛線描邊（A），語意直接、跟另兩階同量級但不搶色。
+- **釐清非 bug（清單描述過期，不是退步）**：試煉「沒有 LOG」——現在是刻意只顯示最近一次結果、不累積
+  （避免清單把底部 CTA 推到手機網址列下面），清單項目寫的是改版前的舊行為。
+- **backlog（Eason 拍板先不動）**：epiphany 棋誌文案「太 AI 太假」——六個模板都用同一種「我沒做 X，你卻/仍 Y」
+  否定式排比骨架，加上「這不容易」「是你掙來的」偏評價語，違反 Neve「不輕易讚美」人格規則；之後再處理
+  （見待辦④）。
+- 驗證足跡：vitest 907/907（含一次疑似快取假紅、單獨重跑即綠，同 technical-preferences 已知模式）、
+  vue-tsc 0、PgnViewer 座標＋coin 樣態均 Playwright 實截圖確認（桌機/手機雙寬）。
+
 ## 2026-07-14（家用機）收線紀錄
 
 - **D3 招呼框銜接修復**（`241e4ea`）：iPhone 反饋「漸層切割感明顯」＝banding；三方向 demo 盲選拍板 D3
   ＝色溫過渡壓縮前 40%、其餘 sky-b 實色、底部硬切＋1px inset 細影，結構上無長漸層段。基準圖重生
   home×2＋play×2/concepts（stale 修正）。
+- **開局面板閃現修復**（`1f8ac2d`）：Eason 反饋開新對局「棋盤先出、下面 block 晚出且閃現」。根因＝
+  PlayView onMounted 先 await engine.init()（Stockfish 握手）才撥 phase 離開 SETUP，面板 v-if 綁 phase
+  被卡 ~183ms 後無過渡蹦出。修法＝開局邏輯移到握手前（面板與棋盤同幀），握手完輪 AI 才補 requestAiMove()
+  （既有 no-op guard，不動狀態機）。插樁實測 gap 183ms→0ms。
+- **以上皆已 push**（`8c3b41a`＋教訓文件 `4823805`）；push 途中三連撞 vitest 假紅，根因＝prepush hook 是
+  PreToolUse（指令執行前先跑），「mv 快取+push 同一條指令」無效——處方已補進 technical-preferences。
 - **⚠️ material 撞題事故與裁決**：家用機 07-12 晚依當日三題拍板（offense／平行欄位／規則層審查）把
   material **完整實作**（6 條件 selector＋37 樣本抽查 0 誤收＋逼和排除——與 spec 條件 9 獨立收斂），
   但未 push；公司機 07-13 不知情之下重跑設計、產出更嚴的 11 條件 Accepted spec（D1–D6 拍板）。
@@ -56,7 +87,7 @@ Task: 2026-07-14 家用機收線：D3 招呼框 banding 修復已推；**materia
   WITH CHECK＋DROP `skill_scores`/`lesson_side_learned`。PostgREST 已驗：兩表回 PGRST205（確實消失）、
   餘 7 表 RLS 正常擋 anon。WITH CHECK 行為中立、僅間接驗證；要鐵證在 SQL editor 查
   `pg_policies` 的 `with_check is not null`（7 行全 true 即過）。
-- **2026-07-10 四磚（工作樹已施工＋全驗證，待 commit）**：
+- **2026-07-10 四磚（已 push 上線 `a80fc9e`）**：
   ① **氛圍首頁 IA-A**：`NeveSceneHeader` 四時段天色（night/morning/afternoon/evening，`timeBucketForHour` 純函式）
   ＋緩亮 620ms（唯一允許超過 300ms 的氛圍例外）＋全站 `journey` 路由轉場（App.vue Transition out-in 200ms）；
   h1 focus 因 out-in 時序改掛 `@after-enter`（router afterEach 保留管首次載入）。
@@ -93,16 +124,19 @@ Task: 2026-07-14 家用機收線：D3 招呼框 banding 修復已推；**materia
 
 ### ① iPhone 實機複驗（累積四批，deploy 後用無痕分頁）
 
-- **7-10 批（四磚）複驗進度（2026-07-11 Eason 回報）**：✅ 頭像；✅ mate 判斷場（節奏反饋「完成彈窗
-  太快」已修＝留白 1.4s）；✅ signpost 全流程；⏳ 氛圍首頁——**等 V3 接天空 push 上線後再測**（原版
-  已被反饋「招呼框太突兀」並重做）；⏳ PWA 加到主畫面＋離線＋autoUpdate 更新（未回報）。
-- **7-03 批**：Neve 頭像三處觀感（課程/判斷場 24px、棋憶 28px）；判斷場第 3 盤裸點擊＋真手指滑動；深化
-  mate 新盤（h1 角 Qg2#）手感；redesign 三項＝#6 keySquare 高亮環+脈動、#9 概念地圖三階 coin、#11 課程
-  氣泡 font-lesson。
-- **6-29 批**：#2 誘餌盤互動、#10 棋盤跑版（含試煉）、#7 d4 軟引導、演示節奏、**epiphany 鉤子實際觸發＋
-  棋誌顯示**、深化 A3 彈窗。
-- **更早**：棋憶賽後 UX 批（`e11d3c6`：失誤動畫節奏、重開同盤 cache 命中）；B5 試煉互動（log 累積、答錯
-  滑回、揭曉箭頭）；逐手 PgnViewer「棋盤外藍框 + 座標小偏」（本機渲染不到、待實機指認）。
+- **7-10 批（四磚）複驗進度**：✅ 頭像；✅ mate 判斷場（「完成彈窗太快」已修＝留白 1.4s）；✅ signpost
+  全流程；⏳ **氛圍首頁 D3 版已上線可測**（V3 漸層被反饋 banding 後重做為 D3 純深底，2026-07-14 已 push）；
+  ⏳ PWA 加到主畫面＋離線＋autoUpdate 更新（未回報）；⏳ 順驗：開新對局棋盤與下方面板應同幀出現（07-14 修）。
+- **7-03 批**：⏳ Neve 頭像三處觀感（課程/判斷場 24px、棋憶 28px）；✅ 判斷場第 3 盤裸點擊＋真手指滑動
+  （2026-07-20 複驗 OK）；⏳ 深化 mate 新盤（h1 角 Qg2#）手感；redesign 三項＝✅ #6 keySquare 高亮環+脈動、
+  ✅ #9 概念地圖三階 coin（2026-07-20 認不出第三階→改虛線描邊已修，見上方 07-20 節）、✅ #11 課程氣泡
+  font-lesson（皆 2026-07-20 複驗 OK）。
+- ✅ **6-29 批全數結案（2026-07-20 複驗）**：#2 誘餌盤互動 OK；#10 棋盤跑版（含試煉）OK；#7 d4 軟引導——
+  清單描述有誤（功能只在課程「控制中心」，不在開新對局），順帶抓到內容矛盾已修（見上方 07-20 節）；
+  演示節奏 OK；epiphany 鉤子實際觸發＋棋誌顯示 OK（文案語氣另立 backlog，見待辦④）；深化 A3 彈窗 OK。
+- ✅ **更早批全數結案（2026-07-20 複驗）**：棋憶賽後 UX 批（`e11d3c6`：失誤動畫節奏 OK、重開同盤 cache
+  命中 OK）；B5 試煉互動（log 累積——清單描述過期，現在刻意單筆不累積，非 bug；答錯滑回 OK；揭曉箭頭 OK）；
+  逐手 PgnViewer「棋盤外藍框 + 座標小偏」——實機終於複現，是真 bug，根因與修法見上方 07-20 節。
 
 ### ② 待 Eason 拍板
 
@@ -151,6 +185,11 @@ Task: 2026-07-14 家用機收線：D3 招呼框 banding 修復已推；**materia
 - **🎨 第二主題（noir / "Dusk"）⏸ 低優先**：設計定案、spec 已固化 SoT（`colors_and_type.css`
   `[data-theme="noir"]` 區塊）；demo＝`design/demos/{theme-tokens-mockup,ink-noir-explore}.html`。production
   0 實作、刻意延後。屆時排序：token 層 → toggle（ProfileView+同步）→ 深區 hex 逐頁 tokenize → CI WCAG gate。
+- **epiphany 棋誌文案語氣待收斂**（2026-07-20 iPhone 複驗反饋「太 AI 太假」，Eason 拍板先放 backlog）：
+  六個模板（`src/data/journal-templates/epiphany.ts`）同一種「我沒做 X，你卻/仍 Y」否定式排比骨架，
+  加上「這不容易」「是你掙來的」偏評價語，違反 Neve「不輕易讚美」人格規則（見
+  `design/gambit-design-system/persona-neve.md`）。處理時走文案語氣護欄的 3-lens 對抗式審查
+  （見 CLAUDE.md「文案語氣護欄」）。
 
 ---
 

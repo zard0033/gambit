@@ -16,6 +16,9 @@ export function useBoardCoordinates(deps: {
   boardRef: import('vue').Ref<HTMLElement | null>
   getShowCoordinates: () => boolean
   squareToRect: (square: string) => Rect | null
+  /** Extra reactive trigger to force a recompute (e.g. a remount that keeps the same
+   * element size, so the ResizeObserver below never fires — PgnViewer flipping orientation). */
+  extraTick?: import('vue').Ref<number>
 }): {
   rankLabels: import('vue').ComputedRef<RankLabel[]>
   fileLabels: import('vue').ComputedRef<FileLabel[]>
@@ -25,6 +28,7 @@ export function useBoardCoordinates(deps: {
 
   const rankLabels = computed<RankLabel[]>(() => {
     void geomTick.value
+    void deps.extraTick?.value
     if (!deps.getShowCoordinates()) return []
     const out: RankLabel[] = []
     for (let r = 1; r <= 8; r++) {
@@ -36,6 +40,7 @@ export function useBoardCoordinates(deps: {
 
   const fileLabels = computed<FileLabel[]>(() => {
     void geomTick.value
+    void deps.extraTick?.value
     if (!deps.getShowCoordinates()) return []
     // Bottom edge = the visually-lowest row (rank 1 for white, rank 8 for black).
     const r1 = deps.squareToRect('a1')
