@@ -1,0 +1,249 @@
+[
+  {
+    "id": "hang-queen-by-knight",
+    "category": "true-hanger",
+    "fen": "4k3/8/8/3q4/8/2N5/8/4K3 w - - 0 1",
+    "bestMove": "c3d5",
+    "expected": "COLLECT",
+    "expectedReason": "Nxd5 wins undefended queen, safe"
+  },
+  {
+    "id": "hang-rook-by-bishop",
+    "category": "true-hanger",
+    "fen": "4k3/8/8/3r4/8/8/B7/4K3 w - - 0 1",
+    "bestMove": "a2d5",
+    "expected": "COLLECT",
+    "expectedReason": "Bxd5 wins undefended rook, safe (verified a2-d5 diagonal, zero defenders pre/post)"
+  },
+  {
+    "id": "hang-bishop-by-pawn",
+    "category": "true-hanger",
+    "fen": "4k3/8/3b4/4P3/8/8/8/4K3 w - - 0 1",
+    "bestMove": "e5d6",
+    "expected": "COLLECT",
+    "expectedReason": "exd6 wins undefended bishop, safe"
+  },
+  {
+    "id": "hang-knight-by-rook",
+    "category": "true-hanger",
+    "fen": "4k3/8/8/3n4/8/8/8/3RK3 w - - 0 1",
+    "bestMove": "d1d5",
+    "expected": "COLLECT",
+    "expectedReason": "Rxd5 wins undefended knight, safe"
+  },
+  {
+    "id": "hang-pawn-by-king",
+    "category": "true-hanger",
+    "fen": "8/8/8/3k4/8/3p4/3K4/8 w - - 0 1",
+    "bestMove": "d2d3",
+    "expected": "COLLECT",
+    "expectedReason": "Kxd3 wins undefended pawn; black king at d5 is 2 ranks away, not adjacent to d3, capture safe"
+  },
+  {
+    "id": "hang-knight-by-bishop-diag",
+    "category": "true-hanger",
+    "fen": "4k3/8/2n5/8/8/8/6B1/4K3 w - - 0 1",
+    "bestMove": "g2c6",
+    "expected": "COLLECT",
+    "expectedReason": "Bxc6 wins undefended knight along open diagonal, safe"
+  },
+  {
+    "id": "defended-by-pawn",
+    "category": "defended",
+    "fen": "4k3/8/2p5/3q4/8/2N5/8/4K3 w - - 0 1",
+    "bestMove": "c3d5",
+    "expected": "SKIP",
+    "expectedReason": "c6 pawn defends d5 pre-capture"
+  },
+  {
+    "id": "defended-by-black-rook-file",
+    "category": "defended",
+    "fen": "3rk3/8/8/3q4/8/2N5/8/4K3 w - - 0 1",
+    "bestMove": "c3d5",
+    "expected": "SKIP",
+    "expectedReason": "black rook d8 defends d5 along the d-file"
+  },
+  {
+    "id": "king-actually-adjacent-defends",
+    "category": "defended",
+    "fen": "8/8/4k3/3p4/8/2N5/8/4K3 w - - 0 1",
+    "bestMove": "c3d5",
+    "expected": "SKIP",
+    "expectedReason": "black king e6 is adjacent to d5, defends the pawn pre-capture"
+  },
+  {
+    "id": "multi-hangers-one-tested",
+    "category": "multi-hanger",
+    "fen": "4k3/8/8/3q4/8/2N4b/8/4K3 w - - 0 1",
+    "bestMove": "c3d5",
+    "expected": "COLLECT",
+    "expectedReason": "two hangers exist (Qd5, Bh3) but tool evaluates only bestMove=c3d5, which is independently safe (moved bishop off the b4-c3-e1 diagonal so it no longer pins the knight)"
+  },
+  {
+    "id": "capturer-itself-pinned-illegal",
+    "category": "pinned-capturer",
+    "fen": "4k3/8/8/3q4/1b6/2N5/8/4K3 w - - 0 1",
+    "bestMove": "c3d5",
+    "expected": "SKIP",
+    "expectedReason": "Nc3 is pinned to Ke1 by Bb4 along the b4-c3-d2-e1 diagonal — Nxd5 is ILLEGAL (would expose own king). Tool must SKIP via \"bestMove illegal on this FEN\", not silently mis-evaluate.",
+    "expectIllegalMove": true
+  },
+  {
+    "id": "double-safe-capture-route1",
+    "category": "duplicate",
+    "fen": "4k3/8/8/3q4/5N2/2N5/8/4K3 w - - 0 1",
+    "bestMove": "f4d5",
+    "expected": "SKIP",
+    "expectedReason": "Nc3xd5 and Nf4xd5 both safe — not unique"
+  },
+  {
+    "id": "double-safe-capture-route2",
+    "category": "duplicate",
+    "fen": "4k3/8/8/3q4/5N2/2N5/8/4K3 w - - 0 1",
+    "bestMove": "c3d5",
+    "expected": "SKIP",
+    "expectedReason": "same board, other route — still not unique"
+  },
+  {
+    "id": "pinned-defender-real",
+    "category": "pin-false-negative",
+    "fen": "7k/8/5n2/8/4p3/8/1B1N4/4K3 w - - 0 1",
+    "bestMove": "d2e4",
+    "expected": "SKIP",
+    "expectedReason": "Nd2xe4: Nf6 geometrically defends e4 but is pinned to Kh8 by Bb2 (verified: Nf6xe4 illegal on this FEN) and cannot legally recapture. attackers() is pin-unaware -> tool conservatively SKIPs a position a human would COLLECT. Expected false negative, not a bug."
+  },
+  {
+    "id": "endgame-rook-vs-pawn",
+    "category": "endgame",
+    "fen": "8/8/8/4k3/8/8/3p4/3RK3 w - - 0 1",
+    "bestMove": "d1d2",
+    "expected": "COLLECT",
+    "expectedReason": "Rxd2 wins undefended pawn; black king e5 too far to matter for square d2"
+  },
+  {
+    "id": "endgame-king-vs-king-pawn-safe",
+    "category": "endgame",
+    "fen": "8/8/8/6k1/8/3K4/3p4/8 w - - 0 1",
+    "bestMove": "d3d2",
+    "expected": "COLLECT",
+    "expectedReason": "Kxd2 wins undefended pawn, black king g5 far away, safe"
+  },
+  {
+    "id": "illegal-king-move-into-check",
+    "category": "illegal-bestmove",
+    "fen": "8/8/8/8/8/2k5/2p5/2K5 w - - 0 1",
+    "bestMove": "c1c2",
+    "expected": "SKIP",
+    "expectedReason": "Kc1xc2 illegal — c2 adjacent to black king c3, would move into check",
+    "expectIllegalMove": true
+  },
+  {
+    "id": "en-passant-excluded",
+    "category": "en-passant",
+    "fen": "4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1",
+    "bestMove": "e5d6",
+    "expected": "SKIP",
+    "expectedReason": "en-passant capture excluded (mv.flags includes \"e\")"
+  },
+  {
+    "id": "promotion-capture-skip",
+    "category": "promotion",
+    "fen": "3r1k2/4P3/8/8/8/8/8/4K3 w - - 0 1",
+    "bestMove": "e7d8q",
+    "expected": "SKIP",
+    "expectedReason": "promotion — bestMove.length===5, v1 skip regardless of safety"
+  },
+  {
+    "id": "player-already-played",
+    "category": "already-played",
+    "fen": "4k3/8/8/3n4/8/2N5/8/4K3 w - - 0 1",
+    "bestMove": "c3d5",
+    "expected": "SKIP",
+    "expectedReason": "actualMove==bestMove, nothing missed",
+    "actualMove": "c3d5"
+  },
+  {
+    "id": "non-capture-bestmove",
+    "category": "non-capture",
+    "fen": "4k3/8/8/8/8/2N5/8/4K3 w - - 0 1",
+    "bestMove": "c3a4",
+    "expected": "SKIP",
+    "expectedReason": "Na4 is not a capture"
+  },
+  {
+    "id": "cploss-below-threshold",
+    "category": "cploss",
+    "fen": "4k3/8/8/3n4/8/2N5/8/4K3 w - - 0 1",
+    "bestMove": "c3d5",
+    "expected": "SKIP",
+    "expectedReason": "cpLoss 299 < 300 threshold",
+    "cpLoss": 299
+  },
+  {
+    "id": "cploss-at-threshold",
+    "category": "cploss",
+    "fen": "4k3/8/8/3n4/8/2N5/8/4K3 w - - 0 1",
+    "bestMove": "c3d5",
+    "expected": "COLLECT",
+    "expectedReason": "cpLoss exactly 300, >= threshold (boundary inclusive)",
+    "cpLoss": 300
+  },
+  {
+    "id": "cploss-above-threshold",
+    "category": "cploss",
+    "fen": "4k3/8/8/3n4/8/2N5/8/4K3 w - - 0 1",
+    "bestMove": "c3d5",
+    "expected": "COLLECT",
+    "expectedReason": "cpLoss 301 > 300 threshold",
+    "cpLoss": 301
+  },
+  {
+    "id": "cploss-zero",
+    "category": "cploss",
+    "fen": "4k3/8/8/3n4/8/2N5/8/4K3 w - - 0 1",
+    "bestMove": "c3d5",
+    "expected": "SKIP",
+    "expectedReason": "cpLoss 0 (e.g. own blunder cancels engine gain) < threshold",
+    "cpLoss": 0
+  },
+  {
+    "id": "black-hangs-queen-by-knight",
+    "category": "black-mover",
+    "fen": "4k3/8/2n5/8/3Q4/8/8/4K3 b - - 0 1",
+    "bestMove": "c6d4",
+    "expected": "COLLECT",
+    "expectedReason": "black Nxd4 wins undefended white queen, safe"
+  },
+  {
+    "id": "black-hangs-rook-by-bishop",
+    "category": "black-mover",
+    "fen": "4kb2/8/3R4/8/8/8/8/4K3 b - - 0 1",
+    "bestMove": "f8d6",
+    "expected": "COLLECT",
+    "expectedReason": "black Bxd6 wins undefended white rook, safe (verified f8-d6 diagonal, zero defenders)"
+  },
+  {
+    "id": "black-defended-by-pawn",
+    "category": "black-mover",
+    "fen": "4k3/8/8/3Q4/2P5/2n5/8/4K3 b - - 0 1",
+    "bestMove": "c3d5",
+    "expected": "SKIP",
+    "expectedReason": "white pawn c4 defends the queen on d5 pre-capture"
+  },
+  {
+    "id": "castling-rights-present-hanger",
+    "category": "castling-context",
+    "fen": "r3k2r/8/8/3n4/8/2N5/8/R3K2R w KQkq - 0 1",
+    "bestMove": "c3d5",
+    "expected": "COLLECT",
+    "expectedReason": "castling rights on the board are irrelevant to this unrelated Nxd5 capture; still safe"
+  },
+  {
+    "id": "over-defended-two-defenders",
+    "category": "defended",
+    "fen": "8/8/2p1k3/3q4/8/2N5/8/4K3 w - - 0 1",
+    "bestMove": "c3d5",
+    "expected": "SKIP",
+    "expectedReason": "black pawn c6 AND black king e6 both defend d5 pre-capture (two attackers)"
+  }
+]
