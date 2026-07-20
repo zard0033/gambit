@@ -2,20 +2,18 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { ArrowRight, Target, BookOpen, Library, Swords } from 'lucide-vue-next'
-import { LESSON_TIER_LABELS, LESSON_TIER_PIECES as TIER_PIECE } from '@/types/lesson'
+import { BookOpen, Target, Library } from 'lucide-vue-next'
+import { LESSON_TIER_LABELS } from '@/types/lesson'
 import { greetingForNow } from '@/lib/utils'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
 import { useDungeonProgressStore } from '@/stores/dungeon-progress'
+import { puzzles } from '@/data/puzzles'
 import { useUiStore } from '@/stores/ui-store'
 import { useResumeGameStore } from '@/stores/resume-game'
 import { useJournalStore } from '@/stores/journal'
 import { HOMEPAGE_PEEK_COUNT } from '@/config/journal-config'
 import { getLastSeenAt, isUnread } from '@/modules/journal/unread'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { DarkPanel, ChapterBadge, StatCard, SectionLabel, ProgressBar } from '@/components/ui/gambit'
-import NeveSceneHeader from '@/components/home/NeveSceneHeader.vue'
+import NeveSceneHeader, { type CtaStation, type PathStation } from '@/components/home/NeveSceneHeader.vue'
 import { useReducedMotion } from '@/composables/use-reduced-motion'
 
 const router = useRouter()
@@ -30,25 +28,8 @@ const journal = useJournalStore()
 const lastSeenAt = getLastSeenAt()
 const peekEntries = computed(() => journal.recent(HOMEPAGE_PEEK_COUNT))
 
-// 續玩對局（續玩對局）：有進行中對局時，hero 卡換成「繼續對局」。
-const resumeInfo = computed(() => {
-  const r = resume.current
-  if (!r) return null
-  return {
-    moveCount: r.moves.length,
-    colorLabel: r.playerColor === 'white' ? '白' : '黑',
-    piece: r.playerColor === 'white' ? 'wP' : 'bP',
-    level: r.level,
-  }
-})
-
 const greeting = computed(greetingForNow)
 const lessonOrdinal = computed(() => progress.completedCount + 1)
-
-// Blocks below the scene fade-rise once on mount (≤300ms, small stagger).
-// prefers-reduced-motion skips the animation (CSS media query forces the lit state).
-const { prefersReducedMotion } = useReducedMotion()
-const ready = ref(false)
 
 function startGame() {
   // Open the setup modal over the home page; navigation to /play happens after the player confirms.
@@ -60,9 +41,58 @@ function continueGame() {
 }
 // 另開新對局：只開設定 modal，不在此清除 resume——真正的清除在 PlayView 確認開局時（startFromPayload）
 // 才做。否則使用者只是點開、又關掉 modal 沒開成，進行中對局會被誤刪。
-function continueLearning() {
-  router.push(nextLesson.value ? `/learn/${nextLesson.value.id}` : '/learn')
-}
+
+// 「繼續走」站：進行中對局 → 回到棋盤；否則 → 開始新對局。
+const ctaStation = computed<CtaStation>(() => {
+  const r = resume.current
+  if (r) {
+    const colorLabel = r.playerColor === 'white' ? '執白' : '執黑'
+    return {
+      mode: 'continue',
+      headline: '上一盤還沒下完',
+      meta: `第 ${r.moves.length} 手 · ${colorLabel} · Lv.${r.level}`,
+      primaryLabel: '回到棋盤',
+      onPrimary: continueGame,
+      secondaryLabel: '另開新對局',
+      onSecondary: startGame,
+    }
+  }
+  return {
+    mode: 'new',
+    headline: '開一盤新的',
+    meta: '自選強度與執子',
+    primaryLabel: '開始對局',
+    onPrimary: startGame,
+  }
+})
+
+// 「學習」站：下一課，或全部完成時導回地圖。
+const lessonStation = computed<PathStation>(() => {
+  const lesson = nextLesson.value
+  if (!lesson) {
+    return { title: '你已完成所有課程', sub: '回到學習地圖看看還有什麼', to: '/learn' }
+  }
+  return {
+    title: lesson.title,
+    sub: `第 ${lessonOrdinal.value} 課 · ${LESSON_TIER_LABELS[lesson.tier]}`,
+    to: `/learn/${lesson.id}`,
+  }
+})
+
+// 「試煉」站：目前解到的題（currentOrder），或全部解開時導回試煉地圖。
+const currentPuzzle = computed(() => puzzles.find((p) => p.order === dungeon.currentOrder))
+const trialStation = computed<PathStation>(() => {
+  const puzzle = currentPuzzle.value
+  if (!puzzle) {
+    return { title: '你已破解所有試煉', sub: '回到試煉地圖看看還有什麼', to: '/dungeon' }
+  }
+  return { title: puzzle.title, sub: puzzle.brief, to: `/dungeon/${puzzle.id}` }
+})
+
+// Blocks below the scene fade-rise once on mount (≤300ms, small stagger).
+// prefers-reduced-motion skips the animation (CSS media query forces the lit state).
+const { prefersReducedMotion } = useReducedMotion()
+const ready = ref(false)
 
 onMounted(() => {
   // evaluate() 內部自己 await load()，settle 完再 reload 一次——取代單純 load()，
@@ -79,155 +109,51 @@ onMounted(() => {
 
 <template>
   <div>
-    <!-- 氛圍首屏：Neve 在場的時段場景帶（取代舊問候區，保留既有標題 h1[tabindex=-1]）。
-         留在 max-w 容器之外＝full-bleed：此 div 不設寬度限制，NeveSceneHeader 因此天然貼齊
-         viewport 左右與 AppNav 底部（main 對 home 無 padding-top）。內容寬度改由
-         NeveSceneHeader 內部自己的 max-w 容器對齊，見該元件。 -->
-    <NeveSceneHeader :greeting="greeting" />
+    <!-- 氛圍首屏：星夜天色場景＋蜿蜒小徑（三站＝今天可做的事）。留在 max-w 容器之外＝full-bleed。 -->
+    <NeveSceneHeader :greeting="greeting" :cta="ctaStation" :lesson="lessonStation" :trial="trialStation" />
 
-  <div class="max-w-2xl md:max-w-4xl mx-auto px-[18px] pb-6">
-    <!-- 主區：桌機 hero | 繼續學習 雙欄等高；手機堆疊 -->
-    <div class="fade-rise mt-4 md:mt-6 md:grid md:grid-cols-2 md:gap-5 md:items-stretch" :class="{ 'is-in': ready }">
-      <!-- 進行中對局 → 繼續對局卡；否則 開始新對局卡（深青瓷焦點卡，桌機填滿欄高、內容垂直置中） -->
-      <DarkPanel
-        v-if="resumeInfo"
-        accent-left
-        class="cursor-pointer md:h-full md:flex md:flex-col md:justify-center"
-        @click="continueGame"
-      >
-        <div class="flex items-center gap-3.5">
-          <div class="flex-1 min-w-0">
-            <!-- 進行中狀態 pill（取代 NEW GAME 的金色 eyebrow，一眼區隔出「存著的對局」；靜態點守平靜鐵則） -->
-            <span class="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/8 px-2.5 py-1 font-sans text-[11px] font-medium text-ink-on-deep-dim">
-              <span class="h-1.5 w-1.5 rounded-full bg-[#7EBEA5]" aria-hidden="true" />進行中
-            </span>
-            <p class="font-display font-bold text-[22px] text-ink-on-deep mt-2">繼續對局</p>
-            <!-- 重點資訊改成可掃讀的 stat chips：手數 / 執色 / 強度 -->
-            <div class="mt-2 flex flex-wrap gap-1.5">
-              <span class="inline-flex items-center rounded-md border border-white/10 bg-white/6 px-2 py-0.5 font-num text-[12px] tabular-nums text-ink-on-deep">第 {{ resumeInfo.moveCount }} 手</span>
-              <span class="inline-flex items-center rounded-md border border-white/10 bg-white/6 px-2 py-0.5 font-num text-[12px] text-ink-on-deep">執{{ resumeInfo.colorLabel }}</span>
-              <span class="inline-flex items-center rounded-md border border-white/10 bg-white/6 px-2 py-0.5 font-num text-[12px] tabular-nums text-ink-on-deep">Lv.{{ resumeInfo.level }}</span>
-            </div>
-            <div class="mt-3.5 flex items-center gap-3">
-              <Button variant="gold" size="sm" @click.stop="continueGame">
-                繼續 <ArrowRight :size="18" />
-              </Button>
-              <button
-                type="button"
-                class="inline-flex items-center min-h-[44px] px-1 -mx-1 font-sans text-[13px] text-ink-on-deep-dim underline-offset-2 transition-colors hover:text-ink-on-deep hover:underline"
-                @click.stop="startGame"
-              >另開新對局</button>
-            </div>
-          </div>
-          <ChapterBadge :piece="resumeInfo.piece" :size="62" />
+    <div class="max-w-2xl md:max-w-4xl mx-auto px-[18px] pb-6">
+      <!-- 棋誌 peek（有新筆才顯示；cream 卡，落在場景下方的「地面」） -->
+      <div v-if="peekEntries.length > 0" class="fade-rise ground-card" :class="{ 'is-in': ready }">
+        <p class="ground-eyebrow">棋誌・最近所記</p>
+        <div class="space-y-2">
+          <RouterLink
+            v-for="entry in peekEntries"
+            :key="entry.id"
+            to="/journal"
+            class="flex min-h-[44px] items-center gap-2.5 rounded-card px-1 py-1 hover:opacity-80 transition-opacity"
+            data-testid="journal-peek-entry"
+          >
+            <span
+              v-if="isUnread(entry, lastSeenAt)"
+              class="h-1.5 w-1.5 flex-shrink-0 self-start mt-[7px] rounded-full bg-[#7EBEA5]/60"
+              data-testid="unread-dot"
+              aria-hidden="true"
+            />
+            <p class="flex-1 font-lesson text-[14px] leading-[1.7] text-ink line-clamp-2">{{ entry.body }}</p>
+          </RouterLink>
         </div>
-      </DarkPanel>
-      <DarkPanel v-else class="relative cursor-pointer overflow-hidden md:h-full md:flex md:flex-col md:justify-center" @click="startGame">
-        <div class="relative z-10 flex-1 min-w-0">
-          <p class="font-sans text-[11px] font-bold tracking-[0.12em] text-gold">NEW GAME</p>
-          <p class="font-display font-bold text-[22px] text-ink-on-deep mt-1.5">開始新對局</p>
-          <p class="font-sans text-[13px] text-ink-on-deep-dim mt-1">自選強度與執子</p>
-          <Button variant="gold" size="sm" class="mt-3.5" @click.stop="startGame">
-            開始對局 <ArrowRight :size="18" />
-          </Button>
-        </div>
-        <Swords
-          :size="110"
-          class="pointer-events-none absolute -right-4 -bottom-4 text-white/[0.07]"
-          :stroke-width="1.2"
-          aria-hidden="true"
-        />
-      </DarkPanel>
+      </div>
 
-      <!-- 繼續學習 — cream accent 卡。桌機隱藏外部小標，讓本卡與左 hero 頂底等高對齊
-           （兩卡都靠卡內小標：NEW GAME / 基礎規則）；手機保留小標分段。 -->
-      <SectionLabel class="mt-5 md:hidden">繼續學習</SectionLabel>
-      <Card
-        accent
-        class="p-4 cursor-pointer md:h-full md:flex md:flex-col md:justify-center"
-        @click="continueLearning"
-      >
-        <template v-if="nextLesson">
-          <div class="flex items-center gap-3">
-            <div class="flex-1 min-w-0">
-              <p class="font-sans text-xs font-bold text-primary-dark">
-                {{ LESSON_TIER_LABELS[nextLesson.tier] }}
-              </p>
-              <p class="font-display font-bold text-xl text-ink mt-1">{{ nextLesson.title }}</p>
-              <Button size="sm" class="mt-3" @click.stop="continueLearning">
-                繼續 · 第 {{ lessonOrdinal }} 課 <ArrowRight :size="16" />
-              </Button>
-            </div>
-            <ChapterBadge :piece="TIER_PIECE[nextLesson.tier]" :size="52" />
-          </div>
-          <div class="mt-3.5">
-            <ProgressBar :value="progress.completedCount" :total="progress.totalCount" />
-          </div>
-        </template>
-        <template v-else>
-          <div class="flex items-center gap-3">
-            <div class="flex-1 min-w-0">
-              <p class="font-sans text-xs font-bold text-primary-dark">學習地圖</p>
-              <p class="font-display font-bold text-xl text-ink mt-1">你已完成所有課程</p>
-              <Button size="sm" class="mt-3" @click.stop="continueLearning">
-                回到地圖 <ArrowRight :size="16" />
-              </Button>
-            </div>
-            <ChapterBadge piece="bK" :size="52" />
-          </div>
-        </template>
-      </Card>
-    </div>
-
-    <!-- 總覽（全寬） -->
-    <div class="fade-rise" :class="{ 'is-in': ready }" style="transition-delay: 60ms">
-    <SectionLabel>總覽</SectionLabel>
-    <div class="grid grid-cols-3 gap-2.5">
-      <RouterLink to="/learn" class="block rounded-card focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold" aria-label="學習進度">
-        <StatCard
-          :icon="BookOpen"
-          label="學習進度"
-          :value="`${progress.completedCount}/${progress.totalCount}`"
-        />
-      </RouterLink>
-      <RouterLink to="/dungeon" class="block rounded-card focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold" aria-label="試煉">
-        <StatCard
-          :icon="Target"
-          label="試煉"
-          :value="`${dungeon.solvedCount}/${dungeon.totalCount}`"
-        />
-      </RouterLink>
-      <RouterLink to="/journal" class="block rounded-card focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold" aria-label="棋誌">
-        <StatCard
-          :icon="Library"
-          label="棋誌"
-          :value="journal.entries.length > 0 ? String(journal.entries.length) : '—'"
-        />
-      </RouterLink>
-    </div>
-    </div>
-    <!-- 棋誌 peek（總覽下方，露最近 HOMEPAGE_PEEK_COUNT 筆；有新筆才顯示此區塊） -->
-    <div v-if="peekEntries.length > 0" class="fade-rise" :class="{ 'is-in': ready }" style="transition-delay: 120ms">
-      <SectionLabel class="mt-5">棋誌</SectionLabel>
-      <div class="space-y-2">
-        <RouterLink
-          v-for="entry in peekEntries"
-          :key="entry.id"
-          to="/journal"
-          class="flex min-h-[44px] items-center gap-2.5 rounded-card border border-line/40 bg-surface-card px-3 py-2.5 hover:border-line transition-colors"
-          data-testid="journal-peek-entry"
-        >
-          <span
-            v-if="isUnread(entry, lastSeenAt)"
-            class="h-1.5 w-1.5 flex-shrink-0 self-start mt-[7px] rounded-full bg-[#7EBEA5]/60"
-            data-testid="unread-dot"
-            aria-hidden="true"
-          />
-          <p class="flex-1 font-lesson text-[13.5px] leading-[1.65] text-ink-muted line-clamp-2">{{ entry.body }}</p>
+      <!-- 底部三數字：課程／試煉／棋誌 -->
+      <div class="fade-rise glance" :class="{ 'is-in': ready }" style="transition-delay: 60ms">
+        <RouterLink to="/learn" class="glance-item" aria-label="學習進度">
+          <BookOpen :size="16" :stroke-width="1.8" class="glance-icon" aria-hidden="true" />
+          <span class="glance-num">{{ progress.completedCount }}/{{ progress.totalCount }}</span>
+          <span class="glance-label">課程</span>
+        </RouterLink>
+        <RouterLink to="/dungeon" class="glance-item" aria-label="試煉">
+          <Target :size="16" :stroke-width="1.8" class="glance-icon" aria-hidden="true" />
+          <span class="glance-num">{{ dungeon.solvedCount }}/{{ dungeon.totalCount }}</span>
+          <span class="glance-label">試煉</span>
+        </RouterLink>
+        <RouterLink to="/journal" class="glance-item" aria-label="棋誌">
+          <Library :size="16" :stroke-width="1.8" class="glance-icon" aria-hidden="true" />
+          <span class="glance-num">{{ journal.entries.length > 0 ? journal.entries.length : '—' }}</span>
+          <span class="glance-label">棋誌</span>
         </RouterLink>
       </div>
     </div>
-  </div>
   </div>
 </template>
 
@@ -251,5 +177,57 @@ onMounted(() => {
     transform: none;
     transition: none;
   }
+}
+
+.ground-card {
+  margin-top: -56px;
+  position: relative;
+  z-index: 3;
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-line-subtle);
+  border-radius: 1.125rem;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(61, 34, 16, 0.08);
+}
+.ground-eyebrow {
+  font-size: 12px;
+  color: var(--color-ink-muted);
+  margin-bottom: 10px;
+}
+
+.glance {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.glance-item {
+  flex: 1;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 14px 8px;
+  border-radius: 0.75rem;
+  text-decoration: none;
+}
+.glance-item:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
+.glance-icon {
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+.glance-num {
+  font-family: var(--font-num);
+  font-size: 18px;
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+.glance-label {
+  font-size: 12px;
+  color: var(--color-ink-muted);
+  margin-top: 2px;
 }
 </style>
