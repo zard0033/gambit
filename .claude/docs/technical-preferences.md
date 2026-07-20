@@ -76,6 +76,10 @@
   （2026-07-13 公司電腦 5 連紅實證），修法＝把 `node_modules/.vite` 搬走讓 vite 重建
   （`mv node_modules/.vite node_modules/.vite-poisoned-<date>`，用 mv 不用 rm 以避開刪除保險絲），一次即綠。
   看到特徵先重跑一次分流①②，別追假根因。
+  **毒法② 撞上 push 時的關鍵細節（2026-07-14 三連撞實證）**：prepush 的 vitest 是 **PreToolUse hook**
+  ——它在整條 shell 指令「執行之前」就先跑。所以「`mv 快取 && git push`」寫在**同一條指令**完全無效：
+  hook 先用舊毒快取跑 → 紅 → 整條指令被擋，mv 根本沒執行。必須**分兩次指令**：
+  第一條 `mv` + `npx vitest run`（暖快取、確認綠），第二條單獨 `git push`（hook 在暖快取上跑即綠）。
 - **Node 26 vitest localStorage shim（`tests/setup-node26-compat.ts`，vitest.config 已 `setupFiles` 指向）**：
   Node 26 把 `localStorage` 加進原生 globals（實驗性 Web Storage），但無 `--localstorage-file` 時它是
   getter-only 的 undefined，happy-dom 用 plain assignment 覆寫在 strict mode 會靜默失敗 → 全測試
