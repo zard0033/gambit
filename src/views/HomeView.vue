@@ -48,7 +48,6 @@ const ctaStation = computed<CtaStation>(() => {
   if (r) {
     const colorLabel = r.playerColor === 'white' ? '執白' : '執黑'
     return {
-      mode: 'continue',
       headline: '上一盤還沒下完',
       meta: `第 ${r.moves.length} 手 · ${colorLabel} · Lv.${r.level}`,
       primaryLabel: '回到棋盤',
@@ -58,7 +57,6 @@ const ctaStation = computed<CtaStation>(() => {
     }
   }
   return {
-    mode: 'new',
     headline: '開一盤新的',
     meta: '自選強度與執子',
     primaryLabel: '開始對局',

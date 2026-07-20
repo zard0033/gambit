@@ -282,7 +282,6 @@
   --scene-core-opacity: 0;
   --scene-core-top: 58%;
   --scene-core-height: 22%;
-  --scene-core-blend: screen;
   --scene-core-gradient: linear-gradient(180deg, transparent, transparent);
 }
 [data-scene='night'] {

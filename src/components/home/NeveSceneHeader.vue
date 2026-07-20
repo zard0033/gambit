@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 
 /** The "繼續走" station — an action (game logic), not a plain navigation. */
 export interface CtaStation {
-  mode: 'continue' | 'new'
   headline: string
   meta: string
   primaryLabel: string
@@ -241,7 +240,7 @@ const stars = [
   height: var(--scene-core-height);
   background: var(--scene-core-gradient);
   opacity: var(--scene-core-opacity);
-  mix-blend-mode: var(--scene-core-blend);
+  mix-blend-mode: screen;
 }
 
 /* 靜態顆粒層:限定在天空容器內（非整頁 fixed，行動效能考量），尺度見 main.css --texture-sky-grain。 */
