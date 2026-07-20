@@ -142,17 +142,26 @@ watch(() => uiStore.showPlaySetup, (open) => {
 })
 
 onMounted(async () => {
+  // Resume intent (home "繼續對局") → restore the saved game; else a setup confirmation → start;
+  // else open the setup modal. A failed restore falls back to setup so the player is never stuck.
+  // Runs BEFORE awaiting engine.init() below — startGame/restoreGame only need the setup payload,
+  // not the engine, so `phase` leaves SETUP (and the side panel's v-if flips) on the same tick the
+  // board mounts. Previously this block ran after the engine handshake, so the panel popped in
+  // with no transition well after the board — a jarring delayed flicker (2026-07-20 fix).
+  if (uiStore.consumeResume()) {
+    if (!resumeSavedGame()) uiStore.openPlaySetup()
+  } else if (uiStore.pendingGame) consumePending()
+  else if (!gameStore.isGameInProgress) uiStore.openPlaySetup()
+
   try {
     await engine.init()
   } catch {
     console.warn('Stockfish unavailable — playing without AI')
   }
-  // Resume intent (home "繼續對局") → restore the saved game; else a setup confirmation → start;
-  // else open the setup modal. A failed restore falls back to setup so the player is never stuck.
-  if (uiStore.consumeResume()) {
-    if (!resumeSavedGame()) uiStore.openPlaySetup()
-  } else if (uiStore.pendingGame) consumePending()
-  else if (!gameStore.isGameInProgress) uiStore.openPlaySetup()
+  // requestAiMove() no-ops silently if called while the engine isn't IDLE yet (see its guard below) —
+  // the calls above may have fired while the engine was still handshaking. Re-arm here now that
+  // engine.init() has resolved, in case it's still the AI's turn (執黑 game, or a resumed AI-turn).
+  if (phase.value === 'AI_THINKING') void requestAiMove()
 })
 
 /** Ask the engine for a move from the current position and apply it. */
