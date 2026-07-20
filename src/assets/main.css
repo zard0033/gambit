@@ -130,6 +130,12 @@
   --text-display-sm--letter-spacing: -0.01em;
 }
 
+/* 棋誌「旅程之書」紙頁紋理（journal-book-redesign）：極低透明度 feTurbulence 雜訊，非做舊——
+   只給紙頁一絲纖維感。baseFrequency 0.9 是唯一驗過不顯髒的值，勿調高。 */
+:root {
+  --texture-paper-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
