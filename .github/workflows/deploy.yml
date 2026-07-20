@@ -4,6 +4,13 @@ on:
   push:
     branches: [main]
 
+# 短時間連推時兩個 deploy 並跑會同時 push gh-pages,後到的被 reject(non-fast-forward,
+# 2026-07-20 兩連紅實證)。序列化:同 group 只留最新一筆排隊、取消進行中的舊 run
+# (deploy 冪等且永遠只要最新版,取消舊的安全)。
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
