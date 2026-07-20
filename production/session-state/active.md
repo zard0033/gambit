@@ -1,15 +1,30 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: Phase 2 收尾 + Phase 3 A 路線（氛圍首頁）
-Task: 2026-07-13 全批已 push 上線（42a4791）：設計案 Accepted、對帳 backfill、拍板施行、vitest 假紅根治。
-**現在球在 Eason**：iPhone 實機四批一次複驗 ＋ 登入態累積 ≥10 局（拍板選路 1）→ feedback 後重跑 D6 量測
-（腳本就緒在 scratchpad）→ ≤5% 開旗施工 material selector。
+Task: 2026-07-14 家用機收線：D3 招呼框 banding 修復已推；**material 撞題已裁決**——家用機 07-12 依當日
+拍板做完的 v0 實作與 07-13 Accepted spec 結構性歧異，Eason 07-14 裁決＝spec 為準、v0 停車保存
+（branch `material-v1-parked`，正式版上線後即刪）。
+**球仍在 Eason**：iPhone 實機四批一次複驗 ＋ 登入態累積 ≥10 局 → D6 量測 → ≤5% 開旗照 spec 施工
+（施工時先拆停車分支的可用件：測試手法／抽樣工具（分支內 scripts/material-v1-parked/）／已驗防線）。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
 > **差異化北極星 = `production/gambit-differentiation-vision.md`**——提任何功能/重構/UI 前**先讀**。
 
 ---
+
+## 2026-07-14（家用機）收線紀錄
+
+- **D3 招呼框銜接修復**（`241e4ea`）：iPhone 反饋「漸層切割感明顯」＝banding；三方向 demo 盲選拍板 D3
+  ＝色溫過渡壓縮前 40%、其餘 sky-b 實色、底部硬切＋1px inset 細影，結構上無長漸層段。基準圖重生
+  home×2＋play×2/concepts（stale 修正）。
+- **⚠️ material 撞題事故與裁決**：家用機 07-12 晚依當日三題拍板（offense／平行欄位／規則層審查）把
+  material **完整實作**（6 條件 selector＋37 樣本抽查 0 誤收＋逼和排除——與 spec 條件 9 獨立收斂），
+  但未 push；公司機 07-13 不知情之下重跑設計、產出更嚴的 11 條件 Accepted spec（D1–D6 拍板）。
+  **07-14 Eason 裁決：spec 為準；v0 實作停車到 branch `material-v1-parked`**（含測試/抽樣工具/樣本集，
+  正式版照 spec 施工時拆件用、上線後刪分支）。**教訓：跨機開工前先 `git fetch` 看對方 session 的
+  active.md；未 push 的施工要在 active.md 標記「in-flight」。**
+- 附帶：判斷場完成留白/slideshow 門等第二批已於 07-12 上線（`bed83ae`），公司機 07-13 的 907 綠已含之。
 
 ## 2026-07-13（公司電腦）本日產出（已 push，`4de2633`…`42a4791`）
 
