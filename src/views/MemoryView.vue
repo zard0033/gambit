@@ -18,8 +18,12 @@ import { usePostGameReview, buildFenSequence, type StoredAnalysisEntry } from '@
 import { useReviewEngine } from '@/modules/chess-engine/review-engine'
 import { classify, type ClassifyResult } from '@/modules/learning-loop/classify'
 import { selectMissedMates } from '@/modules/learning-loop/missed-mate'
+import { selectMissedMaterial } from '@/modules/learning-loop/missed-material'
 import { useRecognitionSourceStore } from '@/stores/recognition-source'
-import { RECOGNITION_MISSED_MATE_ENABLED } from '@/config/learning-loop-tuning'
+import {
+  RECOGNITION_MISSED_MATE_ENABLED,
+  RECOGNITION_MISSED_MATERIAL_ENABLED,
+} from '@/config/learning-loop-tuning'
 import { identifyOpening, type OpeningResult } from '@/modules/opening-id/opening-index'
 import { selectMoments, gatedCandidates } from '@/modules/memory/selection'
 import { evalWhiteSeries } from '@/modules/memory/derive'
@@ -140,8 +144,29 @@ function captureMissedMates(): void {
   if (mates.length > 0) recognitionSource.captureMate(g.completedAt.toString(), orientation.value, mates)
 }
 
+/** Offense-direction counterpart to `captureMissedMates` (missed safe captures, not missed mates). */
+function captureMissedMaterial(): void {
+  if (!RECOGNITION_MISSED_MATERIAL_ENABLED) return
+  const g = game.value
+  if (!g) return
+  const materials = selectMissedMaterial({
+    analysisResults: results.value,
+    fens: fens.value,
+    moves: g.moves,
+    isPlayerMove: review.isPlayerMove,
+  })
+  if (materials.length > 0) {
+    recognitionSource.captureMaterial(g.completedAt.toString(), orientation.value, materials)
+  }
+}
+
 watch(() => review.phase.value, (p) => {
-  if (p === 'COMPLETE' && !recorded) { recorded = true; recordSummary(); captureMissedMates() }
+  if (p === 'COMPLETE' && !recorded) {
+    recorded = true
+    recordSummary()
+    captureMissedMates()
+    captureMissedMaterial()
+  }
 })
 
 // ---- Shallow-stack navigation (history-backed; GDD Rule 2) ----

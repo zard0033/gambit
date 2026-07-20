@@ -1,13 +1,19 @@
 <script setup lang="ts">
 /**
- * 棋憶 signpost — Neve invites the player back to a position in their own game where a forced mate
- * was there and passed over. Renders ONLY when the recognition-source store has a pending 'mate'
- * source; otherwise nothing (no zero-state, no residue). Tapping opens the concept deepening's
- * judgement field seeded with that real position (?source=recognition).
+ * 棋憶 signpost — Neve invites the player back to a position in their own game where a tactical
+ * opportunity was there and passed over (mate or material). Renders ONLY when the recognition-source
+ * store has a pending source for one of the two concepts; otherwise nothing (no zero-state, no
+ * residue). Tapping opens that concept's deepening judgement field seeded with the real position
+ * (?source=recognition).
+ *
+ * mate takes priority over material when both are pending (Eason-approved minimal choice,
+ * signpost-material-design.md follow-up: single card, not two) — mate is the larger error (mirrors
+ * `classify.ts`'s "mate precedes material" EC-5 ordering), and showing two signpost cards at once
+ * would be a UI concern the design never asked for.
  *
  * Visual: deep-jade anchor, warm Neve voice (font-lesson), brand gold used ONLY for the icon
  * indicator + CTA focus ring (never as body colour or background). The whole card is one 44px+
- * tap target. Copy is calm, second-person, no blame; 西洋棋用語「將殺」.
+ * tap target. Copy is calm, second-person, no blame; 西洋棋用語「將殺」「子」.
  */
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
@@ -19,21 +25,38 @@ import { useRecognitionSourceStore } from '@/stores/recognition-source'
 const router = useRouter()
 const source = useRecognitionSourceStore()
 
-const pending = computed(() => source.pendingFor('mate'))
-const visible = computed(() => pending.value.length > 0)
+const matePending = computed(() => source.pendingFor('mate'))
+const materialPending = computed(() => source.pendingFor('material'))
+const activeConcept = computed<'mate' | 'material' | null>(() => {
+  if (matePending.value.length > 0) return 'mate'
+  if (materialPending.value.length > 0) return 'material'
+  return null
+})
+const visible = computed(() => activeConcept.value !== null)
 
-// Deterministic 2-variant copy (no random/LLM): parity of the game's id keeps it stable per game.
-const COPY = [
+// Deterministic 2-variant copy per concept (no random/LLM): parity of the game's id keeps it stable
+// per game.
+const MATE_COPY = [
   '那盤棋裡，有一手將殺，你當時沒看見。不急著檢討——這次換個方式，你自己再看一眼。',
   '你剛下完的那盤，藏著一步將殺。那個局面還留著——回到它面前，這次你來認。',
 ] as const
+const MATERIAL_COPY = [
+  '那盤棋裡，有顆子沒人守著，你當時沒拿下。不急著檢討——這次換個方式，你自己再看一眼。',
+  '你剛下完的那盤，藏著一顆沒人守著的子。那個局面還留著——回到它面前，這次你來拿。',
+] as const
 const copy = computed(() => {
-  const n = Number(pending.value[0]?.gameId)
-  return COPY[Number.isFinite(n) ? n % COPY.length : 0]
+  const concept = activeConcept.value
+  if (!concept) return ''
+  const pool = concept === 'mate' ? MATE_COPY : MATERIAL_COPY
+  const list = concept === 'mate' ? matePending.value : materialPending.value
+  const n = Number(list[0]?.gameId)
+  return pool[Number.isFinite(n) ? n % pool.length : 0]
 })
 
 function go(): void {
-  router.push('/learn/concept/mate?source=recognition')
+  const concept = activeConcept.value
+  if (!concept) return
+  router.push(`/learn/concept/${concept}?source=recognition`)
 }
 </script>
 

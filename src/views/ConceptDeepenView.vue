@@ -11,6 +11,7 @@ import { buildRecognitionSetFromSources } from '@/modules/learning-loop/recognit
 import { useConceptProgressStore } from '@/stores/concept-progress'
 import { useRecognitionSourceStore } from '@/stores/recognition-source'
 import type { MissedMateSource } from '@/modules/learning-loop/missed-mate'
+import type { MissedMaterialSource } from '@/modules/learning-loop/missed-material'
 import { useJournalStore } from '@/stores/journal'
 
 const route = useRoute()
@@ -26,7 +27,7 @@ const deepening = getConceptDeepening(route.params.conceptId as string)
 // positions instead of the canned set. Empty/absent → undefined → fall back to the canned set below;
 // no source param → canned set. The first two lesson steps (canned) are untouched either way.
 const fromRecognitionSource = route.query.source === 'recognition'
-const pendingSources: MissedMateSource[] =
+const pendingSources: ReadonlyArray<MissedMateSource | MissedMaterialSource> =
   deepening && fromRecognitionSource ? recognitionSource.pendingFor(deepening.conceptId) : []
 const runtimeSet = deepening
   ? buildRecognitionSetFromSources(deepening.conceptId, pendingSources)

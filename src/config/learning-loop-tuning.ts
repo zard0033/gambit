@@ -58,6 +58,24 @@ export const RECOGNITION_SOURCE_GAMES_MAX = 3
 export const RECOGNITION_CONSUMED_MAX = 300
 
 /**
+ * Minimum cpLoss (F2 formula, `computeCpLoss` in use-post-game-review.ts) a missed safe capture must
+ * cost the player before `missed-material.ts::selectMissedMaterial` collects it as a signpost source
+ * (GDD §7, signpost-material-design.md §4 rule 4). ≈300cp ≈ a light piece's value — keeps the
+ * judgement field for "you missed a free piece" instead of noise-level pawn nibbles.
+ */
+export const MISSED_MATERIAL_MIN_CP_GAIN = 300
+
+/**
+ * Feature flag for the missed-material signpost brick (offense direction: "you had a safe capture and
+ * didn't take it" — mirrors `RECOGNITION_MISSED_MATE_ENABLED`'s kill-switch shape). When false, both
+ * the write path (no missed-material capture at review COMPLETE) and the read path
+ * (`useRecognitionSourceStore.hasPending`/`pendingFor('material')` report empty regardless of stored
+ * data) go dark — zero behavioural residue, including for sources captured before the flag was
+ * flipped off.
+ */
+export const RECOGNITION_MISSED_MATERIAL_ENABLED = true
+
+/**
  * Pause between the judgement field's final correct verdict and the deepening wrap-up overlay
  * (iPhone 複驗 2026-07-11: the overlay covered Neve's last feedback bubble before it could be
  * read). Pacing, not motion — applies regardless of prefers-reduced-motion. Safe range
