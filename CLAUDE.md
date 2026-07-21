@@ -149,6 +149,17 @@ See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 - **繁中語氣**：成熟、平靜、低壓力，稱呼「你」；無 streak / timer / leaderboard。
 - **西洋棋用語**：棋子一律用「后 / 城堡 / 騎士 / 主教 / 國王 / 兵」。**這是西洋棋，禁用象棋的「車 / 馬 / 象」**（rook=城堡、knight=騎士、bishop=主教）。課程標題如「城堡與主教」「騎士與后」即為準則。
 
+## 樣式落地優先序（禁裸手刻 CSS）
+
+寫任何 UI 樣式，照此順序停在第一個成立的：
+
+1. `src/components/ui/` 既有元件能用 → 用它，別重造。
+2. Tailwind utility class（吃 `@theme` token）能表達 → 用 class，不開 `<style>`。
+3. 用到的值 `@theme` 已有 → 一律 `var(--color-*)` / token，**禁手算硬編 hex / px**。
+4. 真正一次性、utility 表達不了的複雜視覺（動效／glass／發光／複雜佈局）→ 才允許 scoped `<style>`，且優先走 `production/tooling-inspira-ui.md` / `apple-design` / `emil-design-eng`，並在 `<style>` 上方一行註明「為何 utility 做不到」。
+
+> 禁：在 .vue 新增 scoped `<style>` 重寫 token 已涵蓋的顏色／間距／字型／圓角／陰影。
+
 ## UI 質感 Skill 路由（潤飾專用）
 
 當 Eason 提到下列關鍵詞時，主動採用對應 skill。**三條鐵則優先於一切**：
