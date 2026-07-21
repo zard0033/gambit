@@ -10,6 +10,7 @@ import type { ResumeSnapshot } from '@/types/resume'
 import type { JournalEntry } from '@/types/journal'
 import type { MemoryGameSummary } from '@/types/memory'
 import { MEMORY_SUMMARY_SCHEMA_VERSION } from '@/config/memory-config'
+import type { Theme } from '@/lib/theme'
 
 export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error'
 
@@ -747,6 +748,33 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     }
   }
 
+  /**
+   * Fetch the user's persisted theme preference (user_preferences, one row/user). Returns null
+   * when logged out, on error, or before the migration is live — degrades cleanly to local-only.
+   */
+  async function loadThemePreference(): Promise<{ theme: Theme; updatedAt: number } | null> {
+    const authStore = useAuthStore()
+    if (!authStore.userId) return null
+    const { data, error } = await supabase
+      .from('user_preferences')
+      .select('theme, updated_at')
+      .maybeSingle()
+    if (error || !data) return null
+    return { theme: data.theme as Theme, updatedAt: new Date(data.updated_at as string).getTime() }
+  }
+
+  /** Persist the user's theme (replaced on conflict). No-op (false) when logged out or on error. */
+  async function upsertThemePreference(theme: Theme, updatedAt: number): Promise<boolean> {
+    const authStore = useAuthStore()
+    const userId = authStore.userId
+    if (!userId) return false
+    const { error } = await supabase.from('user_preferences').upsert(
+      { user_id: userId, theme, updated_at: new Date(updatedAt).toISOString() },
+      { onConflict: 'user_id' },
+    )
+    return !error
+  }
+
   return {
     syncStatus,
     lastSyncedGameId,
@@ -773,5 +801,7 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     appendMemorySummary,
     readLocalMemorySummaries,
     flushMemoryQueue,
+    loadThemePreference,
+    upsertThemePreference,
   }
 })

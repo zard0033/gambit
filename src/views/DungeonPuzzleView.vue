@@ -270,7 +270,7 @@ function goNext(): void {
     <!-- 石碑題卡：解題態＝turn＋目標＋提示／複習；達成態＝inline（成就＋successText＋回地圖／下一題，
          取代彈窗，單步多步皆同）。棋譜紀錄框累積每次嘗試的白話對錯，兩態共用。 -->
     <div class="mx-auto max-w-[420px] px-4 pt-4">
-      <div class="rounded-[14px] border border-gold/25 bg-[linear-gradient(170deg,#18443A,#0C2118)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_24px_rgba(0,0,0,0.35)]">
+      <div class="puzzle-result-panel rounded-[14px] border border-gold/25 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_24px_rgba(0,0,0,0.35)]">
 
         <!-- ===== 達成態（inline，正解後對手不再動）===== -->
         <template v-if="pz.phase.value === 'solved'">

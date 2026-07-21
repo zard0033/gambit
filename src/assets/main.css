@@ -365,3 +365,200 @@
 :root {
   --texture-sky-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
+
+/* ============================================================
+   NOIR — 第二主題（dark）production token layer.
+   設計 SoT＝design/gambit-design-system/colors_and_type.css [data-theme="noir"]（深墨綠：
+   底是接近黑的深墨綠、jade 當靈魂主操作色、金唯一高光）。
+   Unlayered + :root[data-theme]（specificity 0,2,0）可靠贏過 @theme / @layer base 的 :root tokens。
+   無元件讀 raw hsl(var(--x))，故直接 override --color-* 系列（跳過 HSL bridge）。
+   ⚠ 本 block 只是 token 層——深區頁面（首頁場景 / 對局 / 試煉 / profile hero）寫死的 jade 漸層
+   需另以 theme-aware class 逐頁 tokenize（見下方 component adjustments block）。
+   ============================================================ */
+:root[data-theme='noir'] {
+  /* Surface — 接近黑的深墨綠（非飽和綠、非中性黑）；card/raised 拉開亮度好浮起 */
+  --color-surface-base: #0e1411;
+  --color-surface-card: #141b17;
+  --color-surface-raised: #1a231c;
+  --color-surface-hover: rgba(210, 240, 225, 0.05);
+  --color-surface-deep: #0a0f0c;
+  --color-surface-deep-2: #111a15;
+  --color-surface-dungeon: #080d0a;
+  --color-surface-dungeon-2: #0e1512;
+
+  /* Line / borders（暗底上需較明顯才分得開卡片）*/
+  --color-line: rgba(120, 200, 170, 0.12);
+  --color-line-subtle: rgba(120, 200, 170, 0.07);
+  --color-line-strong: rgba(120, 200, 170, 0.2);
+
+  /* Ink — 亮灰白（帶一絲綠調） */
+  --color-ink: #e6ede8;
+  --color-ink-muted: #9bb3a6;
+  --color-ink-faint: #7d968a;
+  --color-ink-on-deep: #e6ede8;
+  --color-ink-on-deep-dim: #9bb3a6;
+
+  /* Primary — jade 同色系亮階，深墨綠底上的靈魂主操作色 */
+  --color-primary: #33a37e;
+  --color-primary-dark: #277d61;
+  --color-primary-soft: rgba(51, 163, 126, 0.16);
+  --color-primary-fg: #08120d;
+  --color-primary-foreground: #08120d;
+
+  /* Semantic — on-deep 亮版；淺 fill 上用深字 */
+  --color-success: #7fd4a8;
+  --color-success-dark: #5fb389;
+  --color-success-light: rgba(127, 212, 168, 0.12);
+  --color-success-fg: #08150f;
+  --color-success-on-deep: #7fd4a8;
+  --color-danger: #e2705a;
+  --color-danger-dark: #c9745e;
+  --color-danger-light: rgba(226, 112, 90, 0.12);
+  --color-danger-fg: #0e1411;
+  --color-danger-on-deep: #e2705a;
+  --color-hint: #e3b25e;
+  --color-hint-dark: #c99440;
+  --color-hint-light: rgba(227, 178, 94, 0.12);
+  --color-hint-ring: rgba(227, 178, 94, 0.4);
+  --color-hint-fg: #0e1411;
+
+  /* Gold — 唯一高光不變；深底金字用亮金 */
+  --color-gold-light: #ffd777;
+  --color-gold-dark: #ffc94d;
+
+  /* Learning-map / node coins — jade 亮階（active 面延續 jade 家族，非去 jade）*/
+  --color-map-tile-top: #46c7a3;
+  --color-map-tile-face: #279e79;
+  --color-map-tile-socket: #0f5f47;
+  --color-map-tile-lock-top: #2a352e;
+  --color-map-tile-lock-face: #212a24;
+  --color-map-tile-lock-socket: #19201b;
+  --color-map-trail-base: rgba(120, 200, 170, 0.14);
+
+  /* Nav — 深墨綠；active 那格＝jade 亮階 + 深字 */
+  --color-nav-bg: #0a120e;
+  --color-nav-text: #e6ede8;
+  --color-nav-dim: #9bb3a6;
+  --color-nav-active-bg: #33a37e;
+  --color-nav-active: #08120d;
+
+  /* shadcn-bridged tokens — 直接 override 解析後的顏色（無 raw hsl 讀者）*/
+  --color-background: #0e1411;
+  --color-foreground: #e6ede8;
+  --color-card: #141b17;
+  --color-card-foreground: #e6ede8;
+  --color-popover: #141b17;
+  --color-popover-foreground: #e6ede8;
+  --color-secondary: #1a231c;
+  --color-secondary-foreground: #e6ede8;
+  --color-muted: #212a24;
+  --color-muted-foreground: #9bb3a6;
+  --color-accent: #1a231c;
+  --color-accent-foreground: #e6ede8;
+  --color-destructive: #e2705a;
+  --color-destructive-foreground: #0e1411;
+  --color-border: rgba(120, 200, 170, 0.09);
+  --color-input: rgba(120, 200, 170, 0.14);
+  --color-ring: #f8b500;
+
+  /* Elevation — 暗區柔黑陰影；分層優先靠 luminance */
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-card-hover: 0 8px 26px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.45);
+  --shadow-button: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================================
+   NOIR — component adjustments for hardcoded deep-jade surfaces that don't tokenize
+   cleanly (inline style / Tailwind arbitrary / scoped CSS jade gradients). Each class
+   keeps the cream appearance byte-identical to the pre-existing hardcoded value and
+   only re-tints under :root[data-theme='noir'] into the 深墨綠 palette.
+   ============================================================ */
+
+/* App header + bottom-nav bars (app-nav.vue) */
+.app-header-bg {
+  background-image: linear-gradient(180deg, #1e5043 0%, #183e35 100%);
+}
+:root[data-theme='noir'] .app-header-bg {
+  background-image: linear-gradient(180deg, #16382f 0%, #0d211a 100%);
+}
+.app-bottomnav-bg {
+  background-image: linear-gradient(180deg, #1c3e34, #142f28);
+}
+:root[data-theme='noir'] .app-bottomnav-bg {
+  background-image: linear-gradient(180deg, #0e2019, #0a1811);
+}
+
+/* Deep focus panels — shared by ProfileView hero (identical gradient value) and
+   ui/gambit/dark-panel.vue (開始新對局 / 繼續對局 panels). */
+.dark-focus-panel {
+  background-image: linear-gradient(160deg, #2a6654 0%, #1e4d3e 55%, #1a4238 100%);
+}
+:root[data-theme='noir'] .dark-focus-panel {
+  background-image: linear-gradient(160deg, #1e5744 0%, #164130 55%, #123528 100%);
+}
+
+/* 對局 game-over result card (PlayView.vue) */
+.game-over-panel {
+  background-image: linear-gradient(160deg, #163929, #0c2118);
+}
+:root[data-theme='noir'] .game-over-panel {
+  background-image: linear-gradient(160deg, #16382f, #0c1f17);
+}
+
+/* 試煉地圖 done-node coin face (DungeonMapView.vue coinBackground()) — noir values
+   reuse this file's own --color-map-tile-top/-face/-socket noir overrides. */
+.dungeon-node-face-done {
+  background: radial-gradient(120% 120% at 50% 18%, #3ab894, #167a5e 55%, #0c5840);
+}
+:root[data-theme='noir'] .dungeon-node-face-done {
+  background: radial-gradient(120% 120% at 50% 18%, #46c7a3, #279e79 55%, #0f5f47);
+}
+/* Check icon on the done coin: dark ink reads on the noir jade face. */
+.dungeon-node-check-done {
+  color: #eafff6;
+}
+:root[data-theme='noir'] .dungeon-node-check-done {
+  color: #06120c;
+}
+
+/* 試煉地圖背景 (DungeonMapView.vue) */
+.dungeon-zone-bg {
+  background: linear-gradient(to top, #0a1f1a 0%, #103029 38%, #15392f 78%, #1a4a3d 100%);
+}
+:root[data-theme='noir'] .dungeon-zone-bg {
+  background: linear-gradient(to top, #0a1712 0%, #0e2018 38%, #133026 78%, #16382f 100%);
+}
+
+/* 試煉地圖固定底部「目前試煉」action bar (DungeonMapView.vue) */
+.dungeon-action-bar {
+  background-image: linear-gradient(160deg, #1e5043, #15392f);
+}
+:root[data-theme='noir'] .dungeon-action-bar {
+  background-image: linear-gradient(160deg, #16382f, #0e241b);
+}
+
+/* 課程章節進度條 (LearnView.vue) */
+.lesson-progress-fill {
+  background-image: linear-gradient(90deg, #3ab894, #f8b500);
+}
+:root[data-theme='noir'] .lesson-progress-fill {
+  background-image: linear-gradient(90deg, #279e79, #f8b500);
+}
+
+/* 登入頁沉浸背景 (SignInView.vue) — noir value follows the same 深墨綠 wash as
+   .dungeon-zone-bg's first two stops, bookended dark-mid-dark. */
+.signin-bg {
+  background-image: linear-gradient(175deg, #0c2318 0%, #103029 42%, #0a1f18 100%);
+}
+:root[data-theme='noir'] .signin-bg {
+  background-image: linear-gradient(175deg, #0a1712 0%, #0e2018 42%, #0a1712 100%);
+}
+
+/* 試煉結算「石碑題卡」(DungeonPuzzleView.vue) — noir value reuses .game-over-panel's
+   stops (same 結算卡 semantics) at this element's own angle. */
+.puzzle-result-panel {
+  background-image: linear-gradient(170deg, #18443a, #0c2118);
+}
+:root[data-theme='noir'] .puzzle-result-panel {
+  background-image: linear-gradient(170deg, #16382f, #0c1f17);
+}

@@ -1,5 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
+import {
+  type Theme,
+  resolveTheme,
+  applyTheme,
+  persistTheme,
+  storedThemeAt,
+  pickNewer,
+} from '@/lib/theme'
+import { useDataSyncStore } from '@/stores/data-sync'
 
 const BEATEN_KEY = 'ui:highestBeatenLevel'
 
@@ -25,6 +34,41 @@ export const useUiStore = defineStore('ui', () => {
   // Set when the home "繼續對局" card is tapped → PlayView restores the saved game instead of
   // opening the setup modal (續玩對局).
   const pendingResume = ref(false)
+
+  // Appearance theme (cream / noir). main.ts applies the initial theme before mount;
+  // this mirrors it reactively for the settings toggle.
+  const theme = ref<Theme>(resolveTheme())
+  function setTheme(next: Theme): void {
+    const at = Date.now()
+    theme.value = next
+    applyTheme(next)
+    persistTheme(next, at)
+    // Push to the cloud (no-op when logged out); other devices pick it up on their next reconcile.
+    void useDataSyncStore().upsertThemePreference(next, at)
+  }
+
+  /**
+   * On login, reconcile the local theme against the cloud row (last-write-wins by timestamp).
+   * Cloud newer → adopt it; local newer (or no cloud row yet) → push local up. Wired from App.vue.
+   */
+  async function reconcileTheme(): Promise<void> {
+    const sync = useDataSyncStore()
+    const remote = await sync.loadThemePreference()
+    const local = { theme: theme.value, at: storedThemeAt() }
+    const { theme: winner, winner: who } = pickNewer(
+      local,
+      remote ? { theme: remote.theme, at: remote.updatedAt } : null,
+    )
+    if (who === 'remote' && remote) {
+      if (winner !== theme.value) {
+        theme.value = winner
+        applyTheme(winner)
+      }
+      persistTheme(winner, remote.updatedAt)
+    } else {
+      void sync.upsertThemePreference(local.theme, local.at || Date.now())
+    }
+  }
 
   function openPlaySetup(): void {
     showPlaySetup.value = true
@@ -71,6 +115,9 @@ export const useUiStore = defineStore('ui', () => {
     showPlaySetup,
     pendingGame,
     pendingResume,
+    theme,
+    setTheme,
+    reconcileTheme,
     openPlaySetup,
     closePlaySetup,
     requestGame,

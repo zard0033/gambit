@@ -17,7 +17,7 @@ function continueAsGuest() {
 <template>
   <!-- 全屏深青瓷沉浸：棋局即道場 -->
   <div
-    class="flex min-h-dvh flex-col bg-[linear-gradient(175deg,#0C2318_0%,#103029_42%,#0A1F18_100%)]"
+    class="signin-bg flex min-h-dvh flex-col"
   >
     <div class="flex flex-1 flex-col items-center justify-center px-9">
       <!-- 品牌字標：金色國王剪影（brand-mark），金色留給 CTA -->

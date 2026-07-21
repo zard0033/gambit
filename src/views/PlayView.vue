@@ -415,7 +415,7 @@ if (isDev) {
       @click.self="confirmAction = null"
     >
       <!-- 深色卡，與課程完成卡同一全站 modal 語彙（對局畫面是深色，cream 卡會跳） -->
-      <div class="go-card w-full max-w-[320px] rounded-[20px] border border-white/[0.14] bg-[linear-gradient(160deg,#163929,#0C2118)] p-6 text-center shadow-[0_16px_40px_rgba(8,24,18,0.5)]">
+      <div class="go-card game-over-panel w-full max-w-[320px] rounded-[20px] border border-white/[0.14] p-6 text-center shadow-[0_16px_40px_rgba(8,24,18,0.5)]">
         <p class="mb-1.5 font-display text-lg font-bold text-ink-on-deep">{{ CONFIRM_COPY[confirmAction].title }}</p>
         <p class="mb-5 font-sans text-sm text-ink-on-deep-dim">{{ CONFIRM_COPY[confirmAction].body }}</p>
         <div class="flex justify-center gap-3">

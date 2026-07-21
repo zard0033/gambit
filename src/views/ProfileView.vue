@@ -6,7 +6,6 @@ import {
   Trophy,
   BookMarked,
   ShieldCheck,
-  Settings,
   LogOut,
   LogIn,
   ChevronRight,
@@ -14,11 +13,20 @@ import {
   RotateCcw,
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
+import { useUiStore } from '@/stores/ui-store'
+import type { Theme } from '@/lib/theme'
 import ResetHistoryDialog from '@/components/reset-history-dialog.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const uiStore = useUiStore()
 const showResetDialog = ref(false)
+
+const themeOptions: { value: Theme; label: string }[] = [
+  { value: 'cream', label: '奶油' },
+  { value: 'noir', label: '暖墨' },
+]
+const themeIndex = computed(() => themeOptions.findIndex((o) => o.value === uiStore.theme))
 
 const isGuest = computed(() => !authStore.userId)
 const displayName = computed(() => authStore.email?.split('@')[0] ?? '訪客')
@@ -59,7 +67,6 @@ const menuGroups = computed<{ title: string; rows: MenuRow[] }[]>(() => [
     title: '設定',
     rows: [
       { icon: ShieldCheck, label: '帳號安全', badge: '即將推出', locked: true },
-      { icon: Settings, label: '偏好設定', badge: '即將推出', locked: true },
       isGuest.value
         ? { icon: LogIn, label: '登入', to: '/sign-in' }
         : { icon: LogOut, label: '登出', destructive: true, onClick: handleSignOut },
@@ -84,7 +91,7 @@ function handleRow(row: MenuRow) {
   <div class="pb-7">
     <!-- Hero — 深青瓷，貼齊頂部 -->
     <div
-      class="relative overflow-hidden bg-[linear-gradient(160deg,#2A6654_0%,#1E4D3E_55%,#1A4238_100%)] px-[18px] pb-5 pt-[22px]"
+      class="dark-focus-panel relative overflow-hidden px-[18px] pb-5 pt-[22px]"
     >
       <div class="mb-[18px] flex items-center gap-3.5">
         <div
@@ -181,6 +188,30 @@ function handleRow(row: MenuRow) {
           />
         </button>
       </div>
+
+      <!-- 外觀主題切換（cream / noir）— 緊接設定群組，segmented control 滑動 indicator -->
+      <template v-if="group.title === '設定'">
+        <p class="mb-1.5 mt-3 font-sans text-[13px] font-medium text-ink-muted">外觀</p>
+        <div class="relative flex rounded-[14px] border border-line-subtle bg-surface-card p-1 shadow-card">
+          <div
+            class="pointer-events-none absolute inset-y-1 left-1 w-[calc((100%-0.5rem)/2)] transition-transform duration-300 ease-out motion-reduce:transition-none"
+            :style="{ transform: `translateX(${themeIndex * 100}%)` }"
+          >
+            <div class="h-full rounded-[10px] bg-primary shadow-button" />
+          </div>
+          <button
+            v-for="opt in themeOptions"
+            :key="opt.value"
+            type="button"
+            class="relative z-10 min-h-[44px] flex-1 rounded-[10px] font-sans text-[15px] font-medium transition-colors"
+            :class="uiStore.theme === opt.value ? 'text-primary-fg' : 'text-ink-muted'"
+            :aria-pressed="uiStore.theme === opt.value"
+            @click="uiStore.setTheme(opt.value)"
+          >
+            {{ opt.label }}
+          </button>
+        </div>
+      </template>
     </div>
 
     <ResetHistoryDialog v-if="showResetDialog" @close="showResetDialog = false" />

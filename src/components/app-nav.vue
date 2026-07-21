@@ -29,7 +29,7 @@ const NAV_ITEMS = [
 <template>
   <!-- Top app bar — 純色深青瓷（取代木紋照片底），頂端微光 sheen -->
   <header
-    class="sticky top-0 z-30 border-b border-white/6 bg-[linear-gradient(180deg,#1E5043_0%,#183E35_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+    class="app-header-bg sticky top-0 z-30 border-b border-white/6 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
   >
     <div class="max-w-6xl mx-auto flex items-center gap-1 px-4 h-14">
       <!-- 品牌字標：金徽（國王剪影）+ Cinzel GAMBIT wordmark -->
@@ -89,7 +89,7 @@ const NAV_ITEMS = [
     aria-label="主要導覽"
   >
     <div
-      class="pointer-events-auto rounded-full border border-white/16 bg-[linear-gradient(180deg,#1C3E34,#142F28)] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_10px_30px_rgba(0,0,0,0.45)]"
+      class="app-bottomnav-bg pointer-events-auto rounded-full border border-white/16 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_10px_30px_rgba(0,0,0,0.45)]"
     >
       <div class="relative flex">
         <!-- Sliding jade indicator: one slot wide, translateX by activeIndex. -->

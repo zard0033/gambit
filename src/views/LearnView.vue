@@ -139,7 +139,7 @@ function toggleChapter(c: Chapter): void {
           <!-- 進度條（active 限定，永遠可見） -->
           <div v-if="chapterStatus(c) === 'active'" class="h-[3px] overflow-hidden bg-surface-deep-2">
             <div
-              class="h-full bg-[linear-gradient(90deg,#3AB894,#F8B500)] transition-[width] duration-300 motion-reduce:transition-none"
+              class="lesson-progress-fill h-full transition-[width] duration-300 motion-reduce:transition-none"
               :style="{ width: `${(c.done / c.total) * 100}%` }"
             />
           </div>

@@ -1,15 +1,54 @@
 <!-- STATUS -->
 Epic: 差異化重構
-Feature: Phase 2 收尾 + Phase 3 A 路線（氛圍首頁）
-Task: 2026-07-14 家用機收線：D3 招呼框 banding 修復已推；**material 撞題已裁決**——家用機 07-12 依當日
-拍板做完的 v0 實作與 07-13 Accepted spec 結構性歧異，Eason 07-14 裁決＝spec 為準、v0 停車保存
-（branch `material-v1-parked`，正式版上線後即刪）。
-**球仍在 Eason**：iPhone 實機四批一次複驗 ＋ 登入態累積 ≥10 局 → D6 量測 → ≤5% 開旗照 spec 施工
-（施工時先拆停車分支的可用件：測試手法／抽樣工具（分支內 scripts/material-v1-parked/）／已驗防線）。
+Feature: Phase 3 B 路線——整個 app 佈局 from scratch（徹底顛覆導航範式）
+Task: 2026-07-21 第二主題「深墨綠」深色模式**已完成**（branch `feat/theme-deep-jade`，已 commit、未 push）。
+**下一個大 project＝整個 app UI 佈局 from scratch**——Eason 定調「徹底顛覆導航範式、chess realm 不像 app」，
+**另開新對話**走 ui-design-flow 從概念探索開頭。四候選隱喻：棋境地圖／一卷旅程／棋室／棋盤即世界。深墨綠當
+色票資產（新佈局照用顏色、結構重來）。**球在 Eason**：挑隱喻方向 ＋ 給「眼睛一亮」的參照 app。
+（前情：material 撞題 07-14 裁決＝spec 為準、v0 停 `material-v1-parked`；iPhone 四批複驗 07-20 已清，見下節。）
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
 > **差異化北極星 = `production/gambit-differentiation-vision.md`**——提任何功能/重構/UI 前**先讀**。
+
+---
+
+## 2026-07-21 第二主題「深墨綠」完成 ＋ 佈局 from-scratch project 啟動
+
+### 第二主題（深色模式）＝深墨綠，已完成（branch `feat/theme-deep-jade`，已 commit、未 push）
+
+- **方向探索歷程（教訓：憑空認可挑不出、看實物才準）**：原 noir branch 的 ink-noir（暖黑墨底＋暖白紙、去 jade）
+  一路被推翻——Eason 把 cream/noir 擺一起看，覺得 ink-noir「tone 不對、像兩個 app」。診斷＝去 jade 斷了品牌血緣，
+  但飽和 jade 貼中性暗底又螢光。探索「鏡像對偶」（noir 配另一靈魂色 X：朱砂／黛紫／黛藍）後，Eason 最後選
+  **深墨綠沉浸**：底本身是接近黑的深墨綠 `#0e1411`、jade 是同色系亮階（不螢光）、金唯一高光＝cream（暖亮＋jade）
+  的明暗鏡像、同青瓷家族。黑度取「偏黑」版（非較綠版）。
+- **落地**：`main.css` `:root[data-theme='noir']` token block（深墨綠色板）＋11 個深區 theme-aware class 的 noir
+  漸層值；`colors_and_type.css` noir 段（SoT）同步；toggle 系統（`lib/theme.ts`＋`ui-store`＋`data-sync` 跨裝置
+  同步＋ProfileView「外觀」toggle＋`main.ts` 開機套用＋`App.vue` 登入 reconcile）；`theme.test.ts` 6 測試。
+  WCAG 五項實算全過（ink 15.66:1、primary 連結 5.93:1、danger 5.95:1…）。vitest 913 綠、vue-tsc 0、cream byte 不變。
+- **待 Eason 手動套 live**：`supabase/migrations/20260830053143_create_user_preferences.sql`（一人一列 RLS、theme
+  check）。未套前雲端讀寫 degrade local-only（已驗）；套後才跨裝置。**編號已接續當前最大值。**
+- **兩個小尾巴**：① toggle 中文標籤現為「暖墨」（ink-noir 遺留），深墨綠主題**中文名待正名**（品味題）。
+  ② 深區 class 接在**當前佈局**上——佈局 from scratch 後會隨頁面重做而演變，但 token／toggle／migration 是留用資產。
+- **實機截圖未完成**（Playwright 分頁反覆被關），但落地值＝Eason 看過選定的 runtime demo（偏黑深墨綠）＋WCAG＋
+  build 綠，信度足；Eason 可 `localhost:5173`→我的→外觀→暖墨 自驗。
+
+### 首頁光（backlog，未落地）
+
+- 舊「天頂光暈」核心光帶做不到位（手法先天弱：漂浮無錨點＋WCAG 壓到 alpha 0.03–0.1）。三方向 demo 後 **Eason
+  拍板「純星夜」**：拿掉 `--scene-core-*`、星塵密度各時段重給（深夜星滿／白天星稀）表達時段，不靠光。**未落地**，
+  之後改 `main.css` scene tokens ＋ `NeveSceneHeader.vue`。
+
+### 🆕 下一個大 project：整個 app 佈局 from scratch（Phase 3 B 路線）＝另開對話做
+
+- **訴求**：現佈局「很 usual、很普通、沒眼睛為之一亮」（標準頂 header＋底 tab bar＋卡片列表）；想要「這人對 UI
+  好用心、沒想到還可以這樣設計」的驚艷。**大膽程度＝徹底顛覆導航範式**（Eason 拍板）——像走進 chess realm、不像 app。
+- **方法**（ui-design-flow）：先出 2-3 個「顛覆導航範式」概念屏 → Eason 看實物挑方向 → 才一頁頁落地。不一次亂改。
+- **四候選隱喻**（Eason 醞釀）：**棋境地圖**（俯瞰棋世界、功能＝地點、導航＝移動）／**一卷旅程**（垂直水墨長卷、
+  捲動即旅程）／**棋室**（第一人稱書齋、功能＝角落物件）／**棋盤即世界**（導航長在棋盤格）。
+- **待 Eason**：挑隱喻方向 ＋ 給「眼睛一亮」的參照 app／遊戲／網站（真實參照優先於憑空生成，flow 鐵律 1）。
+- **不變約束**：iPhone 單手可用、觸控 ≥44px、a11y、深墨綠+cream 雙主題、Gambit 視覺 SoT（Wood12 盤、Neve 人格、
+  西洋棋用語）。深墨綠色票＝資產。
 
 ---
 

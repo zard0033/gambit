@@ -139,8 +139,9 @@ const aheadPath = computed(() => {
   return smoothPath(pts)
 })
 
-function coinBackground(state: MapNode['state']): string {
-  if (state === 'done') return 'radial-gradient(120% 120% at 50% 18%,#3AB894,#167A5E 55%,#0C5840)'
+function coinBackground(state: MapNode['state']): string | undefined {
+  // 'done' is theme-aware (.dungeon-node-face-done in main.css); leave inline background unset.
+  if (state === 'done') return undefined
   if (state === 'current')
     return 'radial-gradient(120% 120% at 50% 18%,#FFC94D,#F8B500 55%,#C87820)'
   return 'radial-gradient(120% 120% at 50% 18%,#26302c,#1a201d 70%,#121613)'
@@ -154,8 +155,7 @@ function enter(node: MapNode): void {
 
 <template>
   <div
-    class="min-h-dvh overflow-x-hidden pb-24 lg:pb-8"
-    style="background: linear-gradient(to top, #0a1f1a 0%, #103029 38%, #15392f 78%, #1a4a3d 100%)"
+    class="dungeon-zone-bg min-h-dvh overflow-x-hidden pb-24 lg:pb-8"
   >
     <!-- 頂部淨空（option A）：身分／進度／入口都下放到底部固定 CTA。此處只留 a11y 焦點標題。 -->
     <h1 class="sr-only" tabindex="-1">登上試煉之峰</h1>
@@ -199,6 +199,7 @@ function enter(node: MapNode): void {
             :aria-current="node.state === 'current' ? 'step' : undefined"
             :aria-label="`${node.puzzle.title}（${node.state === 'done' ? '已完成' : node.state === 'current' ? '進行中' : '未解鎖'}）`"
             class="absolute z-2 flex items-center justify-center rounded-full transition-transform active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-surface-dungeon"
+            :class="{ 'dungeon-node-face-done': node.state === 'done' }"
             :style="{
               left: `${node.x - node.size / 2}px`,
               top: `${node.y - node.size / 2}px`,
@@ -216,7 +217,7 @@ function enter(node: MapNode): void {
             }"
             @click="enter(node)"
           >
-            <Check v-if="node.state === 'done'" :size="Math.round(node.size * 0.38)" :stroke-width="2.5" class="text-[#eafff6]" />
+            <Check v-if="node.state === 'done'" :size="Math.round(node.size * 0.38)" :stroke-width="2.5" class="dungeon-node-check-done" />
             <span
               v-else-if="node.state === 'current'"
               class="font-num font-bold leading-none text-gold-ink"
@@ -247,7 +248,7 @@ function enter(node: MapNode): void {
       class="fixed inset-x-0 z-30 px-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] lg:bottom-6"
     >
       <div
-        class="mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-white/[0.14] bg-[linear-gradient(160deg,#1E5043,#15392F)] px-3.5 py-3 shadow-[0_10px_30px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.12)]"
+        class="dungeon-action-bar mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-white/[0.14] px-3.5 py-3 shadow-[0_10px_30px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.12)]"
       >
         <span
           class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold/12 text-gold ring-1 ring-gold/25"
