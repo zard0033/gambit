@@ -34,10 +34,10 @@ export function applyTheme(theme: Theme): void {
   if (theme === 'noir') root.dataset.theme = 'noir'
   else delete root.dataset.theme
   // Keep the mobile browser chrome (status bar tint) in sync with the surface.
-  // #141310 = --color-surface-deep under [data-theme='noir'] (src/assets/main.css).
+  // #0a0f0c = --color-surface-deep under [data-theme='noir'] (src/assets/main.css).
   document
     .querySelector('meta[name="theme-color"]')
-    ?.setAttribute('content', theme === 'noir' ? '#141310' : '#103029')
+    ?.setAttribute('content', theme === 'noir' ? '#0a0f0c' : '#103029')
 }
 
 export function persistTheme(theme: Theme, at: number): void {

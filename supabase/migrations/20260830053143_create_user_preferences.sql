@@ -17,4 +17,5 @@ CREATE TABLE IF NOT EXISTS public.user_preferences (
 ALTER TABLE public.user_preferences ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users access own rows" ON public.user_preferences
-  USING (user_id = auth.uid());
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());

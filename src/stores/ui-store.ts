@@ -50,8 +50,10 @@ export const useUiStore = defineStore('ui', () => {
   /**
    * On login, reconcile the local theme against the cloud row (last-write-wins by timestamp).
    * Cloud newer → adopt it; local newer (or no cloud row yet) → push local up. Wired from App.vue.
+   * An OS-derived default (at=0, the user never explicitly chose) is never pushed to the cloud —
+   * only an explicit setTheme() should turn into a synced preference.
    */
-  async function reconcileTheme(): Promise<void> {
+  async function reconcileOnLogin(): Promise<void> {
     const sync = useDataSyncStore()
     const remote = await sync.loadThemePreference()
     const local = { theme: theme.value, at: storedThemeAt() }
@@ -65,8 +67,8 @@ export const useUiStore = defineStore('ui', () => {
         applyTheme(winner)
       }
       persistTheme(winner, remote.updatedAt)
-    } else {
-      void sync.upsertThemePreference(local.theme, local.at || Date.now())
+    } else if (local.at > 0) {
+      void sync.upsertThemePreference(local.theme, local.at)
     }
   }
 
@@ -117,7 +119,7 @@ export const useUiStore = defineStore('ui', () => {
     pendingResume,
     theme,
     setTheme,
-    reconcileTheme,
+    reconcileOnLogin,
     openPlaySetup,
     closePlaySetup,
     requestGame,
