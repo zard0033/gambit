@@ -1,10 +1,9 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: Phase 3 B 路線——整個 app 佈局 from scratch（徹底顛覆導航範式）
-Task: 2026-07-21 第二主題「深墨綠」深色模式**已完成**（branch `feat/theme-deep-jade`，已 commit、未 push）。
-**下一個大 project＝整個 app UI 佈局 from scratch**——Eason 定調「徹底顛覆導航範式、chess realm 不像 app」，
-**另開新對話**走 ui-design-flow 從概念探索開頭。四候選隱喻：棋境地圖／一卷旅程／棋室／棋盤即世界。深墨綠當
-色票資產（新佈局照用顏色、結構重來）。**球在 Eason**：挑隱喻方向 ＋ 給「眼睛一亮」的參照 app。
+Task: 2026-07-21 佈局 project ⓪➊ 拍板完成——方向＝墨色垂直世界（滑動空間語意＋旅程軸 icon 導覽），
+決策記錄寫入 `design/gambit-design-system/navigation-vertical-world.md`。➌ 真開發未開始。
+第二主題「深墨綠」深色模式已完成、已併同一分支 `feat/theme-deep-jade`，**皆已 commit、未 push**。
 （前情：material 撞題 07-14 裁決＝spec 為準、v0 停 `material-v1-parked`；iPhone 四批複驗 07-20 已清，見下節。）
 <!-- /STATUS -->
 
@@ -39,16 +38,26 @@ Task: 2026-07-21 第二主題「深墨綠」深色模式**已完成**（branch `
   拍板「純星夜」**：拿掉 `--scene-core-*`、星塵密度各時段重給（深夜星滿／白天星稀）表達時段，不靠光。**未落地**，
   之後改 `main.css` scene tokens ＋ `NeveSceneHeader.vue`。
 
-### 🆕 下一個大 project：整個 app 佈局 from scratch（Phase 3 B 路線）＝另開對話做
+### 佈局 from scratch project：⓪➊ 拍板完成（同日延續，另一對話開工）
 
-- **訴求**：現佈局「很 usual、很普通、沒眼睛為之一亮」（標準頂 header＋底 tab bar＋卡片列表）；想要「這人對 UI
-  好用心、沒想到還可以這樣設計」的驚艷。**大膽程度＝徹底顛覆導航範式**（Eason 拍板）——像走進 chess realm、不像 app。
-- **方法**（ui-design-flow）：先出 2-3 個「顛覆導航範式」概念屏 → Eason 看實物挑方向 → 才一頁頁落地。不一次亂改。
-- **四候選隱喻**（Eason 醞釀）：**棋境地圖**（俯瞰棋世界、功能＝地點、導航＝移動）／**一卷旅程**（垂直水墨長卷、
-  捲動即旅程）／**棋室**（第一人稱書齋、功能＝角落物件）／**棋盤即世界**（導航長在棋盤格）。
-- **待 Eason**：挑隱喻方向 ＋ 給「眼睛一亮」的參照 app／遊戲／網站（真實參照優先於憑空生成，flow 鐵律 1）。
-- **不變約束**：iPhone 單手可用、觸控 ≥44px、a11y、深墨綠+cream 雙主題、Gambit 視覺 SoT（Wood12 盤、Neve 人格、
-  西洋棋用語）。深墨綠色票＝資產。
+- **方向**：Eason 提出「首頁可垂直滑動、滑到底變場景轉換進試煉」的構想，具體化為**墨色垂直世界**
+  ——可垂直滑動的沉浸首頁樞紐，取代底部 tab 為主的 SaaS 卡片牆。空間語意固定：上＝沉澱回望
+  （棋誌）、中＝當下（對局／首頁落點）、下＝深處挑戰（試煉）。範圍只換首頁樞紐＋跨場景轉場，
+  功能頁本身維持正常頁面不整頁沉浸化。逃生艙（不迷路的保底導覽）選融入式常駐導覽，非點開才現的羅盤。
+- **技術驗證**：Eason 擔心純 CSS 效果有限——demo 證實不需要 WebGL，Canvas 星塵＋CSS 3D＋
+  scroll-driven 動效即可做出空間感與慣性視差。
+- **迭代歷程（教訓：加法不等於加分）**：拋棄式 demo（`design/demos/layout-vertical-world.html`）
+  兩輪大改＋一輪否決——① 右側導覽從圓點升級成「棋座標軸」（數字 rank）與「深度計」（連續指針）
+  兩個新方向，Eason 實測後判「都很醜，比原本圓點更差」；② 改成重用每層本來就有的 glyph（書／
+  學士帽／棋盤格／時鐘／拱門）縮小當導覽 icon、維持簡約，Eason 拍板「先這樣吧」。滑動吸附
+  跨兩層的手感問題桌機測不出結論（滑鼠/觸控板跟 iPhone 觸控物理不同），留待 ➌ 真機驗證。
+- **DESIGN.md 落地**：決策寫入 `design/gambit-design-system/navigation-vertical-world.md`（不建
+  獨立 root DESIGN.md，避免與既有 SoT 分裂）；README.md 導覽段補註記「Phase 3 B redesign in
+  progress」，現行 bottom-tab 描述仍屬實未改。
+- **➌ 真開發未開始**：待 IA 全盤點（五層是否為導覽全集）＋ 補 44px 觸控命中區 ＋ focus-visible
+  ring，細節見 DESIGN.md「已知待驗證」節。
+- **不變約束**：iPhone 單手可用、觸控 ≥44px、a11y、深墨綠+cream 雙主題、Gambit 視覺 SoT（Wood12 盤、
+  Neve 人格、西洋棋用語）。深墨綠色票＝資產。
 
 ---
 
