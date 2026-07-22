@@ -247,12 +247,14 @@ Eason 用 iPhone 走完 4 批複驗清單逐項回報，逐一分流：多數 OK
 - **Phase C+/D**：捉雙/牽制賽後偵測（需精準度實測）；Claude API 動態講解/BYOK（最後）。
 - ✅ **PWA 已實作**（2026-07-10，autoUpdate＋ADR-0016，見現況四磚②）：首次 deploy 後所有訪客開始吃 SW；
   之後每次 deploy 由 autoUpdate 自癒，「舊畫面＝裝置快取」的排查註記仍適用於未升級的舊訪客一次。
-- ✅ **死碼清理 + 效能斷言修正**（2026-07-22）：game-history `expandedRowId`/`setExpandedRow`/展開面板已被
+- ⏳ **死碼清理 + 效能斷言修正**（2026-07-22 施工完成、**尚未 commit**——改動仍在該對話的 working tree，
+  push 前需自行 commit＋過 review）：game-history `expandedRowId`/`setExpandedRow`/展開面板已被
   row-tap-to-navigate 取代，一併清 store（`game-history.ts`）、元件（`history-row.vue` 展開面板＋prop）、
   消費端（`HistoryView.vue`）、孤立測試（store 4 個 + view AC-12 1 個）；`opening-lookup` wall-clock 斷言
   （違反 coding-standards「no time-dependent assertions」）改成正確性斷言（不再測 ms，效能改註解說明已手動
   Chrome DevTools 驗證）；`auth-guard` timeout 查過＝非硬編時間斷言、是重負載下 vitest 逾時保護，非違規，
-  無需修（`--maxWorkers=4` 仍是既有緩解）。vitest 911/911、vue-tsc 0。
+  無需修（`--maxWorkers=4` 仍是既有緩解）。清理後 working tree 實測 vitest 911/911、vue-tsc 0
+  （911 為清理後數字；origin/main 的 tree 仍是清理前狀態）。
 - ✅ **第二主題（深墨綠）已完成並 push**（見上方 07-21 節）：舊待辦記的方向是「noir/Dusk」暖黑探索，
   最終拍板落地的是深墨綠，這條過期待辦移除。
 - **epiphany 棋誌文案語氣待收斂**（2026-07-20 iPhone 複驗反饋「太 AI 太假」，Eason 拍板先放 backlog）：
