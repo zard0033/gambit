@@ -530,7 +530,9 @@
    colors_and_type.css「墨韻母題」段）。墨筆底線/乾筆分隔（InkBrush）＋金墨飛濺
    （InkSplatter）。兩主題共用元件、明暗兩表現：墨色靠 --color-ink-brush（cream 深棕墨
    / noir 暖白墨）；金墨飛濺兩主題品牌金，cream 亮底靠 --fleck-scale 加大粒子補存在感。
-   cream 極克制——只在 reward / 章節扉頁 / Neve 特殊時刻掛載，不進日常 UI。
+   墨筆/乾筆兩主題皆可進日常 UI（2026-07-22 A/B 拍板），鋪量克制——每屏少數錨點；
+   深色表面兩主題皆暖白墨（墨色跟表面走，scoped 覆寫 --color-ink-brush）。
+   金墨飛濺仍限 reward / 章節扉頁 / Neve 特殊時刻。
    ============================================================ */
 :root { --fleck-scale: 1.6; }                  /* cream 亮底：飛濺粒子放大補存在感 */
 :root[data-theme='noir'] { --fleck-scale: 1; } /* 深底：亮金本就跳，維持原尺寸 */

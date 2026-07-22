@@ -176,7 +176,11 @@ interface GameHistoryEntry {
 
   **`fetchHistory()` in-flight guard**: If `isLoading === true` when `fetchHistory()` is called, the call returns immediately without starting a second concurrent fetch (deduplication guard).
 
-8. **Row expand (Should Have — S8-05)**: Tapping a row toggles an inline expanded panel below the row showing the fields listed in Rule 3b (`moveCount`, `endReasonDisplay`, `difficultyLabel`, `playerColor`). Only one row is expanded at a time — tapping a second row collapses the first. The expanded panel does NOT contain a board position or replay controls.
+8. **Row expand (Should Have — S8-05)** — **[REMOVED 2026-07-22]**: superseded by
+   row-tap-to-navigate（點列直接導向 `/review?gameId=…` 賽後檢討，資訊量遠大於行內面板）。
+   展開面板自上線後不可達，2026-07-22 連同 store 狀態（`expandedRowId`/`setExpandedRow`）與
+   測試一併移除（commit `5156f73`）。原文保留於 git 歷史；勿依此規則重新實作面板。
+   ~~Tapping a row toggles an inline expanded panel below the row showing the fields listed in Rule 3b.~~
 
   **iOS scroll disambiguation**: On iPhone Safari, brief scroll attempts frequently register as taps. The tap handler must use a touch-start/touch-end delta check: if the touch moved ≥4px (vertical or horizontal) between `touchstart` and `touchend`, treat the gesture as a scroll and do NOT toggle the row. This prevents accidental expansion mid-scroll in a 100-row list. Implementation: record `touchstartY` on `touchstart`; on `touchend`, expand only if `|touchendY - touchstartY| < 4` (use `pointer-events` or a `click` handler supplemented by this delta guard). A Playwright interaction test (ADVISORY, S8-05) should verify that a ≥4px vertical touch drag does not expand a row.
 
@@ -521,13 +525,16 @@ GIVEN HistoryView is showing `HISTORY_LOAD_LIMIT` rows and `hasMore === true`,
 WHEN the player taps the "Load more" button and `loadGameHistory(cursor)` returns 5 additional rows,
 THEN `entries.length === HISTORY_LOAD_LIMIT + 5`, all previously visible rows are still rendered, and the 5 new rows appear below them.
 
-**AC-12 — Expanded panel DOM wiring (S8-04 blocking unit gate)**
+**AC-12 — Expanded panel DOM wiring (S8-04 blocking unit gate)** — **[REMOVED 2026-07-22]**
+*本 AC 隨 Rule 8 展開面板一併移除（row-tap-to-navigate 取代，面板不可達；commit `5156f73`）。
+歷史上曾以 blocking gate 通過並 ship（S8-04），移除非未達成。gate/consistency 工具勿再視為必要 gate。*
 GIVEN a `GameHistoryEntry` with `moveCount=34`, `endReason='checkmate'` (→ `endReasonDisplay='Checkmate'`), `aiDifficulty=10` (→ `difficultyLabel='Intermediate'`), and `playerColor='white'`,
 WHEN the row is mounted with expansion state set to active (via a test prop, store setter, or any reactive mechanism that drives the expanded panel render condition — the specific mechanism is implementation detail and should not be hard-coded in this AC),
 THEN the DOM contains elements displaying `34`, `'Checkmate'`, `'Intermediate'`, and `'white'` (or equivalent `playerColor` label).
 *This BLOCKING unit AC verifies formula outputs are correctly bound to the expanded panel DOM, independent of the tap gesture. It must pass before S8-04 ships. Tests that set `isExpanded=true` via a store or prop are acceptable; tests that simulate a tap gesture are also acceptable but are not required for this AC.*
 
-**AC-12b — Single-row expand invariant (S8-05 advisory)**
+**AC-12b — Single-row expand invariant (S8-05 advisory)** — **[REMOVED 2026-07-22]**
+*同 AC-12,隨展開面板移除。*
 GIVEN a game row is expanded,
 WHEN a different row is tapped,
 THEN the first row collapses and the second row expands; at no point are two rows simultaneously in the expanded state.

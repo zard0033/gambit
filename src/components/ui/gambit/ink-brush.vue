@@ -7,7 +7,9 @@
  * is deterministic per `seed`, so it never reflows on re-render.
  *
  * 母題共用、明暗兩表現（SoT: design/gambit-design-system/colors_and_type.css「墨韻母題」）。
- * cream 極克制——只在 reward / 章節扉頁 / Neve 特殊時刻掛載，不進日常 UI。
+ * 墨筆底線／乾筆分隔兩主題皆可進日常 UI（2026-07-22 A/B 拍板），鋪量克制——每屏少數錨點；
+ * 深色表面（deep-jade 區）兩主題皆用暖白墨（墨色跟表面走，不跟主題走，scoped 覆寫 --color-ink-brush）。
+ * 金墨飛濺（InkSplatter）仍限 reward／特殊時刻。
  */
 const props = withDefaults(
   defineProps<{ width?: number; height?: number; seed?: number; thickness?: number }>(),

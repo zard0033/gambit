@@ -289,8 +289,9 @@ Eason 用 iPhone 走完 4 批複驗清單逐項回報，逐一分流：多數 OK
 - **Phase C+/D**：捉雙/牽制賽後偵測（需精準度實測）；Claude API 動態講解/BYOK（最後）。
 - ✅ **PWA 已實作**（2026-07-10，autoUpdate＋ADR-0016，見現況四磚②）：首次 deploy 後所有訪客開始吃 SW；
   之後每次 deploy 由 autoUpdate 自癒，「舊畫面＝裝置快取」的排查註記仍適用於未升級的舊訪客一次。
-- ⏳ **死碼清理 + 效能斷言修正**（2026-07-22 施工完成、**尚未 commit**——改動仍在該對話的 working tree，
-  push 前需自行 commit＋過 review）：game-history `expandedRowId`/`setExpandedRow`/展開面板已被
+- ✅ **死碼清理 + 效能斷言修正**（2026-07-22 施工＋commit `5156f73`，隨首頁回退批一同過
+  deep review；GDD `game-history.md` Rule 8/AC-12/AC-12b 已同步標 REMOVED 墓碑）：game-history
+  `expandedRowId`/`setExpandedRow`/展開面板已被
   row-tap-to-navigate 取代，一併清 store（`game-history.ts`）、元件（`history-row.vue` 展開面板＋prop）、
   消費端（`HistoryView.vue`）、孤立測試（store 4 個 + view AC-12 1 個）；`opening-lookup` wall-clock 斷言
   （違反 coding-standards「no time-dependent assertions」）改成正確性斷言（不再測 ms，效能改註解說明已手動

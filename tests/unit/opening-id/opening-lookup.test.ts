@@ -48,7 +48,7 @@ describe('identifyOpening', () => {
   // (target ≤20ms) is not asserted here — a wall-clock threshold is non-deterministic
   // under test-environment load (coding-standards "no time-dependent assertions");
   // verified manually in Chrome DevTools instead.
-  it('test_identifyOpening_40Plies_completesAndReturnsUnknown', () => {
+  it('test_identifyOpening_40Plies_completesWithWellFormedResult', () => {
     // Arrange: 40 half-moves from the Ruy Lopez (verified valid SAN sequence)
     const moves = [
       'e4','e5','Nf3','Nc6','Bb5','a6','Ba4','Nf6','O-O','Be7',
