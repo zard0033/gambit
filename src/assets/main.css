@@ -266,107 +266,37 @@
 
 /* ============================================================
    ATMOSPHERIC HOME SCENE — time-of-day sky tokens (additive)
-   星夜旅程重打（home-scene-redesign, 2026-07-20 定案）：四時段全部維持深空美學，不做亮度階梯、
-   不做適應性深色文字（那版已否決：「風格直接跑掉了」）。天空本身（--scene-sky-1..6）四時段
-   共用同一組深 jade 停駐色（WCAG 對比實算逼出的取捨——見 afternoon 註解）。時段差異靠兩件事
-   表達，不靠亮度：① --scene-star-opacity 星塵密度、② --scene-core-* 「光的事件」窄帶／頂部
-   光暈（見下方 core 註解，alpha 值同樣是對比實算逼出的上限，非設計初稿值）。文字色統一固定
-   --color-ink-on-deep / -dim，不隨 bucket 變動。鐵則：不得疊加金色 radial 光暈——三輪迭代
-   證實會讀成浮空色塊，見 quick-spec。
+   Every bucket departs from the deep-jade anchor #103029, shifted
+   only in colour temperature/lightness. Low saturation throughout;
+   the warm "light" is desaturated cream/amber — NEVER brand gold
+   (#F8B500 is reserved for focus / reward). Defined here so the
+   NeveSceneHeader references loaded var() tokens (no black fallback).
+   sky-a = top of sky · sky-b = deep base anchor · glow = soft light.
    ============================================================ */
 :root {
   /* Matches AppNav's gradient bottom stop (#183E35) so the full-bleed scene's
      top edge joins the nav with no colour jump. Time-invariant (nav never changes). */
   --scene-nav-join: #183e35;
-  /* 文字色固定不隨時段變化——星夜美學是暗空美學，四時段天空皆深，淺色文字全時段可讀。 */
-  --scene-ink: var(--color-ink-on-deep);
-  --scene-ink-dim: var(--color-ink-on-deep-dim);
-  /* 「光的事件」預設關閉（night 無光帶，最深、星最多，是四時段的基準）。 */
-  --scene-core-opacity: 0;
-  --scene-core-top: 58%;
-  --scene-core-height: 22%;
-  --scene-core-gradient: linear-gradient(180deg, transparent, transparent);
 }
 [data-scene='night'] {
-  --scene-sky-1: #030907;
-  --scene-sky-2: #071712;
-  --scene-sky-3: #0b241d;
-  --scene-sky-4: #103029;
-  --scene-sky-5: #16392f;
-  --scene-sky-6: #1c4237;
-  --scene-star-opacity: 1;
+  --scene-sky-a: #123029;
+  --scene-sky-b: #0a1f1a;
+  --scene-glow: rgba(155, 189, 177, 0.16); /* faint cool moon-teal */
 }
 [data-scene='morning'] {
-  /* 冷白熾核心：與 evening 同一「熾白核心」手法，核心色相轉冷（近白帶青藍），避開橄欖濁色
-     ——不用 amber screen 疊綠色天空，直接跳到近白/近冷白，中間調沒有橄欖可生。 */
-  --scene-sky-1: #030907;
-  --scene-sky-2: #071712;
-  --scene-sky-3: #0b241d;
-  --scene-sky-4: #103029;
-  --scene-sky-5: #16392f;
-  --scene-sky-6: #1c4237;
-  --scene-star-opacity: 0.35;
-  --scene-core-opacity: 1;
-  --scene-core-top: 58%;
-  --scene-core-height: 22%;
-  --scene-core-gradient: linear-gradient(
-    180deg,
-    rgba(190, 215, 255, 0) 0%,
-    rgba(210, 230, 255, 0.03) 62%,
-    rgba(235, 245, 255, 0.06) 100%
-  );
+  --scene-sky-a: #163a2f;
+  --scene-sky-b: #0e2721;
+  --scene-glow: rgba(217, 196, 158, 0.2); /* low-sat warm dawn cream */
 }
 [data-scene='afternoon'] {
-  /* 最清透：與 night/morning/evening 共用同一組深 jade 天空停駐色（WCAG 對比實算逼出的取捨——
-     單獨拉淺 afternoon 的天空會讓底部停駐色亮到 ink-dim 對比跌破 4.5:1，見對比實算表）。
-     「清透」感改由星量最低＋天頂光暈事件表達，不靠天空本身變亮。專屬光的事件＝天頂一抹極淡高空
-     白晝光——大尺度、頂緣起始向下暈開、三段停駐皆無硬邊，讀不出浮空邊界（非鐵則禁的 radial 光暈：
-     此為 top-anchored 全寬線性漸層，不是懸空色塊）。 */
-  --scene-sky-1: #030907;
-  --scene-sky-2: #071712;
-  --scene-sky-3: #0b241d;
-  --scene-sky-4: #103029;
-  --scene-sky-5: #16392f;
-  --scene-sky-6: #1c4237;
-  --scene-star-opacity: 0.08;
-  --scene-core-opacity: 1;
-  --scene-core-top: -10%;
-  --scene-core-height: 46%;
-  --scene-core-gradient: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.04) 55%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  --scene-sky-a: #1a4436;
+  --scene-sky-b: #102b24;
+  --scene-glow: rgba(206, 222, 205, 0.18); /* clean pale daylight */
 }
 [data-scene='evening'] {
-  /* 暖白熾核心：色相沿用 warm-sweep.html 變體 2「熾白核心」（核心拉到近白熱、跳過橄欖中間調），
-     但 alpha 大幅下調（原案 0.55/0.88 → 0.035/0.06）——樣張的節點文字位置與本頁實際 path-wrap
-     節點不同，原案 alpha 疊在深空底色 + 亮色文字上會把對比壓到 1.1:1（實算證實），故降到
-     WCAG 對比實算求出的安全上限，光的事件因此比樣張更含蓄，屬 AC 優先於樣張的取捨。 */
-  --scene-sky-1: #030907;
-  --scene-sky-2: #071712;
-  --scene-sky-3: #0b241d;
-  --scene-sky-4: #103029;
-  --scene-sky-5: #16392f;
-  --scene-sky-6: #1c4237;
-  --scene-star-opacity: 0.6;
-  --scene-core-opacity: 1;
-  --scene-core-top: 58%;
-  --scene-core-height: 22%;
-  --scene-core-gradient: linear-gradient(
-    180deg,
-    rgba(255, 214, 150, 0) 0%,
-    rgba(255, 236, 205, 0.035) 62%,
-    rgba(255, 250, 240, 0.06) 100%
-  );
-}
-
-/* 天空顆粒層專用尺度（NeveSceneHeader .grain 消費）：與棋誌紙頁紋理（--texture-paper-grain，
-   baseFrequency 0.9／120px tile）分開調——天空要更細更疏的粒子感（0.75／200px tile），
-   套用強度另由消費端的 opacity:.14 控制，不在此 token 裡。 */
-:root {
-  --texture-sky-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  --scene-sky-a: #123128;
+  --scene-sky-b: #0b211b;
+  --scene-glow: rgba(198, 150, 106, 0.22); /* low-sat warm dusk amber */
 }
 
 /* ============================================================
@@ -501,6 +431,32 @@
 }
 :root[data-theme='noir'] .dark-focus-panel {
   background-image: linear-gradient(160deg, #1e5744 0%, #164130 55%, #123528 100%);
+}
+
+/* NeveSceneHeader（首頁招呼頭部）：--scene-nav-join/-sky-a/-sky-b 是 cream 定案時的深 jade 停駐色，
+   在 noir 下比周邊底色淺、會讀成一塊突兀的亮框——比照 .app-header-bg 手法整組加深。nav-join 直接
+   對齊 noir .app-header-bg 的底部停駐色（維持「與 AppNav 無縫銜接」的原始設計意圖）；四時段
+   sky-a/sky-b 依同一比例（≈×0.52，與 nav-join 深化幅度一致）加深，glow 維持原值——低 alpha
+   疊加層在更深的底色上仍讀得出、不需要跟著變。 */
+:root[data-theme='noir'] {
+  --scene-nav-join: #0d211a;
+}
+/* data-scene lives on NeveSceneHeader's <section>, not :root — descendant combinator required. */
+:root[data-theme='noir'] [data-scene='night'] {
+  --scene-sky-a: #091915;
+  --scene-sky-b: #05100e;
+}
+:root[data-theme='noir'] [data-scene='morning'] {
+  --scene-sky-a: #0b1e18;
+  --scene-sky-b: #071411;
+}
+:root[data-theme='noir'] [data-scene='afternoon'] {
+  --scene-sky-a: #0e231c;
+  --scene-sky-b: #081613;
+}
+:root[data-theme='noir'] [data-scene='evening'] {
+  --scene-sky-a: #091915;
+  --scene-sky-b: #06110e;
 }
 
 /* 對局 game-over result card (PlayView.vue) */

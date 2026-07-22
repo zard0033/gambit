@@ -1,17 +1,62 @@
 <!-- STATUS -->
 Epic: 差異化重構
-Feature: Phase 3 B 路線——整個 app 佈局 from scratch（徹底顛覆導航範式）
-Task: 2026-07-21 佈局 project ⓪➊ 拍板完成——方向＝墨色垂直世界（滑動空間語意＋旅程軸 icon 導覽），
-決策記錄寫入 `design/gambit-design-system/navigation-vertical-world.md`。➌ 真開發未開始。
+Feature: 首頁視覺——墨韻母題 × 舊卡片佈局
+Task: 2026-07-22 **佈局 from-scratch 專案收案**——十案（星夜旅程小徑、墨色垂直世界及其後續九個
+替代構圖）逐輪與舊卡片佈局（深青招呼頭部＋hero 卡＋繼續學習卡＋總覽三磚）比較，Eason 裁定舊版
+勝出，方向廢止。星夜版（`27a26cb`+`63e67db`）已從 HomeView/NeveSceneHeader 回退；墨韻母題（InkBrush
+墨筆／乾筆）融合進回退後的舊佈局（招呼語墨筆＋三段落標籤乾筆），本輪已完成。詳見下方新節。
+**下一步＝墨韻風格逐屏優化**（Eason 已拍板）：以現有佈局為骨架鋪墨韻，順序照計畫——
+棋誌（最近血緣）→ 沉浸區（棋憶/課程/試煉/判斷場）→ 功能頁克制套用；每屏套完走 review+雙主題截圖。
 第二主題「深墨綠」深色模式已完成、**已 push**（`feat/theme-deep-jade` 內容已併入並推送到 origin/main）；
 Supabase migration（`user_preferences`）**已套用 live**（2026-07-22 anon key PostgREST 驗證確認，見下節）。
-（前情：material 撞題 07-14 裁決＝spec 為準、v0 停 `material-v1-parked`；iPhone 四批複驗 07-20 已清，見下節。）
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
 > **差異化北極星 = `production/gambit-differentiation-vision.md`**——提任何功能/重構/UI 前**先讀**。
 
 ---
+
+## 2026-07-22 佈局 from-scratch 專案收案 + 首頁回退
+
+**結論**：佈局 from-scratch 方向（星夜旅程小徑、墨色垂直世界及其後續替代構圖，合計十案）全數敗於
+2026-07-14 前的舊卡片佈局（深青招呼頭部＋「開始新對局」hero 卡＋繼續學習卡＋總覽三磚）。Eason 逐輪
+比較後拍板：**首頁退回舊卡片佈局，方向廢止**。敗因診斷：十案共通問題是缺乏**色塊錨定**與**卡片實體
+感**——星夜的蜿蜒小徑、垂直世界的分層 diorama、墨紙條目式、及甲乙丙/丁戊己等變體，都把資訊攤成
+連續性的場景/軸線敘事，失去舊版「一眼可分辨的色塊區域」與「卡片=可點擊實體」的直覺。
+
+**已回退（外科手術，非整檔 checkout）**：
+- `src/views/HomeView.vue`、`src/components/home/NeveSceneHeader.vue`——還原至 `241e4ea`（D3 招呼框
+  版本，佈局 from-scratch 之前的最後穩定態）。星夜版新增的 `CtaStation`/`PathStation` 型別、蜿蜒小徑
+  版面、`ctaStation`/`lessonStation`/`trialStation` computed 已隨整檔還原一併移除（無孤兒引用）。
+- `src/assets/main.css`——只反做 `27a26cb`／`63e67db` 對「ATMOSPHERIC HOME SCENE」token 段的 hunk
+  （四時段 `--scene-sky-1..6`／`--scene-star-opacity`／`--scene-core-*`／`--texture-sky-grain` 全數
+  移除，還原為 `--scene-sky-a`/`-b`/`--scene-glow` 舊版三 token）。**noir 主題 token 區與「墨韻 (INK
+  GARNISH)」段完全未動**（grep 確認完好）。
+- **noir 下的舊招呼框補一組深色適配**（比照 `.app-header-bg` 手法）：舊版 `--scene-sky-a`/`-b`/
+  `--scene-nav-join` 是 cream 定案時的深 jade 值，未曾被 noir 主題看過——在 noir 下比周邊底色淺、讀
+  成一塊突兀亮框。已在 main.css 加 `:root[data-theme='noir'] [data-scene='X']` 覆寫（四時段個別加深，
+  比例對齊 noir `.app-header-bg` 的加深幅度 ≈×0.52）＋ `:root[data-theme='noir']` 的 `--scene-nav-join`
+  直接對齊 noir `.app-header-bg` 底部停駐色，維持「與 AppNav 無縫銜接」的原始設計意圖。截圖已目視
+  確認 noir 下不再突兀。
+
+**墨韻融合（鋪量克制，只加三處）**：
+1. 招呼語墨筆——`NeveSceneHeader.vue` 的 h1「棋盤未曾離開，你來了。」下方掛 `InkBrush` 底線；深青
+   表面兩主題皆用暖白墨（scoped 覆寫 `--color-ink-brush: rgba(236,230,218,.72)`，不動全域 token——
+   墨色跟著表面走、不跟主題走）。
+2. 段落標籤乾筆——`HomeView.vue` 三個 `SectionLabel`（繼續學習/總覽/棋誌）旁配寬扁乾筆（`InkBrush
+   width=200 height=8 thickness=0.18`），統一處理、各自不同 seed 避免視覺重複；cream/noir 走全域
+   `--color-ink-brush` 預設值（未覆寫，深棕墨／暖白墨隨主題切換）。
+3. 未加飛濺（`InkSplatter`）——首頁是日常場景，金墨飛濺仍限 reward/特殊時刻。
+
+**驗證**：vitest 911/911、vue-tsc 0、E2E `visual-regression` home 結構不變量與像素回歸（chromium+webkit）
+綠、home 基準圖已 `--update-snapshots` 重生並目視確認（cream/noir × mobile/desktop 四張 dev-server 截圖
+另存 scratchpad）。`mobile-play` 像素回歸有一個既有偏差（14176px/0.05，與本次改動無關——PlayView 未觸碰、
+快照自 `241e4ea` 起未變、也不依賴工作樹裡其他人未 commit 的 history 相關改動），本輪範圍外不處理。
+
+**文件收案（同批）**：`design/gambit-design-system/navigation-vertical-world.md`（墨色垂直世界方向）與
+`design/quick-specs/home-scene-redesign.md`（星夜 spec）皆加墓碑（OBSOLETE，本文件僅留歷史記錄）；
+`colors_and_type.css` 墨韻母題段更新「cream 日常可入」定案；下方「佈局 from scratch project」節加墓碑
+註記，「首頁光（backlog）」節（星夜專屬、已無標的）移除。
 
 ## 2026-07-22 墨韻母題改嫁落地（cream / deep-jade 兩主題）
 
@@ -52,13 +97,10 @@ Supabase migration（`user_preferences`）**已套用 live**（2026-07-22 anon k
 - **實機截圖未完成**（Playwright 分頁反覆被關），但落地值＝Eason 看過選定的 runtime demo（偏黑深墨綠）＋WCAG＋
   build 綠，信度足；Eason 可 `localhost:5173`→我的→外觀→暖墨 自驗。
 
-### 首頁光（backlog，未落地）
-
-- 舊「天頂光暈」核心光帶做不到位（手法先天弱：漂浮無錨點＋WCAG 壓到 alpha 0.03–0.1）。三方向 demo 後 **Eason
-  拍板「純星夜」**：拿掉 `--scene-core-*`、星塵密度各時段重給（深夜星滿／白天星稀）表達時段，不靠光。**未落地**，
-  之後改 `main.css` scene tokens ＋ `NeveSceneHeader.vue`。
-
 ### 佈局 from scratch project：⓪➊ 拍板完成（同日延續，另一對話開工）
+
+> **【墓碑，2026-07-22】方向已廢止**：Eason 裁決首頁維持舊卡片佈局＋墨韻融合，本方向不再施工。
+> 詳見上方「2026-07-22 佈局 from-scratch 專案收案 + 首頁回退」節。以下保留原文當歷史記錄。
 
 - **方向**：Eason 提出「首頁可垂直滑動、滑到底變場景轉換進試煉」的構想，具體化為**墨色垂直世界**
   ——可垂直滑動的沉浸首頁樞紐，取代底部 tab 為主的 SaaS 卡片牆。空間語意固定：上＝沉澱回望

@@ -1,5 +1,10 @@
 # 首頁導覽典範轉移 — 墨色垂直世界
 
+> **【墓碑】status: OBSOLETE（2026-07-22）**——Eason 裁決：首頁維持卡片佈局＋墨韻母題，本方向
+> 不再施工。與星夜旅程小徑等其餘九個替代構圖一併敗於舊卡片佈局（色塊錨定＋卡片實體感）。詳見
+> `production/session-state/active.md`「2026-07-22 佈局 from-scratch 專案收案 + 首頁回退」節。
+> 以下原文僅保留作歷史記錄，不代表現行方向。
+>
 > Phase 3 B（差異化重構路線圖）決策紀錄。設計流程：ui-design-flow ⓪→➊ 已於概念 demo
 > （`design/demos/layout-vertical-world.html`，拋棄式，不進 production）驗證並由 Eason 拍板。
 > 本檔是 ➋ 落地依據；➌ 真開發時只引用本檔決策與 token，不搬 demo 的手刻 CSS。

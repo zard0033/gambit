@@ -139,9 +139,9 @@ chessboard is the warm centerpiece; the app "world" (deep jade + gold + glass) f
 - **4 / 8px rhythm**; section steps 16 / 24 / 32 / 48.
 - Mobile-first; **bottom tab bar** is the primary nav (4–5 items: 首頁 / 學習 / 對局 / 我的), top header
   holds only brand + a settings gear. ≥768px may switch to a left sidebar (same tokens).
-  > 🚧 **Phase 3 B redesign in progress** — this bottom-tab pattern is being replaced by a vertical
-  > scroll-world hub for the home/landing screen. Design decided, not yet built. See
-  > `navigation-vertical-world.md`. This line still describes current production behavior.
+  > ✅ **2026-07-22 已收案**: the vertical scroll-world redesign (`navigation-vertical-world.md`) was
+  > shelved — the old card layout won every round of comparison. Bottom-tab + card layout remains
+  > production behavior with no pending replacement.
 - Fixed nav/tab respect **safe areas** (`env(safe-area-inset-*)`); use `min-h-dvh`, not `100vh`.
 - Touch targets ≥ **44×44px**.
 

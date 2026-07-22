@@ -213,13 +213,19 @@
 
    ── 墨韻母題（共通設計語言，Eason 2026-07 拍板；2026-07-22 已改嫁落地兩主題）──────
    水墨筆觸（標題墨筆底線、乾筆分隔）與金墨飛濺（reward）是**全 app 共通的裝飾母題**，非 noir
-   外掛。表現分主題：noir＝暖白墨 rgba(236,230,218,.72)，對比強、可進日常；cream＝深棕墨
-   rgba(61,34,16,.68)、極克制，只在特殊時刻（reward / 章節扉頁 / Neve 特殊時刻）出現，不進日常 UI。
-   母題共用、明暗兩種表現——不是「noir 有裝飾、cream 沒有」。
+   外掛。表現分主題：noir＝暖白墨 rgba(236,230,218,.72)，cream＝深棕墨 rgba(61,34,16,.68)。母題共用、
+   明暗兩種表現——不是「noir 有裝飾、cream 沒有」。
+   **定案（2026-07-22，首頁 A/B 使用者拍板「留」）**：標題墨筆底線／乾筆分隔**兩主題皆日常可入**
+   （非僅限特殊時刻），鋪量仍須克制——一屏內只用於少數錨點（標題底線、段落分隔），不逐段重複。
+   金墨飛濺（InkSplatter）**兩主題皆仍限 reward / 章節扉頁 / Neve 特殊時刻**，不進日常 UI（飛濺是
+   慶祝訊號，天天出現會失去意義）。
+   **墨色跟著表面走，不跟主題走**：深色表面（deep-jade／noir 深區）不論當前主題為何，皆用暖白墨；
+   淺色表面（cream 底）皆用深棕墨。判準是「這塊表面本身多深」，不是「使用者選了哪個主題」——首頁
+   招呼頭部（深青底）在 cream 主題下也用暖白墨即為一例（見 NeveSceneHeader.vue 的 scoped 覆寫）。
    已落地（2026-07-22）：共用元件 InkBrush／InkSplatter（src/components/ui/gambit/）＋ production CSS
    在 src/assets/main.css「墨韻 (INK GARNISH)」段（token --color-ink-brush 兩主題、金墨 --fleck-scale
-   cream 加大 1.6）。首個掛載＝課程完成卡（LessonView，reward 時刻、兩主題）。乾筆分隔 primitive 已備
-   （InkBrush 寬扁用法）、待接手對話逐屏擴散。
+   cream 加大 1.6）。掛載點：課程完成卡（LessonView，reward 時刻、兩主題）；首頁招呼語墨筆＋三段落
+   標籤乾筆（HomeView／NeveSceneHeader，佈局回退舊卡片版後接上，見 active.md 07-22 節）。
    ================================================================ */
 [data-theme="noir"] {
   /* Surface — 接近黑的深墨綠（非飽和綠、非中性黑）；card/raised 拉開亮度好浮起 */
