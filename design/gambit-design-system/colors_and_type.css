@@ -211,12 +211,15 @@
       .dungeon-zone-bg 等；cream 版＝原值不變、noir 版＝深墨綠）。新增深區頁面比照處理。
    6) 棋盤 / 棋子 / 標註 / eval ＝ upstream owned，木紋盤兩主題共用、不 override。
 
-   ── 墨韻母題（共通設計語言，Eason 2026-07 拍板）──────────────────────────────
+   ── 墨韻母題（共通設計語言，Eason 2026-07 拍板；2026-07-22 已改嫁落地兩主題）──────
    水墨筆觸（標題墨筆底線、乾筆分隔）與金墨飛濺（reward）是**全 app 共通的裝飾母題**，非 noir
-   外掛。表現分主題：noir＝暖白墨 rgba(236,230,218,.7)，對比強、可進日常；cream＝極克制（白墨
-   在亮底看不見、深墨鋪多顯髒），只在特殊時刻（reward / 章節扉頁 / Neve 特殊時刻）出現，不進
-   日常 UI。母題共用、明暗兩種表現——不是「noir 有裝飾、cream 沒有」。cream 是否納入日常＝待
-   A/B 實挑（demo 後定）。
+   外掛。表現分主題：noir＝暖白墨 rgba(236,230,218,.72)，對比強、可進日常；cream＝深棕墨
+   rgba(61,34,16,.68)、極克制，只在特殊時刻（reward / 章節扉頁 / Neve 特殊時刻）出現，不進日常 UI。
+   母題共用、明暗兩種表現——不是「noir 有裝飾、cream 沒有」。
+   已落地（2026-07-22）：共用元件 InkBrush／InkSplatter（src/components/ui/gambit/）＋ production CSS
+   在 src/assets/main.css「墨韻 (INK GARNISH)」段（token --color-ink-brush 兩主題、金墨 --fleck-scale
+   cream 加大 1.6）。首個掛載＝課程完成卡（LessonView，reward 時刻、兩主題）。乾筆分隔 primitive 已備
+   （InkBrush 寬扁用法）、待接手對話逐屏擴散。
    ================================================================ */
 [data-theme="noir"] {
   /* Surface — 接近黑的深墨綠（非飽和綠、非中性黑）；card/raised 拉開亮度好浮起 */

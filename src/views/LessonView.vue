@@ -6,7 +6,7 @@ import LessonPlayer from '@/components/lesson/LessonPlayer.vue'
 import { Button } from '@/components/ui/button'
 import { getLessonById, lessons } from '@/data/lessons'
 import { LESSON_TIER_LABELS, LESSON_TIER_PIECES as TIER_PIECE, LESSON_TIER_NUMERALS as TIER_NUM } from '@/types/lesson'
-import { ChapterBadge } from '@/components/ui/gambit'
+import { ChapterBadge, InkBrush, InkSplatter } from '@/components/ui/gambit'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
 
 const route = useRoute()
@@ -49,7 +49,9 @@ function goToNextLesson(): void {
   >
     <!-- 課末收尾：證書感設計——章節勳章 + 金線框 + 課程名稱 + 重點摘要 -->
     <template #completion-card>
-      <div data-testid="lesson-completion" class="flex w-full flex-col items-center">
+      <div data-testid="lesson-completion" class="relative isolate flex w-full flex-col items-center">
+        <!-- 金墨飛濺：reward 時刻慶祝襯底（環狀避中心、-z-10 不搶勳章與文字）-->
+        <InkSplatter class="-z-10" :count="26" :seed="4" />
         <!-- M2: 章節脈絡小標 -->
         <p class="mb-4 font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted">
           第{{ TIER_NUM[lesson.tier] }}章 · {{ LESSON_TIER_LABELS[lesson.tier] }}
@@ -78,6 +80,10 @@ function goToNextLesson(): void {
           · 課程完成 ·
         </p>
         <p class="mt-1 font-display text-xl font-bold text-ink">{{ lesson.title }}</p>
+        <!-- 墨筆底線：課程名的手寫確認感（reward 時刻）-->
+        <div class="mt-1 flex justify-center" aria-hidden="true">
+          <InkBrush :width="168" :height="12" :seed="5" />
+        </div>
 
         <!-- H3: 金線分隔（下） -->
         <div class="my-4 flex w-full items-center gap-2 px-1" aria-hidden="true">

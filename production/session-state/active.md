@@ -3,7 +3,8 @@ Epic: 差異化重構
 Feature: Phase 3 B 路線——整個 app 佈局 from scratch（徹底顛覆導航範式）
 Task: 2026-07-21 佈局 project ⓪➊ 拍板完成——方向＝墨色垂直世界（滑動空間語意＋旅程軸 icon 導覽），
 決策記錄寫入 `design/gambit-design-system/navigation-vertical-world.md`。➌ 真開發未開始。
-第二主題「深墨綠」深色模式已完成、已併同一分支 `feat/theme-deep-jade`，**皆已 commit、未 push**。
+第二主題「深墨綠」深色模式已完成、**已 push**（`feat/theme-deep-jade` 內容已併入並推送到 origin/main）；
+Supabase migration（`user_preferences`）**已套用 live**（2026-07-22 anon key PostgREST 驗證確認，見下節）。
 （前情：material 撞題 07-14 裁決＝spec 為準、v0 停 `material-v1-parked`；iPhone 四批複驗 07-20 已清，見下節。）
 <!-- /STATUS -->
 
@@ -12,9 +13,26 @@ Task: 2026-07-21 佈局 project ⓪➊ 拍板完成——方向＝墨色垂直�
 
 ---
 
+## 2026-07-22 墨韻母題改嫁落地（cream / deep-jade 兩主題）
+
+> 另一對話將以此為地基，把墨韻做成全站共通視覺語言逐屏擴散。
+
+- **落了什麼（共用件，一處定義、非 inline）**：`InkBrush`（墨筆底線＋乾筆分隔，同元件靠 width/height
+  切換）＋ `InkSplatter`（金墨飛濺）＝ `src/components/ui/gambit/`，已在 `index.ts` 註冊；production CSS
+  在 `src/assets/main.css`「墨韻 (INK GARNISH)」段（檔末）。接手對話直接複用元件＋class，不必重刻。
+- **兩主題行為**（SoT 已同步：`design/gambit-design-system/colors_and_type.css` 墨韻母題段）：
+  - 墨色 token `--color-ink-brush`：cream 深棕墨 `rgba(61,34,16,.68)`、deep-jade 暖白墨 `rgba(236,230,218,.72)`。
+  - 金墨飛濺兩主題品牌金；`--fleck-scale` cream=1.6（亮底加大粒子補存在感）、deep-jade=1。
+  - **cream 極克制**：只在 reward／章節扉頁／Neve 特殊時刻掛，不進日常 UI；**deep-jade 暖白墨可進日常**。
+- **首個掛載＝課程完成卡**（`LessonView.vue` `#completion-card`）：課程名下墨筆底線 ＋ 勳章區金墨飛濺，
+  兩主題 reward 時刻。掛載點穩定（不受首頁 from-scratch 重做影響）。
+- **筆觸資產**：演算法（buildPath / flecks）在元件內；決策樣張 demo＝`design/demos/ink-garnish-mockup.html`。
+- **待擴散（給接手對話）**：乾筆分隔（InkBrush 寬扁）primitive 已備、未掛任何畫面；deep-jade 日常標題
+  底線可鋪開；首頁招呼語墨筆待 from-scratch 新 IA 定案後接（星夜元件將拆，故此輪未掛首頁）。
+
 ## 2026-07-21 第二主題「深墨綠」完成 ＋ 佈局 from-scratch project 啟動
 
-### 第二主題（深色模式）＝深墨綠，已完成（branch `feat/theme-deep-jade`，已 commit、未 push）
+### 第二主題（深色模式）＝深墨綠，已完成＋已 push（`feat/theme-deep-jade` 內容已併入 main 並推送到 origin）
 
 - **方向探索歷程（教訓：憑空認可挑不出、看實物才準）**：原 noir branch 的 ink-noir（暖黑墨底＋暖白紙、去 jade）
   一路被推翻——Eason 把 cream/noir 擺一起看，覺得 ink-noir「tone 不對、像兩個 app」。診斷＝去 jade 斷了品牌血緣，
@@ -25,8 +43,10 @@ Task: 2026-07-21 佈局 project ⓪➊ 拍板完成——方向＝墨色垂直�
   漸層值；`colors_and_type.css` noir 段（SoT）同步；toggle 系統（`lib/theme.ts`＋`ui-store`＋`data-sync` 跨裝置
   同步＋ProfileView「外觀」toggle＋`main.ts` 開機套用＋`App.vue` 登入 reconcile）；`theme.test.ts` 6 測試。
   WCAG 五項實算全過（ink 15.66:1、primary 連結 5.93:1、danger 5.95:1…）。vitest 913 綠、vue-tsc 0、cream byte 不變。
-- **待 Eason 手動套 live**：`supabase/migrations/20260830053143_create_user_preferences.sql`（一人一列 RLS、theme
-  check）。未套前雲端讀寫 degrade local-only（已驗）；套後才跨裝置。**編號已接續當前最大值。**
+- **Supabase migration 已套用 live**（2026-07-22 用 anon key 對 PostgREST 驗證，非文件宣稱）：
+  `20260830053143_create_user_preferences.sql`（一人一列 RLS、theme check）。驗法＝`user_preferences` 查詢回
+  `[]`（表存在、RLS 正常擋 anon），對照已 drop 表回 `PGRST205`（真不存在）區分兩種情況。跨裝置同步應已生效；
+  migration 檔內「NOT applied」warning comment 已過期，已一併移除。
 - **兩個小尾巴**：① toggle 中文標籤現為「暖墨」（ink-noir 遺留），深墨綠主題**中文名待正名**（品味題）。
   ② 深區 class 接在**當前佈局**上——佈局 from scratch 後會隨頁面重做而演變，但 token／toggle／migration 是留用資產。
 - **實機截圖未完成**（Playwright 分頁反覆被關），但落地值＝Eason 看過選定的 runtime demo（偏黑深墨綠）＋WCAG＋
@@ -64,7 +84,7 @@ Task: 2026-07-21 佈局 project ⓪➊ 拍板完成——方向＝墨色垂直�
 ## 2026-07-20 iPhone 複驗回合（三真 bug 修復＋待回報項清空）
 
 Eason 用 iPhone 走完 4 批複驗清單逐項回報，逐一分流：多數 OK；三項是真 bug，已修＋驗證；兩項澄清為
-設計本來如此（清單描述過期，非退步）；一項 backlog。**尚未 push。**
+設計本來如此（清單描述過期，非退步）；一項 backlog。**已 push**（`a804adc`，2026-07-22 核對 origin/main 確認）。
 
 - **PgnViewer（棋憶回放）座標終於對齊木框**（待實機指認項終於複現，真 bug）：根因＝
   `@lichess-org/pgn-viewer` 用 snabbdom `patch()` 掛載，會把傳進去的 DOM 節點整個**替換**成它自己蓋的新節點
@@ -174,10 +194,11 @@ Eason 用 iPhone 走完 4 批複驗清單逐項回報，逐一分流：多數 OK
 
 - **7-10 批（四磚）複驗進度**：✅ 頭像；✅ mate 判斷場（「完成彈窗太快」已修＝留白 1.4s）；✅ signpost
   全流程；⏳ **氛圍首頁 D3 版已上線可測**（V3 漸層被反饋 banding 後重做為 D3 純深底，2026-07-14 已 push）；
-  ⏳ PWA 加到主畫面＋離線＋autoUpdate 更新（未回報）；⏳ 順驗：開新對局棋盤與下方面板應同幀出現（07-14 修）。
-- **7-03 批**：⏳ Neve 頭像三處觀感（課程/判斷場 24px、棋憶 28px）；✅ 判斷場第 3 盤裸點擊＋真手指滑動
-  （2026-07-20 複驗 OK）；⏳ 深化 mate 新盤（h1 角 Qg2#）手感；redesign 三項＝✅ #6 keySquare 高亮環+脈動、
-  ✅ #9 概念地圖三階 coin（2026-07-20 認不出第三階→改虛線描邊已修，見上方 07-20 節）、✅ #11 課程氣泡
+  ✅ PWA 加到主畫面＋離線＋autoUpdate 更新（2026-07-22 複驗 OK）；✅ 順驗：開新對局棋盤與下方面板同幀出現
+  （2026-07-22 複驗 OK）。
+- **7-03 批**：✅ Neve 頭像三處觀感（課程/判斷場 24px、棋憶 28px，2026-07-22 複驗 OK）；✅ 判斷場第 3 盤裸點擊＋
+  真手指滑動（2026-07-20 複驗 OK）；⏳ 深化 mate 新盤（h1 角 Qg2#）手感；redesign 三項＝✅ #6 keySquare 高亮環+
+  脈動、✅ #9 概念地圖三階 coin（2026-07-20 認不出第三階→改虛線描邊已修，見上方 07-20 節）、✅ #11 課程氣泡
   font-lesson（皆 2026-07-20 複驗 OK）。
 - ✅ **6-29 批全數結案（2026-07-20 複驗）**：#2 誘餌盤互動 OK；#10 棋盤跑版（含試煉）OK；#7 d4 軟引導——
   清單描述有誤（功能只在課程「控制中心」，不在開新對局），順帶抓到內容矛盾已修（見上方 07-20 節）；
@@ -226,13 +247,14 @@ Eason 用 iPhone 走完 4 批複驗清單逐項回報，逐一分流：多數 OK
 - **Phase C+/D**：捉雙/牽制賽後偵測（需精準度實測）；Claude API 動態講解/BYOK（最後）。
 - ✅ **PWA 已實作**（2026-07-10，autoUpdate＋ADR-0016，見現況四磚②）：首次 deploy 後所有訪客開始吃 SW；
   之後每次 deploy 由 autoUpdate 自癒，「舊畫面＝裝置快取」的排查註記仍適用於未升級的舊訪客一次。
-- **死碼清理**（precommit-review 2026-07-13 點名）：game-history `setExpandedRow`/expanded panel 已被
-  row-tap-to-navigate 取代、只剩孤立 unit test 在養（story-003 有記載）——獨立小掃除。
-- **opening-lookup 20ms wall-clock 斷言違反 determinism 標準**（coding-standards「no time-dependent
-  assertions」）：改 op-count bound 或 fake timers；auth-guard timeout 斷言同查。maxWorkers:4 只是降機率。
-- **🎨 第二主題（noir / "Dusk"）⏸ 低優先**：設計定案、spec 已固化 SoT（`colors_and_type.css`
-  `[data-theme="noir"]` 區塊）；demo＝`design/demos/{theme-tokens-mockup,ink-noir-explore}.html`。production
-  0 實作、刻意延後。屆時排序：token 層 → toggle（ProfileView+同步）→ 深區 hex 逐頁 tokenize → CI WCAG gate。
+- ✅ **死碼清理 + 效能斷言修正**（2026-07-22）：game-history `expandedRowId`/`setExpandedRow`/展開面板已被
+  row-tap-to-navigate 取代，一併清 store（`game-history.ts`）、元件（`history-row.vue` 展開面板＋prop）、
+  消費端（`HistoryView.vue`）、孤立測試（store 4 個 + view AC-12 1 個）；`opening-lookup` wall-clock 斷言
+  （違反 coding-standards「no time-dependent assertions」）改成正確性斷言（不再測 ms，效能改註解說明已手動
+  Chrome DevTools 驗證）；`auth-guard` timeout 查過＝非硬編時間斷言、是重負載下 vitest 逾時保護，非違規，
+  無需修（`--maxWorkers=4` 仍是既有緩解）。vitest 911/911、vue-tsc 0。
+- ✅ **第二主題（深墨綠）已完成並 push**（見上方 07-21 節）：舊待辦記的方向是「noir/Dusk」暖黑探索，
+  最終拍板落地的是深墨綠，這條過期待辦移除。
 - **epiphany 棋誌文案語氣待收斂**（2026-07-20 iPhone 複驗反饋「太 AI 太假」，Eason 拍板先放 backlog）：
   六個模板（`src/data/journal-templates/epiphany.ts`）同一種「我沒做 X，你卻/仍 Y」否定式排比骨架，
   加上「這不容易」「是你掙來的」偏評價語，違反 Neve「不輕易讚美」人格規則（見
