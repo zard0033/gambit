@@ -329,10 +329,11 @@
   --color-line-subtle: rgba(220, 210, 195, 0.06);
   --color-line-strong: rgba(220, 210, 195, 0.16);
 
-  /* Ink — 暖白／中性暖灰，全對比 ≥4.5:1（實算見回報） */
+  /* Ink — 暖白／中性暖灰。ink 15.2:1、muted/card 5.98:1、faint/card 4.58:1（實算）。
+     faint 排真文字限 base/card 面；raised 面（#322C27，約 4.0:1）只准裝飾/disabled。 */
   --color-ink: #ede7dc;
   --color-ink-muted: #a99f92;
-  --color-ink-faint: #857c70;
+  --color-ink-faint: #948a7d;
   --color-ink-on-deep: #e6ede8;
   --color-ink-on-deep-dim: #9bb3a6;
 

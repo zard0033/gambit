@@ -232,7 +232,7 @@ onMounted(() => {
           v-for="entry in peekEntries"
           :key="entry.id"
           to="/journal"
-          class="flex min-h-[44px] items-center gap-2.5 rounded-card border border-line/40 gambit-surface-card px-3 py-2.5 hover:border-line transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
+          class="flex min-h-[44px] items-center gap-2.5 rounded-card border border-line/40 gambit-surface-card px-3 py-2.5 transition-opacity hover:opacity-90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
           data-testid="journal-peek-entry"
         >
           <!-- 行首墨點（乙做法，決策樣張規格8）：不規則墨滴，取代規整圓點；未讀另疊一顆亮綠角標 -->

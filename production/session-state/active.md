@@ -55,7 +55,9 @@ tag、棋誌行首墨點。**下一步＝➍➎ 評審＋push**（precommit-revi
   競爭**（`netstat` 確認另有 dev server 佔用 5173、scratchpad 下發現非本 session 的另一 Claude
   session 正在同一 repo 操作，`tasklist` 當時有 40+ node.exe），非本輪 diff 造成。**下一段對話
   push 前務必補跑乾淨環境下的 `npx vitest run` 確認全綠**，不可用本輪的 build-only 佐證頂替。
-- WCAG 實算（玄夜，全部 ≥4.5:1）：ink/base 15.20:1、ink/card 12.81:1、muted/card 6.05:1、
+- WCAG 實算（玄夜，全部 ≥4.5:1）：faint/card 4.58:1（precommit review 抓到原 #857C70 只 3.8:1，
+  已提亮為 #948A7D；faint 真文字限 base/card 面、raised 面只准裝飾——已註記於 main.css 與 SoT）、
+  ink/base 15.20:1、ink/card 12.81:1、muted/card 6.05:1、
   primary(連結)/base 5.95:1、danger/base 5.97:1、金字(#FFC94D)/深玉(#123A2C) 8.23:1、
   暖白/漆玉(#1F5F4B，hero 最亮點) 6.10:1。card/base 相對亮度比 1.19:1（樣張門檻，準確值
   ≈1.1866，四捨五入達標）。

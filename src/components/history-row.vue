@@ -39,7 +39,7 @@ function onTouchEnd(e: TouchEvent) {
 
 <template>
   <div
-    class="cursor-pointer select-none rounded-card border border-line border-t-white/70 border-b-line-subtle bg-surface-card shadow-card transition-colors hover:bg-surface-hover"
+    class="cursor-pointer select-none rounded-card border border-line gambit-surface-card transition-opacity hover:opacity-90"
     data-testid="history-row"
     role="listitem"
     @click="onRowClick"

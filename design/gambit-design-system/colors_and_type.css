@@ -250,10 +250,11 @@
   --surface-deep-2:     #1B5040;
   --surface-deep-hover: rgba(230, 220, 205, 0.07);
 
-  /* Ink — 暖白／中性暖灰（禁綠偏）*/
+  /* Ink — 暖白／中性暖灰（禁綠偏）。faint/card 4.58:1：真文字限 base/card 面，
+     raised 面只准裝飾/disabled（約 4.0:1 不足 AA）。 */
   --ink:             #EDE7DC;
   --ink-muted:       #A99F92;
-  --ink-faint:       #857C70;
+  --ink-faint:       #948A7D;
   --ink-on-deep:     #E6EDE8;
   --ink-on-deep-dim: #9BB3A6;
 
