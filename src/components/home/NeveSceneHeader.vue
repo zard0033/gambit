@@ -57,13 +57,19 @@ onMounted(() => {
         <InkBrush :width="150" :height="12" :seed="2" />
       </div>
     </div>
+    <!-- 墨氣下滲邊界：cream 長暈染延伸進內容區；noir（玄夜）短距離淡出＋一條極細亮度分界
+         （決策樣張 home-ink-fusion-final.html ➊ 拍板，見 main.css .ink-seep） -->
+    <div class="ink-seep" aria-hidden="true" />
   </section>
 </template>
 
 <style scoped>
 .scene {
   position: relative;
-  overflow: hidden;
+  /* visible（非 hidden）：讓 .ink-seep 的墨氣下滲得以延伸到 section 下緣之外、疊進內容區
+     （決策樣張 home-ink-fusion-final.html ➊ 拍板）。原本 hidden 只是防 glow 的 120% 徑向溢出，
+     glow 半徑集中在頂部、寬度已被 section 100% 限住，改 visible 無副作用。 */
+  overflow: visible;
   width: 100%;
   padding: 26px 0 96px;
   /* 墨韻母題「跟著表面走，不跟主題走」：此表面兩主題皆是深青／深墨綠，墨色固定用暖白墨。 */

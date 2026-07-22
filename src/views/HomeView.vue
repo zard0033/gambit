@@ -98,7 +98,7 @@ onMounted(() => {
         <div class="flex items-center gap-3.5">
           <div class="flex-1 min-w-0">
             <!-- 進行中狀態 pill（取代 NEW GAME 的金色 eyebrow，一眼區隔出「存著的對局」；靜態點守平靜鐵則） -->
-            <span class="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/8 px-2.5 py-1 font-sans text-[11px] font-medium text-ink-on-deep-dim">
+            <span class="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/8 px-2.5 py-1 font-sans text-[11px] font-medium text-ink-on-deep">
               <span class="h-1.5 w-1.5 rounded-full bg-[#7EBEA5]" aria-hidden="true" />進行中
             </span>
             <p class="font-display font-bold text-[22px] text-ink-on-deep mt-2">繼續對局</p>
@@ -114,7 +114,7 @@ onMounted(() => {
               </Button>
               <button
                 type="button"
-                class="inline-flex items-center min-h-[44px] px-1 -mx-1 font-sans text-[13px] text-ink-on-deep-dim underline-offset-2 transition-colors hover:text-ink-on-deep hover:underline"
+                class="inline-flex items-center min-h-[44px] px-1 -mx-1 font-sans text-[13px] text-ink-on-deep underline-offset-2 transition-colors hover:text-ink-on-deep hover:underline"
                 @click.stop="startGame"
               >另開新對局</button>
             </div>
@@ -124,9 +124,14 @@ onMounted(() => {
       </DarkPanel>
       <DarkPanel v-else class="relative cursor-pointer overflow-hidden md:h-full md:flex md:flex-col md:justify-center" @click="startGame">
         <div class="relative z-10 flex-1 min-w-0">
-          <p class="font-sans text-[11px] font-bold tracking-[0.12em] text-gold">NEW GAME</p>
+          <!-- 墨記眉標：短筆畫 + 明朝金字，取代 NEW GAME（乙做法，決策樣張規格5） -->
+          <span class="inline-flex items-center gap-1.5">
+            <!-- 深玉表面：墨色跟表面走，兩主題皆暖白墨（同招呼語 scoped 覆寫模式） -->
+            <InkBrush :width="24" :height="6" :seed="11" :thickness="0.5" style="--color-ink-brush: rgba(236, 230, 218, 0.72)" />
+            <span class="font-display font-bold text-[13px] text-ink-on-deep tracking-[0.04em]">今日</span>
+          </span>
           <p class="font-display font-bold text-[22px] text-ink-on-deep mt-1.5">開始新對局</p>
-          <p class="font-sans text-[13px] text-ink-on-deep-dim mt-1">自選強度與執子</p>
+          <p class="font-sans text-[13px] text-ink-on-deep mt-1">自選強度與執子</p>
           <Button variant="gold" size="sm" class="mt-3.5" @click.stop="startGame">
             開始對局 <ArrowRight :size="18" />
           </Button>
@@ -142,7 +147,7 @@ onMounted(() => {
       <!-- 繼續學習 — cream accent 卡。桌機隱藏外部小標，讓本卡與左 hero 頂底等高對齊
            （兩卡都靠卡內小標：NEW GAME / 基礎規則）；手機保留小標分段。 -->
       <div class="mt-5 md:hidden">
-        <SectionLabel>繼續學習</SectionLabel>
+        <SectionLabel as="h2">繼續學習</SectionLabel>
         <!-- 段落乾筆：寬扁、克制，標籤與內容間的柔性分隔（墨韻母題，鋪量克制） -->
         <InkBrush :width="200" :height="8" :seed="3" :thickness="0.18" aria-hidden="true" />
       </div>
@@ -154,9 +159,14 @@ onMounted(() => {
         <template v-if="nextLesson">
           <div class="flex items-center gap-3">
             <div class="flex-1 min-w-0">
-              <p class="font-sans text-xs font-bold text-primary-dark">
+              <!-- 印框 tag：四角 L 框 + 微 rotate（甲做法，決策樣張規格6） -->
+              <span class="lesson-tag-ink font-sans text-xs font-bold text-primary-dark">
+                <span class="corner tl" aria-hidden="true" />
+                <span class="corner tr" aria-hidden="true" />
+                <span class="corner bl" aria-hidden="true" />
+                <span class="corner br" aria-hidden="true" />
                 {{ LESSON_TIER_LABELS[nextLesson.tier] }}
-              </p>
+              </span>
               <p class="font-display font-bold text-xl text-ink mt-1">{{ nextLesson.title }}</p>
               <Button size="sm" class="mt-3" @click.stop="continueLearning">
                 繼續 · 第 {{ lessonOrdinal }} 課 <ArrowRight :size="16" />
@@ -185,7 +195,7 @@ onMounted(() => {
 
     <!-- 總覽（全寬） -->
     <div class="fade-rise" :class="{ 'is-in': ready }" style="transition-delay: 60ms">
-    <SectionLabel>總覽</SectionLabel>
+    <SectionLabel as="h2">總覽</SectionLabel>
     <!-- 段落乾筆：寬扁、克制，標籤與內容間的柔性分隔（墨韻母題，鋪量克制） -->
     <InkBrush :width="200" :height="8" :seed="7" :thickness="0.18" aria-hidden="true" />
     <div class="grid grid-cols-3 gap-2.5 mt-2.5">
@@ -214,7 +224,7 @@ onMounted(() => {
     </div>
     <!-- 棋誌 peek（總覽下方，露最近 HOMEPAGE_PEEK_COUNT 筆；有新筆才顯示此區塊） -->
     <div v-if="peekEntries.length > 0" class="fade-rise" :class="{ 'is-in': ready }" style="transition-delay: 120ms">
-      <SectionLabel class="mt-5">棋誌</SectionLabel>
+      <SectionLabel as="h2" class="mt-5">棋誌</SectionLabel>
       <!-- 段落乾筆：寬扁、克制，標籤與內容間的柔性分隔（墨韻母題，鋪量克制） -->
       <InkBrush :width="200" :height="8" :seed="9" :thickness="0.18" aria-hidden="true" />
       <div class="space-y-2 mt-2.5">
@@ -222,16 +232,19 @@ onMounted(() => {
           v-for="entry in peekEntries"
           :key="entry.id"
           to="/journal"
-          class="flex min-h-[44px] items-center gap-2.5 rounded-card border border-line/40 bg-surface-card px-3 py-2.5 hover:border-line transition-colors"
+          class="flex min-h-[44px] items-center gap-2.5 rounded-card border border-line/40 gambit-surface-card px-3 py-2.5 hover:border-line transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
           data-testid="journal-peek-entry"
         >
-          <span
-            v-if="isUnread(entry, lastSeenAt)"
-            class="h-1.5 w-1.5 flex-shrink-0 self-start mt-[7px] rounded-full bg-[#7EBEA5]/60"
-            data-testid="unread-dot"
-            aria-hidden="true"
-          />
-          <p class="flex-1 font-lesson text-[13.5px] leading-[1.65] text-ink-muted line-clamp-2">{{ entry.body }}</p>
+          <!-- 行首墨點（乙做法，決策樣張規格8）：不規則墨滴，取代規整圓點；未讀另疊一顆亮綠角標 -->
+          <span class="relative flex-shrink-0" aria-hidden="true">
+            <span class="journal-ink-dot block" />
+            <span
+              v-if="isUnread(entry, lastSeenAt)"
+              class="absolute -right-1 -top-0.5 h-1.5 w-1.5 rounded-full bg-[#7EBEA5]"
+              data-testid="unread-dot"
+            />
+          </span>
+          <p class="flex-1 font-lesson text-[16px] leading-[1.65] text-ink-muted line-clamp-2">{{ entry.body }}</p>
         </RouterLink>
       </div>
     </div>

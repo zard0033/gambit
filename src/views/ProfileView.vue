@@ -24,7 +24,7 @@ const showResetDialog = ref(false)
 
 const themeOptions: { value: Theme; label: string }[] = [
   { value: 'cream', label: '奶油' },
-  { value: 'noir', label: '暖墨' },
+  { value: 'noir', label: '玄夜' },
 ]
 const themeIndex = computed(() => themeOptions.findIndex((o) => o.value === uiStore.theme))
 
@@ -191,8 +191,8 @@ function handleRow(row: MenuRow) {
 
       <!-- 外觀主題切換（cream / noir）— 緊接設定群組，segmented control 滑動 indicator -->
       <template v-if="group.title === '設定'">
-        <p class="mb-1.5 mt-3 font-sans text-[13px] font-medium text-ink-muted">外觀</p>
-        <div class="relative flex rounded-[14px] border border-line-subtle bg-surface-card p-1 shadow-card">
+        <p id="profile-appearance-label" class="mb-1.5 mt-3 font-sans text-[13px] font-medium text-ink-muted">外觀</p>
+        <div role="group" aria-labelledby="profile-appearance-label" class="relative flex rounded-[14px] border border-line-subtle bg-surface-card p-1 shadow-card">
           <div
             class="pointer-events-none absolute inset-y-1 left-1 w-[calc((100%-0.5rem)/2)] transition-transform duration-300 ease-out motion-reduce:transition-none"
             :style="{ transform: `translateX(${themeIndex * 100}%)` }"

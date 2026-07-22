@@ -1,0 +1,496 @@
+<!-- Gambit home fusion-INKSKIN — 換玉留紙：紙不變，玉塊換成暖黑濃墨（墨韻語言直接延伸）· ➊定稿分支 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gambit 首頁 · 墨韻融合決策樣張（墨皮版）</title>
+
+<style>
+  /* Gambit home fusion-INKSKIN — cream紙不動·noir=玉塊換暖黑濃墨 · ➊定稿分支 */
+
+  /* ============================================================
+     字型（真實檔案，/public/fonts/ 前綴）
+     ============================================================ */
+  @font-face { font-family: 'Sarasa UI TC'; src: url('/public/fonts/sarasa-ui-tc-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'Sarasa UI TC'; src: url('/public/fonts/sarasa-ui-tc-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+  @font-face { font-family: 'BIZ UDPMincho'; src: url('/public/fonts/biz-udpmincho-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+  @font-face { font-family: 'Noto Serif TC'; src: url('/public/fonts/noto-serif-tc-600.woff2') format('woff2'); font-weight: 600; font-display: swap; }
+  @font-face { font-family: 'LXGW WenKai TC'; src: url('/public/fonts/lxgw-wenkai-tc-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'Cubic 11'; src: url('/public/fonts/cubic-11.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'Cinzel'; src: url('/public/fonts/cinzel-wordmark.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+
+  /* ============================================================
+     Tokens — cream 預設（不動，第二主題共用同一套紙／字／墨筆 token）
+     ============================================================ */
+  :root {
+    --font-sans: 'Sarasa UI TC', system-ui, sans-serif;
+    --font-display: 'BIZ UDPMincho', 'Noto Serif TC', serif;
+    --font-lesson: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+    --font-num: 'Cubic 11', ui-monospace, monospace;
+    --font-brand: 'Cinzel', 'BIZ UDPMincho', serif;
+
+    --color-base: #faf6f0;
+    --color-card: #fcf9f3;
+    --color-raised: #f4ead8;
+    --color-deep: #103029;
+    --color-deep-2: #18443a;
+    --color-ink: #3d2210;
+    --color-muted: #7a5c44;
+    --color-primary: #1c7059;
+    --color-accent: #f8b500;
+    --color-gold-dark: #8f6200;
+    --color-line: #e0d3bd;
+    --color-ink-brush: rgba(61, 34, 16, 0.68);
+    --color-ink-on-deep: #e7f1ec;
+    --color-ink-on-deep-dim: #9bbdb1;
+    --shadow-color: rgba(61, 34, 16, 0.16);
+  }
+
+  /* 墨皮（第二主題）：換玉留紙——紙／卡／文字／墨筆全部不動（不覆寫），
+     只把大色塊 token（--color-deep / --color-deep-2，頭部 + hero 卡吃的就是這兩個）
+     從深玉換成暖黑濃墨；--color-primary 刻意留 jade，玉退成小面積操作色不從世界裡消失 */
+  :root[data-theme='noir'] {
+    --color-deep: #1a1512;   /* 暖黑濃墨（深），非綠非藍 */
+    --color-deep-2: #241c15; /* 暖黑濃墨（稍亮），墨色漸層下段 */
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--color-base);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  h1, h2, h3, p { margin: 0; }
+  * { font-style: normal !important; } /* CJK 不 italic 鐵則 */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+
+  /* ---------- theme toggle ---------- */
+  .theme-toggle {
+    position: fixed; top: 12px; right: 12px; z-index: 50;
+    min-width: 44px; min-height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 999px;
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px -6px var(--shadow-color);
+  }
+  .theme-toggle:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+  /* ---------- 底紋：兩主題共用同一張紙的極淡暖墨團 ---------- */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background-image:
+      radial-gradient(52% 40% at 22% 18%, color-mix(in srgb, var(--color-ink-brush) 14%, transparent) 0%, transparent 70%),
+      radial-gradient(46% 38% at 78% 82%, color-mix(in srgb, var(--color-ink-brush) 10%, transparent) 0%, transparent 72%);
+  }
+
+  .page { max-width: 640px; margin: 0 auto; }
+  @media (min-width: 860px) { .page { max-width: 900px; } }
+
+  /* ============================================================
+     頭部：墨氣下滲——兩主題共用同一段規則，色塊隨 --color-deep/-2 token 自動變色
+     （cream＝深玉、墨皮＝暖黑濃墨），墨氣下滲的暈染色同步跟著換
+     ============================================================ */
+  .scene {
+    position: relative;
+    overflow: visible;
+    padding: 26px 18px 108px;
+    background: linear-gradient(
+      180deg,
+      var(--color-deep) 0%,
+      var(--color-deep-2) 50%,
+      color-mix(in srgb, var(--color-deep-2) 74%, transparent) 74%,
+      color-mix(in srgb, var(--color-deep-2) 30%, transparent) 88%,
+      transparent 100%
+    );
+  }
+  .scene-glow {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(60% 55% at 88% 12%, rgba(255,255,255,0.04), transparent 70%);
+  }
+  .scene-content { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; }
+  .scene .greet-row { display: flex; align-items: center; gap: 12px; }
+  .scene .avatar {
+    width: 40px; height: 40px; border-radius: 999px; flex-shrink: 0;
+    background: radial-gradient(circle at 35% 30%, #4a7c6d, #1a3d34);
+    border: 1px solid rgba(231,241,236,0.28);
+  }
+  .scene .greet-text { font-size: 16px; font-weight: 500; color: var(--color-ink-on-deep); }
+  .scene h1 {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 26px; line-height: 1.3; color: var(--color-ink-on-deep);
+    margin-top: 10px;
+  }
+  /* 招呼語墨筆底線：暖白墨，貼字基線，兩主題皆同 */
+  .scene .headline-brush { margin-top: -3px; line-height: 0; }
+  .scene .headline-brush svg { display: block; color: rgba(236, 230, 218, 0.72); }
+
+  /* 墨氣下滲邊界：3 層不均勻 offset 暈染，延伸進 content 區——色隨 --color-deep-2 自動換 */
+  .ink-seep {
+    position: absolute; left: 0; right: 0; bottom: -78px; height: 168px;
+    z-index: 1; pointer-events: none;
+    background:
+      radial-gradient(58% 100% at 14% 0%,
+        color-mix(in srgb, var(--color-deep-2) 88%, transparent) 0%,
+        color-mix(in srgb, var(--color-deep-2) 46%, transparent) 24%,
+        color-mix(in srgb, var(--color-deep-2) 18%, transparent) 44%,
+        color-mix(in srgb, var(--color-deep-2) 5%, transparent) 62%,
+        transparent 80%),
+      radial-gradient(72% 100% at 53% 0%,
+        color-mix(in srgb, var(--color-deep-2) 80%, transparent) 0%,
+        color-mix(in srgb, var(--color-deep-2) 40%, transparent) 22%,
+        color-mix(in srgb, var(--color-deep-2) 15%, transparent) 42%,
+        color-mix(in srgb, var(--color-deep-2) 4%, transparent) 60%,
+        transparent 78%),
+      radial-gradient(56% 100% at 86% 0%,
+        color-mix(in srgb, var(--color-deep-2) 76%, transparent) 0%,
+        color-mix(in srgb, var(--color-deep-2) 36%, transparent) 20%,
+        color-mix(in srgb, var(--color-deep-2) 13%, transparent) 40%,
+        color-mix(in srgb, var(--color-deep-2) 3%, transparent) 58%,
+        transparent 76%);
+  }
+
+  /* ============================================================
+     容器
+     ============================================================ */
+  .content { padding: 18px; padding-top: 4px; position: relative; z-index: 2; }
+  .main-grid { display: grid; gap: 20px; }
+  @media (min-width: 860px) { .main-grid { grid-template-columns: 1fr 1fr; align-items: stretch; } }
+
+  /* ============================================================
+     Hero 卡：墨最深處——色塊隨 --color-deep token 自動換（cream＝深玉、墨皮＝暖黑濃墨），
+     內裡淡暈收斂30%、無水印無紋理；墨皮加一絲頂緣 sheen，讀成「紙上倒的一泓墨」
+     ============================================================ */
+  .hero-card {
+    position: relative; overflow: hidden;
+    background:
+      radial-gradient(70% 70% at 10% 92%, color-mix(in srgb, var(--color-deep) 50%, black) 0%, transparent 62%),
+      radial-gradient(68% 68% at 90% 6%, color-mix(in srgb, var(--color-deep) 46%, black) 0%, transparent 56%),
+      radial-gradient(88% 88% at 50% 46%, color-mix(in srgb, var(--color-deep) 42%, var(--color-ink-on-deep)) 0%, transparent 72%),
+      var(--color-deep);
+    color: var(--color-ink-on-deep);
+    padding: 20px;
+    cursor: pointer;
+    border-radius: 18px;
+    box-shadow: 0 22px 46px -20px color-mix(in srgb, var(--color-ink-brush) 26%, transparent),
+                0 6px 16px -10px color-mix(in srgb, var(--color-ink-brush) 20%, transparent);
+  }
+  /* 墨皮：加一絲頂緣 sheen，強化「墨面受光」的材質感 */
+  :root[data-theme='noir'] .hero-card {
+    box-shadow: 0 22px 46px -20px rgba(0, 0, 0, 0.4),
+                0 6px 16px -10px rgba(0, 0, 0, 0.32),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  .hero-card .hero-inner { position: relative; z-index: 1; }
+
+  /* 墨記眉標：短橫筆畫 + 明朝13px金字（兩主題皆同） */
+  .hero-card .eyebrow-ink { display: flex; align-items: center; gap: 7px; }
+  .hero-card .eyebrow-ink svg { display: block; color: var(--color-accent); }
+  .hero-card .eyebrow-ink span {
+    font-family: var(--font-display); font-weight: 700; font-size: 13px;
+    color: var(--color-accent); letter-spacing: 0.04em;
+  }
+  .hero-card h2 {
+    font-family: var(--font-display); font-weight: 700; font-size: 22px;
+    color: var(--color-ink-on-deep); margin-top: 6px;
+  }
+  .hero-card .sub { font-size: 13px; color: var(--color-ink-on-deep-dim); margin-top: 4px; }
+  .btn-gold {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 14px; min-height: 44px; padding: 0 18px;
+    border-radius: 10px; border: none;
+    background: var(--color-accent); color: var(--color-gold-ink, #3a2408);
+    font-family: var(--font-sans); font-weight: 700; font-size: 14px;
+    cursor: pointer;
+  }
+  .btn-gold:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+
+  /* ============================================================
+     課程卡：柔化無邊框，靠深淺差 + 墨暈影——兩主題共用同一張紙，不覆寫
+     ============================================================ */
+  .lesson-card {
+    position: relative;
+    background: var(--color-card);
+    padding: 18px;
+    cursor: pointer;
+    border-radius: 18px;
+    box-shadow: 0 20px 42px -20px color-mix(in srgb, var(--color-ink-brush) 22%, transparent),
+                0 5px 14px -9px color-mix(in srgb, var(--color-ink-brush) 16%, transparent);
+  }
+  .lesson-card .row { display: flex; align-items: center; gap: 12px; }
+
+  /* 印框 tag：四角 L 框 + 微 rotate */
+  .lesson-tag {
+    position: relative;
+    display: inline-flex; align-items: center;
+    font-family: var(--font-sans); font-size: 11px; font-weight: 700;
+    color: var(--color-primary);
+    padding: 3px 9px;
+    transform: rotate(-1.4deg);
+  }
+  .lesson-tag .corner {
+    position: absolute; width: 6px; height: 6px;
+    border-color: var(--color-ink-brush);
+    border-style: solid; border-width: 0;
+  }
+  .lesson-tag .tl { top: 0; left: 0; border-top-width: 1.4px; border-left-width: 1.4px; }
+  .lesson-tag .tr { top: 0; right: 0; border-top-width: 1.4px; border-right-width: 1.4px; }
+  .lesson-tag .bl { bottom: 0; left: 0; border-bottom-width: 1.4px; border-left-width: 1.4px; }
+  .lesson-tag .br { bottom: 0; right: 0; border-bottom-width: 1.4px; border-right-width: 1.4px; }
+
+  .lesson-card h2 {
+    font-family: var(--font-display); font-weight: 700; font-size: 20px;
+    color: var(--color-ink); margin-top: 8px;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 12px; min-height: 44px; padding: 0 16px;
+    border-radius: 10px; border: none;
+    background: var(--color-primary); color: #fff;
+    font-family: var(--font-sans); font-weight: 700; font-size: 13px;
+    cursor: pointer;
+  }
+  .btn-primary:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+  .badge {
+    flex-shrink: 0; width: 52px; height: 52px; border-radius: 999px;
+    background: radial-gradient(circle at 35% 30%, var(--color-raised), var(--color-line));
+    border: 2px solid var(--color-accent);
+    display: grid; place-items: center;
+    font-family: var(--font-num); font-size: 20px; color: var(--color-ink);
+  }
+
+  /* 墨跡進度：乾筆軌 + 實墨前段 clip */
+  .ink-progress { margin-top: 14px; position: relative; }
+  .ink-progress svg { display: block; width: 100%; height: 12px; }
+  .ink-progress .track path { fill: var(--color-ink-brush); opacity: 0.28; }
+  .ink-progress .fill path { fill: var(--color-ink-brush); opacity: 1; }
+  .ink-progress .fill { clip-path: inset(0 var(--progress-clip, 100%) 0 0); }
+  .ink-progress .meta {
+    display: flex; justify-content: space-between; margin-top: 4px;
+    font-family: var(--font-num); font-size: 11px; color: var(--color-muted);
+  }
+
+  /* ============================================================
+     段落標籤：水平落款式，字壓在貫穿筆畫尾端上
+     ============================================================ */
+  .signature-label {
+    position: relative;
+    display: flex; align-items: center;
+    height: 26px;
+    margin-top: 26px; margin-bottom: 4px;
+  }
+  .signature-label svg { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 100%; height: 10px; z-index: 0; }
+  .signature-label svg path { fill: var(--color-ink-brush); opacity: 0.9; }
+  .signature-label span {
+    position: relative; z-index: 1;
+    font-family: var(--font-display); font-weight: 700; font-size: 13.5px;
+    color: var(--color-ink); background: transparent;
+    padding-right: 10px;
+  }
+
+  /* ============================================================
+     總覽三磚：柔化，靠底色深淺差分區——兩主題共用同一張紙，不覆寫
+     ============================================================ */
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 6px; }
+  .stat-tile {
+    background: var(--color-card);
+    padding: 14px 8px;
+    text-align: center;
+    cursor: pointer;
+    min-height: 44px;
+    border-radius: 14px;
+    box-shadow: 0 14px 28px -16px color-mix(in srgb, var(--color-ink-brush) 18%, transparent);
+  }
+  .stat-tile .icon { color: var(--color-primary); margin-bottom: 6px; }
+  .stat-tile .value { font-family: var(--font-num); font-weight: 700; font-size: 16px; color: var(--color-ink); }
+  .stat-tile .label { font-size: 11px; color: var(--color-muted); margin-top: 2px; }
+  .stat-tile:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+  /* ============================================================
+     棋誌 peek：LXGW + 柔化卡 + 行首小墨點——兩主題共用同一張紙，不覆寫
+     ============================================================ */
+  .journal-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .journal-item {
+    position: relative;
+    display: flex; align-items: flex-start; gap: 9px;
+    min-height: 44px; padding: 10px 14px;
+    background: color-mix(in srgb, var(--color-card) 92%, var(--color-accent) 3%);
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 12px 26px -16px color-mix(in srgb, var(--color-ink-brush) 16%, transparent);
+  }
+  /* 行首小墨點：不規則墨滴 */
+  .journal-item .ink-dot {
+    width: 7px; height: 6px; margin-top: 8px; flex-shrink: 0;
+    background: var(--color-ink-brush);
+    border-radius: 62% 38% 55% 45% / 48% 42% 58% 52%;
+  }
+  .journal-item .ink-dot.is-quiet { visibility: hidden; }
+  .journal-item p {
+    font-family: var(--font-lesson); font-size: 13.5px; line-height: 1.65;
+    color: var(--color-muted);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  .section-gap { margin-top: 26px; }
+</style>
+
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="切換玉／墨主題">☀ / ☾</button>
+
+<div class="page">
+  <!-- ================= 頭部 ================= -->
+  <section class="scene">
+    <div class="scene-glow" aria-hidden="true"></div>
+    <div class="scene-content">
+      <div class="greet-row">
+        <div class="avatar" aria-hidden="true"></div>
+        <p class="greet-text">午安，準備好下一手了嗎？</p>
+      </div>
+      <h1>棋盤未曾離開，你來了。</h1>
+      <div class="headline-brush" aria-hidden="true">
+        <svg class="brush" data-w="150" data-h="12" data-seed="2" data-mt="0.42"></svg>
+      </div>
+    </div>
+    <div class="ink-seep" aria-hidden="true"></div>
+  </section>
+
+  <div class="content">
+    <div class="main-grid">
+      <!-- ================= Hero 卡 ================= -->
+      <div class="hero-card" role="button" tabindex="0">
+        <div class="hero-inner">
+          <div class="eyebrow-ink" aria-hidden="false">
+            <svg class="brush" data-w="24" data-h="6" data-seed="11" data-mt="0.5"></svg>
+            <span>新對局</span>
+          </div>
+          <h2>開始新對局</h2>
+          <p class="sub">自選強度與執子</p>
+          <button class="btn-gold" type="button">開始對局 →</button>
+        </div>
+      </div>
+
+      <!-- ================= 課程卡 ================= -->
+      <div class="lesson-card" role="button" tabindex="0">
+        <div class="row">
+          <div style="flex:1; min-width:0;">
+            <span class="lesson-tag">
+              <span class="corner tl" aria-hidden="true"></span>
+              <span class="corner tr" aria-hidden="true"></span>
+              <span class="corner bl" aria-hidden="true"></span>
+              <span class="corner br" aria-hidden="true"></span>
+              基礎規則
+            </span>
+            <h2>騎士的移動</h2>
+            <button class="btn-primary" type="button">繼續 · 第 3 課 →</button>
+          </div>
+          <div class="badge">♞</div>
+        </div>
+        <div class="ink-progress">
+          <svg class="track" viewBox="0 0 200 12" preserveAspectRatio="none"><path id="progTrack" d=""></path></svg>
+          <svg class="fill" viewBox="0 0 200 12" preserveAspectRatio="none" style="position:relative; top:-12px;" id="progFillWrap"><path id="progFill" d=""></path></svg>
+          <div class="meta"><span>2/21</span><span>已完成 2 課</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 總覽 ================= -->
+    <div class="section-gap">
+      <div class="signature-label">
+        <svg viewBox="0 0 200 10" preserveAspectRatio="none"><path id="brushLabel1" d=""></path></svg>
+        <span>總覽</span>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-tile" role="link" tabindex="0" aria-label="學習進度">
+          <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+          <div class="value">2/21</div>
+          <div class="label">學習進度</div>
+        </div>
+        <div class="stat-tile" role="link" tabindex="0" aria-label="試煉">
+          <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg></div>
+          <div class="value">5/40</div>
+          <div class="label">試煉</div>
+        </div>
+        <div class="stat-tile" role="link" tabindex="0" aria-label="棋誌">
+          <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M4 19.5V4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 0 4 22"/><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/></svg></div>
+          <div class="value">12</div>
+          <div class="label">棋誌</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 棋誌 peek ================= -->
+    <div class="section-gap">
+      <div class="signature-label">
+        <svg viewBox="0 0 200 10" preserveAspectRatio="none"><path id="brushLabel2" d=""></path></svg>
+        <span>棋誌</span>
+      </div>
+      <div class="journal-list">
+        <div class="journal-item" role="link" tabindex="0">
+          <span class="ink-dot" aria-hidden="true"></span>
+          <p>昨天那盤騎士殘局，你自己看出了牽制的手感，沒有人提醒。</p>
+        </div>
+        <div class="journal-item" role="link" tabindex="0">
+          <span class="ink-dot is-quiet" aria-hidden="true"></span>
+          <p>連續三天回到同一個開局，你在城堡與主教的配合上越來越熟練。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---- InkBrush 演算法：原樣 port 自 ink-brush.vue / ink-garnish-mockup.html，禁重發明 ----
+  function buildPath(w, h, seed, mt) {
+    const x0 = 2.5, x1 = w - 2.5, maxT = h * mt;
+    const cy = (u) => h / 2 + Math.sin(u * 5.2 + seed) * (h * 0.06) + (u - 0.5) * (h * 0.05);
+    const thick = (u) => {
+      const peak = 0.5 * Math.exp(-Math.pow((u - 0.3) / 0.4, 2)) + 0.18;
+      const dry = u > 0.5 ? 0.62 + 0.38 * Math.sin(u * 34 + seed * 3) : 1;
+      const tip = u > 0.82 ? 0.4 + 0.6 * Math.max(0, 1 - (u - 0.82) / 0.18) : 1;
+      return Math.max(0.6, maxT * peak * dry * tip);
+    };
+    const K = 46;
+    const r = (v) => v.toFixed(1);
+    let d = '';
+    for (let i = 0; i <= K; i++) { const u = i / K, x = x0 + (x1 - x0) * u, y = cy(u), t = thick(u) / 2; d += (i ? 'L' : 'M') + r(x) + ',' + r(y - t) + ' '; }
+    for (let i = K; i >= 0; i--) { const u = i / K, x = x0 + (x1 - x0) * u, y = cy(u), t = thick(u) / 2; d += 'L' + r(x) + ',' + r(y + t) + ' '; }
+    return d + 'Z';
+  }
+
+  document.querySelectorAll('svg.brush').forEach((svg) => {
+    const w = +svg.dataset.w, h = +svg.dataset.h, seed = +svg.dataset.seed, mt = +svg.dataset.mt;
+    svg.setAttribute('width', w); svg.setAttribute('height', h);
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p.setAttribute('d', buildPath(w, h, seed, mt));
+    svg.appendChild(p);
+  });
+
+  // 段落落款乾筆（寬扁、克制，thickness 0.24）
+  document.getElementById('brushLabel1').setAttribute('d', buildPath(200, 10, 7, 0.24));
+  document.getElementById('brushLabel2').setAttribute('d', buildPath(200, 10, 9, 0.24));
+
+  // 課程卡墨跡進度：軌 + 完成段（同一道筆畫，2/21 → clip 至 ~10%）
+  const progD = buildPath(200, 12, 5, 0.30);
+  document.getElementById('progTrack').setAttribute('d', progD);
+  document.getElementById('progFill').setAttribute('d', progD);
+  const completed = 2, total = 21;
+  const clipPct = total > 0 ? (100 - (completed / total) * 100) : 100;
+  document.getElementById('progFillWrap').style.clipPath = `inset(0 ${clipPct}% 0 0)`;
+
+  // 主題切換
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  toggle.addEventListener('click', () => {
+    const isNoir = root.getAttribute('data-theme') === 'noir';
+    if (isNoir) root.removeAttribute('data-theme'); else root.setAttribute('data-theme', 'noir');
+  });
+</script>

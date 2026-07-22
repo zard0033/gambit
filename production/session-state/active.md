@@ -1,20 +1,73 @@
 <!-- STATUS -->
 Epic: 差異化重構
-Feature: 首頁視覺——墨韻母題 × 舊卡片佈局
-Task: 2026-07-22 **佈局 from-scratch 專案收案**——十案（星夜旅程小徑、墨色垂直世界及其後續九個
-替代構圖）逐輪與舊卡片佈局（深青招呼頭部＋hero 卡＋繼續學習卡＋總覽三磚）比較，Eason 裁定舊版
-勝出，方向廢止。星夜版（`27a26cb`+`63e67db`）已從 HomeView/NeveSceneHeader 回退；墨韻母題（InkBrush
-墨筆／乾筆）融合進回退後的舊佈局（招呼語墨筆＋三段落標籤乾筆），本輪已完成。詳見下方新節。
-**下一步＝墨韻風格逐屏優化**（Eason 已拍板）：以現有佈局為骨架鋪墨韻，順序照計畫——
-棋誌（最近血緣）→ 沉浸區（棋憶/課程/試煉/判斷場）→ 功能頁克制套用；每屏套完走 review+雙主題截圖。
-第二主題「深墨綠」深色模式已完成、**已 push**（`feat/theme-deep-jade` 內容已併入並推送到 origin/main）；
-Supabase migration（`user_preferences`）**已套用 live**（2026-07-22 anon key PostgREST 驗證確認，見下節）。
+Feature: noir 主題色板整體換血（玄夜＝玄黑紙×漆玉）＋ 首頁墨韻融合落地
+Task: 2026-07-22 **玄夜換血輪次**——➊ 收關：noir 顯示名「暖墨」→「玄夜」（內部值 'noir' 不動），
+色板從舊「深墨綠」全面換成玄黑紙×漆玉（J3）；全站映射鐵則＝cream 紙→玄黑系、cream 玉→漆玉系、
+金不動。➋➌ 本輪完成：`main.css`/`colors_and_type.css` noir token block ＋ 11 個深區 theme-aware
+class（`.app-header-bg`／`.dungeon-zone-bg` 等）全數重調；首頁（HomeView/NeveSceneHeader）依決策
+樣張 `design/demos/home-ink-fusion-final.html` 落地——cream 墨氣柔化（頭部墨氣下滲＋hero 淡墨暈）、
+noir 材質分層（卡片不柔化、玄黑亮階漸層＋sheen＋hairline）、墨記眉標「今日」取代 NEW GAME、印框
+tag、棋誌行首墨點。**下一步＝➍➎ 評審＋push**（precommit-review／hallmark audit／視覺回歸 e2e）；
+墨韻逐屏擴散仍照原計畫（棋誌→沉浸區→功能頁）延續。
+第二主題「玄夜」（原「深墨綠」，顯示名已正名）深色模式已完成、**尚待 push**（本輪三個既有 commit
++ 本次玄夜換血尚未推送，見固定約束）；Supabase migration（`user_preferences`）**已套用 live**
+（2026-07-22 anon key PostgREST 驗證確認，見下節；theme check constraint 收 'cream'/'noir' 未變）。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
 > **差異化北極星 = `production/gambit-differentiation-vision.md`**——提任何功能/重構/UI 前**先讀**。
 
 ---
+
+## 2026-07-22 玄夜換血輪次（noir 色板換血 + 首頁墨韻融合落地）
+
+**結論**：noir 顯示名「暖墨」正名「玄夜」（內部值 `'noir'` 不動，Supabase check constraint 不動）；
+色板從舊「深墨綠」全面換成「玄黑紙 × 漆玉」（J3），全站映射鐵則＝cream 紙→玄黑系、cream 玉→漆玉
+系、金不動。首頁（HomeView/NeveSceneHeader）依已核可決策樣張 `design/demos/home-ink-fusion-final.html`
+落地墨韻融合：cream＝墨氣柔化，noir（玄夜）＝材質分層。
+
+**改動檔案**：
+- `src/assets/main.css`——noir `:root` token block 整段重調（surface/line/ink 系列）；11 個
+  theme-aware class（`.app-header-bg`／`.app-bottomnav-bg`／`.dark-focus-panel`／
+  `--scene-nav-join`/-sky-a/-b／`.game-over-panel`／`.dungeon-zone-bg`／`.dungeon-action-bar`／
+  `.signin-bg`／`.puzzle-result-panel`）改用漆玉（J3）家族；`.dungeon-node-face-done`／
+  `.dungeon-node-check-done`／`.lesson-progress-fill` 已是玉系維持不變。新增
+  `.gambit-surface-card`（cream 墨氣柔化／noir 材質分層共用 class）、`.lesson-tag-ink`（印框
+  tag）、`.journal-ink-dot`（行首墨點）、`.ink-seep`（頭部墨氣下滲）四個首頁融合共用件。
+- `design/gambit-design-system/colors_and_type.css`——SoT noir 段同步（值＋映射鐵則＋「玄夜」
+  命名＋墨韻母題段補 cream/noir 差異化表現說明＋保留清單）。
+- `src/components/ui/card/card.vue`、`src/components/ui/gambit/stat-card.vue`——改用
+  `.gambit-surface-card`（原 cream 白邊暖棕陰影不變，noir 新增材質分層）。
+- `src/views/HomeView.vue`——眉標「NEW GAME」→墨記「今日」＋短筆畫；課程卡 tier 標籤加印框
+  tag；棋誌 peek 行首圓點→不規則墨滴（未讀另疊亮綠角標）；棋誌卡改 `.gambit-surface-card`。
+- `src/components/home/NeveSceneHeader.vue`——`.scene` `overflow: hidden`→`visible`（放行
+  `.ink-seep` 下滲）；`<section>` 內補 `.ink-seep` div。
+- `src/views/ProfileView.vue`——外觀 toggle 標籤「暖墨」→「玄夜」。
+- `production/session-state/active.md`——STATUS 更新 + 07-21 節「暖墨」殘留改為已正名記錄。
+
+**驗證**：
+- `npx vue-tsc --noEmit` 0 error。
+- `npx vite build` 成功（間接證實 CSS/Vue 語法正確；供 vitest 全紅時的獨立佐證）。
+- `npx vitest run` **本輪未取得綠燈**——92 檔全數在 import/collect 階段即失敗（`Cannot read
+  properties of undefined (reading 'config')`／`Vitest failed to find the runner`），已排除本輪
+  診斷：全新未用過的 `VITEST_CACHE_DIR`、`node_modules/.vite` 搬移重建、`--pool=forks`、
+  `--maxWorkers=1` 四種手法逐一試過仍同錯，且 `vite build` 成功排除語法錯誤——研判為**環境資源
+  競爭**（`netstat` 確認另有 dev server 佔用 5173、scratchpad 下發現非本 session 的另一 Claude
+  session 正在同一 repo 操作，`tasklist` 當時有 40+ node.exe），非本輪 diff 造成。**下一段對話
+  push 前務必補跑乾淨環境下的 `npx vitest run` 確認全綠**，不可用本輪的 build-only 佐證頂替。
+- WCAG 實算（玄夜，全部 ≥4.5:1）：ink/base 15.20:1、ink/card 12.81:1、muted/card 6.05:1、
+  primary(連結)/base 5.95:1、danger/base 5.97:1、金字(#FFC94D)/深玉(#123A2C) 8.23:1、
+  暖白/漆玉(#1F5F4B，hero 最亮點) 6.10:1。card/base 相對亮度比 1.19:1（樣張門檻，準確值
+  ≈1.1866，四捨五入達標）。
+- 截圖（scratchpad，dev-server 實測，guest 登入）：home cream/玄夜 × mobile/desktop 四張＋
+  玄夜 `/learn`、`/dungeon` mobile 各一張——六張皆無黑色 token fallback，深區可辨為漆玉、卡片
+  可辨材質分層。
+- **未跑**：`playwright test visual-regression`（e2e，同上資源競爭風險，留給下一輪在確認
+  dev server 淨空後跑，含 home 快照 `--update-snapshots`）；hallmark audit／
+  precommit-review／web-design-guidelines 三路並行評審（➍➎，按 ui-design-flow 排在下一步）。
+
+**保留清單（未採用、未丟棄）**：inkskin「以墨為玉」概念（`design/demos/home-ink-fusion-inkskin.html`）
+——日後若要進一步收斂玉區用量可回頭參考。
 
 ## 2026-07-22 佈局 from-scratch 專案收案 + 首頁回退
 
@@ -92,10 +145,10 @@ Supabase migration（`user_preferences`）**已套用 live**（2026-07-22 anon k
   `20260830053143_create_user_preferences.sql`（一人一列 RLS、theme check）。驗法＝`user_preferences` 查詢回
   `[]`（表存在、RLS 正常擋 anon），對照已 drop 表回 `PGRST205`（真不存在）區分兩種情況。跨裝置同步應已生效；
   migration 檔內「NOT applied」warning comment 已過期，已一併移除。
-- **兩個小尾巴**：① toggle 中文標籤現為「暖墨」（ink-noir 遺留），深墨綠主題**中文名待正名**（品味題）。
+- **兩個小尾巴**：① toggle 中文標籤原為「暖墨」（ink-noir 遺留）——**已正名「玄夜」（2026-07-22 玄夜換血輪次）**。
   ② 深區 class 接在**當前佈局**上——佈局 from scratch 後會隨頁面重做而演變，但 token／toggle／migration 是留用資產。
 - **實機截圖未完成**（Playwright 分頁反覆被關），但落地值＝Eason 看過選定的 runtime demo（偏黑深墨綠）＋WCAG＋
-  build 綠，信度足；Eason 可 `localhost:5173`→我的→外觀→暖墨 自驗。
+  build 綠，信度足；Eason 可 `localhost:5173`→我的→外觀→玄夜 自驗（深墨綠色板已於 2026-07-22 玄夜換血輪次退役）。
 
 ### 佈局 from scratch project：⓪➊ 拍板完成（同日延續，另一對話開工）
 
