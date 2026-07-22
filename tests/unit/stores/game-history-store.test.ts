@@ -271,35 +271,6 @@ describe('useGameHistoryStore', () => {
     localStorage.removeItem(`chess:unsynced:${id1}`)
   })
 
-  // ── setExpandedRow (AC-12b single-row invariant) ──────────────────────
-
-  it('setExpandedRow expands the given row', () => {
-    const store = useGameHistoryStore()
-    store.setExpandedRow('row-1')
-    expect(store.expandedRowId).toBe('row-1')
-  })
-
-  it('setExpandedRow collapses when called with the already-expanded id', () => {
-    const store = useGameHistoryStore()
-    store.setExpandedRow('row-1')
-    store.setExpandedRow('row-1')
-    expect(store.expandedRowId).toBeNull()
-  })
-
-  it('setExpandedRow enforces single-row invariant — second call replaces first', () => {
-    const store = useGameHistoryStore()
-    store.setExpandedRow('row-1')
-    store.setExpandedRow('row-2')
-    expect(store.expandedRowId).toBe('row-2')
-  })
-
-  it('setExpandedRow(null) collapses any open row', () => {
-    const store = useGameHistoryStore()
-    store.setExpandedRow('row-1')
-    store.setExpandedRow(null)
-    expect(store.expandedRowId).toBeNull()
-  })
-
   // ── resetHistory (ProfileView "重置對局記錄") ──────────────────────────
 
   it('resetHistory: success empties the list and leaves cacheState valid', async () => {

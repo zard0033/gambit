@@ -149,7 +149,6 @@ onMounted(() => {
             v-for="entry in store.entries"
             :key="entry.id"
             :entry="entry"
-            :is-expanded="store.expandedRowId === entry.id"
           />
         </div>
 

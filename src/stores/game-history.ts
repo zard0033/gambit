@@ -23,8 +23,6 @@ export const useGameHistoryStore = defineStore('gameHistory', () => {
   /** Reactive generation counter — incremented on invalidate() and each fetchHistory() start.
    *  In-flight fetches abandon their write-back when generation has moved on. */
   const fetchGeneration = ref(0)
-  /** Single-row expand invariant: only one row open at a time. null = all collapsed. */
-  const expandedRowId = ref<string | null>(null)
 
   async function fetchHistory(): Promise<void> {
     if (isLoading.value) return  // AC-25 deduplication guard — does NOT increment fetchGeneration
@@ -98,11 +96,6 @@ export const useGameHistoryStore = defineStore('gameHistory', () => {
   // sync/flush success path, not on a later microtask tick.
   watch(() => dataSyncStore.syncVersion, invalidate, { flush: 'sync' })
 
-  /** Toggle expanded row; calling with the already-expanded id collapses it. */
-  function setExpandedRow(id: string | null): void {
-    expandedRowId.value = expandedRowId.value === id ? null : id
-  }
-
   return {
     entries,
     isLoading,
@@ -112,11 +105,9 @@ export const useGameHistoryStore = defineStore('gameHistory', () => {
     hasMore,
     nextCursor,
     fetchGeneration,
-    expandedRowId,
     fetchHistory,
     loadMore,
     invalidate,
     resetHistory,
-    setExpandedRow,
   }
 })

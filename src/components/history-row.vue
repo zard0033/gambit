@@ -6,7 +6,6 @@ import type { GameHistoryEntry } from '@/types/game-history'
 
 const props = defineProps<{
   entry: GameHistoryEntry
-  isExpanded: boolean
 }>()
 
 const router = useRouter()
@@ -43,7 +42,6 @@ function onTouchEnd(e: TouchEvent) {
     class="cursor-pointer select-none rounded-card border border-line border-t-white/70 border-b-line-subtle bg-surface-card shadow-card transition-colors hover:bg-surface-hover"
     data-testid="history-row"
     role="listitem"
-    :aria-expanded="props.isExpanded"
     @click="onRowClick"
     @touchstart.passive="onTouchStart"
     @touchend.prevent="onTouchEnd"
@@ -73,17 +71,6 @@ function onTouchEnd(e: TouchEvent) {
         <span class="font-sans text-[11px] text-ink-faint">{{ props.entry.displayDate }}</span>
         <ChevronRight :size="14" class="text-ink-faint" :stroke-width="1.8" />
       </div>
-    </div>
-
-    <!-- 展開面板 (AC-12) -->
-    <div
-      v-if="props.isExpanded"
-      class="space-y-1 border-t border-line-subtle px-3.5 py-3 text-sm text-ink-muted"
-    >
-      <div><span class="text-ink-faint">手數：</span>{{ props.entry.moveCount }}</div>
-      <div><span class="text-ink-faint">結果：</span>{{ props.entry.endReasonDisplay }}</div>
-      <div><span class="text-ink-faint">難度：</span>{{ props.entry.difficultyLabel }}</div>
-      <div><span class="text-ink-faint">執子：</span>{{ props.entry.playerColor }}</div>
     </div>
   </div>
 </template>

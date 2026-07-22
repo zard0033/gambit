@@ -306,37 +306,6 @@ describe('AC-11c: load more appends rows', () => {
   })
 })
 
-// ── AC-12 (BLOCKING): Expanded panel shows correct fields ────────────────
-
-describe('AC-12: expanded row panel fields', () => {
-  it('expanded row shows moveCount, endReasonDisplay, difficultyLabel, playerColor', async () => {
-    const { pinia, store } = setup()
-    vi.spyOn(store, 'fetchHistory').mockResolvedValue()
-
-    store.entries = [makeEntry('row-1', {
-      moveCount: 34,
-      endReasonDisplay: 'Checkmate',
-      difficultyLabel: 'Intermediate',
-      playerColor: 'white',
-    })]
-    store.cacheState = 'valid'
-    store.isLoading = false
-
-    const wrapper = mountView(pinia)
-    await flushPromises()
-
-    // Row click now navigates to /review?gameId; expand via store directly
-    store.expandedRowId = 'row-1'
-    await wrapper.vm.$nextTick()
-
-    const text = wrapper.text()
-    expect(text).toContain('34')
-    expect(text).toContain('Checkmate')
-    expect(text).toContain('Intermediate')
-    expect(text).toContain('white')
-  })
-})
-
 // ── AC-16a: Refresh sets cacheState=dirty and calls fetchHistory ──────────
 
 describe('AC-16a: refresh button', () => {

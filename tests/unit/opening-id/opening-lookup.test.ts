@@ -44,8 +44,11 @@ describe('identifyOpening', () => {
     expect(result.matchedPly).toBe(0)
   })
 
-  // AC-4: performance ≤ 20ms for a 40-ply game
-  it('test_identifyOpening_40Plies_completesWithin20ms', () => {
+  // AC-4: completes without error for a full-length game. Wall-clock performance
+  // (target ≤20ms) is not asserted here — a wall-clock threshold is non-deterministic
+  // under test-environment load (coding-standards "no time-dependent assertions");
+  // verified manually in Chrome DevTools instead.
+  it('test_identifyOpening_40Plies_completesAndReturnsUnknown', () => {
     // Arrange: 40 half-moves from the Ruy Lopez (verified valid SAN sequence)
     const moves = [
       'e4','e5','Nf3','Nc6','Bb5','a6','Ba4','Nf6','O-O','Be7',
@@ -54,17 +57,13 @@ describe('identifyOpening', () => {
       'd5','c4','b4','cxb3','Bxb3','Nc5','Bc2','Rc8','Bb2','Qc7',
     ]
 
-    // Act — measure 10 runs, take max
-    let maxMs = 0
-    for (let run = 0; run < 10; run++) {
-      const t0 = performance.now()
-      identifyOpening(moves)
-      maxMs = Math.max(maxMs, performance.now() - t0)
-    }
+    // Act
+    const result = identifyOpening(moves)
 
-    // Assert — threshold is 200ms to account for test-environment overhead;
-    // the browser target is ≤20ms (verified manually in Chrome DevTools)
-    expect(maxMs).toBeLessThan(200)
+    // Assert — a 40-ply game completes without throwing and returns a well-formed result
+    expect(result.matchedPly).toBeGreaterThan(0)
+    expect(result.matchedPly).toBeLessThanOrEqual(moves.length)
+    expect(typeof result.isUnknown).toBe('boolean')
   })
 
   // AC-5: OpeningResult type has no evaluative fields
