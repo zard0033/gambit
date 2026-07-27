@@ -19,6 +19,24 @@ tag、棋誌行首墨點。**下一步＝➍➎ 評審＋push**（precommit-revi
 
 ---
 
+## 2026-07-27 Supabase 專案被暫停（已 restore）＋ keep-alive workflow
+
+**事故**：Supabase free tier 專案（`vfnzekqtvxhewifnmtnz`）因 7 天無資料庫活動被暫停，
+線上站登入／雲端同步全掛。**暫停的專案連 DNS 都會被撤掉**——症狀是 `curl` / `nslookup` 回
+`Could not resolve host` / NXDOMAIN（本機與 8.8.8.8 皆然），不是回一句 "project is paused"。
+以後看到 supabase.co 網域解析不到，第一個猜測是被暫停，不是被刪。Eason 於後台 Restore 後即恢復。
+
+**restore 後 schema 完整**（anon REST probe 逐表確認）：7 張 live 表全 200；
+`skill_scores` / `lesson_side_learned` 回 404（＝已 drop，與 `supabase/README.md` 記載一致）。資料無損。
+
+**防復發**：`.github/workflows/supabase-keep-alive.yml`——至多每 3 天 `curl`
+`/rest/v1/journal_entries?select=id&limit=1`（實表查詢才會真的打 DB；`/auth/v1/health` 與
+`/rest/v1/` 根目錄都不保證）。沿用既有 secrets `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`，
+無新增設定。非 2xx/4xx 一律讓 job 紅（專案再被停就看得到，不會靜默綠）。
+**注意 GitHub 政策：repo 連續 60 天無 commit 會自動停用 scheduled workflow**。
+
+---
+
 ## 2026-07-22 玄夜換血輪次（noir 色板換血 + 首頁墨韻融合落地）
 
 **結論**：noir 顯示名「暖墨」正名「玄夜」（內部值 `'noir'` 不動，Supabase check constraint 不動）；

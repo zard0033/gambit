@@ -1,0 +1,31 @@
+name: Supabase Keep Alive
+
+# Supabase free tier 專案 7 天無資料庫活動就會被暫停（暫停後連 DNS 都會撤掉，
+# 症狀是 curl 回 "Could not resolve host"）。這裡至多每 3 天打一次真實查詢——
+# PostgREST 會實際執行 SQL 才算得上活動，/auth/v1/health 不算。
+# 注意：repo 連續 60 天無 commit，GitHub 會自動停用 scheduled workflow（會寄信通知）。
+
+on:
+  schedule:
+    - cron: '17 3 */3 * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          code=$(curl -s --max-time 15 -o /dev/null -w '%{http_code}' \
+            "$SUPABASE_URL/rest/v1/journal_entries?select=id&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY")
+          echo "status: $code"
+          # 2xx/4xx = 請求已進到 PostgREST 並查過資料庫（計為活動）；
+          # 其餘（000/3xx/5xx）= 專案暫停、已刪除或網關掛了，要紅給人看。
+          case "$code" in 2??|4??) ;; *) exit 1 ;; esac
