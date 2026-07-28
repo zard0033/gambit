@@ -24,10 +24,3 @@ ADR Dependencies, Engine Compatibility, GDD Requirements Addressed
 - Stories embed this version; `/story-done` checks for staleness
 
 **Validation:** Run `/architecture-review` after completing a set of ADRs.
-
-## Engine Reference (`docs/engine-reference/`)
-
-Version-pinned engine API snapshots. **Always check here before using any
-engine API** — the LLM's training data predates the pinned engine version.
-
-Current engine: see `docs/engine-reference/godot/VERSION.md`

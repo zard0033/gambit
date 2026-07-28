@@ -1,7 +1,7 @@
-# Claude Code Game Studios -- Game Studio Agent Architecture
+# Gambit — Chess Training Companion
 
-Indie game development managed through 49 coordinated Claude Code subagents.
-Each agent owns a specific domain, enforcing separation of concerns and quality.
+單人西洋棋訓練 web app（初學者向）。repo 是 `Claude-Code-Game-Studios` 模板的 fork，
+模板的 agent／skill 生態存於 `.claude/`，需要時才呼叫。
 
 ## Project Overview
 
@@ -73,13 +73,9 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 
 ## Collaboration Protocol
 
-**User-driven collaboration, not autonomous execution.**
-Every task follows: **Question -> Options -> Decision -> Draft -> Approval**
-
-- Agents MUST ask "May I write this to [filepath]?" before using Write/Edit tools
-- Agents MUST show drafts or summaries before requesting approval
-- Multi-file changes require explicit approval for the full changeset
-- No commits without user instruction
+實作與優先序自主進行（Eason 已授權技術經理角色）；問 vs 自己決定照全域 judgment 準則——
+不可逆／對外／偏離原始範圍才停下來問。設計與品味決策仍走「2–3 個可看的選項＋推薦」讓 Eason 拍板，
+不用文字描述要他想像（完整協作原則見 `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md`）。
 
 > **Push guardrail**: this repo is a fork of the `Claude-Code-Game-Studios` template.
 > `origin` = `zard0033/gambit` (your fork); `upstream` = the template.
@@ -88,11 +84,6 @@ Every task follows: **Question -> Options -> Decision -> Draft -> Approval**
 
 > **active.md 同步守則**：push 前先更新 `production/session-state/active.md`（完成項標 ✅、更新下一步），
 > 一起 stage 進同一個 commit，不必單獨推。不寫 commit hash（查 `git log` 即可，hash 在 active.md 裡是冗餘）。
-
-See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
-
-> **First session?** If the project has no engine configured and no game concept,
-> run `/start` to begin the guided onboarding flow.
 
 ## Visual Design System (Gambit)
 
@@ -131,28 +122,21 @@ See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 
 > 禁：在 .vue 新增 scoped `<style>` 重寫 token 已涵蓋的顏色／間距／字型／圓角／陰影。
 
-## UI 質感 Skill 路由（潤飾專用）
+## UI 潤飾路由
 
-當 Eason 提到下列關鍵詞時，主動採用對應 skill。**三條鐵則優先於一切**：
+UI／視覺工作照全域 `~/.claude/rules/ui-design-flow.md` 五階段流程走。
+（🪦 舊路由表指向的 `redesign`／`agent-skills:frontend-ui-engineering`／`web-design-engineer`
+於 2026-07 自環境移除，不要提案裝回；設計事實單點查詢仍可用 `ui-ux-pro-max`。）
+**三條鐵則優先於一切**：
 
-1. **Gambit 是裁判**：任何 UI 潤飾前先讀 `design/gambit-design-system/`。`ui-ux-pro-max` / `web-design-engineer`
-   的產出**不得覆蓋** Gambit 的配色 / 字型 / 金色（focus·reward only）規則；它們只供想法，採用前一律對齊 Gambit。
-2. **單純小修不觸發重型 skill**：改一個字、調一格間距等，依「最小可行解 / 勿動沒壞的」直接做，不啟動下表。
-3. **redesign 先報告後施工**：redesign / 潤飾類任務，**即使 repo 已有 H/M/L 計畫（如 `production/redesign-2026-06.md`），仍須先跑 `/redesign` 對真實畫面出報告 → Eason 拍板 → 才施工**。不可因「計畫已寫好」就直接動手。
-
-| 關鍵詞 | 採用 skill | 行為 |
-| --- | --- | --- |
-| 潤飾、質感、質感提升、視覺/UI/介面優化、polish | `redesign` | 先**審查既有屏**出 H/M/L 優先清單，等拍板再改；不直接亂動 |
-| 實作元件、改畫面、切版、RWD、響應式、a11y、無障礙、前端實作 | `agent-skills:frontend-ui-engineering` | 當**施工紀律**做 production 級實作，逐項 Playwright 驗畫面 |
-| 配色、字型、風格、動效曲線、微互動、設計原則、圖表/chart | `ui-ux-pro-max` | **只當顧問**出想法；採用前對齊 Gambit（見鐵則 1） |
-| Landing、行銷頁、品牌頁、logo 頁、簡報頁、HTML demo、獨立頁 | `web-design-engineer` | 僅限**全新獨立頁**；不碰 App 內既有畫面 |
+1. **Gambit 是裁判**：任何 UI 潤飾前先讀 `design/gambit-design-system/`。外部 skill 的產出
+   **不得覆蓋** Gambit 的配色 / 字型 / 金色（focus·reward only）規則；只供想法，採用前一律對齊 Gambit。
+2. **單純小修不觸發重型流程**：改一個字、調一格間距等，依「最小可行解 / 勿動沒壞的」直接做。
+3. **redesign 先報告後施工**：redesign / 潤飾類任務，**即使 repo 已有 H/M/L 計畫（如 `production/redesign-2026-06.md`），仍須先對真實畫面出報告 → Eason 拍板 → 才施工**。不可因「計畫已寫好」就直接動手。
 
 > **UI 工具參考（動 UI／選元件前先讀——否則這些檔放在 `production/` 裡 AI 不會自己找到）**：
 > 元件框架選/評 → `production/tooling-ui-frameworks.md`（結論：整包框架一律不裝，走現有 reka-ui shadcn 模式）；
 > 氛圍／動畫元件 → `production/tooling-inspira-ui.md`（採用 Inspira UI＝copy-paste 單一元件＋剝 juice＋CSS 優先）。
->
-> 全面提升流程：`redesign` 找問題 → triage（砍掉違反 Gambit / 沒壞的）→ `frontend-ui-engineering` 施工 →
-> 卡關時 `ui-ux-pro-max` 補深度。`web-design-engineer` 留給品牌頁等獨立頁。
 
 ## Coding Standards
 
