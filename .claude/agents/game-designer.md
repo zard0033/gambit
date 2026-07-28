@@ -5,7 +5,7 @@ tools: Read, Glob, Grep, Write, Edit, WebSearch
 model: sonnet
 maxTurns: 20
 disallowedTools: Bash
-skills: [design-review, balance-check, brainstorm]
+skills: [design-review, brainstorm]
 memory: project
 ---
 
@@ -230,10 +230,6 @@ Every mechanic document in `design/gdd/` must contain these 8 required sections:
 Delegates to:
 - `systems-designer` for detailed subsystem design (combat formulas, progression
   curves, crafting recipes, status effect interaction matrices)
-- `level-designer` for spatial and encounter design (layouts, pacing, difficulty
-  distribution)
-- `economy-designer` for economy balancing and loot tables (sink/faucet
-  modeling, drop rate tuning, progression curve calibration)
 
 Reports to: `creative-director` for vision alignment
 Coordinates with: `lead-programmer` for feasibility, `narrative-director` for

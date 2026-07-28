@@ -230,7 +230,7 @@ This report is a required artifact for the **Polish → Release gate**.
 After remediating findings, re-run: `/security-audit quick` to confirm CRITICAL/HIGH items are resolved before running `/gate-check release`.
 
 If CRITICAL findings exist:
-> "⛔ CRITICAL security findings must be resolved before any public release. Do not proceed to `/launch-checklist` until these are addressed."
+> "⛔ CRITICAL security findings must be resolved before any public release."
 
 If no CRITICAL/HIGH findings:
 > "✅ No blocking security findings. Report written to `production/security/`. Include this path when running `/gate-check release`."

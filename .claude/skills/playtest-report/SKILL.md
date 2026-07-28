@@ -109,7 +109,6 @@ Categorize all findings into four buckets:
 Present the categorized list, then route:
 
 - **Design changes:** "Run `/propagate-design-change [path]` on the affected design document to find downstream impacts before making changes."
-- **Balance adjustments:** "Run `/balance-check [system]` to verify the full balance picture before tuning values."
 - **Bugs:** "Use `/bug-report` to formally track these."
 - **Polish items:** "Add to the polish backlog in `production/` when the team reaches that phase."
 

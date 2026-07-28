@@ -182,5 +182,4 @@ internal archive copy.
 
 Verdict: **COMPLETE** — patch notes generated and saved.
 
-- Run `/release-checklist` to verify all other release gates are met before publishing.
 - Share the patch notes draft with the community-manager for tone review before posting publicly.

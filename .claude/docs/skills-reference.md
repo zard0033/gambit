@@ -9,7 +9,6 @@
 | `/start` | First-time onboarding — asks where you are, then guides you to the right workflow |
 | `/help` | Context-aware "what do I do next?" — reads current stage and surfaces the required next step |
 | `/project-stage-detect` | Full project audit — detect phase, identify existence gaps, recommend next steps |
-| `/setup-engine` | Configure engine + version, detect knowledge gaps, populate version-aware reference docs |
 | `/adopt` | Brownfield format audit — checks internal structure of existing GDDs/ADRs/stories, produces migration plan |
 
 ## Game Design
@@ -27,9 +26,7 @@
 
 | Command | Purpose |
 |---------|---------|
-| `/art-bible` | Guided, section-by-section Art Bible authoring — creates visual identity spec before asset production begins |
 | `/asset-spec` | Generate per-asset visual specifications and AI generation prompts from GDDs, level docs, or character profiles |
-| `/asset-audit` | Audit assets for naming conventions, file size budgets, and pipeline compliance |
 
 ## UX & Interface Design
 
@@ -66,7 +63,6 @@
 |---------|---------|
 | `/design-review` | Review a game design document for completeness and consistency |
 | `/code-review` | Architectural code review for a file or changeset |
-| `/balance-check` | Analyze game balance data, formulas, and config — flag outliers |
 | `/content-audit` | Audit GDD-specified content counts against implemented content |
 | `/scope-check` | Analyze feature or sprint scope against original plan, flag scope creep |
 | `/perf-profile` | Structured performance profiling with bottleneck identification |
@@ -105,12 +101,9 @@
 
 | Command | Purpose |
 |---------|---------|
-| `/release-checklist` | Generate and validate a pre-release checklist for the current build |
-| `/launch-checklist` | Complete launch readiness validation across all departments |
 | `/changelog` | Auto-generate changelog from git commits and sprint data |
 | `/patch-notes` | Generate player-facing patch notes from git history and internal data |
 | `/hotfix` | Emergency fix workflow with audit trail, bypassing normal sprint process |
-| `/day-one-patch` | Prepare a focused day-one patch for known issues discovered after gold master but before or at public launch |
 
 ## Creative & Content
 
@@ -127,12 +120,6 @@ Coordinate multiple agents on a single feature area:
 
 | Command | Coordinates |
 |---------|-------------|
-| `/team-combat` | game-designer + gameplay-programmer + ai-programmer + technical-artist + sound-designer + qa-tester |
-| `/team-narrative` | narrative-director + writer + world-builder + level-designer |
 | `/team-ui` | ux-designer + ui-programmer + art-director + accessibility-specialist |
 | `/team-release` | release-manager + qa-lead + devops-engineer + producer |
-| `/team-polish` | performance-analyst + technical-artist + sound-designer + qa-tester |
-| `/team-audio` | audio-director + sound-designer + technical-artist + gameplay-programmer |
-| `/team-level` | level-designer + narrative-director + world-builder + art-director + systems-designer + qa-tester |
-| `/team-live-ops` | live-ops-designer + economy-designer + community-manager + analytics-engineer |
 | `/team-qa` | qa-lead + qa-tester + gameplay-programmer + producer |

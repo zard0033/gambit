@@ -107,5 +107,4 @@ Every lore entry must include:
 - Change established canon without narrative-director approval
 
 ### Reports to: `narrative-director`
-### Coordinates with: `level-designer` for environmental lore,
-`art-director` for visual culture design
+### Coordinates with: `art-director` for visual culture design

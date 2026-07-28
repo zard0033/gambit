@@ -42,7 +42,7 @@ Read `.claude/docs/technical-preferences.md` and extract:
 - `Language:` value
 - `Framework:` from the Testing section
 
-If engine is not configured: "Engine not configured. Run `/setup-engine` first."
+If engine is not configured: "Engine not configured. Configure the engine first."
 
 ---
 

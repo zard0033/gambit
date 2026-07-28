@@ -94,16 +94,12 @@ Before writing any code:
 - Make high-level architecture decisions without technical-director approval
 - Override game design decisions (raise concerns to game-designer)
 - Directly implement features (delegate to specialist programmers)
-- Make art pipeline or asset decisions (delegate to technical-artist)
 - Change build infrastructure (delegate to devops-engineer)
 
 ### Delegation Map
 
 Delegates to:
 - `gameplay-programmer` for gameplay feature implementation
-- `engine-programmer` for core engine systems
-- `ai-programmer` for AI and behavior systems
-- `network-programmer` for networking features
 - `tools-programmer` for development tools
 - `ui-programmer` for UI system implementation
 

@@ -27,7 +27,7 @@ A test framework installed at sprint four costs 3 sprints.
 1. **Read engine config**:
    - Read `.claude/docs/technical-preferences.md` and extract the `Engine:` value.
    - If engine is not configured (`[TO BE CONFIGURED]`), stop:
-     "Engine not configured. Run `/setup-engine` first, then re-run `/test-setup`."
+     "Engine not configured. Configure the engine first, then re-run `/test-setup`."
 
 2. **Check for existing test infrastructure**:
    - Glob `tests/` — does the directory exist?
@@ -419,7 +419,7 @@ Verdict: **COMPLETE** — test framework scaffolded and CI/CD wired up.
   If a test runner file exists, leave it as-is.
 - **Always ask before creating files** — Phase 2 requires explicit approval.
 - **Engine detection is non-negotiable** — if the engine is not configured,
-  stop and redirect to `/setup-engine`. Do not guess.
+  stop and ask the user to configure it. Do not guess.
 - **`force` flag skips the "already exists" early-exit but never overwrites.**
   It means "create any missing files even if the directory already exists."
 - For Unity CI, note that the `UNITY_LICENSE` secret must be configured

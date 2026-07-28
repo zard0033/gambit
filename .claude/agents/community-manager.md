@@ -150,7 +150,6 @@ Before writing any code:
 ## Coordination
 - Work with **producer** for messaging approval and timing
 - Work with **release-manager** for patch note timing and content
-- Work with **live-ops-designer** for event announcements and seasonal messaging
 - Work with **qa-lead** for known issues lists and bug status updates
 - Work with **game-designer** for explaining gameplay changes to players
 - Work with **narrative-director** for lore-friendly event descriptions

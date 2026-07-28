@@ -1,6 +1,6 @@
 ---
 name: prototype
-description: "Concept prototype — validate the core idea is worth designing before writing GDDs. Run right after /brainstorm and /setup-engine. Routes to HTML, Engine, or Paper path based on game type. Produces a throwaway build and a PROCEED/PIVOT/KILL verdict."
+description: "Concept prototype — validate the core idea is worth designing before writing GDDs. Run right after /brainstorm. Routes to HTML, Engine, or Paper path based on game type. Produces a throwaway build and a PROCEED/PIVOT/KILL verdict."
 argument-hint: "[concept-description] [--path html|engine|paper] [--review full|lean|solo] [--spike]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash, Task, AskUserQuestion
@@ -14,7 +14,7 @@ isolation: worktree
 This is the **concept prototype** — a fast, throwaway build that answers one question:
 *"Is this core idea actually fun to interact with?"*
 
-**Default use** — run right after `/brainstorm` and `/setup-engine`, before writing
+**Default use** — run right after `/brainstorm`, before writing
 GDDs or architecture docs. Its verdict determines whether the concept is worth the
 investment of full design documentation.
 
@@ -441,11 +441,10 @@ what you just learned.
 Recommended path (in order):
 1. `/design-review design/gdd/game-concept.md` — validate the concept doc against what the prototype revealed
 2. `/gate-check` — confirm readiness to advance to Systems Design
-3. `/art-bible` — define visual identity (optional but worth doing before GDDs)
-4. `/map-systems` — decompose the concept into all game systems
-5. `/design-system [mechanic]` — GDD for each MVP system; use prototype learnings
+3. `/map-systems` — decompose the concept into all game systems
+4. `/design-system [mechanic]` — GDD for each MVP system; use prototype learnings
    in the Tuning Knobs and Formulas sections
-6. `/review-all-gdds` — cross-system consistency check
+5. `/review-all-gdds` — cross-system consistency check
 
 **Note:** If you used the HTML path and feel is still uncertain, consider running
 a quick engine path prototype targeting feel before writing GDDs.

@@ -111,8 +111,8 @@ If no matching log found: "UE automation tests must be run via the Session
 Frontend or CI pipeline. Please confirm test status manually."
 
 **Unknown engine / not configured:**
-"Engine not configured in `.claude/docs/technical-preferences.md`. Run
-`/setup-engine` to specify the engine, then re-run `/smoke-check`."
+"Engine not configured in `.claude/docs/technical-preferences.md`. Configure
+the engine, then re-run `/smoke-check`."
 
 **If the test runner is not available in this environment** (engine binary not
 on PATH, runner script not found, etc.), report clearly:

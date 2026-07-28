@@ -145,30 +145,10 @@ If the story's Type is `Config/Data`, no programmer agent or engine specialist i
 
 | Story context | Primary agent |
 |---|---|
-| Foundation layer — any type | `engine-programmer` |
 | Any layer — Type: UI | `ui-programmer` |
 | Any layer — Type: Visual/Feel | `gameplay-programmer` (implements) |
 | Core or Feature — gameplay mechanics | `gameplay-programmer` |
-| Core or Feature — AI behaviour, pathfinding | `ai-programmer` |
-| Core or Feature — networking, replication | `network-programmer` |
 | Config/Data — no code | No agent needed (see Phase 4 Config note) |
-
-### Engine specialist — always spawn as secondary for code stories
-
-Read the `Engine Specialists` section of `.claude/docs/technical-preferences.md`
-to get the configured primary specialist. Spawn them alongside the primary agent
-when the story involves engine-specific APIs, patterns, or the ADR has HIGH
-engine risk.
-
-| Engine | Specialist agents available |
-|--------|----------------------------|
-| Godot 4 | `godot-specialist`, `godot-gdscript-specialist`, `godot-shader-specialist` |
-| Unity | `unity-specialist`, `unity-ui-specialist`, `unity-shader-specialist` |
-| Unreal Engine | `unreal-specialist`, `ue-gas-specialist`, `ue-blueprint-specialist`, `ue-umg-specialist`, `ue-replication-specialist` |
-
-**When engine risk is HIGH** (from the ADR or VERSION.md): always spawn the engine
-specialist, even for non-engine-facing stories. High risk means the ADR records
-assumptions about post-cutoff engine APIs that need expert verification.
 
 ---
 

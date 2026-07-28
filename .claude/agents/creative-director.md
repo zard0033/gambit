@@ -353,12 +353,10 @@ All creative direction documents should follow this structure:
 Delegates to:
 - `game-designer` for mechanical design within creative constraints
 - `art-director` for visual execution of creative direction
-- `audio-director` for sonic execution of creative direction
 - `narrative-director` for story execution of creative direction
 
 Escalation target for:
 - `game-designer` vs `narrative-director` conflicts (ludonarrative alignment)
-- `art-director` vs `audio-director` tonal disagreements (aesthetic coherence)
 - Any "this changes the identity of the game" decisions
 - Pillar conflicts that can't be resolved by department leads
 - Scope questions where creative intent and production capacity collide

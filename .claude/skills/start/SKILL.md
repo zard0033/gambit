@@ -58,9 +58,7 @@ The user needs creative exploration before anything else.
 4. Show the recommended path:
    **Concept phase:**
    - `/brainstorm open` — discover your game concept
-   - `/setup-engine` — configure the engine (brainstorm will recommend one)
    - `/prototype` — throwaway concept build: validate the core idea is fun before designing (1–3 days)
-   - `/art-bible` — define visual identity (uses the Visual Identity Anchor brainstorm produces)
    - `/map-systems` — decompose the concept into systems
    - `/design-system` — author a GDD for each MVP system
    - `/review-all-gdds` — cross-system consistency check
@@ -87,9 +85,7 @@ The user needs creative exploration before anything else.
 4. Show the recommended path:
    **Concept phase:**
    - `/brainstorm [hint]` — develop the idea into a full concept
-   - `/setup-engine` — configure the engine
    - `/prototype` — throwaway concept build: validate the core idea is fun before designing (1–3 days)
-   - `/art-bible` — define visual identity (uses the Visual Identity Anchor brainstorm produces)
    - `/map-systems` — decompose the concept into systems
    - `/design-system` — author a GDD for each MVP system
    - `/review-all-gdds` — cross-system consistency check
@@ -111,16 +107,11 @@ The user needs creative exploration before anything else.
 #### If C: Clear concept
 
 1. Ask them to describe their concept in one sentence — genre and core mechanic. Use plain text, not AskUserQuestion (it's an open response).
-2. Acknowledge the concept, then use `AskUserQuestion` to offer two paths:
-   - **Prompt**: "How would you like to proceed?"
-   - **Options**:
-     - `Formalize it first` — Run `/brainstorm [concept]` to structure it into a proper game concept document
-     - `Jump straight in` — Go to `/setup-engine` now and write the GDD manually afterward
+2. Acknowledge the concept, then recommend running `/brainstorm [concept]` to structure it into a proper game concept document.
 3. Show the recommended path:
    **Concept phase:**
-   - `/brainstorm` or `/setup-engine` — (their pick from step 2)
+   - `/brainstorm` — structure the concept into a proper game concept document
    - `/prototype` — throwaway concept build: validate the core idea is fun before designing (1–3 days)
-   - `/art-bible` — define visual identity (after brainstorm if run, or after concept doc exists)
    - `/design-review` — validate the concept doc
    - `/map-systems` — decompose the concept into individual systems
    - `/design-system` — author a GDD for each MVP system
@@ -147,8 +138,7 @@ The user needs creative exploration before anything else.
    - "Your engine is [configured as X / not yet configured]..."
 
 2. **Sub-case D1 — Early stage** (engine not configured or only a game concept exists):
-   - Recommend `/setup-engine` first if engine not configured
-   - Then `/project-stage-detect` for a gap inventory
+   - Recommend `/project-stage-detect` for a gap inventory
 
    **Sub-case D2 — GDDs, ADRs, or stories already exist:**
    - Explain: "Having files isn't the same as the template's skills being able to use them. GDDs might be missing required sections. `/adopt` checks this specifically."
@@ -159,7 +149,6 @@ The user needs creative exploration before anything else.
 3. Show the recommended path for D2:
    - `/project-stage-detect` — phase detection + existence gaps
    - `/adopt` — format compliance audit + migration plan
-   - `/setup-engine` — if engine not configured
    - `/design-system retrofit [path]` — fill missing GDD sections
    - `/architecture-decision retrofit [path]` — add missing ADR sections
    - `/architecture-review` — bootstrap the TR requirement registry

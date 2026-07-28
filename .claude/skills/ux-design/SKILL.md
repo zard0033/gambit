@@ -82,11 +82,6 @@ If `design/ux/interaction-patterns.md` exists, read the pattern catalog index
 pattern details — just the catalog. This tells you which patterns already exist
 so you can reference them rather than reinvent them.
 
-### 2f: Art Bible
-
-Check for `design/art/art-bible.md`. If found, read the visual direction
-section. UX layout must align with the aesthetic commitments already made.
-
 ### 2g: Accessibility Requirements
 
 Check for `design/accessibility-requirements.md`. If found, read it. The spec
@@ -107,8 +102,6 @@ Interaction Map and inform accessibility requirements:
 If the section is unconfigured (`[TO BE CONFIGURED]`), ask once:
 > "Input methods aren't configured yet. What does this game target?"
 > Options: "Keyboard/Mouse only", "Gamepad only", "Both (PC + Console)", "Touch (mobile)", "All of the above"
->
-> (Run `/setup-engine` to save this permanently so you won't be asked again.)
 
 Store the answer for the rest of this session. Do **not** ask again per section
 or per screen.

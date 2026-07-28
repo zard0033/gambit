@@ -50,7 +50,6 @@ Use the Task tool to spawn each team member as a subagent:
 - `subagent_type: analytics-engineer` — Telemetry event verification and dashboard readiness
 - `subagent_type: community-manager` — Patch notes and launch communication
 - `subagent_type: producer` — Go/no-go decision, stakeholder communication
-- `subagent_type: network-programmer` — Netcode stability sign-off (invoke if game has multiplayer)
 
 Always provide full context in each agent's prompt (version number, milestone status, known issues). Launch independent agents in parallel where the pipeline allows it (e.g., Phase 3 agents can run simultaneously).
 
@@ -67,7 +66,7 @@ Delegate to **producer**:
 Delegate to **release-manager**:
 - Cut release branch from the agreed commit
 - Bump version numbers in all relevant files
-- Generate the release checklist using `/release-checklist`
+- Generate the release checklist
 - Freeze the branch — no feature changes, bug fixes only
 - Output: release branch name and checklist
 
@@ -76,18 +75,16 @@ Delegate in parallel:
 - **qa-lead**: Execute full regression test suite. Test all critical paths. Verify no S1/S2 bugs. Sign off on quality.
 - **devops-engineer**: Build release artifacts for all target platforms. Verify builds are clean and reproducible. Run automated tests in CI.
 - **security-engineer** *(if game has online features, multiplayer, or player data)*: Conduct pre-release security audit. Review authentication, anti-cheat, data privacy compliance. Sign off on security posture.
-- **network-programmer** *(if game has multiplayer)*: Sign off on netcode stability. Verify lag compensation, reconnect handling, and bandwidth usage under load.
 
 ### Phase 4: Localization, Performance, and Analytics
 Delegate (can run in parallel with Phase 3 if resources available):
 - Verify all strings are translated (delegate to **localization-lead** if available)
-- Run performance benchmarks against targets (delegate to **performance-analyst** if available)
 - **analytics-engineer**: Verify all telemetry events fire correctly on release build. Confirm dashboards are receiving data. Check that critical funnels (onboarding, progression, monetization if applicable) are instrumented.
 - Output: localization, performance, and analytics sign-off
 
 ### Phase 5: Go/No-Go
 Delegate to **producer**:
-- Collect sign-off from: qa-lead, release-manager, devops-engineer, security-engineer (if spawned in Phase 3), network-programmer (if spawned in Phase 3), and technical-director
+- Collect sign-off from: qa-lead, release-manager, devops-engineer, security-engineer (if spawned in Phase 3), and technical-director
 - Evaluate any open issues — are they blocking or can they ship?
 - Make the go/no-go call
 - Output: release decision with rationale

@@ -202,7 +202,7 @@ complete system set before GDD authoring begins
 ### CD-NARRATIVE — Narrative Consistency Check
 
 **Trigger**: After narrative GDDs, lore documents, dialogue specs, or world-building
-documents are authored (team-narrative, design-system for story systems, writer
+documents are authored (design-system for story systems, writer
 deliverables)
 
 **Context to pass**:
@@ -566,31 +566,6 @@ Agent: `art-director` | Model tier: Sonnet | Domain: Visual identity, art bible,
 
 ---
 
-### AD-ART-BIBLE — Art Bible Sign-Off
-
-**Trigger**: After the art bible is drafted (`/art-bible`), before asset production begins
-
-**Context to pass**:
-- Art bible path (`design/art/art-bible.md`)
-- Game pillars and core fantasy
-- Platform and performance constraints (from `.claude/docs/technical-preferences.md` if configured)
-- Visual identity anchor chosen during brainstorm (from `design/gdd/game-concept.md`)
-
-**Prompt**:
-> "Review this art bible for completeness and internal consistency. Does the color
-> system match the mood targets? Does the shape language follow from the visual
-> identity statement? Are the asset standards achievable within the platform
-> constraints? Does the character design direction give artists enough to work from
-> without over-specifying? Are there contradictions between sections? Would an
-> outsourcing team be able to produce assets from this document without additional
-> briefing? Return APPROVE (art bible is production-ready), CONCERNS [specific
-> sections needing clarification], or REJECT [fundamental inconsistencies that must
-> be resolved before asset production begins]."
-
-**Verdicts**: APPROVE / CONCERNS / REJECT
-
----
-
 ### AD-PHASE-GATE — Visual Readiness at Phase Transition
 
 **Trigger**: Always at `/gate-check` — spawn in parallel with CD-PHASE-GATE, TD-PHASE-GATE, and PR-PHASE-GATE
@@ -599,7 +574,6 @@ Agent: `art-director` | Model tier: Sonnet | Domain: Visual identity, art bible,
 - Target phase name
 - List of all art/visual artifacts present (file paths)
 - Visual identity anchor from `design/gdd/game-concept.md` (if present)
-- Art bible path if it exists (`design/art/art-bible.md`)
 
 **Prompt**:
 > "Review the current project state for [target phase] gate readiness from a visual
@@ -744,7 +718,6 @@ authored, or when a design decision has narrative implications
 introduced, or when a tech art decision affects visual style
 
 **Context to pass**:
-- Art bible path (if exists at `design/art/art-bible.md`)
 - The specific asset type, style decision, or visual direction being reviewed
 - Reference images or style descriptions
 - Platform and performance constraints
@@ -786,7 +759,7 @@ When a new gate is needed for a new skill or workflow:
 
 1. Assign a gate ID: `[DIRECTOR-PREFIX]-[DESCRIPTIVE-SLUG]`
    - Prefixes: `CD-` `TD-` `PR-` `LP-` `QL-` `ND-` `AD-`
-   - Add new prefixes for new agents: `audio-director` → `AU-`, `ux-designer` → `UX-`
+   - Add new prefixes for new agents: `ux-designer` → `UX-`
 2. Add the gate under the appropriate director section with all five fields:
    Trigger, Context to pass, Prompt, Verdicts, and any special handling notes
 3. Reference it in skills by ID only — never copy the prompt text into the skill
@@ -799,7 +772,7 @@ When a new gate is needed for a new skill or workflow:
 |-------|---------------|----------------|
 | **Concept** | CD-PILLARS, AD-CONCEPT-VISUAL | TD-FEASIBILITY, PR-SCOPE |
 | **Systems Design** | TD-SYSTEM-BOUNDARY, CD-SYSTEMS, PR-SCOPE, CD-GDD-ALIGN (per GDD) | ND-CONSISTENCY, AD-VISUAL |
-| **Technical Setup** | TD-ARCHITECTURE, TD-ADR (per ADR), LP-FEASIBILITY, AD-ART-BIBLE | TD-ENGINE-RISK |
+| **Technical Setup** | TD-ARCHITECTURE, TD-ADR (per ADR), LP-FEASIBILITY | TD-ENGINE-RISK |
 | **Pre-Production** | PR-EPIC, QL-STORY-READY (per story), PR-SPRINT, all four PHASE-GATEs (via gate-check) | CD-PLAYTEST |
 | **Production** | LP-CODE-REVIEW (per story), QL-STORY-READY, PR-SPRINT (per sprint), QL-TEST-COVERAGE (per sprint close-out) | PR-MILESTONE, AD-VISUAL |
 | **Polish** | QL-TEST-COVERAGE, CD-PLAYTEST, PR-MILESTONE | AD-VISUAL |

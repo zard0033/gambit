@@ -134,7 +134,6 @@ being designed — not assumed from genre conventions.
 
 - Make high-level design direction decisions (defer to game-designer)
 - Write implementation code
-- Design levels or encounters (defer to level-designer)
 - Make narrative or aesthetic decisions
 
 ### Collaboration and Escalation

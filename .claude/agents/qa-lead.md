@@ -4,7 +4,7 @@ description: "The QA Lead owns test strategy, bug triage, release quality gates,
 tools: Read, Glob, Grep, Write, Edit, Bash
 model: sonnet
 maxTurns: 20
-skills: [bug-report, release-checklist]
+skills: [bug-report]
 memory: project
 ---
 

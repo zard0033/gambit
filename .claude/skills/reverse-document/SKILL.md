@@ -184,8 +184,7 @@ After writing, suggest next steps:
 ✅ Written to design/gdd/combat-system.md
 
 FOLLOW-UP RECOMMENDED:
-1. Run /balance-check on combat formulas (exponential scaling concern)
-2. Create ADR for stamina system architecture decision
+1. Create ADR for stamina system architecture decision
 3. Implement missing edge cases:
    - Stamina depletion mid-combo behavior
    - Stagger state during dodge
@@ -241,7 +240,6 @@ Agent: ✅ Written to design/gdd/[system-name].md
 
        Next steps:
        - Update [formula] to [corrected scaling]
-       - Run /balance-check to validate [curve]
        - Document [mechanic] as core pillar in game-pillars.md
 ```
 

@@ -80,18 +80,11 @@ Read the GDD and identify every domain present. A GDD can touch multiple domains
 
 | If the GDD contains... | Spawn these agents |
 |------------------------|-------------------|
-| Costs, prices, drops, rewards, economy | `economy-designer` |
 | Combat stats, damage, health, DPS | `game-designer`, `systems-designer` |
-| AI behaviour, pathfinding, targeting | `ai-programmer` |
-| Level layout, spawning, wave structure | `level-designer` |
-| Player progression, XP, unlocks | `economy-designer`, `game-designer` |
+| Player progression, XP, unlocks | `game-designer` |
 | UI, HUD, menus, player-facing displays | `ux-designer`, `ui-programmer` |
 | Dialogue, quests, story, lore | `narrative-director` |
 | Animation, feel, timing, juice | `gameplay-programmer` |
-| Multiplayer, sync, replication | `network-programmer` |
-| Audio cues, music triggers | `audio-director` |
-| Performance, draw calls, memory | `performance-analyst` |
-| Engine-specific patterns or APIs | Primary engine specialist (from `.claude/docs/technical-preferences.md`) |
 | Acceptance criteria, test coverage | `qa-lead` |
 | Data schema, resource structure | `systems-designer` |
 | Any gameplay system | `game-designer` (always) |
@@ -135,7 +128,7 @@ After all specialists respond, spawn `creative-director` as the **senior reviewe
 
 If specialists disagree with each other or with the creative-director, do NOT silently pick one view. Present the disagreement explicitly in Phase 4 so the user can adjudicate.
 
-Mark every finding with its source: `[game-designer]`, `[economy-designer]`, `[creative-director]` etc.
+Mark every finding with its source: `[game-designer]`, `[systems-designer]`, `[creative-director]` etc.
 
 ---
 

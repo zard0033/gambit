@@ -27,15 +27,6 @@ phases:
         required: false
         description: "Explore the game concept using MDA, verb-first, and player psychology frameworks"
 
-      - id: engine-setup
-        name: "Engine Setup"
-        command: /setup-engine
-        required: true
-        artifact:
-          glob: ".claude/docs/technical-preferences.md"
-          pattern: "Engine: [^[]"
-        description: "Configure engine, pin version, set naming conventions and performance budgets"
-
       - id: game-concept
         name: "Game Concept Document"
         command: /brainstorm
@@ -49,14 +40,6 @@ phases:
         command: /design-review
         required: false
         description: "Validate the game concept (recommended before proceeding)"
-
-      - id: art-bible
-        name: "Art Bible"
-        command: /art-bible
-        required: true
-        artifact:
-          glob: "design/art/art-bible.md"
-        description: "Author the visual identity specification (9 sections). Uses the Visual Identity Anchor produced by /brainstorm. Run after game concept is formed, before systems design."
 
       - id: map-systems
         name: "Systems Map"
@@ -309,7 +292,7 @@ phases:
         name: "Team Orchestration (optional)"
         required: false
         repeatable: true
-        description: "Coordinate multiple agents on a complex feature. Use: /team-combat, /team-narrative, /team-ui, /team-audio, /team-level, /team-live-ops, /team-qa. Run when a feature spans multiple agent domains."
+        description: "Coordinate multiple agents on a complex feature. Use: /team-ui, /team-qa. Run when a feature spans multiple agent domains."
 
       - id: scope-check
         name: "Scope Check"
@@ -338,18 +321,6 @@ phases:
         required: false
         description: "Profile and optimize CPU/GPU/memory bottlenecks"
 
-      - id: balance-check
-        name: "Balance Check"
-        command: /balance-check
-        required: false
-        description: "Analyze game balance formulas and data for outliers and broken progressions"
-
-      - id: asset-audit
-        name: "Asset Audit"
-        command: /asset-audit
-        required: false
-        description: "Verify naming conventions, file format standards, and size budgets"
-
       - id: playtest-polish
         name: "Playtest Sessions (×3)"
         command: /playtest-report
@@ -359,23 +330,11 @@ phases:
           min_count: 3
         description: "Cover: new player experience, mid-game systems, difficulty curve"
 
-      - id: team-polish
-        name: "Polish Team Pass"
-        command: /team-polish
-        required: true
-        description: "Coordinated polish pass across performance, audio, visual, and UX"
-
   release:
     label: "Release"
     description: "Launch preparation, certification, and ship"
     next_phase: null
     steps:
-      - id: release-checklist
-        name: "Release Checklist"
-        command: /release-checklist
-        required: true
-        description: "Pre-release validation across all departments: code, content, store, legal"
-
       - id: patch-notes
         name: "Patch Notes"
         command: /patch-notes
@@ -387,9 +346,3 @@ phases:
         command: /changelog
         required: false
         description: "Auto-generate internal changelog from commits, sprints, and design docs"
-
-      - id: launch-checklist
-        name: "Launch Checklist"
-        command: /launch-checklist
-        required: true
-        description: "Final launch readiness — last gate before shipping to players"

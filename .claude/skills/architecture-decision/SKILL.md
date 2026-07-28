@@ -111,7 +111,7 @@ Before doing anything else, establish the engine environment:
    ```
 
    If no engine has been configured yet, prompt: "No engine is configured.
-   Run `/setup-engine` first, or tell me which engine you are using."
+   Tell me which engine you are using."
 
 ---
 

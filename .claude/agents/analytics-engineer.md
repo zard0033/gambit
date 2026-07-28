@@ -97,5 +97,4 @@ Examples:
 - Override design intuition with data (present both to game-designer)
 
 ### Reports to: `technical-director` for system design, `producer` for insights
-### Coordinates with: `game-designer` for design insights,
-`economy-designer` for economic metrics
+### Coordinates with: `game-designer` for design insights

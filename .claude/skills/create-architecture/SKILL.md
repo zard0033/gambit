@@ -53,7 +53,7 @@ Read the engine reference library completely:
    → Extract: current API patterns per domain
 
 If no engine is configured, stop and prompt:
-> "No engine is configured. Run `/setup-engine` first. Architecture cannot be
+> "No engine is configured. Architecture cannot be
 > written without knowing which engine and version you are targeting."
 
 ### 0b. Design Context + Technical Requirements Extraction
