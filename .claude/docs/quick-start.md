@@ -3,13 +3,13 @@
 ## What Is This?
 
 This is a complete Claude Code agent architecture for game development. It
-organizes 49 specialized AI agents into a studio hierarchy that mirrors
+organizes 24 specialized AI agents into a studio hierarchy that mirrors
 real game development teams, with defined responsibilities, delegation
-rules, and coordination protocols. It includes engine-specialist agents
-for Godot, Unity, and Unreal — each with dedicated sub-specialists for
-major engine subsystems. All design agents and templates are grounded in
+rules, and coordination protocols. This project is a Vue 3 web app — there
+are no engine-specialist agents; game engine advice (Godot/Unity/Unreal)
+does not apply. All design agents and templates are grounded in
 established game design theory (MDA Framework, Self-Determination Theory,
-Flow State, Bartle Player Types). Use whichever engine set matches your project.
+Flow State, Bartle Player Types).
 
 ## How to Use
 
@@ -49,17 +49,6 @@ Ask yourself: "What department would handle this in a real studio?"
 | Test a mechanic idea quickly | `prototyper` |
 | Review code for security issues | `security-engineer` |
 | Check accessibility compliance | `accessibility-specialist` |
-| Get Unreal Engine advice | `unreal-specialist` |
-| Get Unity advice | `unity-specialist` |
-| Get Godot advice | `godot-specialist` |
-| Design DOTS/ECS architecture | `unity-dots-specialist` |
-| Write Unity shaders/VFX | `unity-shader-specialist` |
-| Manage Addressable assets | `unity-addressables-specialist` |
-| Build UI Toolkit/UGUI screens | `unity-ui-specialist` |
-| Write idiomatic GDScript | `godot-gdscript-specialist` |
-| Write Godot C# code | `godot-csharp-specialist` |
-| Create Godot shaders | `godot-shader-specialist` |
-| Build GDExtension modules | `godot-gdextension-specialist` |
 | Write patch notes for players | `community-manager` |
 | Brainstorm a new game idea | Use `/brainstorm` skill |
 
@@ -190,26 +179,26 @@ If you already know what you need, jump directly to the relevant path:
    what excites you, what you've played, your constraints
    - Generates 3 concepts, helps you pick one, defines core loop and pillars
    - Produces a game concept document and recommends an engine
-3. **Validate the concept** — Run `/design-review design/gdd/game-concept.md`
-4. **Decompose into systems** — Run `/map-systems` to map all systems and dependencies
-5. **Design each system** — Run `/design-system [system-name]` (or `/map-systems next`)
+2. **Validate the concept** — Run `/design-review design/gdd/game-concept.md`
+3. **Decompose into systems** — Run `/map-systems` to map all systems and dependencies
+4. **Design each system** — Run `/design-system [system-name]` (or `/map-systems next`)
    to write GDDs in dependency order
-6. **Prototype the mechanic** — Run `/prototype [core-mechanic]` (1–3 days — before writing GDDs)
-7. **Design each system** — Run `/design-system [system-name]` to write GDDs, informed by prototype findings
-8. **Plan the first sprint** — After architecture and `/vertical-slice`, run `/sprint-plan new`
-9. Start building
+5. **Prototype the mechanic** — Run `/prototype [core-mechanic]` (1–3 days — before writing GDDs)
+6. **Design each system** — Run `/design-system [system-name]` to write GDDs, informed by prototype findings
+7. **Plan the first sprint** — After architecture and `/vertical-slice`, run `/sprint-plan new`
+8. Start building
 
 ### Path B: "I know what I want to build"
 
 If you already have a game concept and engine choice:
 
-2. **Write the Game Pillars** — delegate to `creative-director`
-3. **Decompose into systems** — Run `/map-systems` to enumerate systems and dependencies
-4. **Design each system** — Run `/design-system [system-name]` for GDDs in dependency order
-5. **Create the initial ADR** — Run `/architecture-decision`
-6. **Create the first milestone** in `production/milestones/`
-7. **Plan the first sprint** — Run `/sprint-plan new`
-8. Start building
+1. **Write the Game Pillars** — delegate to `creative-director`
+2. **Decompose into systems** — Run `/map-systems` to enumerate systems and dependencies
+3. **Design each system** — Run `/design-system [system-name]` for GDDs in dependency order
+4. **Create the initial ADR** — Run `/architecture-decision`
+5. **Create the first milestone** in `production/milestones/`
+6. **Plan the first sprint** — Run `/sprint-plan new`
+7. Start building
 
 ### Path C: "I know the game but not the engine"
 
@@ -226,8 +215,8 @@ If you have design docs, prototypes, or code already:
 2. **Run `/adopt`** if you have existing GDDs, ADRs, or stories — audits
    internal format compliance and builds a numbered migration plan to fill gaps
    without overwriting your existing work
-4. **Validate phase readiness** — Run `/gate-check` to see where you stand
-5. **Plan the next sprint** — Run `/sprint-plan new`
+3. **Validate phase readiness** — Run `/gate-check` to see where you stand
+4. **Plan the next sprint** — Run `/sprint-plan new`
 
 ## File Structure Reference
 

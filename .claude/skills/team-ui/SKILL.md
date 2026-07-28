@@ -31,7 +31,7 @@ Store the resolved mode for use in all subsequent phases.
 ## Team Composition
 - **ux-designer** — User flows, wireframes, accessibility, input handling
 - **ui-programmer** — UI framework, screens, widgets, data binding, implementation
-- **art-director** — Visual style, layout polish, consistency with art bible
+- **art-director** — Visual style, layout polish, consistency with `design/gambit-design-system/`
 - **engine UI specialist** — Validates UI implementation patterns against engine-specific best practices (read from `.claude/docs/technical-preferences.md` Engine Specialists → UI Specialist)
 - **accessibility-specialist** — Audits accessibility compliance at Phase 4
 

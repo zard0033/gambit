@@ -296,7 +296,7 @@ phases:
   polish:
     label: "Polish"
     description: "Performance, balance, playtesting, bug fixing"
-    next_phase: release
+    next_phase: null
     steps:
       - id: playtest-polish
         name: "Playtest Sessions (×3)"
@@ -306,20 +306,3 @@ phases:
           glob: "production/playtests/*.md"
           min_count: 3
         description: "Cover: new player experience, mid-game systems, difficulty curve"
-
-  release:
-    label: "Release"
-    description: "Launch preparation, certification, and ship"
-    next_phase: null
-    steps:
-      - id: patch-notes
-        name: "Patch Notes"
-        command: /patch-notes
-        required: false
-        description: "Generate player-facing patch notes from git history and sprint data"
-
-      - id: changelog
-        name: "Changelog"
-        command: /changelog
-        required: false
-        description: "Auto-generate internal changelog from commits, sprints, and design docs"

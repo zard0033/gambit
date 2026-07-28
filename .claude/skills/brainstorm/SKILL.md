@@ -247,6 +247,9 @@ Ground the concept in reality:
 - **Engine experience**: Use `AskUserQuestion` — "Do you already have an engine you work in?"
   Options: `Godot` / `Unity` / `Unreal Engine 5` / `No preference — help me decide`
   - If they pick an engine → record it as their preference and move on. Do NOT second-guess it.
+  - If they pick "No preference — help me decide" → recommend an engine based on
+    the target platform answered above and the stated scope, explain the choice
+    in one line, and record it as the recommendation.
 - **Art pipeline**: What's the art style and how labor-intensive is it?
 - **Content scope**: Estimate level/area count, item count, gameplay hours
 - **MVP definition**: What's the absolute minimum build that tests "is the

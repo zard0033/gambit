@@ -75,7 +75,7 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 
 實作與優先序自主進行（Eason 已授權技術經理角色）；問 vs 自己決定照全域 judgment 準則——
 不可逆／對外／偏離原始範圍才停下來問。設計與品味決策仍走「2–3 個可看的選項＋推薦」讓 Eason 拍板，
-不用文字描述要他想像（完整協作原則見 `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md`）。
+不用文字描述要他想像。
 
 > **Push guardrail**: this repo is a fork of the `Claude-Code-Game-Studios` template.
 > `origin` = `zard0033/gambit` (your fork); `upstream` = the template.
