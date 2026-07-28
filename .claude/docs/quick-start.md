@@ -77,7 +77,6 @@ Ask yourself: "What department would handle this in a real studio?"
 | `/quick-design` | Lightweight spec for small changes — tuning, tweaks, minor additions |
 | `/review-all-gdds` | Cross-GDD consistency and game design theory review |
 | `/propagate-design-change` | Find ADRs and stories affected by a GDD change |
-| `/asset-spec` | Generate per-asset visual specifications and AI generation prompts from GDDs or character profiles |
 | `/ux-design` | Author UX specs (screen/flow, HUD, interaction patterns) |
 | `/ux-review` | Validate UX specs for accessibility and GDD alignment |
 | `/create-architecture` | Master architecture document for the game |
@@ -96,7 +95,6 @@ Ask yourself: "What department would handle this in a real studio?"
 | `/code-review` | Reviews code for quality and architecture |
 | `/content-audit` | GDD-specified content vs. implemented — find gaps |
 | `/scope-check` | Detect scope creep against plan |
-| `/perf-profile` | Performance profiling and bottleneck ID |
 | `/tech-debt` | Scan, track, and prioritize tech debt |
 | `/gate-check` | Validate phase readiness (PASS/CONCERNS/FAIL) |
 | `/consistency-check` | Scan all GDDs for cross-document inconsistencies (conflicting stats, names, rules) |

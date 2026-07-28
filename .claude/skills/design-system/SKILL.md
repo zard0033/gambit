@@ -646,9 +646,6 @@ Use `AskUserQuestion`:
 
 For **Visual/Audio** (non-required systems): Coordinate with `art-director` if detail is needed. Often a brief note suffices at the GDD stage.
 
-> **Asset Spec Flag**: After the Visual/Audio section is written with real content, output this notice:
-> "📌 **Asset Spec** — Visual/Audio requirements are defined. After the art bible is approved, run `/asset-spec system:[system-name]` to produce per-asset visual descriptions, dimensions, and generation prompts from this section."
-
 For **UI Requirements**: Coordinate with `ux-designer` for complex UI systems.
 After writing this section, check whether it contains real content (not just
 `[To be designed]` or a note that this system has no UI). If it does have real

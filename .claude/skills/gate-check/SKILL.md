@@ -145,7 +145,6 @@ A depends on B). If any cycle is detected (e.g. A→B→A, or A→B→C→A):
 **Required Artifacts:**
 - [ ] Vertical slice exists in `prototypes/` with a REPORT.md (run `/vertical-slice`) — **recommended, not blocking**; if absent, surface as CONCERNS
 - [ ] First sprint plan exists in `production/sprints/`
-- [ ] Entity inventory exists at `design/assets/entity-inventory.md` (recommended — run `/asset-spec` with no arguments to generate collaboratively from GDDs)
 - [ ] All MVP-tier GDDs from systems index are complete
 - [ ] Master architecture document exists at `docs/architecture/architecture.md`
 - [ ] At least 3 ADRs covering Foundation-layer decisions exist in `docs/architecture/`
@@ -278,7 +277,7 @@ cross-GDD consistency check failed and must be resolved before advancing.
 - For test checks: Run the test suite via `Bash` if a test runner is configured
 - For design review checks: `Read` the GDD and check for the 8 required sections
 - For performance checks: `Read` technical-preferences.md and compare against any
-  profiling data in `tests/performance/` or recent `/perf-profile` output
+  profiling data in `tests/performance/`
 - For localization checks: `Grep` for hardcoded strings in `src/`
 
 ### Cross-Reference Checks
@@ -294,7 +293,6 @@ For items that can't be automatically verified, **ask the user**:
 
 - "I can't automatically verify that the core loop plays well. Has it been playtested?"
 - "No playtest report found. Has informal testing been done?"
-- "Performance profiling data isn't available. Would you like to run `/perf-profile`?"
 
 **Never assume PASS for unverifiable items.** Mark them as MANUAL CHECK NEEDED.
 
@@ -486,7 +484,6 @@ For all other gates, offer the two most logical next steps for that phase plus "
 
 Based on the verdict, suggest specific next steps:
 
-- **No asset specs?** → `/asset-spec system:[name]` to generate per-asset visual specs and generation prompts from approved GDDs
 - **No game concept?** → `/brainstorm` to create one
 - **No systems index?** → `/map-systems` to decompose the concept into systems
 - **Missing design docs?** → `/reverse-document` or delegate to `game-designer`
@@ -513,7 +510,6 @@ Based on the verdict, suggest specific next steps:
 - **No Difficulty Curve doc?** → Create `design/difficulty-curve.md` from the template at `.claude/docs/templates/difficulty-curve.md` — or use `/quick-design "difficulty curve"` for a guided session.
 - **No player journey map?** → Create `design/player-journey.md` from the template at `.claude/docs/templates/player-journey.md` — or author it collaboratively using `/ux-design` Phase 2b.
 - **Need a quick sprint check?** → `/sprint-status` for current sprint progress snapshot
-- **Performance unknown?** → `/perf-profile`
 - **Not localized?** → `/localize`
 
 ---

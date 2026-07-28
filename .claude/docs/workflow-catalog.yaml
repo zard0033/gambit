@@ -136,23 +136,6 @@ phases:
     description: "Visual entity inventory, UX specs, asset specs, prototype the core mechanic, define stories, validate fun"
     next_phase: production
     steps:
-      - id: entity-inventory
-        name: "Visual Entity & Screen Inventory"
-        command: /asset-spec
-        required: false
-        artifact:
-          glob: "design/assets/entity-inventory.md"
-        description: "Enumerate everything the game needs visually: entities (characters, enemies, buildings, environment pieces), UI screens, HUD elements, panels. Run /asset-spec with no arguments to start a collaborative inventory session — brief or detailed based on your responses. Reads GDDs and art bible to propose a starting list; you add, remove, and adjust. Becomes the source of truth for all art and UX work. Not required if the game has very few distinct visual elements."
-
-      - id: asset-spec
-        name: "Asset Specs"
-        command: /asset-spec
-        required: false
-        repeatable: true
-        artifact:
-          glob: "design/assets/asset-manifest.md"
-        description: "Generate per-asset visual specifications and AI generation prompts. Run once per entity, system, level, or character. If no source doc exists, /asset-spec interviews you inline — no narrative document required."
-
       - id: ux-design
         name: "UX Specs (key screens)"
         command: /ux-design
@@ -315,12 +298,6 @@ phases:
     description: "Performance, balance, playtesting, bug fixing"
     next_phase: release
     steps:
-      - id: perf-profile
-        name: "Performance Profile"
-        command: /perf-profile
-        required: false
-        description: "Profile and optimize CPU/GPU/memory bottlenecks"
-
       - id: playtest-polish
         name: "Playtest Sessions (×3)"
         command: /playtest-report

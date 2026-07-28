@@ -22,12 +22,6 @@
 | `/review-all-gdds` | Cross-GDD consistency and game design holism review across all design docs |
 | `/propagate-design-change` | When a GDD is revised, find affected ADRs and produce an impact report |
 
-## Art & Assets
-
-| Command | Purpose |
-|---------|---------|
-| `/asset-spec` | Generate per-asset visual specifications and AI generation prompts from GDDs, level docs, or character profiles |
-
 ## UX & Interface Design
 
 | Command | Purpose |
@@ -65,7 +59,6 @@
 | `/code-review` | Architectural code review for a file or changeset |
 | `/content-audit` | Audit GDD-specified content counts against implemented content |
 | `/scope-check` | Analyze feature or sprint scope against original plan, flag scope creep |
-| `/perf-profile` | Structured performance profiling with bottleneck identification |
 | `/tech-debt` | Scan, track, prioritize, and report on technical debt |
 | `/gate-check` | Validate readiness to advance between development phases (PASS/CONCERNS/FAIL) |
 | `/consistency-check` | Scan all GDDs against the entity registry to detect cross-document inconsistencies (stats, names, rules that contradict each other) |
