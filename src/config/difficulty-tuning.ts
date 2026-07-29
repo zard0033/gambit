@@ -6,7 +6,10 @@
  * nothing: every rung sent `go movetime 3000` with no depth cap, so the only difference between
  * them was Skill Level's candidate jitter. Rung 0 was in fact stronger than lichess's *top* level.
  *
- * These values are lichess's levels 1/2/3/4/6, adopted verbatim. Five rounds of local measurement
+ * These values are lichess's levels 1/2/3/4/6, adopted almost verbatim — the exception is rung 1's
+ * Skill Level, dropped 3 → 0 after a real game showed the bottom rung was still unbeatable for a
+ * beginner. That was the last unused headroom in the parameters; anything weaker needs a different
+ * mechanism (material odds, or picking a worse move out of MultiPV). Five rounds of local measurement
  * (four by win rate, one by centipawn loss) failed to produce a better table — win rate over 5-6
  * decided games is too noisy to read (the same pairing came out 83% and then 20% on two runs).
  * lichess's table is tuned against millions of real games; ours had a sample five orders of
@@ -47,7 +50,9 @@ export interface DifficultyRung {
 }
 
 export const DIFFICULTY_LADDER: readonly DifficultyRung[] = [
-  { rung: 1, name: '初學', blurb: '常常看不到你的威脅。', skillLevel: 3, depth: 1, movetimeMs: 50 },
+  // skill 0（lichess level 1 用的是 3）：2026-07-29 Eason 實玩最低階仍輸，把僅剩的參數空間用掉。
+  // depth 1 是奇數層，評估天然偏樂觀（odd-even effect），在這裡剛好幫倒忙幫到我們。
+  { rung: 1, name: '初學', blurb: '常常看不到你的威脅。', skillLevel: 0, depth: 1, movetimeMs: 50 },
   { rung: 2, name: '進階', blurb: '會抓明顯的破綻，但看不遠。', skillLevel: 6, depth: 2, movetimeMs: 100 },
   { rung: 3, name: '熟練', blurb: '算得到幾步之後，很少送子。', skillLevel: 9, depth: 3, movetimeMs: 150 },
   { rung: 4, name: '精通', blurb: '很少失誤，開局也算得清楚。', skillLevel: 11, depth: 4, movetimeMs: 200 },

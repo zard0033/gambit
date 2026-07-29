@@ -94,15 +94,21 @@ describe('remainingThinkDelayMs — 出手節奏', () => {
 
 describe('rungForSkillLevel — legacy 0-20 values', () => {
   it('test_rungForSkillLevel_exactLadderValue_returnsThatRung', () => {
-    expect(rungForSkillLevel(3).rung).toBe(1)
+    expect(rungForSkillLevel(0).rung).toBe(1)
     expect(rungForSkillLevel(17).rung).toBe(5)
   })
 
   it('test_rungForSkillLevel_legacyValue_returnsNearestRung', () => {
     // Saved resume games and ui:highestBeatenLevel hold raw Skill Levels from the old selector.
-    expect(rungForSkillLevel(0).rung).toBe(1) // nearest to 3
+    expect(rungForSkillLevel(2).rung).toBe(1) // nearest to 0
     expect(rungForSkillLevel(7).rung).toBe(2) // nearest to 6
     expect(rungForSkillLevel(20).rung).toBe(5) // nearest to 17
+  })
+
+  it('test_rungForSkillLevel_equidistantValue_favoursTheWeakerRung', () => {
+    // skill 3 sits exactly between rung 1 (skill 0) and rung 2 (skill 6). The doc comment promises
+    // ties go to the weaker rung — without this, a restored game could silently level the player up.
+    expect(rungForSkillLevel(3).rung).toBe(1)
   })
 
   it('test_rungForSkillLevel_everyLegacyValue_resolvesWithoutThrowing', () => {
