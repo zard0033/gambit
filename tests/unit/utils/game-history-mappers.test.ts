@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { DIFFICULTY_LADDER } from '../../../src/config/difficulty-tuning'
 import {
   mapPlayerResult,
   mapDifficultyLabel,
@@ -63,8 +64,8 @@ describe('mapDifficultyLabel', () => {
     expect(mapDifficultyLabel(0)).toBe('Beginner')
   })
 
-  it('AC-07b: 4 → Easy', () => {
-    expect(mapDifficultyLabel(4)).toBe('Easy')
+  it('AC-07b: 5 → Easy', () => {
+    expect(mapDifficultyLabel(5)).toBe('Easy')
   })
 
   it('AC-07c: 10 → Intermediate', () => {
@@ -99,6 +100,17 @@ describe('mapDifficultyLabel', () => {
 
   it('AC-07i: undefined → Unknown (type guard)', () => {
     expect(mapDifficultyLabel(undefined)).toBe('Unknown')
+  })
+
+  it('test_mapDifficultyLabel_everyLadderRung_getsItsOwnLabel', () => {
+    // The reason Formula 2's bands were recut (2026-07-29): under the old bands rungs 三 and 四
+    // both resolved to 'Intermediate', so the ladder read as flat in game history.
+    // Arrange / Act
+    const labels = DIFFICULTY_LADDER.map((rung) => mapDifficultyLabel(rung.skillLevel))
+
+    // Assert
+    expect(new Set(labels).size).toBe(DIFFICULTY_LADDER.length)
+    expect(labels).not.toContain('Unknown')
   })
 })
 

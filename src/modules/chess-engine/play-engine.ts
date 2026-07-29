@@ -44,12 +44,25 @@ export class EngineTimeoutError extends Error {
   }
 }
 
-/** play() input. movetimeMs ∈ [3000,8000] per GDD tuning knobs (not enforced here — caller's responsibility). */
+/** play() input. Values come from the difficulty ladder (config/difficulty-tuning.ts). */
 export interface PlayInput {
   fen: string
   skillLevel: number
   movetimeMs: number
+  /**
+   * Search depth cap. Omit to search until movetime runs out.
+   * Skill Level alone barely weakens Stockfish — the depth cap is what actually sets the
+   * difficulty ladder apart. See design/quick-specs/difficulty-ladder-remake.md.
+   */
+  depth?: number
   signal?: AbortSignal
+}
+
+/** UCI `go` line for a play request. */
+function goCommand(input: PlayInput): string {
+  return input.depth === undefined
+    ? `go movetime ${input.movetimeMs}`
+    : `go depth ${input.depth} movetime ${input.movetimeMs}`
 }
 
 /**
@@ -96,7 +109,8 @@ export function usePlayEngine(
   let _lastHeartbeatTs = 0
   let _probePending = false
   let _probeTimer: ReturnType<typeof setTimeout> | null = null
-  let _checkpoint: { fen: string; skillLevel: number; movetimeMs: number } | null = null
+  let _checkpoint: { fen: string; skillLevel: number; movetimeMs: number; depth?: number } | null =
+    null
   let _livenessRegistered = false
 
   function _recordHeartbeat(): void {
@@ -293,7 +307,7 @@ export function usePlayEngine(
         state.value = 'THINKING'
         worker.postMessage(`setoption name Skill Level value ${input.skillLevel}`)
         worker.postMessage(`position fen ${input.fen}`)
-        worker.postMessage(`go movetime ${input.movetimeMs}`)
+        worker.postMessage(goCommand(input))
         reject(new CanceledError())
         startDrain()
         return
@@ -310,10 +324,15 @@ export function usePlayEngine(
 
       state.value = 'THINKING'
       // Store checkpoint for liveness probe respawn (TR-chess-engine-009)
-      _checkpoint = { fen: input.fen, skillLevel: input.skillLevel, movetimeMs: input.movetimeMs }
+      _checkpoint = {
+        fen: input.fen,
+        skillLevel: input.skillLevel,
+        movetimeMs: input.movetimeMs,
+        depth: input.depth,
+      }
       worker.postMessage(`setoption name Skill Level value ${input.skillLevel}`)
       worker.postMessage(`position fen ${input.fen}`)
-      worker.postMessage(`go movetime ${input.movetimeMs}`)
+      worker.postMessage(goCommand(input))
 
       worker.onmessage = (ev: MessageEvent<string>) => {
         _recordHeartbeat()

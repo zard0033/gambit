@@ -11,6 +11,7 @@ import { usePlayEngine } from '@/modules/chess-engine/play-engine'
 import { useGameStore } from '@/stores/game-store'
 import { useUiStore } from '@/stores/ui-store'
 import { useResumeGameStore } from '@/stores/resume-game'
+import { DIFFICULTY_LADDER, rungForSkillLevel } from '@/config/difficulty-tuning'
 
 const router = useRouter()
 const gameStore = useGameStore()
@@ -74,8 +75,11 @@ watch(
 
 const engine = usePlayEngine()
 
-// Skill Level (0–20) chosen for the current game — used for engine.play and win-recording.
-const chosenLevel = ref(3)
+// Skill Level chosen for the current game — used for engine.play and win-recording.
+// Stays a raw Skill Level (not a rung index) so saved resume snapshots, ui:highestBeatenLevel
+// and game_sessions.ai_difficulty all keep working untouched; the ladder is resolved from it
+// at request time via rungForSkillLevel.
+const chosenLevel = ref(DIFFICULTY_LADDER[0].skillLevel)
 
 // Board is playable only on the player's turn (disabled while AI thinks, game over, or no game).
 const boardDisabled = computed(() => phase.value !== 'PLAYER_TURN')
@@ -177,7 +181,15 @@ async function requestAiMove(): Promise<void> {
   }
   if (engine.state.value !== 'IDLE') return // busy/handshaking — a play is already in flight
   try {
-    const engineResult = await engine.play({ fen: fen.value, skillLevel: chosenLevel.value, movetimeMs: 3000 })
+    // Resolve the ladder rung here rather than storing one: a snapshot saved before the ladder
+    // existed holds an arbitrary 0–20 Skill Level, and this maps it onto the nearest rung.
+    const rung = rungForSkillLevel(chosenLevel.value)
+    const engineResult = await engine.play({
+      fen: fen.value,
+      skillLevel: rung.skillLevel,
+      depth: rung.depth,
+      movetimeMs: rung.movetimeMs,
+    })
     if (!engineResult.bestMove || engineResult.bestMove === '(none)' || engineResult.bestMove === '0000') {
       lifecycle.handleAiMove('0000')
       return

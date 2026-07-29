@@ -1,21 +1,253 @@
 <!-- STATUS -->
 Epic: 差異化重構
-Feature: noir 主題色板整體換血（玄夜＝玄黑紙×漆玉）＋ 首頁墨韻融合落地
-Task: 2026-07-22 **玄夜換血輪次**——➊ 收關：noir 顯示名「暖墨」→「玄夜」（內部值 'noir' 不動），
-色板從舊「深墨綠」全面換成玄黑紙×漆玉（J3）；全站映射鐵則＝cream 紙→玄黑系、cream 玉→漆玉系、
-金不動。➋➌ 本輪完成：`main.css`/`colors_and_type.css` noir token block ＋ 11 個深區 theme-aware
-class（`.app-header-bg`／`.dungeon-zone-bg` 等）全數重調；首頁（HomeView/NeveSceneHeader）依決策
-樣張 `design/demos/home-ink-fusion-final.html` 落地——cream 墨氣柔化（頭部墨氣下滲＋hero 淡墨暈）、
-noir 材質分層（卡片不柔化、玄黑亮階漸層＋sheen＋hairline）、墨記眉標「今日」取代 NEW GAME、印框
-tag、棋誌行首墨點。**下一步＝➍➎ 評審＋push**（precommit-review／hallmark audit／視覺回歸 e2e）；
-墨韻逐屏擴散仍照原計畫（棋誌→沉浸區→功能頁）延續。
-第二主題「玄夜」（原「深墨綠」，顯示名已正名）深色模式已完成、**尚待 push**（本輪三個既有 commit
-+ 本次玄夜換血尚未推送，見固定約束）；Supabase migration（`user_preferences`）**已套用 live**
-（2026-07-22 anon key PostgREST 驗證確認，見下節；theme check constraint 收 'cream'/'noir' 未變）。
+Feature: 對局難度階梯重製（引擎弱化 + 難度選單）
+Task: 2026-07-29 **難度階梯已施工完成、待實玩驗收**——根因＝對手從未被調弱
+（`play-engine` 只送 Skill Level，depth 無上限、`movetime 3000`，資源遠超 lichess level 8；
+**舊的「難度 0」不是最低難度**）。已落地：五檔階梯（抄 lichess 1/2/3/4/6）＋選單重製
+（變體四＝橫向軌道＋節點下掛標籤＋明朝大字重述，包進 `DarkPanel`）。vue-tsc 0 error、
+全量 vitest 93 檔 925 綠、cream／noir 雙主題 390px 截圖驗過。
+**剩兩件**：① ui-design-flow ➍➎ 獨立評審未跑（需派 agent，本 session 受限未派）
+② **AC-5＝Eason 實玩檔一「初學」要贏得了**——這條是整件事的目的，只有他能判。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況 + 待辦 + 未固化的 in-flight 決策。長期鐵則/技術參考在 CLAUDE.md 體系（見「接手必讀」），不複述；**已完成施工細節在 git**。
 > **差異化北極星 = `production/gambit-differentiation-vision.md`**——提任何功能/重構/UI 前**先讀**。
+
+---
+
+## 2026-07-29 對局難度階梯重製（進行中）
+
+### 三件事的優先序（Eason 2026-07-29 拍板）
+
+1. **對手強度修正** ← 現在做。修完才有可信的對照組
+2. **課程→對局的 gap 重新評估**——等 1 完成後 Eason 重玩一輪再判斷。若 gap 仍在，候選解＝
+   優勢局面下完／殘局實戰／開局十步（都是既有系統的延伸，非重做課程）
+3. **UI／UX design flow 全站化**——排最後。**不逐頁跑五階段**，先全站 audit 分流，
+   只對真有問題的頁跑完整流程，其餘標「下次要改時再跑」
+
+> 順序理由：1 沒修之前，「學完課程仍贏不了」這個實驗的對照組是壞的，不能拿來推論課程系統
+> 方向錯誤。3 排最後是因為 2 可能改動資訊架構，現在跑等於幫要重做的頁做設計。
+
+### 已驗證事實（node 直驅 Stockfish 實測，非推論）
+
+- **現況＝對手從未被調弱**：`play-engine.ts` 只送 `setoption name Skill Level`，接著
+  `go movetime 3000`——無 depth 上限、無 `UCI_LimitStrength`。搜尋資源遠超 lichess 最高的
+  level 8（depth 12 / 400ms）。**現在的「難度 0」不是最低難度。**
+- **lichess 對照**：level 1 = skill 3 / depth 1 / 50ms；level 8 = skill 20 / depth 12 / 400ms。
+  三件套一起調，**depth 才是主角**。（註：現行 lichess 用 Fairy-Stockfish 的負值 skill，
+  標準 SF18 範圍 0–20 無負值，我們用不了）
+- **depth 1 仍不會吊子**：quiescence search 會把吃子序列算完。depth 1 vs depth 6 一局打完
+  子力 0:0，輸在被將殺，開局仍下得像樣（`Nf3 d5 d3 Nc6 g3 f6 c4`）。
+- **要犯錯必須注入隨機手**：depth 1 + **20% 隨機**＝對 depth 6 淨輸 9 子（后冒進、王亂走、
+  中局失子，但開局仍體面）；**35%** ＝淨輸 20 子、連續送大子——那是 chess.com 低階 bot 的
+  反面教材，玩家贏了會知道對方在亂下，**給不了成就感**。20% 是目前的甜蜜點。
+- **頂部擠在一起**：depth 6 vs depth 10 六局有五局在 80 手內分不出勝負；depth 10 vs 全力
+  也只決勝 4/6。對初學者訓練 app 而言「很強」與「更強」是同一格。
+- **中間有斷崖**：depth 1+8%隨機 vs depth 6 ＝ 6:0 全數將死。這段空白正是使用者要待數月的區間。
+
+### 旋鈕有效性實測（三輪，每輪都推翻前一輪的假設——照順序讀）
+
+- **隨機比例不是有效的分級旋鈕**：25% vs 12% 隨機打成 4:4（50%），玩家不可能感覺到差異。
+  隨機的作用是「讓對手會犯錯」，**不是分級**——所以它該是低檔共用的固定值（暫定 15%），
+  不是每檔給不同比例。真正的大跳是「有隨機 vs 無隨機」。
+- **多變數混淆是實驗設計錯誤**：第二輪每檔同時改 depth／skill／movetime／random 四個變數，
+  測出的差異無法歸因，還測出「檔三輸給檔二」的反序。**分級參數一次只驗一個變數。**
+- **🚩 勝率作為度量不可靠——四輪數據全部作廢，不要拿去定參數**：每對只有 5–6 局決勝，
+  一局值 20 個百分點，隨機開局＋隨機手注入的變異直接淹沒訊號。決定性證據＝**同一組對比
+  兩輪結果相反**：`d2 vs d1` 第三輪 83%、第四輪 20%（反序）；`d6 vs d4` 第三輪 100%、
+  第四輪 50%。加大樣本是「同做法換參數」，不解決根因。**改用平均 centipawn loss**
+  （每局約 50 個樣本點 vs 1 個，變異小一到兩個數量級，且直接對應「這個對手下得多爛」）——
+  script＝scratchpad `cploss-ladder.js`，判官用 depth 12、cpLoss 上限 1000 避免單一崩盤淹沒平均。
+- **⚠️ 奇數 depth 疑似不可用（奇偶效應）**：勝率輪測到 `d3 vs d2 = 0%`（depth 2 完勝 0:5），
+  是所有勝率數據裡最極端的一筆，且有獨立文獻佐證——成因＝alpha-beta 最小博弈樹拓撲 ＋
+  奇數層的額外先手使評估偏樂觀（[Chessprogramming: Odd-Even Effect](https://www.chessprogramming.org/Odd-Even_Effect)；
+  歷史程式 L'Excentrique／Bebe 即以「兩層遞增」規避）。**暫定階梯只用偶數 depth，
+  待 cpLoss 複驗確認**（文獻＋極端值兩項佐證，但度量本身已知有缺陷，不可當定論）。
+
+### 架構落點（已確認，進 spec）
+
+- **隨機手注入不放 `play-engine`**：它不 import chess.js，是純 UCI 通道；`PlayResult` 型別上有
+  「only objective chess data」的邊界註記，ADR-0002 亦規定 postMessage-only IPC。要在那裡挑
+  隨機手就得算合法手＝讓引擎模組開始懂棋規，破壞既有分層。
+- **切法**：`play-engine.play()` 只加一個 optional `depth`（`go movetime T` → `go depth D movetime T`），
+  改動極小；難度查表與「這手要不要走隨機」的決策放 `use-game-lifecycle`——它已 import chess.js
+  且已在管 `aiSkillLevel`。
+
+### 🔑「弱」不是一維的——本輪最重要的發現
+
+cpLoss 量測（judge depth 12，對手固定 depth 4，每檔約 56 手）：
+
+| 檔（測試用） | mean cpLoss | median | 崩盤 ≥300cp |
+| ---- | ---- | ---- | ---- |
+| d1 + 15% 隨機 | 90 | 22 | **5**/56 |
+| d2 + 15% 隨機 | 145 | 23 | **6**/53 |
+| d2 無隨機 | 89 | 29 | 3/55 |
+| d4 無隨機 | 59 | **56** | **0**/56 |
+| d6 無隨機 | 38 | 18 | 1/56 |
+| 全力（參考點） | 3 | 0 | 0/56 |
+
+mean 與 median 給出**矛盾的排序**，原因不是雜訊：
+
+- **隨機手注入 ＝ 崩盤型的弱**（median 低、崩盤多）：大部分手下得不錯，偶爾整盤送掉。
+  玩家贏了會知道是對方送的——**這正是 chess.com 低階 bot 的反面教材，給不了成就感**。
+- **depth 限制 ＝ 持續小虧型的弱**（median 高、崩盤零）：每手小虧一點、從不崩。
+  玩家靠慢慢累積優勢贏——**這才是要的那種弱**。
+
+> **結論：隨機手注入整個放棄。** 先前「20% 是甜蜜點」的判斷是看子力差得出的，
+> 那個判準看不出崩盤型與持續型的差別。另註：此輪 foil 固定用 d4，故 d4 那列是自己對自己，
+> 局面性質不同、median 偏高有此偏差成分。
+
+### 方向（已定案）——抄 lichess，不自己發明
+
+**五輪自製測量的產出不是參數表**，是「理解為什麼 lichess 那樣設計」。lichess 的 skill+depth+movetime
+三件套經幾百萬局真實對局調校，樣本量差我五個數量級，我測不出更好的。**直接抄它的 1/2/3/4/6 檔**：
+
+| 檔 | Skill | Depth | Movetime |
+| ---- | ---- | ---- | ---- |
+| 一 | 3 | 1 | 50ms |
+| 二 | 6 | 2 | 100ms |
+| 三 | 9 | 3 | 150ms |
+| 四 | 11 | 4 | 200ms |
+| 五 | 17 | 8 | 300ms |
+
+這順帶解掉奇偶效應的顧慮——lichess 用 depth 3 多年無事，因為 Skill Level 的候選擾動蓋過該效應；
+我的測量會放大它，是因為把 skill 固定在 0。**上線後靠 Eason 實玩微調，不再自製測量。**
+
+### 待辦（依序）
+
+1. ~~定出參數表~~ ✅ 收案（抄 lichess）。自製測量到此為止，不再開新輪
+2. ~~寫 spec~~ ✅ `design/quick-specs/difficulty-ladder-remake.md`（★ Eason 已核可）
+3. **⚠️ 規模從「大」降回「中」——不需要 migration**：`ai_difficulty` 的 CHECK 是
+   `BETWEEN 0 AND 20`，五檔各對應一個 skill level（3/6/9/11/17），**續存那個 skill level 即可**，
+   不改欄位語意。`highestBeatenLevel`／`resume.level`／`data-sync`／`game-export` 全部照舊能用。
+   先前判「大」是假設要改欄位語意，那假設不必要。
+4. ~~實作~~ ✅ 五檔階梯 + 選單重製全數落地（改動清單見下）
+5. ~~ui-design-flow ➍➎ 三路評審~~ ✅ 跑完（hallmark／impeccable／web-design-guidelines），
+   findings 已合併修完十條（見下「評審修復」）
+6. ~~fresh-context 複驗~~ ✅ 跑完：**18 條 17 pass / 1 fail**，唯一 fail 是字階（見下），已修並複量
+7. **剩：AC-5 Eason 實玩檔一「初學」贏得了**——不能自動化，只有他能判。輸了就回頭調表
+
+### 複驗（verifier，fresh context）結論與後續處置
+
+- **唯一 fail＝字階**：`text-[11px]`（label）與 `text-[26px]`（選中階名）不在設計系統字階
+  （44/32/28/22/18/16/14/13/12）上。verifier 按字面判 fail 並拒絕自行改判準，只列減輕情境交裁決——
+  **這是對的做法**（驗收條件是我寫得不精確，不是它過嚴）。已修：11→12（caption）、26→28（h1）。
+- **排除一個 medium 疑點**：verifier 質疑 blurb 仍用 `ink-on-deep-dim`、對比疑慮應同樣成立。
+  實測面板內垂直位置：label 13% / 階名 45% / 大字 69% / **blurb 87%**。漸層 160deg 近似由上而下，
+  87% 處插值約 `#1b453a`，`#9bbdb1` 對它 **5.26:1**，過 AA。**dim 色只在漸層亮端失分**，
+  blurb 在暗端，層級可保留、不需提亮。
+- **⚠️ 量測時序陷阱（verifier 發現，未來寫回歸腳本必讀）**：這個 dialog 有 0.95→1 的 scale 進場動畫，
+  開啟後 300–900ms 內量 `getBoundingClientRect()` 會拿到全體 ×0.95 的假數字
+  （它第一次量到 41.8px/20.9px，等動畫結束才是 44px/22px）。**量這個 modal 一定要等動畫結束**，
+  否則觸控目標會誤報不達 44px。
+
+### 🚩 待辦：執子方也改 radiogroup（Eason 2026-07-29 決議「列待辦」）
+
+
+`play-setup-modal.vue` 的執黑／隨機／執白仍是 `button + aria-pressed`，三選一語意上同樣該是
+`radiogroup` + `radio` + roving tabindex + 方向鍵——與難度階梯本輪剛改好的做法一致。
+**同一個 modal 內目前兩套語意並存**。非本次改動範圍故複驗未判 fail，但既然難度那組已示範過
+完整寫法，照抄即可，成本很低。順手做的話可一併統一「已選中」的視覺語言
+（現為綠框 vs 金環兩套，見下方「評審提出但本輪不做」）。
+
+### 🚩 待辦：noir 深色模式的 DarkPanel 明度（Eason 2026-07-29 決議「之後再做」）
+
+**問題不是色相，是明度差。** Eason 回報「jade 配暗色就是不搭尬，調過很多輪都沒用」——
+hallmark 實測給出診斷：noir 下 modal 底是 `rgb(39,35,32)` 暖黑棕，`DarkPanel` 是 jade 漸層
+`#1f5f4b → #0e3a2c`，**兩者亮度接近，面板「跳出來」的錨定效果比 cream 弱很多**。
+調色相調不動，是因為調錯維度了。
+
+**修法（hallmark 給的兩條，未擇一）**：① noir 下面板漸層再提亮一階；② 給 DialogContent
+挑一個更明確偏中性／非綠的深色，重新拉開兩者對比。
+
+**範圍警告**：`DarkPanel` 是全站共用元件（首頁／對局／深化都用），改它的 noir 配色＝一次動到
+所有深色區塊。**動手前先做 A/B demo 讓 Eason 挑**，不要直接改進去。
+
+> 本輪已修的是**文字對比**（階名／label 提亮、徽章加深色 pill 底），那與本項無關、已完成。
+> 「直接砍掉暗色模式」仍是 Eason 提過的選項；砍要連 Supabase `user_preferences` 的
+> theme CHECK constraint 一起處理（不可逆），所以先試最便宜的修法。
+
+### 評審修復（2026-07-29，三路 findings 合併一輪修）
+
+- **radiogroup 語意（critical）**——五選一原用 `button + aria-pressed`（獨立開關語意），
+  螢幕閱讀器聽不到「第 N 項共 5 項」。改 `role="radiogroup"` + `role="radio"` + `aria-checked`
+  ＋ roving tabindex ＋ 方向鍵／Home／End。**焦點落點問題隨之自動解決**（非選中階 `tabindex=-1`，
+  Tab 直接到選中那階），未另寫 autofocus。
+- **`aria-live="polite"`**——選中換階時名稱與描述整段更新，沒有它螢幕閱讀器讀不到變化。
+- **第一次獲勝的軌道（我的公式錯）**——原 `litRailWidth` 在 `beatenRung <= 1` 回 `0px`，
+  使「第一次獲勝」成為唯一「節點有勾、軌道全暗」的狀態，恰好是最該被慶祝的那次。
+  改成亮到已通過那階**再往前半步**；半步也讓五階全通時剛好滿格。
+- **「你上次贏過 X」語意錯位（我的邏輯錯）**——原綁全域 `beatenRung` 放在描述段，打穿後點回初學
+  會同時讀到「初學：常常看不到你的威脅」＋「你上次贏過大師」。改成右上角常駐徽章「最高 · X」。
+- **輕度降權**——超過建議階的節點 22px→18px。**刻意用尺寸不用顏色**，降顏色會壓低對比。
+- **對比**——面板頂端是漸層最亮處（160deg 由上而下），小字疊在那裡掉出 AA
+  （`ink-on-deep-dim` 僅 3.30:1）。階名與 label 改全亮 `ink-on-deep`（選中與否改由字重承擔）；
+  成就徽章自帶 `bg-surface-deep/70` pill 底，才留得住 success 綠又不失對比。
+- **reduced-motion**——補 `motion-reduce:transition-none`，對齊專案既有 Button 寫法。
+- **字階**——13.5/12.5px 不在官方字階上，對齊成 13/12。
+  ⚠️ 兩路 agent 都報「文字低於 16px 違反鐵則」是**誤判**：設計系統原文是
+  `body 16 (min) · body-sm 14 · label 13 · caption 12`，16px 下限只綁 body，
+  且 iOS auto-zoom 只作用於 focusable input。日後再收到同樣 finding 可直接駁回。
+- **「精通」文案**——原「很少失誤，要靠佈局才有機會」轉去評論玩家勝算，與其餘四句「描述對手」
+  的語氣不一致且隱含壓力。改為「很少失誤，開局也算得清楚。」
+
+### 評審提出但本輪不做（記著，別重新發現一次）
+
+- **連續卡關時介面毫無差異化陪伴**——`beatenRung` 只前進不記錄失敗，輸 8 次和第一次挑戰畫面
+  完全一樣。UX agent 判斷：新設計有了清楚的「你應該贏這階」敘事之後，卡關反而更醒目。
+  需要新的持久狀態，超出本輪範圍。
+- **五階打穿後沒有收尾肯定**——只是多幾個綠勾，是唯一讓它讀回「像進度條」的地方。
+- **執子方與難度用兩套「已選中」視覺語言**（綠框 vs 金環）——同畫面兩種慣例。
+  金色限 focus/reward 是設計系統鐵則，故未動。
+
+### 已落地的改動（2026-07-29）
+
+- **新增 `src/config/difficulty-tuning.ts`**——五檔表（rung／name／blurb／skillLevel／depth／
+  movetimeMs）＋ `rungAt()` ＋ `rungForSkillLevel()`（把前朝任意 0–20 值映射到最近的檔，
+  舊續玩存檔才不會壞）。文案誠實原則：第五檔是 depth 8 **不是全力**，blurb 不得宣稱全力。
+- **`play-engine.ts`**——`PlayInput` 加 optional `depth`，`go` 指令抽成 `goCommand()`。
+  **`_checkpoint` 一併帶 depth**：漏了的話 iOS 背景切回觸發 worker 重生會靜默退回無 depth 的舊行為。
+- **`PlayView.vue`**——呼叫引擎前 `rungForSkillLevel(chosenLevel)` 查表。`chosenLevel` 仍存 raw
+  Skill Level，所以下游全鏈路不動。
+- **`play-setup-modal.vue`**——21 格數字 → 五階橫向軌道（變體四）。包進既有 `DarkPanel`；
+  gold 只給當前節點的 ring，已通過用 `success-on-deep`；`legend` 改 sr-only、節點 44px 觸控目標。
+  順手修掉一句過期文案：「無限思考時間」已不成立（每檔都有 movetime 上限）。
+- **`game-history-mappers.ts` ＋ GDD game-history Formula 2**——區間重切成五檔各佔一段
+  （`0-4/5-7/8-10/11-14/15-20`）。Eason 授權改上游文件。順帶修掉既有的文件／實作不一致
+  （GDD 寫 `4–7 Easy`、程式碼寫 `[4,6]`，`7` 兩邊對不上）。
+- **測試**——新增 `tests/unit/config/difficulty-tuning.test.ts`（表不變式＋legacy 值映射）；
+  `play-engine-uci.test.ts` 加三條（go 帶 depth／不帶 depth 的回溯相容／五檔各驗參數）；
+  `game-history-mappers.test.ts` 加一條守住「五檔各得一個標籤」。
+
+### UI 決策紀錄（ui-design-flow ⓪➊）
+
+- **⓪**：三方向樣張 `design/demos/difficulty-selector-concepts.html`（棋力階段／對手身份／序數）。
+  Eason 選「甲乙合併」＋要求橫向解捲動。**⓪ 的三個樣張全 cream、無 deep-jade 錨——那是它們扁的原因**，
+  ➊ 才補上 `DarkPanel`。
+- **➊**：四變體樣張 `design/demos/difficulty-selector-final.html`，Eason 選**變體四**
+  （節點下掛標籤看全貌 ＋ 明朝大字重述選中檔）。變體一二被否的真原因：**只顯示選中那一檔的名字**，
+  玩家得一個個點才知道有哪五個對手。
+- **命名語彙（選單與歷史紀錄共用）**：初學／進階／熟練／精通／大師。
+- **不顯示 Skill Level 數值**（Eason 拍板）：引擎內部參數對初學者無意義，等於把 21 格數字選單的病
+  帶回來一半。要查對照直接看 `difficulty-tuning.ts`。設定頁**沒有**開發者區塊（唯一的 dev 工具是
+  `PlayView` 的 Ctrl+Shift+F FEN 注入）；為此新建一個不划算。
+
+### 相關發現
+
+- `game-history-mappers.ts` 的 `DIFFICULTY_RANGES` 早就把 0–20 收成五個標籤
+  （Beginner/Easy/Intermediate/Hard/Master）——**產品早已認定五級是對的**，只是這判斷只用在
+  歷史紀錄顯示，選單那端仍把底層 21 檔整個攤給玩家
+- **Maia**（人類化 NN 引擎，1100–1900，用真人棋譜訓練、犯人類會犯的錯；lc0 有 WASM 版、
+  權重約 1.2MB）＝日後做「陪練角色」時的答案，**現在不做**：要引入第二套引擎 runtime，
+  且最低 1100 對真初學者仍偏強
+- **design flow 現況盤點**：2026-07-20 之後的 UI 工作有跑且留了申報行
+  （`home-scene-redesign` / `journal-book-redesign` / `navigation-vertical-world`）；之前的
+  沒跑（＝app 絕大部分）。根目錄 DESIGN.md 是**刻意不建**，由 `design/gambit-design-system/`
+  擔任該角色（見 quick-spec 檔內註記）。**未結欠帳＝玄夜換血輪次的 ➍➎**——hallmark audit
+  與 web-design-guidelines 兩路從未跑過，那批已經 push 上線（見下方 07-22 節「未跑」段）
+
+> 測量 script 在 scratchpad（非 repo）：`level-gap-probe.js`（對局棋譜＋子力差）、
+> `rung-spacing.js`（相鄰檔勝率）。要重跑得先重建——scratchpad 是 session-specific。
 
 ---
 

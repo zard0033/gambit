@@ -258,13 +258,22 @@ Game History computations are display transformations only — no balance math o
 
 **Stepped mapping:**
 
-| aiDifficulty range | difficultyLabel |
-| ------------------ | --------------- |
-| 0–3 | `'Beginner'` |
-| 4–7 | `'Easy'` |
-| 8–12 | `'Intermediate'` |
-| 13–17 | `'Hard'` |
-| 18–20 | `'Master'` |
+| aiDifficulty range | difficultyLabel | ladder rung landing here |
+| ------------------ | --------------- | ------------------------ |
+| 0–4 | `'Beginner'` | 一 (skill 3) |
+| 5–7 | `'Easy'` | 二 (skill 6) |
+| 8–10 | `'Intermediate'` | 三 (skill 9) |
+| 11–14 | `'Hard'` | 四 (skill 11) |
+| 15–20 | `'Master'` | 五 (skill 17) |
+
+> **Revised 2026-07-29** (difficulty ladder remake, `design/quick-specs/difficulty-ladder-remake.md`).
+> The original bands (`0–3 / 4–7 / 8–12 / 13–17 / 18–20`) predate the five-rung ladder and put
+> rungs 三 and 四 both in `'Intermediate'`, making the ladder look flat in game history. Bands are
+> now cut so each rung owns one. This also settles a pre-existing doc/code split: the old table
+> said `4–7 → Easy` while the implementation used `[4,6]`, so `7` disagreed between them.
+> Historical rows keep resolving — full 0–20 coverage is preserved and some pre-ladder games
+> shift by one band, which is acceptable because the old 21-step selector had no real strength
+> differences between adjacent values anyway.
 
 **Output range:** Always one of five labels; range 0–20 fully covered with no gaps.
 **Type guard (required before range logic):** Check `typeof aiDifficulty !== 'number' || !isFinite(aiDifficulty)` before evaluating any range. This guard handles: `null` (would otherwise coerce silently to `0` → `'Beginner'`), `undefined`, `NaN` (fails all comparisons, causing silent fall-through), and `Infinity`. If the guard triggers, `difficultyLabel` immediately returns `'Unknown'`.

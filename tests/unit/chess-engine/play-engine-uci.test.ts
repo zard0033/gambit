@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { usePlayEngine, EngineUnavailableError } from '../../../src/modules/chess-engine/play-engine'
 import type { IStockfishWorker } from '../../../src/modules/chess-engine/play-engine'
+import { DIFFICULTY_LADDER } from '../../../src/config/difficulty-tuning'
 
 // -----------------------------------------------------------------------
 // Mock Worker
@@ -253,5 +254,74 @@ describe('usePlayEngine — AC-6: state machine transitions', () => {
 
     // After handshake: IDLE
     expect(state.value).toBe('IDLE')
+  })
+})
+
+// -----------------------------------------------------------------------
+// Difficulty ladder — the `go` line must carry the depth cap.
+// Spec: design/quick-specs/difficulty-ladder-remake.md
+// -----------------------------------------------------------------------
+
+const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
+/** Fresh engine already past the handshake, with handshake chatter cleared from the log. */
+async function idleEngine(): Promise<{
+  mock: MockStockfishWorker
+  engine: ReturnType<typeof usePlayEngine>
+}> {
+  const mock = new MockStockfishWorker()
+  const engine = usePlayEngine(factoryFor(mock))
+  const ready = engine.init()
+  mock.simulateResponse('uciok')
+  mock.simulateResponse('readyok')
+  await ready
+  mock.sentMessages.length = 0
+  return { mock, engine }
+}
+
+describe('usePlayEngine — difficulty ladder depth cap', () => {
+  it('test_playEngine_playWithDepth_sendsGoWithDepthAndMovetime', async () => {
+    // Arrange
+    const { mock, engine } = await idleEngine()
+
+    // Act
+    const promise = engine.play({ fen: START_FEN, skillLevel: 3, movetimeMs: 50, depth: 1 })
+    mock.simulateResponse('bestmove e2e4')
+    await promise
+
+    // Assert
+    expect(mock.sentMessages).toContain('go depth 1 movetime 50')
+  })
+
+  it('test_playEngine_playWithoutDepth_sendsGoWithMovetimeOnly', async () => {
+    // Post-game review analyses deliberately search without a depth cap; that path must survive.
+    const { mock, engine } = await idleEngine()
+
+    const promise = engine.play({ fen: START_FEN, skillLevel: 20, movetimeMs: 3000 })
+    mock.simulateResponse('bestmove e2e4')
+    await promise
+
+    expect(mock.sentMessages).toContain('go movetime 3000')
+  })
+
+  it('test_playEngine_everyLadderRung_sendsItsOwnSkillAndDepth', async () => {
+    for (const rung of DIFFICULTY_LADDER) {
+      // Arrange
+      const { mock, engine } = await idleEngine()
+
+      // Act
+      const promise = engine.play({
+        fen: START_FEN,
+        skillLevel: rung.skillLevel,
+        movetimeMs: rung.movetimeMs,
+        depth: rung.depth,
+      })
+      mock.simulateResponse('bestmove e2e4')
+      await promise
+
+      // Assert — skill must travel with depth (odd-even effect is severe at skill 0)
+      expect(mock.sentMessages).toContain(`setoption name Skill Level value ${rung.skillLevel}`)
+      expect(mock.sentMessages).toContain(`go depth ${rung.depth} movetime ${rung.movetimeMs}`)
+    }
   })
 })

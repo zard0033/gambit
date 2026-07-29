@@ -21,12 +21,19 @@ export function mapPlayerResult(
   return { playerResult: 'Unknown', playerResultPrefix: '?' }
 }
 
+/**
+ * Skill Level → label (GDD game-history Formula 2, revised 2026-07-29).
+ * Bands are cut so each difficulty-ladder rung (skill 3/6/9/11/17, see config/difficulty-tuning.ts)
+ * lands in a band of its own — under the previous bands rungs 3 and 4 both read 'Intermediate'
+ * and the ladder looked flat in game history. Still covers 0–20 with no gaps: games recorded
+ * before the ladder existed hold arbitrary Skill Levels and must keep resolving to a label.
+ */
 const DIFFICULTY_RANGES: Array<[number, number, string]> = [
-  [0, 3, 'Beginner'],
-  [4, 6, 'Easy'],
-  [7, 12, 'Intermediate'],
-  [13, 17, 'Hard'],
-  [18, 20, 'Master'],
+  [0, 4, 'Beginner'],
+  [5, 7, 'Easy'],
+  [8, 10, 'Intermediate'],
+  [11, 14, 'Hard'],
+  [15, 20, 'Master'],
 ]
 
 /** Formula 2 — map aiDifficulty number to label */
