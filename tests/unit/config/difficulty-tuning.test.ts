@@ -2,8 +2,11 @@ import { describe, it, expect } from 'vitest'
 import {
   DIFFICULTY_LADDER,
   DEFAULT_RUNG,
+  MIN_THINK_MS,
+  THINK_JITTER_MS,
   rungAt,
   rungForSkillLevel,
+  remainingThinkDelayMs,
 } from '../../../src/config/difficulty-tuning'
 
 describe('difficulty ladder — table invariants', () => {
@@ -58,6 +61,34 @@ describe('rungAt', () => {
     expect(rungAt(0).rung).toBe(DEFAULT_RUNG)
     expect(rungAt(99).rung).toBe(DEFAULT_RUNG)
     expect(rungAt(Number.NaN).rung).toBe(DEFAULT_RUNG)
+  })
+})
+
+describe('remainingThinkDelayMs — 出手節奏', () => {
+  it('test_thinkDelay_fastSearch_padsUpToTheFloor', () => {
+    // 檔一只搜 50ms，若不補停頓就會瞬間落子，讀起來像快棋
+    expect(remainingThinkDelayMs(50, 0)).toBe(MIN_THINK_MS - 50)
+  })
+
+  it('test_thinkDelay_isAFloorNotAnAddition', () => {
+    // 搜得久的檔位要等得比較少，總節奏才一致
+    const fast = remainingThinkDelayMs(50, 0.5)
+    const slow = remainingThinkDelayMs(300, 0.5)
+    expect(slow).toBe(fast - 250)
+  })
+
+  it('test_thinkDelay_searchAlreadyExceedsFloor_returnsZero', () => {
+    // 絕不回負值——負的 setTimeout 會立刻觸發，等於沒有節奏保護
+    expect(remainingThinkDelayMs(MIN_THINK_MS + THINK_JITTER_MS + 500, 1)).toBe(0)
+  })
+
+  it('test_thinkDelay_jitter_staysWithinFloorAndSpread', () => {
+    // 隨機只在 floor 與 floor+jitter 之間擺動，不會產生離譜的等待
+    for (const roll of [0, 0.25, 0.5, 0.75, 1]) {
+      const delay = remainingThinkDelayMs(0, roll)
+      expect(delay).toBeGreaterThanOrEqual(MIN_THINK_MS)
+      expect(delay).toBeLessThanOrEqual(MIN_THINK_MS + THINK_JITTER_MS)
+    }
   })
 })
 

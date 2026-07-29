@@ -125,7 +125,36 @@ mean 與 median 給出**矛盾的排序**，原因不是雜訊：
 5. ~~ui-design-flow ➍➎ 三路評審~~ ✅ 跑完（hallmark／impeccable／web-design-guidelines），
    findings 已合併修完十條（見下「評審修復」）
 6. ~~fresh-context 複驗~~ ✅ 跑完：**18 條 17 pass / 1 fail**，唯一 fail 是字階（見下），已修並複量
-7. **剩：AC-5 Eason 實玩檔一「初學」贏得了**——不能自動化，只有他能判。輸了就回頭調表
+7. **🔴 AC-5 FAIL（2026-07-29 Eason 實玩）**——**下最低階「初學」仍然輸**。
+   底部到頭了：depth 不能低於 1、movetime 也壓不動。**下一步＝MultiPV 挑次好手**
+   （從候選前幾名裡挑差的，錯得像人；不是本輪已否決的「隨機送子」）。要動 engine 解析層，
+   且 `handshake.ts` 目前寫死 `MultiPV 1`、與 review 分析路徑共用，改時勿污染分析。
+
+### 2026-07-29 續：出手節奏 ＋ 刻度改分段條
+
+**出手節奏（已修）**——Eason 回報「下得好快，很像快棋」。根因：我把「引擎搜尋時間」和
+「對手表現出來的思考時間」當成同一件事。實測**引擎本身只花 21ms 就回手**（停頓歸零時量的）。
+修法＝`difficulty-tuning.ts` 加 `MIN_THINK_MS=900` / `THINK_JITTER_MS=600` ＋ 純函數
+`remainingThinkDelayMs(elapsed, roll)`（roll 可注入故可測），`PlayView.requestAiMove` 在引擎回手後
+補足到該下限才落子，並在等待後重驗 `phase` 以丟棄過期的手。實測體感：落子動畫 820ms ＋ 引擎 21ms
+＋ 停頓 900–1500ms ≈ **1.7–2.3 秒**。
+
+> ⚠️ **量測陷阱（我踩過，會誤導調參）**：Playwright 開多分頁時，非前景頁的 `setTimeout` 會被瀏覽器
+> throttle。我第一次量到 3019ms 差點照著把停頓調小——實際是分頁在背景。量任何跟 `setTimeout`
+> 有關的節奏前，先 `bringToFront()` 並關掉其他分頁。
+
+> 可省未省：引擎現在是**等玩家落子動畫跑完才開始算**（`PlayView` 的 `await payload.animationDoneAt`），
+> 那 820ms 是乾等。改成動畫與思考並行可省下來；目前總節奏尚可，刻意不動。
+
+**刻度改分段條（Eason 選 A）**——原「圓點＋連線」被嫌醜。樣張見
+`design/demos/difficulty-track-restyle.html`（四案：現況／分段條／棋子刻度／純文字底線）。
+**棋子刻度（兵→騎士→城堡→后→王，子力嚴格遞增）Eason 因擴充性顧慮否決**，雖然實際上
+六階上限碰不到（往上加階無意義，實測 d6 vs d10 分不出勝負）。採 A：五格連成一條、面積取代線條。
+降權改用**底色深淺**（`bg-surface-deep/70` vs `/40`）而非文字顏色——降文字會壓低對比，降底色反而提高。
+radiogroup／roving tabindex／方向鍵／aria-live 全部沿用，換形式後複驗仍通過（觸控 60×52）。
+
+> 隨形式改變而消失的修復：先前為「第一次獲勝軌道不亮」寫的 `litRailWidth` 半步偏移已刪除。
+> 分段條天然沒有這個問題——贏第一階就有一整格變綠。
 
 ### 複驗（verifier，fresh context）結論與後續處置
 

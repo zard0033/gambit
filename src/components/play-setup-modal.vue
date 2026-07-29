@@ -40,21 +40,6 @@ const selectedRung = ref<number>(suggestedRung.value)
 const selected = computed(() => rungAt(selectedRung.value))
 const selectedSide = ref<Side>('random')
 
-/**
- * Width of the lit segment of the rail. Nodes are 44px wide and evenly spread, so their centres
- * sit at 22px … (100% − 22px).
- *
- * The lit length runs half a step PAST the last cleared rung rather than stopping dead on it.
- * Stopping on it made the very first win — the one most worth celebrating — the only state where
- * the node got a tick but the rail stayed dark, because a single point has nothing to connect to.
- * Half a step also lands exactly on 100% once every rung is cleared.
- */
-const litRailWidth = computed(() => {
-  if (beatenRung.value < 1) return '0px'
-  const steps = Math.min(beatenRung.value - 0.5, LAST_RUNG - 1)
-  return `calc((100% - 44px) * ${steps / (LAST_RUNG - 1)})`
-})
-
 // Roving tabindex: only the checked radio is tabbable, so Tab lands on the current rung instead of
 // always on 初學, and arrow keys move between rungs (WAI-ARIA radiogroup pattern).
 const rungButtons = ref<HTMLButtonElement[]>([])
@@ -133,60 +118,44 @@ function start(): void {
             </span>
           </div>
 
+          <!-- 分段條：五格連成一條，用面積取代點與線。
+               降權用底色深淺而非文字顏色——降文字會壓低對比，降底色反而提高。 -->
           <div
             role="radiogroup"
             aria-label="電腦強度"
-            class="relative flex items-start justify-between"
+            class="flex overflow-hidden rounded-[10px] border border-white/15"
             @keydown="onLadderKeydown"
           >
-            <!-- 軌道：未走的底線 + 已通過的亮段。節點寬 44px，故中心落在 22px … (100%−22px) -->
-            <span class="pointer-events-none absolute top-[21px] right-[22px] left-[22px] h-0.5 rounded-full bg-white/15" />
-            <span
-              class="pointer-events-none absolute top-[21px] left-[22px] h-0.5 rounded-full bg-success-on-deep/75"
-              :style="{ width: litRailWidth }"
-            />
-
             <button
               v-for="rung in DIFFICULTY_LADDER"
               :key="rung.rung"
               :ref="(el) => { if (el) rungButtons[rung.rung - 1] = el as HTMLButtonElement }"
               type="button"
               role="radio"
-              class="relative z-1 grid w-11 min-h-[44px] cursor-pointer place-items-center rounded-btn pt-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
+              class="grid min-h-[52px] flex-1 cursor-pointer place-items-center gap-0.5 border-0 border-r border-white/12 px-1 py-1.5 text-xs transition-colors duration-200 last:border-r-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-inset motion-reduce:transition-none"
+              :class="
+                selectedRung === rung.rung
+                  ? 'bg-ink-on-deep font-bold text-surface-deep shadow-[inset_0_0_0_2px_var(--color-gold)]'
+                  : rung.rung <= beatenRung
+                    ? 'bg-success-on-deep/20 text-ink-on-deep'
+                    : rung.rung > suggestedRung
+                      ? 'bg-surface-deep/70 text-ink-on-deep'
+                      : 'bg-surface-deep/40 text-ink-on-deep'
+              "
               :aria-checked="selectedRung === rung.rung"
               :tabindex="selectedRung === rung.rung ? 0 : -1"
               :aria-label="rung.rung <= beatenRung ? `${rung.name}（已通過）` : rung.name"
               @click="selectedRung = rung.rung"
             >
-              <span
-                class="grid place-items-center rounded-full border-[1.5px] transition-transform duration-200 motion-reduce:transition-none"
-                :class="[
-                  // 超過建議階的節點縮一號＝輕度降權。用尺寸不用顏色，才不會壓低對比。
-                  rung.rung > suggestedRung ? 'h-[18px] w-[18px]' : 'h-[22px] w-[22px]',
-                  rung.rung <= beatenRung
-                    ? 'border-success-on-deep bg-success-on-deep'
-                    : selectedRung === rung.rung
-                      ? 'border-ink-on-deep bg-ink-on-deep'
-                      : 'border-white/30 bg-surface-deep/75',
-                  selectedRung === rung.rung
-                    ? 'scale-110 shadow-[0_0_0_3px_var(--color-gold),0_0_12px_rgba(248,181,0,0.45)]'
-                    : '',
-                ]"
-              >
-                <Check
-                  v-if="rung.rung <= beatenRung"
-                  :size="12"
-                  :stroke-width="3.2"
-                  class="text-surface-deep"
-                  aria-hidden="true"
-                />
-              </span>
-              <!-- 階名一律用全亮 ink：dim 色在漸層亮端只有 3.3:1。選中與否改由字重承擔，
-                   節點本身還有金環／實心／勾記三層區別，不缺這一個顏色維度。 -->
-              <span
-                class="mt-1.5 block text-xs whitespace-nowrap text-ink-on-deep"
-                :class="selectedRung === rung.rung ? 'font-bold' : 'font-normal'"
-              >{{ rung.name }}</span>
+              <Check
+                v-if="rung.rung <= beatenRung"
+                :size="11"
+                :stroke-width="3.4"
+                :class="selectedRung === rung.rung ? 'text-surface-deep' : 'text-success-on-deep'"
+                aria-hidden="true"
+              />
+              <span v-else class="block h-[11px]" aria-hidden="true" />
+              <span class="whitespace-nowrap">{{ rung.name }}</span>
             </button>
           </div>
 

@@ -11,7 +11,7 @@ import { usePlayEngine } from '@/modules/chess-engine/play-engine'
 import { useGameStore } from '@/stores/game-store'
 import { useUiStore } from '@/stores/ui-store'
 import { useResumeGameStore } from '@/stores/resume-game'
-import { DIFFICULTY_LADDER, rungForSkillLevel } from '@/config/difficulty-tuning'
+import { DIFFICULTY_LADDER, rungForSkillLevel, remainingThinkDelayMs } from '@/config/difficulty-tuning'
 
 const router = useRouter()
 const gameStore = useGameStore()
@@ -184,6 +184,7 @@ async function requestAiMove(): Promise<void> {
     // Resolve the ladder rung here rather than storing one: a snapshot saved before the ladder
     // existed holds an arbitrary 0–20 Skill Level, and this maps it onto the nearest rung.
     const rung = rungForSkillLevel(chosenLevel.value)
+    const startedAt = Date.now()
     const engineResult = await engine.play({
       fen: fen.value,
       skillLevel: rung.skillLevel,
@@ -194,6 +195,12 @@ async function requestAiMove(): Promise<void> {
       lifecycle.handleAiMove('0000')
       return
     }
+    // Hold the move back to a human-looking pace. The ladder searches in 50–300ms, so without this
+    // the opponent answers instantly — it reads as blitz and pressures the player into rushing.
+    const pause = remainingThinkDelayMs(Date.now() - startedAt)
+    if (pause > 0) await new Promise((resolve) => setTimeout(resolve, pause))
+    // The board can have moved on while we waited (resign, new game, navigation) — drop a stale move.
+    if (phase.value !== 'AI_THINKING') return
     lifecycle.handleAiMove(engineResult.bestMove)
   } catch {
     // Engine error — treat as AI resignation so the board doesn't stay permanently disabled

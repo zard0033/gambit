@@ -57,6 +57,30 @@ export const DIFFICULTY_LADDER: readonly DifficultyRung[] = [
 /** Rung offered to a player who has never won yet. */
 export const DEFAULT_RUNG = 1
 
+/**
+ * Pacing floor for the opponent's reply, in ms.
+ *
+ * Search time and *apparent* thinking time are different things. The ladder's search budget runs
+ * 50-300ms, so without this the opponent answers instantly — which reads as blitz, and quietly
+ * pressures the player into moving fast too. That is the opposite of what a calm training app
+ * wants, and rushing is exactly when a beginner blunders.
+ *
+ * The delay is a floor, not an addition: time already spent searching counts toward it, so the
+ * top rung (300ms search) waits correspondingly less.
+ */
+export const MIN_THINK_MS = 900
+/** Random spread on top of the floor, so the opponent's pace is not mechanically identical. */
+export const THINK_JITTER_MS = 600
+
+/**
+ * How much longer to wait before playing a move that took `elapsedMs` to find.
+ * `roll` is injectable so tests stay deterministic.
+ */
+export function remainingThinkDelayMs(elapsedMs: number, roll: number = Math.random()): number {
+  const target = MIN_THINK_MS + roll * THINK_JITTER_MS
+  return Math.max(0, Math.round(target - elapsedMs))
+}
+
 /** Clamps to the ladder, so a corrupt or out-of-range stored value can never crash the game. */
 export function rungAt(rung: number): DifficultyRung {
   return DIFFICULTY_LADDER.find((r) => r.rung === rung) ?? DIFFICULTY_LADDER[DEFAULT_RUNG - 1]
