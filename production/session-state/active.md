@@ -54,13 +54,8 @@ fresh-context 複驗過）。**🔴 AC-5 FAIL（Eason 實玩）：最低階「�
 連續卡關無差異化陪伴（要新持久狀態，超範圍）；五階打穿無收尾肯定；執子方/難度「已選中」
 兩套視覺語言（金限 focus/reward 鐵則故未動，radiogroup 待辦時可順手統一）。
 
-## 量測陷阱（寫回歸/量測腳本前讀；細節在歸檔）
-
-- Playwright 背景分頁的 `setTimeout` 會被 throttle——量節奏先 `bringToFront()`＋關其他分頁
-- 難度 modal 有 0.95→1 scale 進場動畫，開啟後 300–900ms 內量 `getBoundingClientRect()`
-  拿到 ×0.95 假數字——**等動畫結束再量**，否則觸控目標誤報不達 44px
-- 字階 16px 下限只綁 body（官方字階 `body 16 (min)·body-sm 14·label 13·caption 12`）——
-  agent 報「文字 <16px 違反鐵則」是誤判，可直接駁回
+> 本輪三條量測陷阱（背景分頁 throttle／modal 進場動畫假座標／字階 16px 誤判）已升格進
+> `.claude/docs/technical-preferences.md` Testing 段，此處不重複。
 
 ## 護欄備忘
 

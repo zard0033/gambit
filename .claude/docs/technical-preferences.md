@@ -116,6 +116,15 @@
   教過兩次而被對抗審查退回）。**script 寫進 scratchpad、用絕對路徑 `require('<repo>/node_modules/stockfish')`**
   （require 從 script 所在目錄解析，scratchpad 無 node_modules）。已實證真A `8/7p/2r3k1/pp6/7P/5N2/P5P1/4K3 w`
   → `bestmove f3e5`。閘門級唯一解仍以 `concept-deepening-uniqueness-spike`（@spike）為準，此法是設計階段的快速自驗。
+- **Playwright 背景分頁的 `setTimeout` 會被瀏覽器 throttle**（2026-07-29 難度輪實踩）：多分頁時
+  非前景頁的計時器被降頻，量出 3019ms 的假停頓差點誤導調參。量任何跟 `setTimeout` 有關的節奏前，
+  先 `bringToFront()` 並關掉其他分頁。
+- **有 scale 進場動畫的 modal，等動畫結束才量 `getBoundingClientRect()`**（2026-07-29 verifier 實踩）：
+  難度 dialog 0.95→1 進場，開啟後 300–900ms 內量到全體 ×0.95 的假數字（44px 讀成 41.8px），
+  觸控目標會誤報不達標。寫回歸腳本先 wait 動畫收斂再量。
+- **字階 16px 下限只綁 body，agent 報「<16px 違反鐵則」可直接駁回**（2026-07-29 兩路評審同時誤判）：
+  設計系統原文＝`body 16 (min)·body-sm 14·label 13·caption 12`，且 iOS auto-zoom 只作用於
+  focusable input。label/caption 用 13/12 是合法字階，不是缺陷。
 
 ## Board / chessground gotchas（vue3-chessboard，動棋盤幾何/易位/標註前先讀）
 
