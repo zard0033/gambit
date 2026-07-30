@@ -69,7 +69,16 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 
 ## Coordination Rules
 
-@.claude/docs/coordination-rules.md
+派 subagent 照全域 `~/.claude/rules/model-dispatch.md`（角色選用、升降級、並行紀律都在那）。
+
+> **模板的多人工作室管線刻意不走，別「修復」回來**：`.claude/docs/coordination-rules.md`
+> 已自本檔移除 `@` 匯入——它常駐吃 context，內容（三層 vertical delegation、director 階層、
+> 模型名已過期的 tier 表）又與上方 Collaboration Protocol 的「自主進行、照全域 judgment」
+> 相衝。檔案留著，要查模板原始設計時自己去讀。同理 `.claude/docs/director-gates.md`
+> （779 行、4 位 director）與 `/gate-check`、`/dev-story`、`/story-readiness`、
+> `/retrospective`：2026-07 全月開發史（`active.md` 678 行）對它們的觸發次數是 **0**，
+> 不是漏用，是形狀不合（模板預設「先寫完 GDD／story 再開工」，本專案邊改邊定 SoT）。
+> 要走先講理由。
 
 ## Collaboration Protocol
 
@@ -84,6 +93,21 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 
 > **active.md 同步守則**：push 前先更新 `production/session-state/active.md`（完成項標 ✅、更新下一步），
 > 一起 stage 進同一個 commit，不必單獨推。不寫 commit hash（查 `git log` 即可，hash 在 active.md 裡是冗餘）。
+
+### Pre-Push Checklist
+
+取代 `director-gates.md` 的 director 評審。細節在上面各護欄段，此處只列動作；跳過的寫理由，不留空。
+
+- [ ] `npm run test:unit` **全量**綠（假紅先查 technical-preferences 的 `.vite` 快取處方，別當真紅硬修）
+- [ ] `npm run typecheck` 0 error
+- [ ] 動到啟動／路由／auth／mount 時序 → 補跑 `npm run test:e2e`（見上方「E2E 盲區護欄」）
+- [ ] UI 改動：cream／玄夜 × mobile／desktop 四張截圖，確認無黑色 token fallback
+- [ ] 新增顏色：WCAG 對比實算 ≥4.5:1（真文字面；raised 面只准裝飾）
+- [ ] `precommit-review` ＋ `/ponytail-review` 過
+- [ ] `active.md` 已更新並 stage 進同一 commit（見上方「active.md 同步守則」）
+- [ ] `git push origin main`，永不裸 push
+- [ ] **蒸餾一句**：這次有沒有「換個任務還會用到」的通則？有 → 寫進 `active.md` 或該領域 SoT 檔；
+      沒有 → 明講「無」，不硬湊。（不叫 `/retrospective`——它是 user-invoked，沒人手動叫就永遠不會跑。）
 
 ## Visual Design System (Gambit)
 
