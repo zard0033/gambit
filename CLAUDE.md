@@ -93,6 +93,8 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 
 > **active.md 同步守則**：push 前先更新 `production/session-state/active.md`（完成項標 ✅、更新下一步），
 > 一起 stage 進同一個 commit，不必單獨推。不寫 commit hash（查 `git log` 即可，hash 在 active.md 裡是冗餘）。
+> session-state 與歸檔檔**只准寫檔名／環境變數名，禁貼 token 或 credential 的實際值**——
+> 這些檔在 git 白名單內，貼了就進歷史、洗不掉。
 
 ### Pre-Push Checklist
 
