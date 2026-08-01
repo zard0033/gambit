@@ -1,9 +1,10 @@
 <!-- STATUS -->
 Epic: 差異化重構
 Feature: 對局難度階梯重製（引擎弱化＋難度選單）
-Task: 2026-07-29 五檔階梯＋選單重製＋出手節奏＋分段條全數上線（vitest 925 綠、三路評審＋
-fresh-context 複驗過）。**🔴 AC-5 FAIL（Eason 實玩）：最低階「初學」仍然輸**——depth/movetime
-都到底了。下一步＝**MultiPV 挑次好手**（從候選前幾名挑差的，錯得像人；「隨機送子」已否決勿回頭）。
+Task: AC-5 修復**已實作、待 Eason 實玩驗收**（2026-08-02）。機制＝全寬 MultiPV ＋虧損帶挑手
+（新檔 `modules/chess-engine/fallible-pick.ts`）。vitest 951 綠、typecheck／build 乾淨、
+自我對局實跑 80 手：犯錯率 56%（設定 60%）、cpLoss 中位數 106（目標 ~100）、超窗 0、無非法手。
+**尚未在瀏覽器裡跑過**——實玩即驗收，順便校準五檔窗口。
 ⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
 <!-- /STATUS -->
 
@@ -21,17 +22,36 @@ fresh-context 複驗過）。**🔴 AC-5 FAIL（Eason 實玩）：最低階「�
 
 ## 難度階梯——已定案的關鍵結論（數據與推導全文在歸檔）
 
-- **抄 lichess 五檔**（skill/depth/movetime 三件套），表＝`src/config/difficulty-tuning.ts`（SoT）。
-  五輪自製測量的產出是「理解為什麼」不是參數表；上線後靠 Eason 實玩微調，不再自製測量
+- **🔴 Stockfish 無旋鈕可製造初學者級失誤**（2026-08-01 實測定案）。探針＝「白方白送一隻馬，
+  引擎會不會放過」，四維度全部 16–20/20 照吃：skill 0（試過 depth 1/5/8）、`go nodes 1`
+  （砍到一個節點也照吃——move ordering 的 MVV-LVA 把吃子排第一，它不搜也會下）、
+  `UCI_Elo 1320`（官方最低）、depth 限制。**要它犯錯只能在引擎外面做**：拿到 bestmove 後換手
+- **🔴 抄 lichess 參數表是死路，勿再抄**：lichess level 1–3 的 `Skill Level -9/-5/-1` 在官方
+  Stockfish 上**整段被拒收**（引擎宣告 `spin default 20 min 0 max 20`，越界不 clamp），
+  實際停在預設 20 滿血。實測 `d5 skill -9` 與 `d5 skill 20` 行為完全一致。
+  **我們現在的 d1 skill 0 已經比 lichess level 1 弱**——表＝`src/config/difficulty-tuning.ts`（SoT）
+- **✅ 定案解＝全寬 MultiPV ＋虧損帶挑手**（2026-08-01 量測）。MultiPV 設成合法走法數（開局 20–31、
+  中局 40），depth 8 全寬跑完最慢 156ms（桌機；手機打 4 倍仍在 `MIN_THINK_MS 900` 內，等於免費）。
+  100–200cp 帶挑出來的是 f7f5／g7g5／b7b5／g2g4／Ng1h3——**引擎眼中的爛棋與新手愛下的爛棋在開局
+  高度重合**，所以引擎自己就能近似真人開局書。≥400cp 帶＝送子，整個排除掉（那是已否決的崩盤型）。
+  兩個旋鈕：**觸發機率**（人是偶爾犯錯，不是每手都爛）×**cp 帶**（上限＝不送子那條線）
+- **⚠️ 前一輪 MultiPV 15 挑不到差手是取樣不足，不是方案不成立**：開局有 20–31 個合法走法，
+  15 只涵蓋前半。全寬才看得到尾端
+- **lichess 開局書：知道但不抄**。它靠 opening explorer（level 1 對應模擬 rating 400）拿真人走法，
+  但該 API 2026 年起強制 OAuth、限 25 req/min（建置期抓 5 千節點要 3.3 小時），還是個會被改政策
+  掐掉的外部依賴。全寬 MultiPV 已能近似，不值得。lichess 另有 zerofish bot 走 CPL 目標抽樣
+- **depth 壓低是反效果**：depth 越高候選虧損分得越開（中局 d1 最多虧 59cp、d8 到 131cp）。
+  壓 depth 不是讓它變弱，是讓它分不出好壞，skill 擾動跟著塌縮。新表的 depth 應回到 8
 - **隨機手注入整個放棄**：cpLoss 量測分出兩種弱——隨機注入＝崩盤型（玩家知道是對方送的，
   無成就感）；depth 限制＝持續小虧型（才是要的）。勝率當度量已作廢（樣本小、同組兩輪反序）
-- **奇偶 depth 效應**存在，但 lichess 靠 skill 擾動蓋掉——抄它的組合即可，不必避奇數
+- **讓子（material odds）已否決**（Eason 2026-08-01），不要再提案
 - 出手節奏＝`MIN_THINK_MS 900`＋jitter 600（引擎實際只花 21ms）；刻度＝五格分段條（A 案）
 - 命名：初學／進階／熟練／精通／大師；**不顯示 Skill Level 數值**（Eason 拍板）
 
 ## 待辦
 
-- **🔴 AC-5**：MultiPV 次好手方向（見 STATUS）
+- **🟡 AC-5**：機制已實作，等實玩驗收＋校準五檔窗口（旋鈕＝`difficulty-tuning.ts` 的 `fallible`：
+  probability 調犯錯頻率、min/maxLossCp 調錯得多重；maxLossCp 別碰 400，那條線以上是送子）
 - **🚩 執子方也改 radiogroup**（Eason 決議列待辦）：`play-setup-modal.vue` 執黑/隨機/執白仍是
   button+aria-pressed，照難度階梯本輪的 radiogroup 寫法抄即可；順手可統一「已選中」視覺
   （現為綠框 vs 金環兩套）

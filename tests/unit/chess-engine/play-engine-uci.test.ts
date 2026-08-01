@@ -304,7 +304,9 @@ describe('usePlayEngine — difficulty ladder depth cap', () => {
     expect(mock.sentMessages).toContain('go movetime 3000')
   })
 
-  it('test_playEngine_everyLadderRung_sendsItsOwnSkillAndDepth', async () => {
+  it('test_playEngine_everyLadderRung_sendsTheSettingsItsRungActuallyUses', async () => {
+    // 呼叫形狀必須與 PlayView 一致（它一律帶 rung.fallible）——少傳 fallible 的話，
+    // 這條會對 1-4 階斷言一件生產路徑已經放棄的事（送自己的 Skill Level），變成假信心。
     for (const rung of DIFFICULTY_LADDER) {
       // Arrange
       const { mock, engine } = await idleEngine()
@@ -315,13 +317,125 @@ describe('usePlayEngine — difficulty ladder depth cap', () => {
         skillLevel: rung.skillLevel,
         movetimeMs: rung.movetimeMs,
         depth: rung.depth,
+        fallible: rung.fallible,
       })
       mock.simulateResponse('bestmove e2e4')
       await promise
 
-      // Assert — skill must travel with depth (odd-even effect is severe at skill 0)
-      expect(mock.sentMessages).toContain(`setoption name Skill Level value ${rung.skillLevel}`)
+      // Assert — 會犯錯的階把弱化交給挑手，所以引擎本身跑滿血＋全寬候選；
+      // 頂階不挑手，維持窄搜尋與自己的 skill level。
+      if (rung.fallible) {
+        expect(mock.sentMessages).toContain('setoption name MultiPV value 50')
+        expect(mock.sentMessages).toContain('setoption name Skill Level value 20')
+      } else {
+        expect(mock.sentMessages).toContain('setoption name MultiPV value 1')
+        expect(mock.sentMessages).toContain(`setoption name Skill Level value ${rung.skillLevel}`)
+      }
       expect(mock.sentMessages).toContain(`go depth ${rung.depth} movetime ${rung.movetimeMs}`)
     }
+  })
+})
+
+// -----------------------------------------------------------------------
+// 全寬 MultiPV：候選解析與替換。純函式那半在 fallible-pick.test.ts，
+// 這裡驗的是「UCI 字串 → 候選清單 → 替換後的 bestMove」這段接線。
+// -----------------------------------------------------------------------
+
+describe('usePlayEngine — 全寬 MultiPV 候選解析與替換', () => {
+  const WINDOW = { probability: 1, minLossCp: 100, maxLossCp: 300 }
+  const FALLIBLE_PLAY = {
+    fen: START_FEN,
+    skillLevel: 0,
+    movetimeMs: 1000,
+    depth: 8,
+    fallible: WINDOW,
+  }
+
+  /** 一輪完整的 MultiPV 輸出：最佳手 e2e4，其後依序虧 50 / 150 / 250 / 500cp。 */
+  function feedCandidates(mock: MockStockfishWorker): void {
+    mock.simulateResponse('info depth 8 multipv 1 score cp 20 pv e2e4 e7e5')
+    mock.simulateResponse('info depth 8 multipv 2 score cp -30 pv d2d4 d7d5')
+    mock.simulateResponse('info depth 8 multipv 3 score cp -130 pv g2g4 e7e5')
+    mock.simulateResponse('info depth 8 multipv 4 score cp -230 pv b1a3 e7e5')
+    mock.simulateResponse('info depth 8 multipv 5 score cp -480 pv f2f3 e7e5')
+  }
+
+  it('test_playEngine_multipvStream_substitutesAMoveFromTheWindow', async () => {
+    const { mock, engine } = await idleEngine()
+
+    const promise = engine.play(FALLIBLE_PLAY)
+    feedCandidates(mock)
+    mock.simulateResponse('bestmove e2e4')
+    const result = await promise
+
+    // 窗口 100-300cp 只涵蓋 g2g4(-150) 與 b1a3(-250)。f2f3 虧 500 是掛子，必須被排除。
+    expect(['g2g4', 'b1a3']).toContain(result.bestMove)
+  })
+
+  it('test_playEngine_noFallibleConfig_keepsEngineBestMove', async () => {
+    const { mock, engine } = await idleEngine()
+
+    const promise = engine.play({ fen: START_FEN, skillLevel: 17, movetimeMs: 1000, depth: 8 })
+    feedCandidates(mock)
+    mock.simulateResponse('bestmove e2e4')
+    const result = await promise
+
+    expect(result.bestMove).toBe('e2e4')
+  })
+
+  it('test_playEngine_resignToken_isNeverSubstituted', async () => {
+    // 0000 是投降／終局訊號。把它換成一個走法，對局邏輯會以為棋還在下。
+    const { mock, engine } = await idleEngine()
+
+    const promise = engine.play(FALLIBLE_PLAY)
+    feedCandidates(mock)
+    mock.simulateResponse('bestmove 0000')
+    const result = await promise
+
+    expect(result.bestMove).toBe('0000')
+    expect(result.kind).toBe('resign')
+  })
+
+  it('test_playEngine_evalFields_comeFromMultipvOne_notTheLastInfoLine', async () => {
+    // 全寬搜尋的最後一行是最差的候選；抓錯行會讓局面評估變成爛手的分數。
+    const { mock, engine } = await idleEngine()
+
+    const promise = engine.play(FALLIBLE_PLAY)
+    feedCandidates(mock)
+    mock.simulateResponse('bestmove e2e4')
+    const result = await promise
+
+    expect(result.evalCp).toBe(20)
+    expect(result.pv?.[0]).toBe('e2e4')
+  })
+
+  it('test_playEngine_deeperIteration_overwritesShallowerCandidates', async () => {
+    // 每個 depth 都會重印整組 multipv，留下的必須是最深那一輪的分數。
+    const { mock, engine } = await idleEngine()
+
+    const promise = engine.play(FALLIBLE_PLAY)
+    // 淺層：g2g4 只虧 20cp，在窗口外
+    mock.simulateResponse('info depth 4 multipv 1 score cp 20 pv e2e4 e7e5')
+    mock.simulateResponse('info depth 4 multipv 2 score cp 0 pv g2g4 e7e5')
+    // 深層：同一手虧到 150cp，進入窗口
+    mock.simulateResponse('info depth 8 multipv 1 score cp 20 pv e2e4 e7e5')
+    mock.simulateResponse('info depth 8 multipv 2 score cp -130 pv g2g4 e7e5')
+    mock.simulateResponse('bestmove e2e4')
+    const result = await promise
+
+    expect(result.bestMove).toBe('g2g4')
+  })
+
+  it('test_playEngine_windowEmpty_fallsBackToEngineBest', async () => {
+    // 殘局常見：合法走法少、彼此又接近，窗口空無一物時必須走引擎的最佳手。
+    const { mock, engine } = await idleEngine()
+
+    const promise = engine.play(FALLIBLE_PLAY)
+    mock.simulateResponse('info depth 8 multipv 1 score cp 20 pv e2e4 e7e5')
+    mock.simulateResponse('info depth 8 multipv 2 score cp 10 pv d2d4 d7d5')
+    mock.simulateResponse('bestmove e2e4')
+    const result = await promise
+
+    expect(result.bestMove).toBe('e2e4')
   })
 })

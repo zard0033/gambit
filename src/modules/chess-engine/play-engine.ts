@@ -1,6 +1,8 @@
 import { ref, readonly } from 'vue'
 import { createStockfishWorker, type IStockfishWorker } from '../../workers/stockfish-worker'
 import { runHandshake, EngineUnavailableError } from './handshake'
+import { pickFallibleMove, type MoveCandidate } from './fallible-pick'
+import type { FallibleConfig } from '../../config/difficulty-tuning'
 
 export type { IStockfishWorker }
 export { EngineUnavailableError }
@@ -44,6 +46,21 @@ export class EngineTimeoutError extends Error {
   }
 }
 
+/**
+ * MultiPV width requested when a rung plays fallibly — we need the whole candidate list to pick a
+ * mistake out of, and the tail is where the beginner-shaped moves are. Openings have 20-31 legal
+ * moves and midgames ~40, so 50 covers them; the engine caps it at the legal move count anyway
+ * (declared range is 1-256). Cost measured 2026-08-01 at depth 8: 156ms worst case on desktop.
+ */
+const WIDE_MULTIPV = 50
+
+/**
+ * Skill Level sent to the engine when picking mistakes ourselves. Skill Level's own jitter would
+ * reorder the bestmove away from `multipv 1`, and the whole candidate list is scored relative to
+ * that line — so we turn the engine's jitter off and own the weakening entirely.
+ */
+const FULL_SKILL = 20
+
 /** play() input. Values come from the difficulty ladder (config/difficulty-tuning.ts). */
 export interface PlayInput {
   fen: string
@@ -51,10 +68,16 @@ export interface PlayInput {
   movetimeMs: number
   /**
    * Search depth cap. Omit to search until movetime runs out.
-   * Skill Level alone barely weakens Stockfish — the depth cap is what actually sets the
-   * difficulty ladder apart. See design/quick-specs/difficulty-ladder-remake.md.
+   * Deeper search spreads the candidate scores apart, which is what makes a mistake pickable —
+   * a low cap does not weaken the engine, it stops it telling good moves from bad.
+   * See design/quick-specs/difficulty-ladder-remake.md.
    */
   depth?: number
+  /**
+   * Deliberate-mistake tuning from the ladder. Omit to always play the engine's best move.
+   * Present → the search runs wide (MultiPV) and the reply is picked from the loss window.
+   */
+  fallible?: FallibleConfig
   signal?: AbortSignal
 }
 
@@ -90,8 +113,10 @@ const defaultEventTarget: VisibilityEventTarget | undefined =
 /**
  * Play Engine composable.
  * ADR-0001 (amended 2026-06-02): Stockfish 18 Lite single-threaded build. SF18 is
- * always-NNUE (no `Use NNUE` option), so no eval-mode switch is sent. Beginner
- * difficulty comes from Skill Level.
+ * always-NNUE (no `Use NNUE` option), so no eval-mode switch is sent. Beginner difficulty does
+ * NOT come from Skill Level — no UCI knob makes Stockfish blunder like a beginner (measured
+ * 2026-08-01, four knobs tried), so it is manufactured outside the engine: search wide and
+ * substitute a worse move from the candidate list. See ./fallible-pick.ts.
  * ADR-0002: postMessage-only IPC; nine-state machine.
  * TR-chess-engine-009: iOS visibility liveness probe (60s threshold, 1s readyok timeout).
  *
@@ -109,8 +134,13 @@ export function usePlayEngine(
   let _lastHeartbeatTs = 0
   let _probePending = false
   let _probeTimer: ReturnType<typeof setTimeout> | null = null
-  let _checkpoint: { fen: string; skillLevel: number; movetimeMs: number; depth?: number } | null =
-    null
+  let _checkpoint: {
+    fen: string
+    skillLevel: number
+    movetimeMs: number
+    depth?: number
+    fallible?: FallibleConfig
+  } | null = null
   let _livenessRegistered = false
 
   function _recordHeartbeat(): void {
@@ -264,6 +294,22 @@ export function usePlayEngine(
       let lastPv: string[] | undefined
       let lastPonder: string | undefined
 
+      /** MultiPV index → candidate, for fallible rungs. Empty when the rung plays its best move. */
+      const candidates = new Map<number, MoveCandidate>()
+
+      /**
+       * MultiPV and Skill Level are set per search, not at handshake — handshake.ts pins
+       * `MultiPV 1` and is shared with the review engine, which must never search wide.
+       */
+      function sendSearch(): void {
+        worker.postMessage(`setoption name MultiPV value ${input.fallible ? WIDE_MULTIPV : 1}`)
+        worker.postMessage(
+          `setoption name Skill Level value ${input.fallible ? FULL_SKILL : input.skillLevel}`,
+        )
+        worker.postMessage(`position fen ${input.fen}`)
+        worker.postMessage(goCommand(input))
+      }
+
       function cleanup(): void {
         if (abortHandler && input.signal) {
           input.signal.removeEventListener('abort', abortHandler)
@@ -305,9 +351,7 @@ export function usePlayEngine(
         // Already aborted before play() was called: send UCI commands anyway for clean state,
         // then immediately start drain and reject.
         state.value = 'THINKING'
-        worker.postMessage(`setoption name Skill Level value ${input.skillLevel}`)
-        worker.postMessage(`position fen ${input.fen}`)
-        worker.postMessage(goCommand(input))
+        sendSearch()
         reject(new CanceledError())
         startDrain()
         return
@@ -329,10 +373,9 @@ export function usePlayEngine(
         skillLevel: input.skillLevel,
         movetimeMs: input.movetimeMs,
         depth: input.depth,
+        fallible: input.fallible,
       }
-      worker.postMessage(`setoption name Skill Level value ${input.skillLevel}`)
-      worker.postMessage(`position fen ${input.fen}`)
-      worker.postMessage(goCommand(input))
+      sendSearch()
 
       worker.onmessage = (ev: MessageEvent<string>) => {
         _recordHeartbeat()
@@ -344,6 +387,24 @@ export function usePlayEngine(
           const depthMatch = line.match(/\bdepth (\d+)/)
           const pvMatch = line.match(/\bpv (.+)$/)
           const ponderMatch = line.match(/\bponder (\S+)/)
+          const mpvMatch = line.match(/\bmultipv (\d+)/)
+
+          // Every depth reprints the whole MultiPV set, so later lines overwrite earlier ones and
+          // what survives is the deepest iteration. If movetime cuts a search off mid-iteration the
+          // tail can still hold the previous depth's scores; adjacent depths differ too little to
+          // move a move in or out of the window, so keeping a per-depth snapshot is not worth it.
+          if (mpvMatch && pvMatch) {
+            candidates.set(parseInt(mpvMatch[1], 10), {
+              move: pvMatch[1].trim().split(/\s+/)[0],
+              cp: cpMatch ? parseInt(cpMatch[1], 10) : undefined,
+              mate: mateMatch ? parseInt(mateMatch[1], 10) : undefined,
+            })
+          }
+
+          // The fields below describe the engine's principal variation, so they may only be read
+          // from `multipv 1` — under a wide search the last info line is the *worst* candidate.
+          if (mpvMatch && mpvMatch[1] !== '1') return
+
           if (cpMatch) lastEvalCp = parseInt(cpMatch[1], 10)
           if (mateMatch) lastEvalMate = parseInt(mateMatch[1], 10)
           if (depthMatch) lastDepth = parseInt(depthMatch[1], 10)
@@ -357,14 +418,21 @@ export function usePlayEngine(
           // Race guard: drop if stale requestId (superseded by newer play() call)
           if (_requestId !== localId) return
 
-          const bestMoveToken = line.split(/\s+/)[1]
-          const kind = bestMoveToken === '0000' ? 'resign' : 'move'
+          const engineBest = line.split(/\s+/)[1]
+          const kind = engineBest === '0000' ? 'resign' : 'move'
+          // 0000 signals resign/game-over, not a move — never substitute a mistake for it.
+          const ordered = [...candidates.entries()].sort((a, b) => a[0] - b[0]).map(([, c]) => c)
+          const bestMoveToken =
+            kind === 'move' ? (pickFallibleMove(ordered, input.fallible) ?? engineBest) : engineBest
           _checkpoint = null
           state.value = 'IDLE'
           cleanup()
           resolve({
             bestMove: bestMoveToken,
             kind,
+            // These four always describe the engine's principal variation and do NOT follow a
+            // deliberate mistake — nothing on the play path consumes them (post-game analysis runs
+            // through review-engine), so they keep the "how the engine reads this position" meaning.
             evalCp: lastEvalCp,
             evalMate: lastEvalMate,
             depthReached: lastDepth,

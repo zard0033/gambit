@@ -190,13 +190,15 @@ async function requestAiMove(): Promise<void> {
       skillLevel: rung.skillLevel,
       depth: rung.depth,
       movetimeMs: rung.movetimeMs,
+      fallible: rung.fallible,
     })
     if (!engineResult.bestMove || engineResult.bestMove === '(none)' || engineResult.bestMove === '0000') {
       lifecycle.handleAiMove('0000')
       return
     }
-    // Hold the move back to a human-looking pace. The ladder searches in 50–300ms, so without this
-    // the opponent answers instantly — it reads as blitz and pressures the player into rushing.
+    // Hold the move back to a human-looking pace. A wide search still finishes well inside the
+    // floor, so without this the opponent answers near-instantly — it reads as blitz and pressures
+    // the player into rushing.
     const pause = remainingThinkDelayMs(Date.now() - startedAt)
     if (pause > 0) await new Promise((resolve) => setTimeout(resolve, pause))
     // The board can have moved on while we waited (resign, new game, navigation) — drop a stale move.

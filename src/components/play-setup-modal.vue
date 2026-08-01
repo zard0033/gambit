@@ -92,7 +92,7 @@ function start(): void {
     <DialogContent class="max-w-sm">
       <div class="text-center">
         <DialogTitle class="text-xl">對局設定</DialogTitle>
-        <!-- 「無限思考時間」已不成立：難度階梯給每一檔都設了 movetime 上限（50–300ms）。 -->
+        <!-- 「無限思考時間」已不成立：難度階梯給每一檔都設了 movetime 上限（1000ms）。 -->
         <DialogDescription class="mt-1">選一個對手</DialogDescription>
       </div>
 

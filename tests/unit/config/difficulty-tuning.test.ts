@@ -15,26 +15,20 @@ describe('difficulty ladder — table invariants', () => {
     expect(DIFFICULTY_LADDER.map((r) => r.rung)).toEqual([1, 2, 3, 4, 5])
   })
 
-  it('test_difficultyLadder_everyRung_capsSearchDepth', () => {
-    // The whole point of the remake: the old selector sent no depth cap, so all 21 rungs
-    // played at effectively full strength. An uncapped rung here is that bug coming back.
+  it('test_difficultyLadder_everyRung_searchesDeepEnoughToSpreadCandidates', () => {
+    // 反轉自舊設計（2026-08-01 量測）：壓低 depth 不是弱化引擎，是讓它分不出好壞——
+    // 候選分數全擠在一起，窗口就沒東西可挑。難度差異一律由 fallible 負責，depth 不再是旋鈕。
     for (const rung of DIFFICULTY_LADDER) {
-      expect(rung.depth).toBeGreaterThan(0)
+      expect(rung.depth).toBeGreaterThanOrEqual(8)
       expect(Number.isFinite(rung.depth)).toBe(true)
     }
   })
 
-  it('test_difficultyLadder_skillDepthAndMovetime_increaseMonotonically', () => {
-    // Arrange / Act
-    for (let i = 1; i < DIFFICULTY_LADDER.length; i++) {
-      const prev = DIFFICULTY_LADDER[i - 1]
-      const curr = DIFFICULTY_LADDER[i]
-
-      // Assert — a rung the player cannot feel is a rung that should not exist
-      expect(curr.skillLevel).toBeGreaterThan(prev.skillLevel)
-      expect(curr.depth).toBeGreaterThan(prev.depth)
-      expect(curr.movetimeMs).toBeGreaterThan(prev.movetimeMs)
-    }
+  it('test_difficultyLadder_skillLevels_stayDistinct', () => {
+    // skillLevel 已不送給引擎，但仍是 ai_difficulty 的持久化值，且 rungForSkillLevel 靠它反查。
+    // 一旦有兩階撞值，還原舊存檔就會落到錯的階。
+    const seen = new Set(DIFFICULTY_LADDER.map((r) => r.skillLevel))
+    expect(seen.size).toBe(DIFFICULTY_LADDER.length)
   })
 
   it('test_difficultyLadder_skillLevels_stayInStockfishRange', () => {
@@ -46,6 +40,54 @@ describe('difficulty ladder — table invariants', () => {
   })
 })
 
+describe('difficulty ladder — 犯錯窗口', () => {
+  it('test_difficultyLadder_topRung_neverMakesMistakes', () => {
+    // 頂階省略 fallible ＝一律走引擎最佳手
+    expect(DIFFICULTY_LADDER[DIFFICULTY_LADDER.length - 1].fallible).toBeUndefined()
+  })
+
+  it('test_difficultyLadder_lowerRungs_allDefineAWindow', () => {
+    // 除了頂階，每一階都要有窗口——沒有窗口的階等於滿血，玩家會撞到隱形的難度斷層
+    for (const rung of DIFFICULTY_LADDER.slice(0, -1)) {
+      expect(rung.fallible).toBeDefined()
+    }
+  })
+
+  it('test_difficultyLadder_mistakeRate_fallsAsRungsRise', () => {
+    const rates = DIFFICULTY_LADDER.filter((r) => r.fallible).map((r) => r.fallible!.probability)
+    for (let i = 1; i < rates.length; i++) {
+      expect(rates[i]).toBeLessThan(rates[i - 1])
+    }
+  })
+
+  it('test_difficultyLadder_mistakeWindow_narrowsAsRungsRise', () => {
+    // 階梯之所以有階：高階不只錯得少，錯得也更輕
+    const windows = DIFFICULTY_LADDER.filter((r) => r.fallible).map((r) => r.fallible!)
+    for (let i = 1; i < windows.length; i++) {
+      expect(windows[i].minLossCp).toBeLessThan(windows[i - 1].minLossCp)
+      expect(windows[i].maxLossCp).toBeLessThan(windows[i - 1].maxLossCp)
+    }
+  })
+
+  it('test_difficultyLadder_everyWindow_staysBelowTheHangingPieceLine', () => {
+    // 這條線是與已否決的「隨機送子」的分界：量測顯示 >=400cp 的候選就是掛子，
+    // 玩家靠對方送子贏沒有成就感（chess.com 低階 bot 的失敗模式）。
+    for (const rung of DIFFICULTY_LADDER) {
+      if (!rung.fallible) continue
+      expect(rung.fallible.maxLossCp).toBeLessThan(400)
+    }
+  })
+
+  it('test_difficultyLadder_everyWindow_isNonEmptyAndProbabilityIsAFraction', () => {
+    for (const rung of DIFFICULTY_LADDER) {
+      if (!rung.fallible) continue
+      expect(rung.fallible.minLossCp).toBeLessThan(rung.fallible.maxLossCp)
+      expect(rung.fallible.probability).toBeGreaterThan(0)
+      expect(rung.fallible.probability).toBeLessThanOrEqual(1)
+    }
+  })
+})
+
 describe('rungAt', () => {
   it('test_rungAt_knownRung_returnsMatchingEntry', () => {
     // Act
@@ -53,7 +95,7 @@ describe('rungAt', () => {
 
     // Assert
     expect(rung.rung).toBe(3)
-    expect(rung.depth).toBe(3)
+    expect(rung.name).toBe('熟練')
   })
 
   it('test_rungAt_outOfRangeValue_fallsBackToDefaultRung', () => {
