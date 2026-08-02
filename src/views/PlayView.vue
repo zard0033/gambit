@@ -4,7 +4,8 @@ import { useRouter } from 'vue-router'
 import ChessBoard from '@/components/chess-board.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { DarkPanel } from '@/components/ui/gambit'
+import { DarkPanel, NeveAvatar } from '@/components/ui/gambit'
+import { COACH } from '@/types/lesson'
 import type { MoveMadePayload } from '@/composables/use-chess-board'
 import { useGameLifecycle } from '@/modules/game-lifecycle/use-game-lifecycle'
 import { usePlayEngine } from '@/modules/chess-engine/play-engine'
@@ -258,11 +259,11 @@ const outcomeBlurb = computed(() => {
   const reason = terminal.value?.endReason
   if (isDraw.value) return '勢均力敵的一盤，各有所守。'
   if (playerWon.value) {
-    if (reason === 'checkmate') return '漂亮的將殺，收得乾淨俐落。'
+    if (reason === 'checkmate') return '將殺成立了。'
     if (reason === 'resignation') return '對手投降了，這盤你掌握得很好。'
     return '穩穩拿下這一盤。'
   }
-  if (reason === 'checkmate') return '被將死了，下一盤多留意國王的安全。'
+  if (reason === 'checkmate') return '被將死了。我們回去看看它是從哪裡開始的。'
   if (reason === 'resignation') return '這盤先投降了——輸贏都是練習的一部分，再來一盤。'
   return '這盤輸了，調整一下節奏再戰。'
 })
@@ -338,17 +339,26 @@ if (isDev) {
             class="mb-3 rounded-[10px] border border-white/10 bg-white/5 p-3.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
           >
             <p class="font-display text-xl font-bold" :class="playerWon ? 'text-gold' : 'text-ink-on-deep'">{{ resultLabel }}</p>
-            <p class="mt-1.5 font-sans text-[13px] leading-relaxed text-ink-on-deep-dim">{{ outcomeBlurb }}</p>
-            <div class="mt-3.5 flex gap-2">
-              <Button variant="secondary" size="sm" class="flex-1" @click="goHome">返回首頁</Button>
-              <Button :variant="playerWon ? 'gold' : 'default'" size="sm" class="flex-1" @click="handleNewGame">再來一局</Button>
+            <!-- 講評歸屬給 Neve（頭像＋署名＋font-lesson＝persona-neve「視覺嗓音」），
+                 否則這句會被讀成系統訊息而不是教練在跟你說話。 -->
+            <div class="mt-3 flex items-center justify-center gap-2">
+              <NeveAvatar size="md" surface="deep" />
+              <span class="font-num text-[11px] tracking-[0.08em] text-ink-on-deep-dim">{{ COACH.name.toUpperCase() }}</span>
             </div>
-            <!-- 賽後檢討入口降級為次要連結（不佔主按鈕版面，但保留核心學習迴圈入口） -->
+            <p class="mt-1.5 font-lesson text-[15px] leading-[1.9] text-ink-on-deep">{{ outcomeBlurb }}</p>
+            <!-- 主按鈕＝賽後檢討：完局那幾秒是學習遷移最可能發生的時刻，版面權重跟著走。
+                 深青底上 secondary（米白實心）才是最高對比，jade 的 default 反而糊在底色裡。 -->
+            <Button variant="secondary" size="sm" class="mt-3.5 w-full" @click="handleReview">我陪你看看剛剛那一步</Button>
             <button
               type="button"
-              class="mt-2.5 font-sans text-xs text-ink-on-deep-dim underline-offset-2 transition-colors hover:text-ink-on-deep hover:underline"
-              @click="handleReview"
-            >查看賽後檢討</button>
+              class="mt-2 min-h-[44px] w-full rounded-btn border border-white/10 bg-white/6 text-sm font-semibold text-ink-on-deep transition-colors hover:bg-white/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
+              @click="handleNewGame"
+            >再來一局</button>
+            <button
+              type="button"
+              class="mt-2 min-h-[44px] px-2 font-sans text-xs text-ink-on-deep-dim underline-offset-2 transition-colors hover:text-ink-on-deep hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
+              @click="goHome"
+            >返回首頁</button>
           </div>
 
           <!-- 密度列：回合狀態 ｜ 身分（執子 + 對手等級）合併成一條，省垂直空間，手機一屏可見。
