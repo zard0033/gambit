@@ -30,7 +30,8 @@ Task: ✅ 零風險四項已完成（238 檔刪除、25,566 行）。**下一步
    （`assembler.ts` 保留——`data-sync.ts:59` 靠它寫雲端 PGN）／variants 輪替機制拔除、
    已深化概念不再給行動召喚（`variants[0]` 直取，資料結構未攤平＝v2 明令不動 `index.ts`）／
    `production/{epics,qa,sprints,gate-checks}`＋49 個 design HTML 共 236 檔（`session-state/` 已排除；
-   `session-log.md` 是 gitignored 無 git 保護，**搬到 scratchpad 未刪**）／vision 三節切除 239→152 行。
+   `session-log.md` 是 gitignored、無 git 保護，搬到本次 session 的 scratchpad——**那裡會被清，
+   等同延後刪除**，要留就自己另存）／vision 三節切除 239→152 行。
    合計 238 檔、25,566 行。vitest 944 綠、typecheck 0 error。
 2. **判斷場搬出 `/learn/concept/:conceptId` 給自己的路由**（前置，先做）。不先搬，砍 D2/D4 會讓主路徑
    完全不可達——它唯一入口是 `MemoryDashboard.vue:41` 掛的 `RecognitionSignpost.vue:36`。

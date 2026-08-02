@@ -44,6 +44,7 @@ export const DEFAULT_EXPORT_TUNING = {
   eventTag: 'Chess Training Companion',
   siteTag: 'Chess Training Companion (local)',
   aiNameTemplate: 'Stockfish (level {{N}})',
+  // 2026-08-02：useGameExport composable 已移除（positioning-v2 D7），此欄位已無消費端；下次動這支檔時可清。
   feedbackDurationMs: 2000,
   promptTokenBudget: 4000,
   maxPlyBeforeWarn: 200,

@@ -133,7 +133,7 @@ const maskStyle = (piece: string) => ({
             :data-testid="v.lit ? 'concept-tile-lit' : 'concept-tile-dormant'"
             :data-concept="v.id"
             class="glass-panel relative flex min-h-[72px] flex-row items-center gap-3 overflow-hidden rounded-2xl p-3 text-left transition-colors hover:bg-white/[0.14] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
-            :aria-label="`深入「${v.label}」`"
+            :aria-label="v.isDeepened ? `重看「${v.label}」的深化` : `深入「${v.label}」`"
             @click="deepenConcept(v)"
           >
             <span
@@ -159,15 +159,19 @@ const maskStyle = (piece: string) => ({
               >{{ v.label }}</span>
               <div class="mt-0.5 font-sans text-[11px] leading-snug text-ink-faint">{{ v.blurb }}</div>
             </div>
-            <!-- 深化過的概念不再給行動召喚：每個概念只有一組盤面，「重溫」暗示有新東西是假的
-                 （完成狀態由左側的 coin-check 表示）。 -->
+            <!-- 深化過的概念只報狀態、不給行動召喚：每個概念只有一組盤面，箭頭會暗示有新東西。
+                 不能靠左側 coin-check 代表——它由 isLearned && isPracticed 推導（見 :88），
+                 與 isDeepened 是兩套獨立訊號，而深化是 always-open 的（:103），
+                 「已深化但沒上完課」是可達狀態。 -->
             <span
-              v-if="!v.isDeepened"
               class="flex shrink-0 items-center gap-0.5 self-center font-sans text-[11px] text-ink-faint"
-              data-testid="concept-tile-deepen"
+              :data-testid="v.isDeepened ? 'concept-tile-deepened' : 'concept-tile-deepen'"
             >
-              深入
-              <ChevronRight :size="14" :stroke-width="2" aria-hidden="true" />
+              <template v-if="v.isDeepened">已深化</template>
+              <template v-else>
+                深入
+                <ChevronRight :size="14" :stroke-width="2" aria-hidden="true" />
+              </template>
             </span>
           </button>
         </div>

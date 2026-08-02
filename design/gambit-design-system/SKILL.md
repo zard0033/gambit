@@ -20,7 +20,7 @@ depending on the need.
 - **`colors_and_type.css`** — single source of truth for color + type CSS variables (base + semantic).
   Import it and use `var(--primary)`, `var(--accent)`, `.gx-h1`, etc.
 - **`fonts/`** — self-hosted Sarasa UI TC (body). Headings load Noto Serif TC via Google Fonts.
-- **`preview/`** — small reference cards for every token group (colors, type, spacing, components).
+- **`preview/`** — 已於 2026-08-02 刪除（見 git 歷史），原內容：small reference cards for every token group (colors, type, spacing, components).
 - **`ui_kits/app/`** — interactive 4-screen recreation of the app (Home · Learn · Game · Review) with
   reusable JSX components (`PhoneFrame`, `BottomTab`, `Chessboard`, `Button`, `Card`, glass, …).
 - **`assets/`** — seed mockup + brand notes.

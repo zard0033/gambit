@@ -6,7 +6,7 @@
 > 以下原文僅保留作歷史記錄，不代表現行方向。
 >
 > Phase 3 B（差異化重構路線圖）決策紀錄。設計流程：ui-design-flow ⓪→➊ 已於概念 demo
-> （`design/demos/layout-vertical-world.html`，拋棄式，不進 production）驗證並由 Eason 拍板。
+> （`design/demos/layout-vertical-world.html`，拋棄式，不進 production；已刪，見 git 歷史）驗證並由 Eason 拍板。
 > 本檔是 ➋ 落地依據；➌ 真開發時只引用本檔決策與 token，不搬 demo 的手刻 CSS。
 
 ## 狀態
@@ -84,6 +84,6 @@ icon 脈動），進場內容直接可見不跑 transition，捲動改 `scroll-b
 ## 參照
 
 - 拋棄式概念 demo：`design/demos/layout-vertical-world.html`（不進 production，開發時參考
-  行為與參數，不搬代碼）
+  行為與參數，不搬代碼；已刪，見 git 歷史）
 - 北極星脈絡：`production/gambit-differentiation-vision.md`
 - 現行（尚未取代）導覽規則：`README.md`《Spacing & layout》節

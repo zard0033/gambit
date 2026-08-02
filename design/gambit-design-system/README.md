@@ -46,7 +46,7 @@ Root files:
 - **`SKILL.md`** — Agent-Skill front-matter so this system is usable as a downloadable skill.
 - **`assets/`** — logos, the seed mockup, and any copied brand imagery.
 - **`fonts/`** — self-hosted webfonts (see Typography; currently CDN-linked, drop Sarasa here to match prod).
-- **`preview/`** — small HTML cards that populate the Design System tab (colors, type, components…).
+- **`preview/`** — 已於 2026-08-02 刪除（見 git 歷史），原內容：small HTML cards that populate the Design System tab (colors, type, components…).
 - **`ui_kits/app/`** — the Gambit app UI kit (4 core screens as an interactive click-thru prototype).
 
 There is **one product** (the mobile-first app); no marketing site / docs site exists in the materials,

@@ -37,15 +37,19 @@
 │   └── smoke/                   # Smoke/toolchain checks
 ├── supabase/                    # Supabase migrations + README (schema SoT)
 ├── scripts/                     # One-off / build scripts
-└── production/                  # Production management
+└── production/                  # Positioning SoT, handoff snapshot, tooling notes
+    ├── positioning-v2-*.md      # Positioning SoT — read before proposing any feature/refactor
+    ├── health-check-*.md        # Full product health check (findings + what was refuted)
     ├── session-state/           # active.md — handoff snapshot (TRACKED in git on purpose)
-    ├── session-logs/            # Session audit trail (gitignored)
-    ├── epics/                   # Epic + story files
-    ├── sprints/                 # Sprint plans
-    ├── qa/                      # QA plans, bugs, evidence
-    ├── gate-checks/             # Phase-gate verdicts
-    └── retrospectives/          # Retro notes
+    └── session-logs/            # Session audit trail (gitignored)
 ```
+
+> **The template's process pipeline was deleted on 2026-08-02** — `epics/`, `sprints/`, `qa/`,
+> `gate-checks/` and the 49 standalone HTML previews under `design/` (236 files, ~26k lines) are gone
+> (positioning-v2 D9). CLAUDE.md had already recorded that they were triggered 0 times in all of
+> 2026-07. The `.claude/skills/*` that read those paths (dev-story, story-readiness, sprint-plan,
+> gate-check, qa-*, …) are therefore **inoperable by design — do not "repair" them, and do not
+> recreate the directories**. Retrieval is `git show` on any commit before 607aba9.
 
 > **active.md is intentionally version-controlled** (not gitignored as the upstream template
 > assumes). This is a solo, multi-machine setup (home + work computer); committing the handoff

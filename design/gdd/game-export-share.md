@@ -1,5 +1,8 @@
 # Game Export / Share
 
+> ⚠️ 2026-08-02：Tier-1/2/3 分享 UI 與其 composable 已移除（positioning-v2 D7），本 GDD 未實作／已撤除。
+> PGN 組裝（assembler.ts）仍在服役。
+
 > **Status**: Designed (pending review)
 > **Author**: Eason + Claude
 > **Last Updated**: 2026-05-27

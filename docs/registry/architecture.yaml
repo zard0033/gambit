@@ -237,20 +237,6 @@ interfaces:
     added: 2026-05-28
     revised: ""
 
-  - contract: game_export_control_api
-    status: active
-    pattern: direct_call
-    producer: game-export
-    consumers:
-      - post-game-review   # mounts the AnalyzeWithClaude component; passes gameStore ref + config
-    adr: docs/architecture/adr-0010-game-export-tier-delivery-and-sync-gesture-contract.md
-    signal_signature: "useGameExport(game: Ref<CompletedGame | null>, config: ExportConfig) → { state: Ref<ExportState>, fallbackPayload: Ref<string | null>, oversizeWarning: Ref<boolean>, onAnalyzeTap(): void, dismissFallback(): void }"
-    notes: "ExportState = 'IDLE' | 'SHARING' | 'COPYING' | 'SUCCESS' | 'FALLBACK'. State machine is owned by the composable (NOT Pinia) because export state is per-screen ephemeral and unmount-clean by Vue lifecycle. If Game History MVP ever needs cross-screen export-in-flight state, this composable model must be superseded (see ADR-0010 Decision §3 supersession trigger)."
-    referenced_by:
-      - docs/architecture/adr-0010-game-export-tier-delivery-and-sync-gesture-contract.md
-    added: 2026-05-28
-    revised: ""
-
   - contract: auth_store_api
     status: active
     pattern: direct_call

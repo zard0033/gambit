@@ -263,9 +263,10 @@ const outcomeBlurb = computed(() => {
     if (reason === 'resignation') return '對手投降了，這盤你掌握得很好。'
     return '穩穩拿下這一盤。'
   }
+  // 落敗三句不再指向「再來一盤」——主按鈕已改成賽後檢討，文案催下一局會跟版面打架。
   if (reason === 'checkmate') return '被將死了。我們回去看看它是從哪裡開始的。'
-  if (reason === 'resignation') return '這盤先投降了——輸贏都是練習的一部分，再來一盤。'
-  return '這盤輸了，調整一下節奏再戰。'
+  if (reason === 'resignation') return '這盤先投降了。輸贏都是練習的一部分。'
+  return '這盤輸了。'
 })
 
 // Record a win at the chosen Skill Level so the setup modal can nudge to the next rung.

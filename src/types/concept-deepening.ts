@@ -17,9 +17,12 @@ export interface ConceptDeepening {
   /** Situational set-up shown before the first step (Neve's method: scenario first). */
   intro: string
   /**
-   * Variant pool (spec §10). Each inner array is a full 3-step Neve-收手 triplet.
-   * variants.length === 1 is the degenerate single-variant case (zero breaking change from old `steps`).
-   * The active variant is selected deterministically: deepenedCount[conceptId] % variants.length.
+   * Board sets. Each inner array is a full 3-step Neve-收手 triplet.
+   * Every concept ships exactly one — the deepening page always reads `variants[0]`.
+   * The rotation mechanism this pool was built for was removed 2026-08-02 (positioning-v2 D8):
+   * all 8 concepts had length 1, so `count % length` was permanently 0 and the revisit promise
+   * ("重溫 = a different board") was never kept. Kept as a nested array only to avoid rewriting
+   * the 352-line catalog; flatten to `steps: LessonStep[]` if it is ever touched for another reason.
    */
   variants: LessonStep[][]
   /** The tactic's essence, crystallized — shown in the wrap-up popup for a calm "回味" (A3). */

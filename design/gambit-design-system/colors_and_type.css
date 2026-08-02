@@ -236,7 +236,7 @@
    src/assets/main.css「墨韻 (INK GARNISH)」段（token --color-ink-brush 兩主題、金墨 --fleck-scale
    cream 加大 1.6）。掛載點：課程完成卡（LessonView，reward 時刻、兩主題）；首頁招呼語墨筆＋段落
    標籤乾筆（HomeView／NeveSceneHeader）；2026-07-22 起首頁再擴散墨氣下滲（cream）／材質分層（玄夜）。
-   保留清單（未採用、未丟棄）：inkskin「以墨為玉」概念（design/demos/home-ink-fusion-inkskin.html）
+   保留清單（未採用、未丟棄）：inkskin「以墨為玉」概念（design/demos/home-ink-fusion-inkskin.html，已刪，見 git 歷史）
    ——日後若要進一步收斂玉區用量可回頭參考。
    ================================================================ */
 [data-theme="noir"] {

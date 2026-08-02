@@ -4,10 +4,10 @@ import type { ConceptDeepening } from '../../types/concept-deepening'
 /**
  * Concept deepening catalog (quick-specs/concept-deepening-page.md §2.2 + §10–§13).
  * One entry per concept — the `Record<ChessConcept, …>` makes adding a concept without deepening
- * content a compile error. Each concept has a `variants` pool of full 3-step Neve-收手 triplets
- * (step 0 she shows → step 1 she only asks → step 2 silence); active variant selected
- * deterministically via `deepenedCount % variants.length`. All single-concept entries use
- * `variants.length === 1` (degenerate, zero-breaking migration from old `steps` shape).
+ * content a compile error. Each concept ships exactly one 3-step Neve-收手 triplet
+ * (step 0 she shows → step 1 she only asks → step 2 silence), read as `variants[0]`.
+ * The rotation mechanism was removed 2026-08-02 (positioning-v2 D8) — every entry had length 1,
+ * so it never rotated. See types/concept-deepening.ts for why the nesting survived.
  * Clean-room; all FENs carry both kings; chess.js validity + mate claims enforced by
  * tests/unit/data/concept-deepening.test.ts. New variants must pass all 3 gates before commit:
  * chess.js → Stockfish uniqueness spike → adversarial chess review.

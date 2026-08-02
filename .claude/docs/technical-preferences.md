@@ -170,10 +170,15 @@
   而非結構保證，又接在核心 `onMove`，移除＝拔 fallback。升變無法只靠 vue-tsc/vitest 驗（要瀏覽器真走一步
   升變），故待能實機測升變再移除。
 - **`recommend.ts` 的 `recommended()`**：有測試/文件、與 candidates/practiceTarget 成套的保留 API，刻意不刪。
-- **`src/modules/game-export/use-game-export.ts` 整組**（composable + state machine + 尺寸警告）：待接分享
-  UI 的已完成後端，勿刪（見 `design/gdd/game-export-share.md`）。
-- **`src/components/opening-knowledge-card.vue` + `src/data/opening-knowledge-cards.ts`**（20 張開局知識卡）：
-  待接 UI 的完整功能，勿刪。
+- 🪦 **`src/modules/game-export/use-game-export.ts`（已於 2026-08-02 刪除，勿提案裝回）**：依
+  `production/positioning-v2-2026-08-02.md` D7 移除 composable ＋ `tier-delivery.test.ts`。
+  **`assembler.ts` 仍在服役、不可刪**——`buildPgn` 有兩個活消費端（`stores/data-sync.ts:59` 寫雲端 PGN、
+  `views/MemoryView.vue:28`），砍它會靜默降級成原始 UCI 字串。
+- 🪦 **`opening-knowledge-card.vue` + `opening-knowledge-cards.ts`（v2 D5 判死，尚未執行）**：
+  20 張卡全站零呼叫點，開局知識與「察覺」無關。接線＝替與斷層無關的東西發居留證。
+
+> **這份清單的教訓**：上面兩條原本寫「待接 UI，勿刪」，但沒有日期也沒有具名用途——結果是無限期腐爛。
+> 新增 Deferred Cleanup 必須同時給**一個日期**和**一個具名用途**，否則直接刪。
 
 ## 手寫 `var()` 顏色 token（SVG / inline-style 前先讀）
 

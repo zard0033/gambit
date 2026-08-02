@@ -177,7 +177,6 @@ This manifest is a programmer's quick-reference extracted from all Accepted-trea
 - **`ExportConfig` fields use `readonly` modifiers**; accept a frozen `CompletedGame` — source: ADR-0010 §1
 - **Tier (Web Share vs Clipboard vs Fallback) decision MUST be made synchronously inside the tap handler BEFORE any `await`** — source: ADR-0010 §2
 - **`canShare({ text: payload })` probe MUST use exactly the same `{ text }` shape** that `navigator.share` will be called with — source: ADR-0010 §2
-- **`useGameExport` is a Vue composable, NOT a Pinia store**; timers cleared via `onScopeDispose` — source: ADR-0010 §3
 - **FALLBACK textarea rendered via `v-if`** (conditional, not persistent hidden); `nextTick(() => el.select())` on mount — source: ADR-0010 §4
 - **FALLBACK dismiss is a real `<button>` element** (not glyph, not click-outside region); ≥ 44×44 px — source: ADR-0010 §4
 - **Button bound to `:disabled="state === 'SHARING' || state === 'COPYING'"`** for in-flight tap suppression — source: ADR-0010 §6

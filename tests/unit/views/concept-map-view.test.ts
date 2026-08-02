@@ -137,14 +137,18 @@ describe('ConceptMapView', () => {
     expect(router.currentRoute.value.query.from).toBeUndefined()
   })
 
-  it('test_conceptMap_deepenedConcept_dropsCallToAction', async () => {
-    // Arrange: fork deepened; pin not.
+  it('test_conceptMap_deepenedConcept_reportsStateWithoutCallToAction', async () => {
+    // Arrange: fork deepened with no lesson/puzzle progress — the exact case the coin-check cannot
+    // cover, since coin stage comes from isLearned && isPracticed, not isDeepened.
     seed({ deepened: ['fork'] })
     const { wrapper: w } = await mountAt()
-    // Assert: each concept ships exactly one board set, so a deepened tile offers no call to action
-    // (completion is carried by the coin-check); only un-deepened tiles invite you in.
-    expect(w.find('[data-concept="fork"]').text()).not.toContain('深入')
-    expect(w.find('[data-concept="fork"]').text()).not.toContain('重溫')
+    // Assert: a deepened tile still reports its state (one board set per concept → no arrow, no
+    // invitation), while un-deepened tiles keep the call to action.
+    const fork = w.find('[data-concept="fork"]')
+    expect(fork.text()).toContain('已深化')
+    expect(fork.text()).not.toContain('深入')
+    expect(fork.attributes('aria-label')).toContain('重看')
     expect(w.find('[data-concept="pin"]').text()).toContain('深入')
+    expect(w.find('[data-concept="pin"]').attributes('aria-label')).toContain('深入')
   })
 })

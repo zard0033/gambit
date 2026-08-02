@@ -432,7 +432,7 @@
 
 /* Deep focus panels — shared by ProfileView hero (identical gradient value) and
    ui/gambit/dark-panel.vue (開始新對局 / 繼續對局 panels). noir value = 玄夜漆玉最亮點
-   （與首頁 hero-card 同一支漸層，見 home-ink-fusion-final.html ➊ 定稿樣張）。 */
+   （與首頁 hero-card 同一支漸層，見 home-ink-fusion-final.html ➊ 定稿樣張；已刪，見 git 歷史）。 */
 .dark-focus-panel {
   background-image: linear-gradient(160deg, #2a6654 0%, #1e4d3e 55%, #1a4238 100%);
 }
@@ -590,7 +590,7 @@
 }
 
 /* ============================================================
-   首頁墨韻融合（2026-07-22，➊ 決策樣張 design/demos/home-ink-fusion-final.html 拍板）：
+   首頁墨韻融合（2026-07-22，➊ 決策樣張 design/demos/home-ink-fusion-final.html 拍板；已刪，見 git 歷史）：
    cream＝墨氣柔化（沿用既有 Card/StatCard 白邊+暖棕陰影不變）；noir（玄夜）＝材質分層——卡片
    不柔化，改玄黑亮階漸層＋頂緣 sheen＋暗影＋中性 hairline。共用 class，供 Card/StatCard/棋誌
    peek 項目共用，勿逐元件重複手刻。

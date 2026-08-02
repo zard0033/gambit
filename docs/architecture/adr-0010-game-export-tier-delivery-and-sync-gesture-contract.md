@@ -1,7 +1,11 @@
 # ADR-0010: Game Export Tier-1/2/3 Delivery and Synchronous User-Gesture Clipboard Contract
 
 ## Status
-Accepted
+Superseded
+
+> **2026-08-02**：composable 層（`useGameExport` 及其狀態機、`tests/unit/game-export/tier-delivery.test.ts`）
+> 已依 positioning-v2 D7 移除。`assembler.ts` 的 `buildPgn` 仍在服役（`data-sync.ts` 寫雲端 PGN、
+> `MemoryView.vue` 消費），不受影響。本 ADR 保留為歷史記錄，不再是實作規則來源。
 
 > **Spike complete (2026-05-28)**: `scripts/spike-adr0010-export-gesture-audit.mjs` — desktop delivery pattern verified (all 4 scenarios pass). iPhone device session deferred to before Sprint 3; architecture is correct by construction (TypeScript-enforced sync contract). See Validation Criteria results below.
 

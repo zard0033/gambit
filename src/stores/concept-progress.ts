@@ -10,13 +10,6 @@ interface ProgressShape {
   deepened?: string[]
   /** Concepts whose deepening silent gate was solved with no aid — triggers the epiphany journal pen. */
   deepenedUnaided?: string[]
-  /**
-   * How many times each concept's deepening has been completed (localStorage-only).
-   * Used for deterministic variant selection: variantIndex = count % variants.length.
-   * Intentionally not synced to cloud — clearing cache resets to variant 0, which only affects
-   * "which board do you see on revisit", not correctness. (spec §10 MINIMAL)
-   */
-  deepenedCount?: Record<string, number>
 }
 
 /** Read a persisted string[] field from STORAGE_KEY. Corrupt/absent → []; progress must never throw. */
@@ -34,25 +27,6 @@ function loadField(field: 'practiceSolved' | 'deepened' | 'deepenedUnaided'): st
   }
 }
 
-/** Read persisted deepenedCount. Corrupt/absent → {}; progress must never throw. */
-function loadDeepenedCount(): Record<string, number> {
-  if (typeof localStorage === 'undefined') return {}
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) return {}
-  try {
-    const parsed = JSON.parse(raw) as ProgressShape
-    const counts = parsed?.deepenedCount
-    if (!counts || typeof counts !== 'object' || Array.isArray(counts)) return {}
-    const result: Record<string, number> = {}
-    for (const [k, v] of Object.entries(counts)) {
-      if (typeof v === 'number') result[k] = v
-    }
-    return result
-  } catch {
-    return {}
-  }
-}
-
 /**
  * Concept progress (Learning Loop #20 + concept deepening). Two independent quiet signals, both kept
  * SEPARATE from the dungeon's linear `solved` set and from lesson `completed` (no leak into unlock):
@@ -65,8 +39,6 @@ export const useConceptProgressStore = defineStore('conceptProgress', () => {
   const practiceSolved = ref<Set<string>>(new Set(loadField('practiceSolved')))
   const deepenedConcepts = ref<Set<string>>(new Set(loadField('deepened')))
   const deepenedUnaided = ref<Set<string>>(new Set(loadField('deepenedUnaided')))
-  /** Completion count per concept — drives deterministic variant selection (spec §10 MINIMAL). */
-  const deepenedCount = ref<Record<string, number>>(loadDeepenedCount())
 
   function persist(): void {
     if (typeof localStorage === 'undefined') return
@@ -74,7 +46,6 @@ export const useConceptProgressStore = defineStore('conceptProgress', () => {
       practiceSolved: [...practiceSolved.value],
       deepened: [...deepenedConcepts.value],
       deepenedUnaided: [...deepenedUnaided.value],
-      deepenedCount: deepenedCount.value,
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
   }
@@ -95,11 +66,7 @@ export const useConceptProgressStore = defineStore('conceptProgress', () => {
     return deepenedConcepts.value.has(conceptId)
   }
 
-  /**
-   * Record a concept's deepening as completed.
-   * deepenedConcepts: idempotent (Set deduplication).
-   * deepenedCount: always increments — drives variant rotation on revisit (spec §10 MINIMAL).
-   */
+  /** Record a concept's deepening as completed. Idempotent (Set deduplication). */
   function markDeepened(conceptId: string): void {
     const isNew = !deepenedConcepts.value.has(conceptId)
     if (isNew) {
@@ -107,11 +74,6 @@ export const useConceptProgressStore = defineStore('conceptProgress', () => {
       deepenedConcepts.value = new Set(deepenedConcepts.value)
       // Best-effort cloud write; no-ops when logged out (re-flushed on next login).
       void useDataSyncStore().upsertDeepenedConcepts([conceptId])
-    }
-    // Count always increments so the next visit picks the next variant.
-    deepenedCount.value = {
-      ...deepenedCount.value,
-      [conceptId]: (deepenedCount.value[conceptId] ?? 0) + 1,
     }
     persist()
   }
@@ -164,7 +126,6 @@ export const useConceptProgressStore = defineStore('conceptProgress', () => {
     markDeepened,
     deepenedUnaided,
     markDeepenedUnaided,
-    deepenedCount,
     reconcileOnLogin,
   }
 })
