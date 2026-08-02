@@ -137,13 +137,14 @@ describe('ConceptMapView', () => {
     expect(router.currentRoute.value.query.from).toBeUndefined()
   })
 
-  it('test_conceptMap_deepenedConcept_showsReturnAffordance', async () => {
+  it('test_conceptMap_deepenedConcept_dropsCallToAction', async () => {
     // Arrange: fork deepened; pin not.
     seed({ deepened: ['fork'] })
     const { wrapper: w } = await mountAt()
-    // Assert: deepened tile reads 重溫, un-deepened reads 深入.
-    expect(w.find('[data-concept="fork"]').text()).toContain('重溫')
+    // Assert: each concept ships exactly one board set, so a deepened tile offers no call to action
+    // (completion is carried by the coin-check); only un-deepened tiles invite you in.
     expect(w.find('[data-concept="fork"]').text()).not.toContain('深入')
+    expect(w.find('[data-concept="fork"]').text()).not.toContain('重溫')
     expect(w.find('[data-concept="pin"]').text()).toContain('深入')
   })
 })

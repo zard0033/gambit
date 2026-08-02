@@ -1,118 +1,103 @@
 <!-- STATUS -->
-Epic: 差異化重構
-Feature: 對局難度階梯重製（引擎弱化＋難度選單）
-Task: AC-5 修復**已實作、待 Eason 實玩驗收**（2026-08-02）。機制＝全寬 MultiPV ＋虧損帶挑手
-（新檔 `modules/chess-engine/fallible-pick.ts`）。vitest 951 綠、typecheck／build 乾淨、
-自我對局實跑 80 手：犯錯率 56%（設定 60%）、cpLoss 中位數 106（目標 ~100）、超窗 0、無非法手。
-**尚未在瀏覽器裡跑過**——實玩即驗收，順便校準五檔窗口。
+Epic: 定位 v2 刪除期
+Feature: 照死刑名單砍 src ~3,100 行、tests ~1,400 行、文件 ~37,000 行
+Task: ✅ 零風險四項已完成（238 檔刪除、25,566 行）。**下一步＝判斷場搬遷（前置）**，
+它會動路由與 mount 時序 → 走 dev-flow ＋ 補跑 E2E。順序見下方，不可調換。
 ⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況＋待辦＋未固化決策；施工細節在 git，歷史輪次全文在
-> `archive-2026-07.md`（07-10～07-29 收線記錄）。**收尾覆寫本檔，紅線 ≤150 行**（超線 hook 會叫）。
-> **差異化北極星 = `production/gambit-differentiation-vision.md`**——提任何功能/重構/UI 前**先讀**。
+> `archive-2026-07.md`。**收尾覆寫本檔，紅線 ≤150 行**（超線 hook 會叫）。
+> **定位 SoT ＝ `production/positioning-v2-2026-08-02.md`**——提任何功能/重構/UI 前**先讀**。
+> （舊 `gambit-differentiation-vision.md` 的問題定義已作廢，只剩氣質面有效；D10 會刪掉它三節。）
 
-## 三件事優先序（Eason 2026-07-29 拍板）
+## 🔪 定位 v2 已拍板，進入刪除期（2026-08-02）
 
-1. **對手強度修正** ← 進行中（AC-5 未過）。修完才有可信的對照組
-2. **課程→對局 gap 重估**——等 1 完成後 Eason 重玩再判。候選解＝優勢局面下完／殘局實戰／開局十步
-3. **UI/UX design flow 全站化**——最後。先全站 audit 分流，只對真有問題的頁跑完整流程
+一句話：**Gambit 把你剛下完的那盤棋，變成明天的題目——而且不告訴你裡面有沒有東西。**
+其餘（課程／題庫／回放／賽後分析／開局資料）lichess 都免費且更好；那條唯一抄不走的路**已經跑得起來**
+（`modules/learning-loop/recognition-runtime.ts`），缺口是只涵蓋 fork/mate 2/8 概念、只在課後觸發、
+且 runtime 那條沒有誘餌（`recognition-runtime.ts:24` 每盤 `kind:'real'`，答案恆為「有」）。
 
-> 順序理由：1 沒修好，「學完仍贏不了」實驗的對照組是壞的；3 排最後因 2 可能改資訊架構。
+**問題陳述**：斷層＝**認知遷移**（學到的調用不出來），不是情緒問題。「新手覺得自己笨」是症狀。
+目標使用者第一位＝Eason 本人；定位第一段兩個目標都寫（A 學棋／B 有一個值得做的工程專案）。
+第一筆資料：失敗類型比例 **5:2:3**（沒看到／算不出／評估偏），全在 rung 1，量級足以定方向。
+商業模式與「對標 Calm、怎麼贏 chess.com」整組作廢。
 
-## 難度階梯——已定案的關鍵結論（數據與推導全文在歸檔）
+### 施工順序（依賴決定，不可調換）
 
-- **🔴 Stockfish 無旋鈕可製造初學者級失誤**（2026-08-01 實測定案）。探針＝「白方白送一隻馬，
-  引擎會不會放過」，四維度全部 16–20/20 照吃：skill 0（試過 depth 1/5/8）、`go nodes 1`
-  （砍到一個節點也照吃——move ordering 的 MVV-LVA 把吃子排第一，它不搜也會下）、
-  `UCI_Elo 1320`（官方最低）、depth 限制。**要它犯錯只能在引擎外面做**：拿到 bestmove 後換手
-- **🔴 抄 lichess 參數表是死路，勿再抄**：lichess level 1–3 的 `Skill Level -9/-5/-1` 在官方
-  Stockfish 上**整段被拒收**（引擎宣告 `spin default 20 min 0 max 20`，越界不 clamp），
-  實際停在預設 20 滿血。實測 `d5 skill -9` 與 `d5 skill 20` 行為完全一致。
-  **我們現在的 d1 skill 0 已經比 lichess level 1 弱**——表＝`src/config/difficulty-tuning.ts`（SoT）
-- **✅ 定案解＝全寬 MultiPV ＋虧損帶挑手**（2026-08-01 量測）。MultiPV 設成合法走法數（開局 20–31、
-  中局 40），depth 8 全寬跑完最慢 156ms（桌機；手機打 4 倍仍在 `MIN_THINK_MS 900` 內，等於免費）。
-  100–200cp 帶挑出來的是 f7f5／g7g5／b7b5／g2g4／Ng1h3——**引擎眼中的爛棋與新手愛下的爛棋在開局
-  高度重合**，所以引擎自己就能近似真人開局書。≥400cp 帶＝送子，整個排除掉（那是已否決的崩盤型）。
-  兩個旋鈕：**觸發機率**（人是偶爾犯錯，不是每手都爛）×**cp 帶**（上限＝不送子那條線）
-- **⚠️ 前一輪 MultiPV 15 挑不到差手是取樣不足，不是方案不成立**：開局有 20–31 個合法走法，
-  15 只涵蓋前半。全寬才看得到尾端
-- **lichess 開局書：知道但不抄**。它靠 opening explorer（level 1 對應模擬 rating 400）拿真人走法，
-  但該 API 2026 年起強制 OAuth、限 25 req/min（建置期抓 5 千節點要 3.3 小時），還是個會被改政策
-  掐掉的外部依賴。全寬 MultiPV 已能近似，不值得。lichess 另有 zerofish bot 走 CPL 目標抽樣
-- **depth 壓低是反效果**：depth 越高候選虧損分得越開（中局 d1 最多虧 59cp、d8 到 131cp）。
-  壓 depth 不是讓它變弱，是讓它分不出好壞，skill 擾動跟著塌縮。新表的 depth 應回到 8
-- **隨機手注入整個放棄**：cpLoss 量測分出兩種弱——隨機注入＝崩盤型（玩家知道是對方送的，
-  無成就感）；depth 限制＝持續小虧型（才是要的）。勝率當度量已作廢（樣本小、同組兩輪反序）
-- **讓子（material odds）已否決**（Eason 2026-08-01），不要再提案
-- 出手節奏＝`MIN_THINK_MS 900`＋jitter 600（引擎實際只花 21ms）；刻度＝五格分段條（A 案）
-- 命名：初學／進階／熟練／精通／大師；**不顯示 Skill Level 數值**（Eason 拍板）
+1. ~~**零風險四項**~~ ✅ **2026-08-02 完成**：`use-game-export.ts`＋`tier-delivery.test.ts`
+   （`assembler.ts` 保留——`data-sync.ts:59` 靠它寫雲端 PGN）／variants 輪替機制拔除、
+   已深化概念不再給行動召喚（`variants[0]` 直取，資料結構未攤平＝v2 明令不動 `index.ts`）／
+   `production/{epics,qa,sprints,gate-checks}`＋49 個 design HTML 共 236 檔（`session-state/` 已排除；
+   `session-log.md` 是 gitignored 無 git 保護，**搬到 scratchpad 未刪**）／vision 三節切除 239→152 行。
+   合計 238 檔、25,566 行。vitest 944 綠、typecheck 0 error。
+2. **判斷場搬出 `/learn/concept/:conceptId` 給自己的路由**（前置，先做）。不先搬，砍 D2/D4 會讓主路徑
+   完全不可達——它唯一入口是 `MemoryDashboard.vue:41` 掛的 `RecognitionSignpost.vue:36`。
+   拆頁時注意 `lessonUnaided` 串著 epiphany 判定（`settle.ts:91-95`），D1 未先執行會靜默漏發。
+3. **D1 棋誌整組**（保留 `lib/persona-lint.ts`，`modules/memory/persona-lint.ts:9` 在用）。
+   **須早於任何 game-history 動作**（`stores/journal.ts:6`）。
+4. **D2 試煉關卡外殼**（保留 `src/data/puzzles/` 30 題）。注意只有 26 題能直接餵 `RecognitionBoard`——
+   4 題 mate-in-2 無法用 `types/recognition.ts:25-28` 的單一 `expectedMove` 表達。
+5. **D4 棋憶敘事外殼**（**保留 `MemoryDashboard.vue`**＝主路徑的門，另保留 describe/selection/
+   summary/missed-mate/post-game-review）。`pgn-viewer` 與 `@lichess-org/pgn-viewer` 同批退役。
+6. **D3 難度五檔→一檔**（保留 `fallible-pick.ts`）。
+7. **D5 開局知識卡＋opening-id＋`chess-openings` 依賴**。
+8. **D6 ProfileView 整頁**——主題切換（`:198-209`，`uiStore.setTheme` 唯一 UI）與 `reset-history-dialog`
+   （`:78` 唯一掛載點）**先搬進 header 齒輪**再刪。
 
-## 待辦
+### 🔴 三個必須記住的陷阱（審查實測，別重新發現）
 
-- **🟡 AC-5**：機制已實作，等實玩驗收＋校準五檔窗口（旋鈕＝`difficulty-tuning.ts` 的 `fallible`：
-  probability 調犯錯頻率、min/maxLossCp 調錯得多重；maxLossCp 別碰 400，那條線以上是送子）
-- **🚩 執子方也改 radiogroup**（Eason 決議列待辦）：`play-setup-modal.vue` 執黑/隨機/執白仍是
-  button+aria-pressed，照難度階梯本輪的 radiogroup 寫法抄即可；順手可統一「已選中」視覺
-  （現為綠框 vs 金環兩套）
-- **🚩 noir DarkPanel 明度**（Eason 決議之後做）：問題是明度差不是色相——modal 底
-  `rgb(39,35,32)` 與 jade 漸層亮度太近，錨定失效。hallmark 兩解未擇一（面板提亮一階／
-  DialogContent 換偏中性深色）。**DarkPanel 是全站共用件，動前先 A/B demo 讓 Eason 挑**。
-  「砍暗色模式」是備案（連 Supabase theme CHECK 一起處理，不可逆，最後才選）
-- **欠帳：玄夜輪 ➍➎ 評審從未跑**（hallmark audit＋web-design-guidelines，該批已上線）；
-  visual-regression e2e 的 home 基準圖 `--update-snapshots` 也欠
-- **iPhone 複驗殘項**：氛圍首頁 D3 手感；深化 mate 新盤（h1 角 Qg2#）手感
-- **material 擴充**（設計案 Accepted；施工前置＝D6 離線量測）：樣本歸零（「重置對局」實機驗收
-  清空了雲端），續點＝登入態自然累積 ≥10 局後重跑量測腳本（原在 scratchpad 已蒸發，要重建）；
-  session token 過期請 Eason 重貼
-- **epiphany 文案語氣**（backlog）：六模板同款否定式排比＋評價語，違反 Neve「不輕易讚美」；
-  處理時走 3-lens 對抗審查（CLAUDE.md 文案語氣護欄）
-- **Phase C+/D**：捉雙/牽制賽後偵測（需精準度實測）；Claude API 動態講解/BYOK（最後）
+1. **題目供給率 ∝ 對手有多弱**：判斷場題目全來自 `selectMissedMates`（要求唯一解 mate-in-1），
+   而 rung 1 有 60% 機率刻意送一手虧 100–300cp。關掉 fallible 訊號才乾淨、但主路徑會餓死；不關則練成
+   「認出引擎故意送的子」。這是 D3 挑窗口值時的真正決策點（v2 的 P3，隨 D3 一起量）。
+2. **MultiPV gap ≥150cp 當「有沒有東西」的訊號是壞的**：實測觸發率 7/10/30/15%，開局中局可為 0，
+   恆答「沒有」準確率 70–93%。它量的是最佳手唯不唯一——兩手都能贏子時 gap≈0，正好在戰術最豐富處
+   關掉自己。正解＝chess.js 窮舉（`missed-mate.ts:44-58` 已有一半，另一半「有沒有強制贏子」要新寫
+   前瞻判定，**不能**沿用 `classify.ts:57-92`，那支是事後判定）。
+3. **`data-sync.ts` 不是雲端層，是唯一的持久化層**：`:286-300`／`:513`／`:537`／`:635` 是純
+   localStorage 讀寫，`game-history`／`journal`／`memory` 全靠它。砍它＝失去本機儲存，不是失去跨裝置。
+   要動必須先拆成 local-store ＋ cloud-adapter 兩層（v2 的 R1）。
 
-## 評審提出但不做（別重新發現一次）
+## 已施工（本輪，未 commit）
 
-連續卡關無差異化陪伴（要新持久狀態，超範圍）；五階打穿無收尾肯定；執子方/難度「已選中」
-兩套視覺語言（金限 focus/reward 鐵則故未動，radiogroup 待辦時可順手統一）。
+- ✅ **完局屏改版**（`PlayView.vue`）：Neve 頭像＋署名＋font-lesson 講評；主按鈕改
+  「我陪你看看剛剛那一步」→ `/review`，再來一局降次要、返回首頁降文字連結。文案改兩句。
+  verifier 11/11 PASS（雙尺寸截圖、按鈕 44px、`/review` 實載入）；vitest 957 綠、typecheck 0 error。
+- ✅ **vision 開頭加「2026-08-02 修訂」節**（D10 會把它連同三節一起收斂進 v2）。
+- 📄 `production/health-check-2026-08-02.md`（體檢，15 條指控推翻 5 條——**推翻那節要讀**）；
+  `production/positioning-v2-2026-08-02.md`（定位 SoT，含死刑／緩刑名單與 5 條可證偽預測）。
 
-> 本輪三條量測陷阱（背景分頁 throttle／modal 進場動畫假座標／字階 16px 誤判）已升格進
-> `.claude/docs/technical-preferences.md` Testing 段，此處不重複。
+## 未決 / 待辦
+
+- **`HomeView.vue:109`** 的 `Lv.{{ resumeInfo.level }}` 印 raw Skill Level，違反「不顯示 Skill Level
+  數值」。D3 砍成一檔後這行連同難度選單一起消失，**不必單獨修**。
+- **missed-mate 從 mate 擴到 material**（v2 的 P2）：若對既有對局跑 `selectMissedMates` 產出 ≥1 題的
+  比例 <30%，主路徑必須先擴到 material 才成立。這是題目供給的第二個旋鈕。
+- **底部 tab 三格→兩格**：技術可行，D2/D6 砍完會空出兩格，屆時一起處理。
+- v2 末尾另有 8 題待答（棋力現況、下棋 vs 寫 app 時數比、四週對照實驗、自用產品的驗收條件等）。
 
 ## 護欄備忘
 
+- **Stockfish 無旋鈕可製造初學者級失誤**（2026-08-01 實測定案）：skill 0／`go nodes 1`／
+  `UCI_Elo 1320`／depth 限制四維度全部照吃白送的子。**要它犯錯只能在引擎外面做**（拿到 bestmove
+  後換手＝`fallible-pick.ts`）。**抄 lichess 的 `Skill Level -9/-5/-1` 是死路**——引擎宣告
+  `spin min 0 max 20`，越界整段拒收、實際停在滿血 20。讓子（material odds）已否決，勿再提案。
 - Supabase keep-alive workflow 每 3 天打實表查詢（免費層 7 天無活動即暫停；暫停的專案連 DNS
-  都消失——NXDOMAIN ≠ 被刪）。**GitHub 政策：repo 60 天無 commit 自動停用 scheduled workflow**
-- Maia（人類化 NN 引擎）＝日後「陪練角色」的答案，現在不做（要第二套 runtime、最低 1100 仍偏強）
+  都消失——NXDOMAIN ≠ 被刪）。**GitHub 政策：repo 60 天無 commit 自動停用 scheduled workflow**。
+- Maia（人類化 NN 引擎）＝日後「陪練角色」的答案，現在不做（要第二套 runtime、最低 1100 仍偏強）。
 
 ## 接手必讀（鐵則不在這個檔）
 
 長期規則與技術參考都在 **CLAUDE.md 與它 `@`-include 的 docs**，每次 session 自動載入：
 
 - **CLAUDE.md**：技術棧、CI Node 26 鎖、push guardrail、部署 base path、E2E 盲區、棋理護欄、
-  內容授權、視覺設計 SoT（全 app 棋盤＝Wood12+Gioco）、教練人格 Neve、西洋棋用語、
-  單人模式＋Pre-Push Checklist。
+  視覺設計 SoT（全 app 棋盤＝Wood12+Gioco）、教練人格 Neve、西洋棋用語、Pre-Push Checklist。
 - **`.claude/docs/technical-preferences.md`**：測試規範（@spike、Node26 shim、vitest 快取假紅、
-  chessground 合成事件測不到、node 直驅 Stockfish 驗盤法）、Board/chessground gotchas
-  （viewOnly 兩層修法、stale bounds、PgnViewer CSS 汙染）、Deferred Cleanups。
-- **`.claude/docs/coding-standards.md`**：commit 格式、截圖自清。
-- 設計 SoT＝`design/gambit-design-system/`；GDD＝`design/gdd/`；Supabase migration＝
-  `supabase/README.md`；lib/ vs modules/ 判準＝**ADR-0015**。
+  chessground tap-to-move 可驅動、node 直驅 Stockfish 驗盤法、三條量測陷阱）、
+  Board/chessground gotchas（viewOnly 兩層修法、stale bounds、PgnViewer CSS 汙染）、Deferred Cleanups。
+- 設計 SoT＝`design/gambit-design-system/`；Supabase migration＝`supabase/README.md`；
+  lib/ vs modules/ 判準＝**ADR-0015**。
 - **Supabase MCP**：stdio、user scope、**read-only**、`--project-ref=vfnzekqtvxhewifnmtnz`、
-  token 走 `$env:SUPABASE_ACCESS_TOKEN`；需重開 Claude Code 才 Connected。可查表除錯、不能跑 migration。
-- **Gambit-noir 平行 worktree** 共用同 origin：加 Supabase migration 時編號接續 repo 現有最大值
-  （已到 202608305xxxxx，非真日期；撞號前例見 memory）。
-
-## 北極星 + 重構路線圖
-
-> 一句話：解新手**情緒問題**、對標 Calm 非 chess.com、Neve 安靜陪伴、課程長在你自己棋上＋棋誌、
-> 核心零 AI、氛圍 vs juice。完整見 vision 文件。
-
-**三階（鐵律：一次蓋一塊磚，每塊能單獨上線、單獨證明靈魂）：**
-
-- **Phase 1 — 棋誌**：✅ 已上線（settle 管線全面接線）。
-- **Phase 2 — 課程長在你自己的棋上**：✅ 棋憶／深化頁／signpost v1 皆 ship。🚧 剩 iPhone 複驗
-  殘項與 material 擴充（見待辦）。
-- **Phase 3 — 沉浸感＋旅程 IA**：🚧 A 路線（氛圍首頁＋轉場）已施工待複驗；B 路線未動，待 A 後評估。
-- **商業模式**（訂閱/付費深度/BYOK）＝最後。
-
-**關鍵架構事實**（細節在 ADR/git）：ADR-0013（journal）＋ADR-0014（memory）＋ADR-0015
-（lib/modules 判準）皆 Accepted；Supabase 現 7 張 live 表（兩張 unused 已 drop）。
+  token 走 `$env:SUPABASE_ACCESS_TOKEN`；需重開 Claude Code 才 Connected。
+- **Gambit-noir 平行 worktree** 共用同 origin：加 Supabase migration 時編號接續現有最大值
+  （已到 202608305xxxxx，非真日期）。

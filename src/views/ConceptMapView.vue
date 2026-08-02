@@ -159,11 +159,14 @@ const maskStyle = (piece: string) => ({
               >{{ v.label }}</span>
               <div class="mt-0.5 font-sans text-[11px] leading-snug text-ink-faint">{{ v.blurb }}</div>
             </div>
+            <!-- 深化過的概念不再給行動召喚：每個概念只有一組盤面，「重溫」暗示有新東西是假的
+                 （完成狀態由左側的 coin-check 表示）。 -->
             <span
+              v-if="!v.isDeepened"
               class="flex shrink-0 items-center gap-0.5 self-center font-sans text-[11px] text-ink-faint"
-              :data-testid="v.isDeepened ? 'concept-tile-deepened' : 'concept-tile-deepen'"
+              data-testid="concept-tile-deepen"
             >
-              {{ v.isDeepened ? '重溫' : '深入' }}
+              深入
               <ChevronRight :size="14" :stroke-width="2" aria-hidden="true" />
             </span>
           </button>

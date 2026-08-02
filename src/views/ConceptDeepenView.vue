@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, nextTick, computed } from 'vue'
+import { ref, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import LessonPlayer from '@/components/lesson/LessonPlayer.vue'
 import RecognitionGate from '@/components/lesson/RecognitionGate.vue'
@@ -42,15 +42,6 @@ if (!deepening) router.replace('/learn/concepts')
 // BOTH phases clean — no aid in the lesson, no miss/trap in the gate — to fire the epiphany pen.
 const phase = ref<'lesson' | 'recognition'>('lesson')
 let lessonUnaided = false
-
-// Deterministic variant selection (spec §10 MINIMAL): no random/LLM, only the completion count.
-// First visit = variant 0 (clean board); each revisit advances to the next variant (mod pool size).
-// deepenedCount is localStorage-only; clearing cache resets to 0 (intentional, affects feel only).
-const variantIndex = computed(() => {
-  if (!deepening) return 0
-  const count = conceptProgress.deepenedCount[deepening.conceptId] ?? 0
-  return count % deepening.variants.length
-})
 
 // Wrap-up popup (A3): the board stays behind; this overlay crystallizes the essence and — only when
 // the player got through without any aid — Neve quietly acknowledges that they saw it themselves.
@@ -125,7 +116,7 @@ function onWrapKeydown(e: KeyboardEvent): void {
   <div>
     <LessonPlayer
       v-if="deepening && phase === 'lesson'"
-      :steps="deepening.variants[variantIndex]"
+      :steps="deepening.variants[0]"
       :title="deepening.title"
       player-color="white"
       :scenario="deepening.intro"
