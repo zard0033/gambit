@@ -1,8 +1,8 @@
 <!-- STATUS -->
 Epic: 定位 v2 刪除期
 Feature: 照死刑名單砍 src ~3,100 行、tests ~1,400 行、文件 ~37,000 行
-Task: ✅ 零風險四項已完成（238 檔刪除、25,566 行）。**下一步＝判斷場搬遷（前置）**，
-它會動路由與 mount 時序 → 走 dev-flow ＋ 補跑 E2E。順序見下方，不可調換。
+Task: ✅ 零風險四項＋✅ 判斷場搬遷都完成。**下一步＝D1 棋誌整組刪除**（須早於任何
+game-history 動作），再依序 D2 → D4 → D3 → D5 → D6。
 ⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
 <!-- /STATUS -->
 
@@ -33,9 +33,25 @@ Task: ✅ 零風險四項已完成（238 檔刪除、25,566 行）。**下一步
    `session-log.md` 是 gitignored、無 git 保護，搬到本次 session 的 scratchpad——**那裡會被清，
    等同延後刪除**，要留就自己另存）／vision 三節切除 239→152 行。
    合計 238 檔、25,566 行。vitest 944 綠、typecheck 0 error。
-2. **判斷場搬出 `/learn/concept/:conceptId` 給自己的路由**（前置，先做）。不先搬，砍 D2/D4 會讓主路徑
-   完全不可達——它唯一入口是 `MemoryDashboard.vue:41` 掛的 `RecognitionSignpost.vue:36`。
-   拆頁時注意 `lessonUnaided` 串著 epiphany 判定（`settle.ts:91-95`），D1 未先執行會靜默漏發。
+2. ~~**判斷場搬出獨立路由**~~ ✅ **2026-08-03 完成**：新路由 `/learn/concept/:conceptId/judge`
+   → `RecognitionFieldView.vue`（新檔）。`ConceptDeepenView.vue` 只留 LessonPlayer 相位，完成後
+   `router.push` 到 judge 路由並帶 `?unaided=`（跨路由沒有記憶體狀態，epiphany 判定改用 query 傳遞，
+   見 `RecognitionFieldView.vue` 開頭註解）；`?source=recognition`（棋憶 signpost）原樣轉送。
+   `RecognitionSignpost.vue` **不用改**——它推的是教學相位（lesson 仍在前），不是 judge 路由本身，
+   改了反而會跳過課程，是原計畫漏想的一步。收尾卡片抽成共用 `DeepeningWrapUp.vue`。
+   `deepening.essence`（收尾卡精髓句）沒有輕量替代來源，`RecognitionFieldView` 仍依賴
+   `data/concept-deepening/index.ts`——**未完全解鎖** R2 提的 catalog 刪除，只解鎖了路由獨立本身。
+   新增 unit（9 條，涵蓋 unaided 跨路由往返、epiphany 觸發／不觸發、棋憶 signpost 真實局面路徑）
+   ＋ e2e（3 條，涵蓋路由掛載與 guard）。**precommit-review deep 跑過**（9 agent、5 條 major 全被
+   對抗驗證反駁——重複判定/routeKey/deep-link 偽造三類指控查證後都不成立，理由見 workflow 記錄）；
+   19 條 minor 修了 9 條（testid 改路由中性、`hasPending()` 省一次陣列具現化、cast 風格對齊、
+   `push`→`replace` 修回搬遷前的上一頁行為兩處、補棋憶 signpost 全程 unit、trust-boundary 註解、
+   e2e 註解澄清「無課程前置」是現行設計非永久契約、DeepeningWrapUp 多餘 nextTick）；其餘 10 條
+   低信心/超出本次範圍略過（理由已附在 workflow 記錄，未寫進本檔——查 runId 或 journal.jsonl）。
+   vitest／typecheck／e2e 修復後**重跑待確認**。
+   `/play` 像素回歸兩張失敗＝**環境既有基線差異**（stash 驗證過與本次改動無關，新裝的 chromium
+   版本與基線截圖不符）。**處置期限：D1 開工前**——D1–D6 是連續大規模刪除，不能一路踩著已知紅燈的
+   視覺 gate 做，屆時要嘛補新基線要嘛查清楚為何紅（precommit-review 五維度審查點出這點）。
 3. **D1 棋誌整組**（保留 `lib/persona-lint.ts`，`modules/memory/persona-lint.ts:9` 在用）。
    **須早於任何 game-history 動作**（`stores/journal.ts:6`）。
 4. **D2 試煉關卡外殼**（保留 `src/data/puzzles/` 30 題）。注意只有 26 題能直接餵 `RecognitionBoard`——

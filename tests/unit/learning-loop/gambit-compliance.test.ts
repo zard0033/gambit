@@ -10,7 +10,9 @@ import { resolve } from 'node:path'
 const LL_FILES = [
   'src/views/ConceptMapView.vue',
   'src/views/ConceptDeepenView.vue',
+  'src/views/RecognitionFieldView.vue',
   'src/components/lesson/LessonPlayer.vue',
+  'src/components/lesson/DeepeningWrapUp.vue',
   'src/components/learn-tabs.vue',
   'src/data/concepts/index.ts',
   'src/data/concept-deepening/index.ts',

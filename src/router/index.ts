@@ -12,6 +12,7 @@ export const routes = [
   { path: '/learn',           name: 'learn',     component: () => import('@/views/LearnPager.vue') },
   { path: '/learn/concepts',  name: 'concepts',  component: () => import('@/views/LearnPager.vue') },
   { path: '/learn/concept/:conceptId', name: 'concept-deepen', component: () => import('@/views/ConceptDeepenView.vue'), meta: { fullBleed: true } },
+  { path: '/learn/concept/:conceptId/judge', name: 'concept-judge', component: () => import('@/views/RecognitionFieldView.vue'), meta: { fullBleed: true } },
   { path: '/learn/:lessonId', name: 'lesson',    component: () => import('@/views/LessonView.vue'), meta: { fullBleed: true } },
   { path: '/dungeon',          name: 'dungeon',     component: () => import('@/views/DungeonMapView.vue') },
   { path: '/dungeon/:puzzleId', name: 'puzzle',     component: () => import('@/views/DungeonPuzzleView.vue'), meta: { fullBleed: true } },
