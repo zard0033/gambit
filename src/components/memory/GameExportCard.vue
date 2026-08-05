@@ -11,8 +11,8 @@
  * GDD scope guard: only ever rendered inside the dashboard's `isComplete` branch, so an
  * unfinished game has no export affordance.
  */
-import { computed } from 'vue'
-import { Copy, Check } from 'lucide-vue-next'
+import { computed, ref, watch } from 'vue'
+import { Copy, Check, Share2 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { useGameExport } from '@/modules/game-export/use-game-export'
 import type { CompletedGame } from '@/stores/game-store'
@@ -29,12 +29,15 @@ function plyToMoveNumber(ply: number): number {
   return Math.floor(ply / 2) + 1
 }
 
-const exportContext = computed(() => ({
-  opening: props.opening ?? undefined,
-  review: props.moments.length
-    ? { keyMoveNumbers: [...new Set(props.moments.map((m) => plyToMoveNumber(m.ply)))] }
-    : undefined,
-}))
+/** Read once at setup, not a computed: nothing re-reads it after the composable is constructed. */
+function buildExportContext() {
+  return {
+    opening: props.opening ?? undefined,
+    review: props.moments.length
+      ? { keyMoveNumbers: [...new Set(props.moments.map((m) => plyToMoveNumber(m.ply)))] }
+      : undefined,
+  }
+}
 
 /**
  * ADR-0010 puts Web Share first, which is right on a phone — the iOS share sheet reaches Claude,
@@ -54,15 +57,36 @@ const { state, fallbackText, onExportTap, dismissFallback } = useGameExport(
   props.game,
   {
     playerName: '你',
+    // Required by ExportConfig but nothing reads it — buildPgn and the {{AI_SKILL_LEVEL}} slot both
+    // take the value off `game` directly. Dead field on the type, not introduced here; left alone
+    // rather than widened into a types.ts change that this feature does not need.
     aiSkillLevel: props.game.aiSkillLevel ?? 0,
     includeAnnotations: false,
   },
   navDeps,
-  exportContext.value,
+  buildExportContext(),
 )
 
 const busy = computed(() => state.value === 'SHARING' || state.value === 'COPYING')
 const done = computed(() => state.value === 'SUCCESS')
+
+/**
+ * Which tier actually ran. The idle label can only predict from `isTouch`, but by the time we show
+ * a success message we know for certain — the state machine passes through SHARING or COPYING on
+ * the way to SUCCESS. Saying 「已複製」 after a Web Share would be a lie the player acts on: the
+ * text never reached the clipboard, so their paste would produce whatever was there before.
+ */
+const lastTier = ref<'share' | 'copy' | null>(null)
+watch(state, (s) => {
+  if (s === 'SHARING') lastTier.value = 'share'
+  else if (s === 'COPYING') lastTier.value = 'copy'
+})
+
+const label = computed(() => {
+  if (done.value) return lastTier.value === 'share' ? '已分享' : '已複製'
+  return isTouch ? '分享這盤棋' : '複製這盤棋'
+})
+const icon = computed(() => (isTouch ? Share2 : Copy))
 </script>
 
 <template>
@@ -72,11 +96,11 @@ const done = computed(() => state.value === 'SUCCESS')
       size="sm"
       class="w-full"
       :disabled="busy"
-      :aria-label="done ? '已複製這盤棋' : '複製這盤棋，貼給 AI 一起看'"
+      :aria-label="done ? label : `${label}，貼給 AI 一起看`"
       @click="onExportTap"
     >
-      <component :is="done ? Check : Copy" :size="16" :stroke-width="1.8" />
-      {{ done ? '已複製' : '複製這盤棋' }}
+      <component :is="done ? Check : icon" :size="16" :stroke-width="1.8" />
+      {{ label }}
     </Button>
     <p class="text-center font-sans text-xs text-ink-muted">貼給 AI，就能一起看這盤怎麼走的。</p>
 
@@ -87,7 +111,7 @@ const done = computed(() => state.value === 'SUCCESS')
         :value="fallbackText"
         readonly
         rows="6"
-        class="w-full rounded-card border border-line bg-surface-card p-3 font-sans text-sm text-ink"
+        class="w-full rounded-card border border-line bg-surface-card p-3 font-sans text-base text-ink"
         aria-label="這盤棋的內容，請自行選取複製"
         @focus="(e) => (e.target as HTMLTextAreaElement).select()"
       />

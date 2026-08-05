@@ -170,10 +170,11 @@
   而非結構保證，又接在核心 `onMove`，移除＝拔 fallback。升變無法只靠 vue-tsc/vitest 驗（要瀏覽器真走一步
   升變），故待能實機測升變再移除。
 - **`recommend.ts` 的 `recommended()`**：有測試/文件、與 candidates/practiceTarget 成套的保留 API，刻意不刪。
-- 🪦 **`src/modules/game-export/use-game-export.ts`（已於 2026-08-02 刪除，勿提案裝回）**：依
-  `production/positioning-v2-2026-08-02.md` D7 移除 composable ＋ `tier-delivery.test.ts`。
-  **`assembler.ts` 仍在服役、不可刪**——`buildPgn` 有兩個活消費端（`stores/data-sync.ts:59` 寫雲端 PGN、
-  `views/MemoryView.vue:28`），砍它會靜默降級成原始 UCI 字串。
+- **`src/modules/game-export/use-game-export.ts`（已接 UI，勿刪）**：2026-08-02 曾依 positioning-v2 D7
+  當死碼刪除（當時零呼叫點），**2026-08-05 撤銷並復活**——匯出接上棋憶儀表板的「複製這盤棋」
+  （`components/memory/GameExportCard.vue`），Eason 拍板它屬於產品而非開發工具。`tier-delivery.test.ts`
+  一併復活。**`assembler.ts` 亦不可刪**——`buildPgn` 另有兩個活消費端（`stores/data-sync.ts:59` 寫雲端
+  PGN、`views/MemoryView.vue:28`），砍它會靜默降級成原始 UCI 字串。
 - 🪦 **`opening-knowledge-card.vue` + `opening-knowledge-cards.ts`（v2 D5 判死，尚未執行）**：
   20 張卡全站零呼叫點，開局知識與「察覺」無關。接線＝替與斷層無關的東西發居留證。
 

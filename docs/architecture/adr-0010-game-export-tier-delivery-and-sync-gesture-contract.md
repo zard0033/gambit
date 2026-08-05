@@ -1,11 +1,20 @@
 # ADR-0010: Game Export Tier-1/2/3 Delivery and Synchronous User-Gesture Clipboard Contract
 
 ## Status
-Superseded
+Accepted
 
-> **2026-08-02**：composable 層（`useGameExport` 及其狀態機、`tests/unit/game-export/tier-delivery.test.ts`）
-> 已依 positioning-v2 D7 移除。`assembler.ts` 的 `buildPgn` 仍在服役（`data-sync.ts` 寫雲端 PGN、
-> `MemoryView.vue` 消費），不受影響。本 ADR 保留為歷史記錄，不再是實作規則來源。
+> **2026-08-05（撤銷 08-02 的退役）**：匯出接上 UI——棋憶儀表板的「複製這盤棋」
+> （`components/memory/GameExportCard.vue`），`useGameExport` 與 `tier-delivery.test.ts` 一併復活。
+> 本 ADR **重新成為實作規則來源**：三層 delivery 與同步手勢契約仍是規格。
+>
+> **一處實作偏離，刻意為之**：桌機（`pointer: coarse` 為 false）不走 Tier 1。ADR 寫這份規格時
+> Web Share 還是行動裝置專屬，如今桌機 Chrome/Edge 也實作了 `navigator.share`，在那裡它會開啟
+> Windows 系統分享面板——對一顆寫著「複製」的按鈕是錯的 affordance，而且它做不到使用者真正要的
+> 那件事（把文字放進剪貼簿）。故非觸控裝置注入不含 `share` 的 navigator surface，落到 Tier 2。
+> 觸控裝置維持完整 tier 鏈。
+>
+> **2026-08-02 原註（已失效，保留為歷史）**：composable 層曾依 positioning-v2 D7 移除，
+> 當時 `assembler.ts` 的 `buildPgn` 不受影響仍在服役。
 
 > **Spike complete (2026-05-28)**: `scripts/spike-adr0010-export-gesture-audit.mjs` — desktop delivery pattern verified (all 4 scenarios pass). iPhone device session deferred to before Sprint 3; architecture is correct by construction (TypeScript-enforced sync contract). See Validation Criteria results below.
 
