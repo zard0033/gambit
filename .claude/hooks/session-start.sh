@@ -15,7 +15,11 @@ if [ -n "$BRANCH" ]; then
     # session read a 7-day-old active.md, worked a full day, and found afterwards it had been
     # redoing work that was already 10 commits ahead on origin. "Recent commits" below looked
     # perfectly normal — being behind is invisible without asking for it explicitly.
-    git fetch --quiet origin "$BRANCH" 2>/dev/null
+    # `timeout 3`: settings.json gives this whole hook 10s. Offline (VPN down, DNS failure) a bare
+    # fetch would eat the entire budget and get the script killed here — costing the branch line,
+    # recent commits and the active.md preview below, which are exactly what a session needs when
+    # it CANNOT reach the remote. Capped, an unreachable origin degrades to "no divergence line".
+    timeout 3 git fetch --quiet origin -- "$BRANCH" 2>/dev/null
     COUNTS=$(git rev-list --left-right --count "origin/$BRANCH...HEAD" 2>/dev/null)
     if [ -n "$COUNTS" ]; then
         BEHIND=$(echo "$COUNTS" | cut -f1)
@@ -28,6 +32,7 @@ if [ -n "$BRANCH" ]; then
             git log --oneline "HEAD..origin/$BRANCH" 2>/dev/null | head -10 | while read -r line; do
                 echo "     $line"
             done
+            [ "$BEHIND" -gt 10 ] && echo "     …（共 $BEHIND 個，僅列前 10）"
         elif [ "$AHEAD" -gt 0 ]; then
             echo "本地領先 origin/$BRANCH $AHEAD 個 commit（未 push）"
         fi
