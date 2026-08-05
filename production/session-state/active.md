@@ -1,8 +1,8 @@
 <!-- STATUS -->
 Epic: 定位 v2 刪除期
 Feature: 照死刑名單砍 src ~3,100 行、tests ~1,400 行、文件 ~37,000 行
-Task: ✅ 零風險四項＋✅ 判斷場搬遷都完成。**下一步＝D1 棋誌整組刪除**（須早於任何
-game-history 動作），再依序 D2 → D4 → D3 → D5 → D6。
+Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘已清（`/play` 兩張基線重生，全量 80 綠）。
+**下一步＝D1 棋誌整組刪除**（須早於任何 game-history 動作），再依序 D2 → D4 → D3 → D5 → D6。
 ⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
 <!-- /STATUS -->
 
@@ -50,9 +50,6 @@ game-history 動作），再依序 D2 → D4 → D3 → D5 → D6。
    e2e 註解澄清「無課程前置」是現行設計非永久契約、DeepeningWrapUp 多餘 nextTick）；其餘 10 條
    低信心/超出本次範圍略過（理由已附在 workflow 記錄，未寫進本檔——查 runId 或 journal.jsonl）。
    vitest／typecheck／e2e 修復後**重跑待確認**。
-   `/play` 像素回歸兩張失敗＝**環境既有基線差異**（stash 驗證過與本次改動無關，新裝的 chromium
-   版本與基線截圖不符）。**處置期限：D1 開工前**——D1–D6 是連續大規模刪除，不能一路踩著已知紅燈的
-   視覺 gate 做，屆時要嘛補新基線要嘛查清楚為何紅（precommit-review 五維度審查點出這點）。
 3. **D1 棋誌整組**（保留 `lib/persona-lint.ts`，`modules/memory/persona-lint.ts:9` 在用）。
    **須早於任何 game-history 動作**（`stores/journal.ts:6`）。
 4. **D2 試煉關卡外殼**（保留 `src/data/puzzles/` 30 題）。注意只有 26 題能直接餵 `RecognitionBoard`——
@@ -77,8 +74,13 @@ game-history 動作），再依序 D2 → D4 → D3 → D5 → D6。
    localStorage 讀寫，`game-history`／`journal`／`memory` 全靠它。砍它＝失去本機儲存，不是失去跨裝置。
    要動必須先拆成 local-store ＋ cloud-adapter 兩層（v2 的 R1）。
 
-## 已施工（本輪，未 commit）
+## 已施工（已 commit，工作區乾淨）
 
+- ✅ **像素回歸閘已清**（2026-08-05）：`/play` 兩張紅燈的真因＝**基線是舊的 Skill Level 0–20
+  二十一顆按鈕 UI**，2026-07-29 改成五檔難度輪後從沒重生過。不是 chromium 版本漂移——真是版本
+  問題不會 26 張只挑 2 張紅。已重生兩張，全量像素回歸 80 passed / 0 failed。
+  另：**`/review` 從來不在像素回歸路由表裡**（`visual-regression.spec.ts:8-22`），先前記的
+  「`/review` 基線未重生」是誤記，沒有那張基線。匯出卡目前無視覺守門（要補得先在 spec 內種完局）。
 - ✅ **匯出這盤棋接上 UI**（2026-08-05，D7 撤銷）：新 `GameExportCard.vue` 掛在 `MemoryDashboard`
   的 COMPLETE 分支末尾——選這裡是因為 `/review?gameId=` 同時服務「剛下完」與「對局紀錄點進來的
   過去某局」。復活 `use-game-export.ts`＋`tier-delivery.test.ts`；`MemoryContext` 加 `opening`。
@@ -102,11 +104,9 @@ game-history 動作），再依序 D2 → D4 → D3 → D5 → D6。
 
 ## 未決 / 待辦
 
-- **本機像素回歸整批處理，期限＝D1 開工前**（2026-08-05 Eason 拍板併案）：`/play` 兩張既有紅燈
-  （新裝 chromium 版本與基線不符，已驗證與改動無關）＋ `/review` 新增匯出按鈕後的基線未重生。
-  **CI 綠不代表這批過了**——`toHaveScreenshot` 在 CI 是 skip 的（基線 chromium-win32、依平台而異），
-  CI 只跑結構不變量。兩者一起：先查清楚 `/play` 為何紅，再決定整批重生還是逐張處理。
-
+- **像素回歸的 CI 盲區仍在**（非待辦，是常識備忘）：`toHaveScreenshot` 在 CI 是 skip 的
+  （基線 chromium-win32、依平台而異），CI 只跑結構不變量。**動到任何 UI 後本機要自己跑**
+  `npx playwright test visual-regression`——否則基線會像這次一樣悄悄爛掉六天。
 - **`HomeView.vue:109`** 的 `Lv.{{ resumeInfo.level }}` 印 raw Skill Level，違反「不顯示 Skill Level
   數值」。D3 砍成一檔後這行連同難度選單一起消失，**不必單獨修**。
 - **missed-mate 從 mate 擴到 material**（v2 的 P2）：若對既有對局跑 `selectMissedMates` 產出 ≥1 題的
