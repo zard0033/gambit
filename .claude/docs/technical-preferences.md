@@ -171,6 +171,11 @@
 
 ## Deferred Cleanups（刻意保留、勿移除）
 
+- **`concept-progress.deepenedUnaided`（登記日 2026-08-05，複查期限 2026-11-05）**：唯一消費端
+  （epiphany 棋誌筆）已隨 D1 刪除，現在是**只寫不讀**的持久欄位，兩個深化 view 仍在寫。
+  **具名用途**：它是全 app 唯一的「無求助通關」持久訊號，落在 v2 保留的認知遷移軸上，
+  預定給「該殺沒殺／判斷場題目供給」那批新訊號當輸入（v2 的 P2／P3）。
+  到期仍無讀取端就刪掉欄位＋兩個寫入點＋`ProgressShape` 對應鍵。**別當死碼順手清掉。**
 - **自訂升變 fallback**：`components/promotion-dialog.vue` ＋ `chess-board.vue` 的 `pendingPromotion`/
   `handlePromotionSelect`/`handlePromotionCancel`/`isPromotionMove` 分支。「死」靠 vue3-chessboard runtime
   而非結構保證，又接在核心 `onMove`，移除＝拔 fallback。升變無法只靠 vue-tsc/vitest 驗（要瀏覽器真走一步

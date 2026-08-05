@@ -42,9 +42,12 @@ const playerColor = computed<'white' | 'black'>(() =>
 
 const pz = puzzle ? usePuzzle(puzzle) : null
 
-// Wrong-move + hint UI state.
+// Wrong-move + hint UI state。hintStage 是 **per-ply** 的（走對一手就歸零，讓下一手重新給提示），
+// 所以結算面板不能讀它——多手題在第一手按過提示、第二手自己解出來，會誤報「完成」。
+// hintUsed 是 **per-puzzle** 的黏著旗標，一旦為 true 就不再重置。
 const wrongActive = ref(false)
 const hintStage = ref<0 | 1 | 2>(0)
+const hintUsed = ref(false)
 
 const boardDisabled = computed(
   () => !pz || pz.phase.value === 'solved' || pz.awaitingOpponent.value || wrongActive.value,
@@ -158,6 +161,7 @@ function showHint(): void {
   if (!pz) return
   if (hintStage.value === 0) {
     hintStage.value = 1
+    hintUsed.value = true
   } else if (hintStage.value === 1 && HINT_ARROW_ON_SECOND_PRESS) {
     hintStage.value = 2
   }
@@ -173,9 +177,12 @@ function reviewConcept(): void {
   if (puzzle) router.push(`/learn/concepts?focus=${MOTIF_TO_CONCEPT[puzzle.motif]}`)
 }
 
-// 練習是從課程／棋憶岔出來的一趟，解完就回去，不接「下一題」的線性流。
+// 練習是從課程／棋憶岔出來的一趟，解完就回原本的脈絡，不接「下一題」的線性流。
+// 目前唯一入口是棋憶回放的概念路標（MemoryReplay），硬丟回 /learn 會把人從棋憶踢到課程列表；
+// 有站內上一頁就回上一頁，直接貼網址進來（無 history）才 fallback。
 function goBack(): void {
-  router.push('/learn')
+  if (window.history.state?.back) router.back()
+  else router.push('/learn')
 }
 </script>
 
@@ -188,7 +195,7 @@ function goBack(): void {
         class="flex min-h-[44px] items-center gap-1 px-1 font-sans text-xs font-semibold text-gold/70 active:scale-95"
         @click="goBack"
       >
-        <ArrowLeft :size="16" :stroke-width="1.8" /> 課程
+        <ArrowLeft :size="16" :stroke-width="1.8" /> 返回
       </button>
     </div>
 
@@ -248,7 +255,7 @@ function goBack(): void {
               <Check :size="14" :stroke-width="3" class="text-gold" />
             </span>
             <b class="font-display text-base font-bold tracking-wider text-[#F5D070]">
-              {{ hintStage > 0 ? '看了提示，完成' : '完成' }}
+              {{ hintUsed ? '看了提示，完成' : '完成' }}
             </b>
           </div>
           <p class="font-lesson text-sm leading-relaxed text-ink-on-deep-dim">{{ puzzle.successText }}</p>
@@ -296,7 +303,7 @@ function goBack(): void {
             class="inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-full bg-linear-to-b from-gold-light to-gold px-5 font-sans text-sm font-bold text-gold-ink shadow-[0_2px_12px_rgba(248,181,0,0.4)] active:scale-95"
             @click="goBack"
           >
-            <ArrowLeft :size="16" :stroke-width="1.8" /> 回課程
+            <ArrowLeft :size="16" :stroke-width="1.8" /> 返回
           </button>
         </div>
 

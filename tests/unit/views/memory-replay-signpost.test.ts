@@ -40,7 +40,7 @@ function makeRouter() {
       { path: '/', component: { template: '<div/>' } },
       { path: '/review', component: MemoryView },
       { path: '/learn/:lessonId', component: { template: '<div/>' } },
-      { path: '/dungeon/:puzzleId', component: { template: '<div/>' } },
+      { path: '/practice/:puzzleId', component: { template: '<div/>' } },
     ],
   })
 }

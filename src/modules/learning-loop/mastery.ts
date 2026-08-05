@@ -3,8 +3,8 @@
  * no store access — so they unit-test trivially. v1 exposes exactly two boolean states per concept
  * (已學 / 已練); the deferred `encountered(c)` third state (D3) is intentionally absent.
  *
- * A puzzle counts toward 已練 whether it was cleared in the dungeon or practised from a lesson's
- * Bridge-1 CTA — compose `isSolved` from `dungeonSolved ∪ practiceSolved` at the call site.
+ * 已練的來源自 2026-08-05（v2 的 D2）起只剩 concept-progress 的 `practiceSolved`——試煉的線性
+ * `solved` set 隨外殼一起刪除。`isSolved` 仍是注入的述詞，呼叫端自己決定怎麼組。
  */
 
 import type { ChessConcept } from '../../types/concept'
@@ -26,7 +26,7 @@ export function learned(
   return teaches.every((id) => isCompleted(id))
 }
 
-/** How many of the concept's drill puzzles are solved (dungeon ∪ practice). 0 for lesson-only concepts. */
+/** How many of the concept's drill puzzles are solved. 0 for lesson-only concepts. */
 export function practicedCount(
   concept: ChessConcept,
   allPuzzles: readonly Puzzle[],

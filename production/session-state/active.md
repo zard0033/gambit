@@ -57,6 +57,22 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1
 
 ## 已施工（已 commit、工作區乾淨；**本機領先 origin 4 個 commit，尚未 push**）
 
+- 🔎 **push 前 deep review 收斂（runId `wf_358bd846-92d`，22 條 confirmed）**：修了 12 條。
+  真 bug 只有一條——**多手題吃過提示仍顯示「完成」**：D2 刪掉 per-puzzle 的 sticky `hintUsed`
+  改讀 `hintStage`，但後者在 `correct-advance` 每手歸零，第一手求助、第二手自解就誤報。單手題碰不到，
+  所以 850 綠證明不了它。已還原 sticky flag。
+  **舊試煉進度加了一次性遷移**（`pgr:dungeon:progress.solved` → `practiceSolved`，先 persist 才刪來源鍵，
+  ＋3 條測試）——不遷移的話概念地圖的「已練」金幣會無聲退回未練。**但雲端 `dungeon_progress` 不遷移**
+  （讀它的 data-sync 函式已隨 D2 移除，加回來不划算）：只在別台裝置解過的題不會回來，且**已練從
+  cloud-synced 降級成 device-local**——這是 D2 的已知取捨，不是 bug。
+  另修：練習頁返回改回上一頁（入口是棋憶，硬丟 `/learn` 會把人踢出脈絡）、nav indicator 寬度改由
+  `NAV_ITEMS.length` 算（本輪已手改兩次）、systems-index 等 6 份 GDD 的 journal/DungeonScreen 死連結、
+  learning-loop 兩支模組註解、signpost 測試的 route stub。
+  **駁回 1 條**：reviewer 說 `--color-surface-dungeon` 已死——`PracticePuzzleView.vue:183` 還在用。
+  **不修 4 條**：`/journal`、`/dungeon` 不加 redirect（已刪功能不留路由，NotFoundView 已優雅處理）；
+  `surface-dungeon` token 不改名（cascade 到 light/noir 兩塊＋view，純語彙）；HomeView 零單元測試
+  （e2e 結構不變量已涵蓋掛載與 JS 例外）；`chess:journal:*` 本機鍵不清（與保留雲端表同一立場）。
+
 - ✅ **D2 試煉外殼下架，練習模式留下**（2026-08-05）：**名單原本要連 `DungeonPuzzleView` 一起刪，
   Eason 拍板只砍外殼**——那個 view 同時是棋憶回放「練這個概念」路標的唯一出口，落在保留軸上。
   刪：`DungeonMapView`(285)、`stores/dungeon-progress`(158)、`data-sync` 的 dungeon 兩支、`/dungeon`
@@ -83,14 +99,13 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1
   仍在寫）：唯一消費端是死掉的 epiphany 筆，但它落在認知遷移軸上，是**目前唯一「無求助通關」的
   持久訊號**。現在是孤兒欄位，別當死碼誤刪。
   vitest 867 綠（原 964 減掉刪除的 97 個 it）、typecheck 0、e2e 92 綠。
-- 🔴 **像素回歸容差原本鬆到會放行改版**（2026-08-05 由 D1 意外暴露，已修）：`maxDiffPixelRatio`
-  原為 0.02，量到首頁少一整張 StatCard ＋一整列 peek 只有 **0.0213**——僅超標 6%，實際判過。
-  根因是本站**奶油卡疊奶油底**，YIQ 色差小到多數變動像素不被計入，不是閘壞了（用假基線驗過會紅）。
-  收緊成 **0.005** 後另有 5 張一起轉紅（concepts／concept-deepen／lesson／profile／mobile concepts），
-  diff 圖是卡片位移＝**0.02 一直藏著的既有漂移**，非噪音；全數重生後連跑兩輪 24/24 綠。
-  同輪另清掉 `/play` 兩張紅燈（基線停在舊的 Skill Level 0–20 UI，非 chromium 漂移）。
-  **`/review` 從來不在像素回歸路由表裡**——匯出卡目前無視覺守門（要補得先在 spec 內種完局）。
-  **收緊後仍不夠敏感**：D2 改掉練習頁標題等小改動照樣過關，得靠 `--update-snapshots=all` 才發現基線舊了。
+- 🔴 **像素回歸容差原本鬆到會放行改版**（2026-08-05，已修）：`maxDiffPixelRatio` 原為 0.02，
+  量到首頁少一整張 StatCard ＋一整列 peek 只有 **0.0213**——僅超標 6%，實際判過。根因是本站
+  **奶油卡疊奶油底**，YIQ 色差小到多數變動像素不被計入，閘本身是好的（假基線驗過會紅）。
+  收緊成 **0.005** 後另有 5 張一起轉紅＝0.02 一直藏著的既有漂移（diff 是卡片位移，非散點），全數重生。
+  同輪另清掉 `/play` 兩張（基線停在舊的 Skill Level 0–20 UI，非 chromium 漂移）。
+  **`/review` 不在路由表裡**——匯出卡無視覺守門。**收緊後仍抓不到純文字改動**，
+  改到文案要自己 `--update-snapshots=all` 對一次。
 - ✅ **匯出這盤棋接上 UI**（2026-08-05，D7 撤銷）：新 `GameExportCard.vue` 掛在 `MemoryDashboard`
   的 COMPLETE 分支末尾——選這裡是因為 `/review?gameId=` 同時服務「剛下完」與「對局紀錄點進來的
   過去某局」。復活 `use-game-export.ts`＋`tier-delivery.test.ts`；`MemoryContext` 加 `opening`。

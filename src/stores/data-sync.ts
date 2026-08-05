@@ -380,7 +380,6 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     return !error
   }
 
-
   /**
    * Fetch the player's single in-progress game (續玩對局). Returns null when logged out or on error
    * (resume degrades to the local cache; a read failure must never surface). All in_progress_game
@@ -433,7 +432,6 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     const { error } = await supabase.from('in_progress_game').delete().eq('user_id', userId)
     return !error
   }
-
 
   // ── 棋憶 (Memory) — ADR-0014. guest localStorage → login union reconcile,
   //    event-keyed on game_id, schema_version-filtered. ──

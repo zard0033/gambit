@@ -93,9 +93,9 @@ const NAV_ITEMS = [
       <div class="relative flex">
         <!-- Sliding jade indicator: one slot wide, translateX by activeIndex. -->
         <div
-          class="pointer-events-none absolute inset-y-0 left-0 w-1/2 transition-transform duration-300 ease-out motion-reduce:transition-none"
+          class="pointer-events-none absolute inset-y-0 left-0 transition-transform duration-300 ease-out motion-reduce:transition-none"
           :class="activeIndex < 0 ? 'opacity-0' : 'opacity-100'"
-          :style="{ transform: `translateX(${Math.max(activeIndex, 0) * 100}%)` }"
+          :style="{ width: `${100 / NAV_ITEMS.length}%`, transform: `translateX(${Math.max(activeIndex, 0) * 100}%)` }"
         >
           <div class="mx-1 h-full rounded-full bg-white/13 border border-white/[0.28] shadow-[0_3px_10px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.25)]" />
         </div>

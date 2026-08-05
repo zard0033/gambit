@@ -187,7 +187,6 @@ passed by playing its expectedMove, so reaching the end implies all were played.
 - **(Phase 2b) AI tutor** — Claude API may generate dynamic coach commentary layered on the same scripted step structure.
 - **Learning Loop — Concept Linking (#20)** — realises the bidirectional lesson ↔ game/puzzle linking (the deferred ADR #4, now `docs/architecture/adr-0012`). Lessons gain an optional `concepts?: ChessConcept[]` tag (additive); lesson completion hosts the「練習這個想法」course→puzzle CTA. See `design/gdd/learning-loop.md`.
 - **Game Replay (Phase 2a)** — `game-replay.md` Downstream already names "(Phase 2c) Lesson Linking"; this GDD is the corresponding upstream side of that bidirectional reference.
-- **Journal — 棋誌 (#21)** *(Phase 1 differentiation)* — subscribes to lesson-solved events (motif + `hintUsed`) and reads `lesson-progress.completed` + catalog stage to write ① epiphany (no-hint first solve) and ④ arrival (stage completion) entries. Read-only; never mutates lesson state. See `design/gdd/journal.md`.
 
 ---
 

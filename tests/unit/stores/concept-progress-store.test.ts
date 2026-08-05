@@ -124,3 +124,48 @@ describe('concept deepening — does not pollute lesson progress', () => {
     expect(lessons.nextLesson?.id).toBe(nextBefore)
   })
 })
+
+// D2 遷移：試煉外殼刪除後，舊的 `pgr:dungeon:progress` 沒有讀取端，裡面已解的題會讓概念地圖的
+// 「已練」無聲退回未練。這組測試釘住三件事：真的併進來、真的寫進去（不是只留在記憶體）、
+// 併完把來源鍵清掉且不重複遷移。
+describe('D2 一次性遷移：舊試煉進度併入 practiceSolved', () => {
+  const LEGACY = 'pgr:dungeon:progress'
+
+  beforeEach(() => {
+    localStorage.clear()
+    setActivePinia(createPinia())
+  })
+
+  it('test_legacyDungeonSolved_mergesIntoPracticeSolved_andPersists', () => {
+    // Arrange
+    localStorage.setItem(LEGACY, JSON.stringify({ solved: ['l1-capture-queen', 'l2-knight-fork-rook'], hinted: [] }))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ practiceSolved: ['l3-existing'], deepened: [] }))
+
+    // Act
+    const store = useConceptProgressStore()
+
+    // Assert — 記憶體有了
+    expect(store.isPracticeSolved('l1-capture-queen')).toBe(true)
+    expect(store.isPracticeSolved('l2-knight-fork-rook')).toBe(true)
+    expect(store.isPracticeSolved('l3-existing')).toBe(true)
+    // 而且真的落地了——沒 persist 的話來源鍵已刪，重載即失
+    const persisted = JSON.parse(localStorage.getItem(STORAGE_KEY)!) as { practiceSolved: string[] }
+    expect([...persisted.practiceSolved].sort()).toEqual(['l1-capture-queen', 'l2-knight-fork-rook', 'l3-existing'])
+    // 來源鍵已清
+    expect(localStorage.getItem(LEGACY)).toBeNull()
+  })
+
+  it('test_legacyKeyAbsent_isNoOp', () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ practiceSolved: ['l3-existing'], deepened: [] }))
+    const store = useConceptProgressStore()
+    expect(store.isPracticeSolved('l3-existing')).toBe(true)
+    expect(localStorage.getItem(LEGACY)).toBeNull()
+  })
+
+  it('test_corruptLegacyPayload_doesNotThrow_andStillClearsKey', () => {
+    localStorage.setItem(LEGACY, '{ not json')
+    expect(() => useConceptProgressStore()).not.toThrow()
+    expect(localStorage.getItem(LEGACY)).toBeNull()
+  })
+})
+

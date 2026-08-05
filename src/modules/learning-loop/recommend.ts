@@ -1,11 +1,9 @@
 /**
  * Bridge 1 recommendation (Learning Loop #20, GDD §4.3). Pure functions over the puzzle catalog
  * — no store access — so they are trivially unit-testable. The caller supplies an `isSolved`
- * predicate; compose it from `dungeonSolved ∪ practiceSolved` so a puzzle counts as done whether
- * it was cleared in the dungeon or practised from a lesson.
+ * predicate；自 2026-08-05（v2 的 D2）起唯一來源是 `practiceSolved`。
  *
- * Because the Bridge-1 CTA opens puzzles in PRACTICE mode (the D1 side-door bypasses the dungeon
- * lock), recommendation does NOT filter by dungeon unlock — every puzzle of the concept is a
+ * 沒有鎖可以濾（D2 之後練習是唯一模式），recommendation 不做任何解鎖過濾——every puzzle of the concept is a
  * legitimate practice target.
  */
 

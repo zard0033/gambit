@@ -260,7 +260,7 @@ solved when p ≥ L − 1 after a correct final player move
   + separate data module).
 - **chess.js** (bundled with vue3-chessboard) — rules authority for legality and
   `isCheckmate()` validation. No new dependency added.
-- **Gambit Design System** — visual SoT; the screen follows `DungeonScreen.jsx` minus
+- **Gambit Design System** — visual SoT。（`DungeonScreen.jsx` 已隨 D2 刪除。）原文：the screen follows `DungeonScreen.jsx` minus
   the streak elements. Dark dungeon surface, jade "coin" climb nodes (same beveled
   map-tile vocabulary as the Concept Map), gold for the current node + CTA + the
   already-climbed trail only.
