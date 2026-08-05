@@ -26,30 +26,13 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1
 
 ### 施工順序（依賴決定，不可調換）
 
-1. ~~**零風險四項**~~ ✅ **2026-08-02 完成**：~~`use-game-export.ts`＋`tier-delivery.test.ts`~~
-   （🔙 **D7 已於 2026-08-05 撤銷、兩檔復活**——匯出接上 UI 後成為保留項目，見下方「已施工」；
-   `assembler.ts` 本就保留，`data-sync.ts:59` 靠它寫雲端 PGN）／variants 輪替機制拔除、
-   已深化概念不再給行動召喚（`variants[0]` 直取，資料結構未攤平＝v2 明令不動 `index.ts`）／
-   `production/{epics,qa,sprints,gate-checks}`＋49 個 design HTML 共 236 檔（`session-state/` 已排除；
-   `session-log.md` 是 gitignored、無 git 保護，搬到本次 session 的 scratchpad——**那裡會被清，
-   等同延後刪除**，要留就自己另存）／vision 三節切除 239→152 行。
-   合計 238 檔、25,566 行。vitest 944 綠、typecheck 0 error。
-2. ~~**判斷場搬出獨立路由**~~ ✅ **2026-08-03 完成**：新路由 `/learn/concept/:conceptId/judge`
-   → `RecognitionFieldView.vue`（新檔）。`ConceptDeepenView.vue` 只留 LessonPlayer 相位，完成後
-   `router.push` 到 judge 路由並帶 `?unaided=`（跨路由沒有記憶體狀態，epiphany 判定改用 query 傳遞，
-   見 `RecognitionFieldView.vue` 開頭註解）；`?source=recognition`（棋憶 signpost）原樣轉送。
-   `RecognitionSignpost.vue` **不用改**——它推的是教學相位（lesson 仍在前），不是 judge 路由本身，
-   改了反而會跳過課程，是原計畫漏想的一步。收尾卡片抽成共用 `DeepeningWrapUp.vue`。
-   `deepening.essence`（收尾卡精髓句）沒有輕量替代來源，`RecognitionFieldView` 仍依賴
-   `data/concept-deepening/index.ts`——**未完全解鎖** R2 提的 catalog 刪除，只解鎖了路由獨立本身。
-   新增 unit（9 條，涵蓋 unaided 跨路由往返、epiphany 觸發／不觸發、棋憶 signpost 真實局面路徑）
-   ＋ e2e（3 條，涵蓋路由掛載與 guard）。**precommit-review deep 跑過**（9 agent、5 條 major 全被
-   對抗驗證反駁——重複判定/routeKey/deep-link 偽造三類指控查證後都不成立，理由見 workflow 記錄）；
-   19 條 minor 修了 9 條（testid 改路由中性、`hasPending()` 省一次陣列具現化、cast 風格對齊、
-   `push`→`replace` 修回搬遷前的上一頁行為兩處、補棋憶 signpost 全程 unit、trust-boundary 註解、
-   e2e 註解澄清「無課程前置」是現行設計非永久契約、DeepeningWrapUp 多餘 nextTick）；其餘 10 條
-   低信心/超出本次範圍略過（理由已附在 workflow 記錄，未寫進本檔——查 runId 或 journal.jsonl）。
-   vitest／typecheck／e2e 修復後**重跑待確認**。
+1. ~~**零風險四項**~~ ✅ **2026-08-02**：238 檔、25,566 行（`production/{epics,qa,sprints,gate-checks}`
+   ＋49 個 design HTML ＋ variants 輪替 ＋ vision 三節）。🔙 其中 **D7 已於 2026-08-05 撤銷**——
+   `use-game-export.ts`＋`tier-delivery.test.ts` 復活，匯出接上 UI 後是保留項目。
+2. ~~**判斷場搬出獨立路由**~~ ✅ **2026-08-03**：`/learn/concept/:conceptId/judge` →
+   `RecognitionFieldView.vue`；`unaided` 改用 query 跨路由傳遞，收尾卡抽成 `DeepeningWrapUp.vue`。
+   **未完全解鎖 R2 的 catalog 刪除**——`deepening.essence` 仍依賴 `data/concept-deepening/index.ts`。
+   `RecognitionSignpost.vue` 刻意不改（它推教學相位，改了會跳過課程）。
 3. ~~**D1 棋誌整組**~~ ✅ **2026-08-05 完成**（見下方「已施工」）。
 4. ~~**D2 試煉關卡外殼**~~ ✅ **2026-08-05 完成**（見下方「已施工」）。
 5. **D4 棋憶敘事外殼**（**保留 `MemoryDashboard.vue`**＝主路徑的門，另保留 describe/selection/
@@ -68,9 +51,9 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1
    恆答「沒有」準確率 70–93%。它量的是最佳手唯不唯一——兩手都能贏子時 gap≈0，正好在戰術最豐富處
    關掉自己。正解＝chess.js 窮舉（`missed-mate.ts:44-58` 已有一半，另一半「有沒有強制贏子」要新寫
    前瞻判定，**不能**沿用 `classify.ts:57-92`，那支是事後判定）。
-3. **`data-sync.ts` 不是雲端層，是唯一的持久化層**：`:286-300`／`:513`／`:537`／`:635` 是純
-   localStorage 讀寫，`game-history`／`journal`／`memory` 全靠它。砍它＝失去本機儲存，不是失去跨裝置。
-   要動必須先拆成 local-store ＋ cloud-adapter 兩層（v2 的 R1）。
+3. **`data-sync.ts` 不是雲端層，是唯一的持久化層**：guest 佇列與 memory 的讀寫都是純 localStorage，
+   `game-history`／`memory` 全靠它。砍它＝失去本機儲存，不是失去跨裝置。要動必須先拆成
+   local-store ＋ cloud-adapter 兩層（v2 的 R1）。（行號原本寫死在這裡，D1/D2 刪過就不準了，故移除。）
 
 ## 已施工（已 commit，工作區乾淨）
 
