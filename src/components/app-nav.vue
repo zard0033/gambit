@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { House, BookOpen, Target, CircleUserRound } from 'lucide-vue-next'
+import { House, BookOpen, CircleUserRound } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
 import brandMark from '@/assets/brand-mark.svg'
 import { useAuthStore } from '@/stores/auth'
@@ -16,13 +16,12 @@ const isActive = (to: string): boolean => (to === '/' ? route.path === '/' : rou
 // (e.g. /profile, /review), indicator hidden.
 const activeIndex = computed(() => NAV_ITEMS.findIndex((i) => isActive(i.to)))
 
-// Primary destinations — 首頁 + 學習 / 試煉. 對局 has no tab: a game always starts from the
+// Primary destinations — 首頁 + 學習. 對局 has no tab: a game always starts from the
 // global setup modal (home card / 再來一局), so a nav entry to the bare /play board is redundant.
 // Account/profile lives in the top-right header. Shared by the desktop top bar + mobile bottom bar.
 const NAV_ITEMS = [
   { to: '/', label: '首頁', icon: House },
   { to: '/learn', label: '學習', icon: BookOpen },
-  { to: '/dungeon', label: '試煉', icon: Target },
 ] as const
 </script>
 
@@ -94,7 +93,7 @@ const NAV_ITEMS = [
       <div class="relative flex">
         <!-- Sliding jade indicator: one slot wide, translateX by activeIndex. -->
         <div
-          class="pointer-events-none absolute inset-y-0 left-0 w-1/3 transition-transform duration-300 ease-out motion-reduce:transition-none"
+          class="pointer-events-none absolute inset-y-0 left-0 w-1/2 transition-transform duration-300 ease-out motion-reduce:transition-none"
           :class="activeIndex < 0 ? 'opacity-0' : 'opacity-100'"
           :style="{ transform: `translateX(${Math.max(activeIndex, 0) * 100}%)` }"
         >

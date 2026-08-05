@@ -3,7 +3,7 @@
 觸發時機：新增或修改 `data/lessons/*`、`data/puzzles/*`、`data/concept-deepening/*` 的局面，
 或潤飾 `design/gambit-design-system/persona-neve.md` 相關文案。其餘工作不需要讀這份檔案。
 
-> **課程／試煉棋理護欄**：新增或修改 `data/lessons/*`、`data/puzzles/*` 的局面後，
+> **課程／練習題棋理護欄**：新增或修改 `data/lessons/*`、`data/puzzles/*` 的局面後，
 > 內容閘門測試（`tests/unit/data/*.test`）只驗「FEN／走法合法、mate 題結尾將死」，
 > **不驗**最佳解、子力交換結算、概念是否匹配。必須額外用 chess.js 實證：將殺宣稱跑
 > `isCheckmate()`、子力交換逐步推算、確認 expectedMove／solution 是客觀最佳解、局面

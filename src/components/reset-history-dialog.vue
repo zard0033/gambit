@@ -2,7 +2,7 @@
 /**
  * ProfileView「重置對局記錄」二次確認。危險動作區平靜但明確（非紅色恐嚇風，鐵則）——說清楚會刪什麼、
  * 保留什麼，再讓使用者按下確認。刪除範圍：對局歷史（雲端 game_sessions 自己的 rows / 訪客 localStorage）
- * ＋進行中對局。不動棋誌、棋憶回顧、課程與試煉進度。
+ * ＋進行中對局。不動棋憶回顧、課程與練習進度。
  * Mount/unmount owned by the parent (v-if), mirrors play-setup-modal.vue's open+emit('close') shape.
  */
 import { ref, watch } from 'vue'
@@ -46,7 +46,7 @@ async function confirmReset(): Promise<void> {
       <DialogHeader>
         <DialogTitle>重置對局記錄</DialogTitle>
         <DialogDescription>
-          這會清除你的對局歷史與目前進行中的對局，且無法復原。棋誌、棋憶回顧、課程與試煉進度不受影響。
+          這會清除你的對局歷史與目前進行中的對局，且無法復原。棋憶回顧、課程與練習進度不受影響。
         </DialogDescription>
       </DialogHeader>
 

@@ -12,8 +12,7 @@ const ROUTES: readonly [name: string, path: string][] = [
   ['concepts', '/learn/concepts'],
   ['concept-deepen', '/learn/concept/pin'],
   ['lesson', '/learn/pawn-basics'], // 第一課，未上鎖
-  ['dungeon', '/dungeon'],
-  ['puzzle', '/dungeon/l1-capture-queen'],
+  ['practice', '/practice/l1-capture-queen'],
   ['history', '/history'],
   ['profile', '/profile'],
   ['sign-in', '/sign-in'],

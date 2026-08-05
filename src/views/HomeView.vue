@@ -2,23 +2,21 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { ArrowRight, Target, BookOpen, Swords } from 'lucide-vue-next'
+import { ArrowRight, Swords } from 'lucide-vue-next'
 import { LESSON_TIER_LABELS, LESSON_TIER_PIECES as TIER_PIECE } from '@/types/lesson'
 import { greetingForNow } from '@/lib/utils'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
-import { useDungeonProgressStore } from '@/stores/dungeon-progress'
 import { useUiStore } from '@/stores/ui-store'
 import { useResumeGameStore } from '@/stores/resume-game'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { DarkPanel, ChapterBadge, StatCard, SectionLabel, ProgressBar, InkBrush } from '@/components/ui/gambit'
+import { DarkPanel, ChapterBadge, SectionLabel, ProgressBar, InkBrush } from '@/components/ui/gambit'
 import NeveSceneHeader from '@/components/home/NeveSceneHeader.vue'
 import { useReducedMotion } from '@/composables/use-reduced-motion'
 
 const router = useRouter()
 const progress = useLessonProgressStore()
 const { nextLesson } = storeToRefs(progress)
-const dungeon = useDungeonProgressStore()
 const uiStore = useUiStore()
 const resume = useResumeGameStore()
 
@@ -181,28 +179,6 @@ onMounted(() => {
       </Card>
     </div>
 
-    <!-- 總覽（全寬） -->
-    <div class="fade-rise" :class="{ 'is-in': ready }" style="transition-delay: 60ms">
-    <SectionLabel as="h2">總覽</SectionLabel>
-    <!-- 段落乾筆：寬扁、克制，標籤與內容間的柔性分隔（墨韻母題，鋪量克制） -->
-    <InkBrush :width="200" :height="8" :seed="7" :thickness="0.18" aria-hidden="true" />
-    <div class="grid grid-cols-2 gap-2.5 mt-2.5">
-      <RouterLink to="/learn" class="block rounded-card focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold" aria-label="學習進度">
-        <StatCard
-          :icon="BookOpen"
-          label="學習進度"
-          :value="`${progress.completedCount}/${progress.totalCount}`"
-        />
-      </RouterLink>
-      <RouterLink to="/dungeon" class="block rounded-card focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold" aria-label="試煉">
-        <StatCard
-          :icon="Target"
-          label="試煉"
-          :value="`${dungeon.solvedCount}/${dungeon.totalCount}`"
-        />
-      </RouterLink>
-    </div>
-    </div>
   </div>
   </div>
 </template>

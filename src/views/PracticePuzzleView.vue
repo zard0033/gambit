@@ -2,48 +2,36 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Chess } from 'chess.js'
-import { ArrowLeft, ArrowRight, Lightbulb, Check, X, BookOpen } from 'lucide-vue-next'
+import { ArrowLeft, Lightbulb, Check, X, BookOpen } from 'lucide-vue-next'
 import ChessBoard from '@/components/chess-board.vue'
 import MoveAnnotationDisplay from '@/components/move-annotation-display.vue'
-import { getPuzzleById, puzzles } from '@/data/puzzles'
+import { getPuzzleById } from '@/data/puzzles'
 import { reviewLinkForMotif } from '@/data/concepts'
 import { MOTIF_TO_CONCEPT } from '@/types/concept'
-import { useDungeonProgressStore } from '@/stores/dungeon-progress'
 import { useConceptProgressStore } from '@/stores/concept-progress'
-import { useDungeonPuzzle } from '@/modules/dungeon/use-dungeon-puzzle'
+import { usePuzzle } from '@/modules/practice/use-puzzle'
 import { useReducedMotion } from '@/composables/use-reduced-motion'
 import { useBoardFit } from '@/composables/use-board-fit'
 import {
   OPPONENT_REPLY_DELAY_MS,
   WRONG_TINT_DURATION_MS,
   HINT_ARROW_ON_SECOND_PRESS,
-} from '@/config/dungeon-tuning'
+} from '@/config/practice-tuning'
 import type { MoveMadePayload } from '@/composables/use-chess-board'
 import type { Annotation } from '@/modules/move-annotation/annotation-types'
 import type { Rect } from '@/utils/board-geometry'
 
 const route = useRoute()
 const router = useRouter()
-const progress = useDungeonProgressStore()
 const conceptProgress = useConceptProgressStore()
 const { prefersReducedMotion } = useReducedMotion()
 
 const puzzle = getPuzzleById(route.params.puzzleId as string)
 
-// D1 side-door (Learning Loop #20): when arriving from a lesson's Bridge-1 CTA (`?from=lesson`),
-// this puzzle opens in PRACTICE mode — it bypasses the dungeon's linear `nodeState` lock, and a
-// solve is recorded ONLY in the concept-progress store (never the dungeon `solved` set). The
-// dungeon's linear map is untouched.
-const isPractice = route.query.from === 'lesson'
-
-// Guard: unknown puzzle → back to the map. A still-locked puzzle is allowed ONLY in practice mode.
-if (!puzzle || (progress.nodeState(puzzle) === 'locked' && !isPractice)) {
-  router.replace('/dungeon')
-}
-
-// Local hint-used flag for the solved panel — in practice mode we must NOT write the dungeon
-// store's `hinted` set, so the panel reads this instead.
-const hintUsed = ref(false)
+// 練習模式是唯一模式（2026-08-05，定位 v2 的 D2 砍掉試煉外殼後）：沒有鎖、沒有線性進度、
+// 沒有雲端表；解出來只記進 concept-progress 的 practiceSolved。入口是棋憶回放的概念路標。
+// Guard: 認不得的題目 → 回課程。
+if (!puzzle) router.replace('/learn')
 
 // Track last correct move's destination for the board checkmark badge.
 const lastCorrectSquare = ref<string | null>(null)
@@ -52,7 +40,7 @@ const playerColor = computed<'white' | 'black'>(() =>
   puzzle && new Chess(puzzle.fen).turn() === 'b' ? 'black' : 'white',
 )
 
-const pz = puzzle ? useDungeonPuzzle(puzzle) : null
+const pz = puzzle ? usePuzzle(puzzle) : null
 
 // Wrong-move + hint UI state.
 const wrongActive = ref(false)
@@ -160,23 +148,16 @@ function handleMove(payload: MoveMadePayload): void {
     return
   }
 
-  // correct-solved — practice mode records to concept-progress only (D1 zero-mutation invariant);
-  // normal dungeon play advances the linear progress as before.
+  // correct-solved — 只記進 concept-progress。
   lastResult.value = { ok: true, text: describeMove(result.piece, result.captured) }
   lastCorrectSquare.value = payload.to
-  if (puzzle) {
-    if (isPractice) conceptProgress.markPracticed(puzzle.id)
-    else progress.markSolved(puzzle.id)
-  }
+  if (puzzle) conceptProgress.markPracticed(puzzle.id)
 }
 
 function showHint(): void {
   if (!pz) return
   if (hintStage.value === 0) {
     hintStage.value = 1
-    hintUsed.value = true
-    // Practice mode must not touch the dungeon store; only normal play records the hint flag.
-    if (puzzle && !isPractice) progress.markHintUsed(puzzle.id) // non-penalising (no streak); flag only
   } else if (hintStage.value === 1 && HINT_ARROW_ON_SECOND_PRESS) {
     hintStage.value = 2
   }
@@ -192,20 +173,9 @@ function reviewConcept(): void {
   if (puzzle) router.push(`/learn/concepts?focus=${MOTIF_TO_CONCEPT[puzzle.motif]}`)
 }
 
-const nextPuzzle = computed(() => {
-  if (!puzzle) return null
-  return puzzles.find((p) => p.order === puzzle.order + 1) ?? null
-})
-
-function goNext(): void {
-  // Practice mode is a side trip from a lesson — return to the lessons, not the dungeon's
-  // linear "next puzzle" flow.
-  if (isPractice) {
-    router.push('/learn')
-    return
-  }
-  if (nextPuzzle.value) router.push(`/dungeon/${nextPuzzle.value.id}`)
-  else router.push('/dungeon')
+// 練習是從課程／棋憶岔出來的一趟，解完就回去，不接「下一題」的線性流。
+function goBack(): void {
+  router.push('/learn')
 }
 </script>
 
@@ -216,19 +186,18 @@ function goNext(): void {
       <button
         type="button"
         class="flex min-h-[44px] items-center gap-1 px-1 font-sans text-xs font-semibold text-gold/70 active:scale-95"
-        @click="router.push(isPractice ? '/learn' : '/dungeon')"
+        @click="goBack"
       >
-        <ArrowLeft :size="16" :stroke-width="1.8" /> {{ isPractice ? '課程' : '地圖' }}
+        <ArrowLeft :size="16" :stroke-width="1.8" /> 課程
       </button>
-      <span class="font-num text-[11px] text-ink-on-deep-dim/70">{{ progress.solvedCount }}/{{ progress.totalCount }}</span>
     </div>
 
-    <!-- 關卡銘牌：道場匾額 —「第 N 關」+ 金色 motif kicker + 細金分隔線 -->
+    <!-- 銘牌：道場匾額 + 細金分隔線。原本寫「第 N 關」，D2 砍掉關卡地圖後那個編號不再指向任何東西，
+         改以題目自己的標題當標題。 -->
     <div class="px-6 pb-3 pt-1 text-center">
       <h1 class="font-display text-[22px] font-bold tracking-[0.06em] text-ink-on-deep" tabindex="-1">
-        第 {{ puzzle.order }} 關
+        {{ puzzle.title }}
       </h1>
-      <p class="mt-1 font-sans text-[11px] font-medium tracking-[0.18em] text-gold/85">{{ puzzle.title }}</p>
       <div class="mx-auto mt-2.5 h-px w-12 bg-[linear-gradient(90deg,transparent,#F8B500,transparent)] opacity-60" />
     </div>
 
@@ -279,7 +248,7 @@ function goNext(): void {
               <Check :size="14" :stroke-width="3" class="text-gold" />
             </span>
             <b class="font-display text-base font-bold tracking-wider text-[#F5D070]">
-              {{ (isPractice ? hintUsed : progress.wasHintUsed(puzzle.id)) ? '看了提示，完成' : '試煉達成' }}
+              {{ hintStage > 0 ? '看了提示，完成' : '完成' }}
             </b>
           </div>
           <p class="font-lesson text-sm leading-relaxed text-ink-on-deep-dim">{{ puzzle.successText }}</p>
@@ -320,34 +289,15 @@ function goNext(): void {
         </template>
 
         <!-- ===== Footer ===== -->
-        <!-- 達成：practice mode → 單一「回課程」；dungeon mode → 回地圖（次要）+ 下一題（金 CTA）-->
+        <!-- 達成：單一「回課程」 -->
         <div v-if="pz.phase.value === 'solved'" class="mt-3.5 flex items-center gap-2 border-t border-white/8 pt-3">
-          <template v-if="isPractice">
-            <button
-              type="button"
-              class="inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-full bg-linear-to-b from-gold-light to-gold px-5 font-sans text-sm font-bold text-gold-ink shadow-[0_2px_12px_rgba(248,181,0,0.4)] active:scale-95"
-              @click="goNext"
-            >
-              <ArrowLeft :size="16" :stroke-width="1.8" /> 回課程
-            </button>
-          </template>
-          <template v-else>
-            <button
-              type="button"
-              class="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-white/15 bg-white/6 px-4 font-sans text-[13px] font-semibold text-ink-on-deep active:scale-[0.98]"
-              @click="router.push('/dungeon')"
-            >
-              <ArrowLeft :size="15" :stroke-width="1.8" /> 回地圖
-            </button>
-            <div class="flex-1" />
-            <button
-              type="button"
-              class="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-linear-to-b from-gold-light to-gold px-5 font-sans text-sm font-bold text-gold-ink shadow-[0_2px_12px_rgba(248,181,0,0.4)] active:scale-95"
-              @click="goNext"
-            >
-              {{ nextPuzzle ? '下一題' : '回到地圖' }} <ArrowRight :size="16" />
-            </button>
-          </template>
+          <button
+            type="button"
+            class="inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-full bg-linear-to-b from-gold-light to-gold px-5 font-sans text-sm font-bold text-gold-ink shadow-[0_2px_12px_rgba(248,181,0,0.4)] active:scale-95"
+            @click="goBack"
+          >
+            <ArrowLeft :size="16" :stroke-width="1.8" /> 回課程
+          </button>
         </div>
 
         <!-- 解題：提示（低調收進卡內）+ 概念複習連結 -->

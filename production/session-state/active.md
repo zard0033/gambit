@@ -1,8 +1,8 @@
 <!-- STATUS -->
 Epic: 定位 v2 刪除期
 Feature: 照死刑名單砍 src ~3,100 行、tests ~1,400 行、文件 ~37,000 行
-Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1 棋誌整組已刪**。
-**下一步＝D2 試煉關卡外殼**，再依序 D4 → D3 → D5 → D6。
+Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1 棋誌**＋✅ **D2 試煉外殼**。
+**下一步＝D4 棋憶敘事外殼**，再依序 D3 → D5 → D6。
 ⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
 <!-- /STATUS -->
 
@@ -51,8 +51,7 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1
    低信心/超出本次範圍略過（理由已附在 workflow 記錄，未寫進本檔——查 runId 或 journal.jsonl）。
    vitest／typecheck／e2e 修復後**重跑待確認**。
 3. ~~**D1 棋誌整組**~~ ✅ **2026-08-05 完成**（見下方「已施工」）。
-4. **D2 試煉關卡外殼**（保留 `src/data/puzzles/` 30 題）。注意只有 26 題能直接餵 `RecognitionBoard`——
-   4 題 mate-in-2 無法用 `types/recognition.ts:25-28` 的單一 `expectedMove` 表達。
+4. ~~**D2 試煉關卡外殼**~~ ✅ **2026-08-05 完成**（見下方「已施工」）。
 5. **D4 棋憶敘事外殼**（**保留 `MemoryDashboard.vue`**＝主路徑的門，另保留 describe/selection/
    summary/missed-mate/post-game-review）。`pgn-viewer` 與 `@lichess-org/pgn-viewer` 同批退役。
 6. **D3 難度五檔→一檔**（保留 `fallible-pick.ts`）。
@@ -75,14 +74,28 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1
 
 ## 已施工（已 commit，工作區乾淨）
 
+- ✅ **D2 試煉外殼下架，練習模式留下**（2026-08-05）：**名單原本要連 `DungeonPuzzleView` 一起刪，
+  Eason 拍板只砍外殼**——那個 view 同時是棋憶回放「練這個概念」路標的唯一出口，落在保留軸上。
+  刪：`DungeonMapView`(285)、`stores/dungeon-progress`(158)、`data-sync` 的 dungeon 兩支、`/dungeon`
+  路由、底部 tab 的試煉格（indicator `w-1/3`→`w-1/2`）、首頁**整個總覽區**（砍完只剩一張學習進度卡，
+  而 hero 卡已經有同一條 0/21 進度）、地圖的死 CSS 與 8 個孤兒 token（map-tile-*／map-trail／
+  surface-dungeon-2／棋誌遺留的 texture-paper-grain）。
+  改名：`modules/dungeon`→`modules/practice`、`useDungeonPuzzle`→`usePuzzle`、`dungeon-tuning`→
+  `practice-tuning`、`DungeonPuzzleView`→`PracticePuzzleView`、路由 `/dungeon/:id`→`/practice/:id`。
+  **`App.vue` 的 `routeKey` 也要跟著改**（它比對 route name `'puzzle'`，漏改就換題不重繪）。
+  順修三處說謊文案：練習頁標題還寫「第 N 關」（地圖沒了，編號不指向任何東西）→ 改用題目標題；
+  重置對話框說「不動棋誌與試煉進度」（兩者都已不存在）；棋憶路標按鈕「去試煉」→「練這個概念」。
+  `ConceptMapView` 的**已練**來源從 `dungeonSolved ∪ practiceSolved` 收斂成只剩 practiceSolved。
+  GDD 標「部分 superseded」並在標頭列出哪些死哪些活（解題本體仍有效）；`dungeon_progress` 表與
+  migration 同 D1 處置＝保留未 drop。vitest 850 綠、typecheck 0、e2e 86 綠。
+
 - ✅ **D1 棋誌整組下架**（2026-08-05）：42 檔、約 3,100 行。名單外自行裁定的三件——
   ① **`data-sync.ts` 的 journal 持久化層一併拔除**（`journalRowToEntry`／`journalEntryToRow`／
   `loadJournalEntries`／`appendJournalEntry`／`readLocalJournalEntries`／`flushJournalQueue`
   ＋兩個 localStorage key 常數），棋誌一死它就是純死碼；這不違反 R1，R1 擋的是砍 data-sync 本身。
   ② **Supabase `journal_entries` 表與 migration 保留未 drop**，資料還在。
-  ③ **GDD／quick-spec／review-log 刪、ADR-0013 標 Superseded**（ADR 是決策紀錄，且仍是那張表的
-  唯一 schema 描述）。另刪 `.claude/docs/technical-preferences.md` 的「新增棋誌筆種 pen 的標準路徑」
-  整節——留著等於叫未來的 session 去接一個不存在的管線。
+  ③ **GDD／quick-spec／review-log 刪、ADR-0013 標 Superseded**；另刪 technical-preferences 的
+  「新增棋誌筆種 pen 的標準路徑」整節——留著等於叫未來的 session 去接一個不存在的管線。
   **`concept-progress.deepenedUnaided` 刻意留著**（`ConceptDeepenView`／`RecognitionFieldView`
   仍在寫）：唯一消費端是死掉的 epiphany 筆，但它落在認知遷移軸上，是**目前唯一「無求助通關」的
   持久訊號**。現在是孤兒欄位，別當死碼誤刪。
@@ -92,9 +105,9 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1
   根因是本站**奶油卡疊奶油底**，YIQ 色差小到多數變動像素不被計入，不是閘壞了（用假基線驗過會紅）。
   收緊成 **0.005** 後另有 5 張一起轉紅（concepts／concept-deepen／lesson／profile／mobile concepts），
   diff 圖是卡片位移＝**0.02 一直藏著的既有漂移**，非噪音；全數重生後連跑兩輪 24/24 綠。
-  同輪另清掉 `/play` 兩張紅燈：真因是基線停在舊的 Skill Level 0–20 UI（2026-07-29 換五檔難度輪後
-  沒重生），非 chromium 版本漂移。**`/review` 從來不在像素回歸路由表裡**，先前記的「基線未重生」
-  是誤記；匯出卡目前無視覺守門（要補得先在 spec 內種完局）。
+  同輪另清掉 `/play` 兩張紅燈（基線停在舊的 Skill Level 0–20 UI，非 chromium 漂移）。
+  **`/review` 從來不在像素回歸路由表裡**——匯出卡目前無視覺守門（要補得先在 spec 內種完局）。
+  **收緊後仍不夠敏感**：D2 改掉練習頁標題等小改動照樣過關，得靠 `--update-snapshots=all` 才發現基線舊了。
 - ✅ **匯出這盤棋接上 UI**（2026-08-05，D7 撤銷）：新 `GameExportCard.vue` 掛在 `MemoryDashboard`
   的 COMPLETE 分支末尾——選這裡是因為 `/review?gameId=` 同時服務「剛下完」與「對局紀錄點進來的
   過去某局」。復活 `use-game-export.ts`＋`tier-delivery.test.ts`；`MemoryContext` 加 `opening`。
@@ -106,9 +119,7 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1
   強制殺，他第 43 手才完成、11 手偏離最短路徑——**現有檢討完全看不到，只會說「你走得很穩」**。
   這是繼 P2（missed-mate 擴到 material）之後的**第三種訊號**：現有 `selectMissedMates` 管的是
   「放任被將死」，這裡要的是「該殺沒殺／殺得慢」，量的是 mate distance 不是 cp。
-- ✅ **完局屏改版**（`PlayView.vue`）：Neve 頭像＋署名＋font-lesson 講評；主按鈕改
-  「我陪你看看剛剛那一步」→ `/review`，再來一局降次要、返回首頁降文字連結。文案改兩句。
-  verifier 11/11 PASS（雙尺寸截圖、按鈕 44px、`/review` 實載入）；vitest 957 綠、typecheck 0 error。
+- ✅ **完局屏改版**（`PlayView.vue`）：Neve 頭像＋署名＋講評，主按鈕「我陪你看看剛剛那一步」→ `/review`。
 - ✅ **vision 開頭加「2026-08-02 修訂」節**（D10 會把它連同三節一起收斂進 v2）。
 - 📄 `production/health-check-2026-08-02.md`（體檢，15 條指控推翻 5 條——**推翻那節要讀**）；
   `production/positioning-v2-2026-08-02.md`（定位 SoT，含死刑／緩刑名單與 5 條可證偽預測）。
@@ -121,7 +132,6 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1
   數值」。D3 砍成一檔後這行連同難度選單一起消失，**不必單獨修**。
 - **missed-mate 從 mate 擴到 material**（v2 的 P2）：若對既有對局跑 `selectMissedMates` 產出 ≥1 題的
   比例 <30%，主路徑必須先擴到 material 才成立。這是題目供給的第二個旋鈕。
-- **底部 tab 三格→兩格**：技術可行，D2/D6 砍完會空出兩格，屆時一起處理。
 - v2 末尾另有 8 題待答（棋力現況、下棋 vs 寫 app 時數比、四週對照實驗、自用產品的驗收條件等）。
 
 ## 護欄備忘

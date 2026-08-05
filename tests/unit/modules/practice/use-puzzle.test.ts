@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { useDungeonPuzzle } from '@/modules/dungeon/use-dungeon-puzzle'
+import { usePuzzle } from '@/modules/practice/use-puzzle'
 import type { Puzzle } from '@/types/puzzle'
 
 const singleMove: Puzzle = {
@@ -32,16 +32,16 @@ const mateAny: Puzzle = {
   hint: 'h', successText: 's',
 }
 
-describe('useDungeonPuzzle — single-move', () => {
+describe('usePuzzle — single-move', () => {
   it('test_correct_move_solves', () => {
-    const p = useDungeonPuzzle(singleMove)
+    const p = usePuzzle(singleMove)
     const r = p.submitMove({ from: 'd1', to: 'd4' })
     expect(r.kind).toBe('correct-solved')
     expect(p.phase.value).toBe('solved')
   })
 
   it('test_wrong_legal_move_keeps_state', () => {
-    const p = useDungeonPuzzle(singleMove)
+    const p = usePuzzle(singleMove)
     const r = p.submitMove({ from: 'e1', to: 'e2' }) // legal king move, off-line
     expect(r.kind).toBe('wrong')
     expect(p.phase.value).toBe('solving')
@@ -50,9 +50,9 @@ describe('useDungeonPuzzle — single-move', () => {
   })
 })
 
-describe('useDungeonPuzzle — multi-move', () => {
+describe('usePuzzle — multi-move', () => {
   it('test_ply_progression_advances_with_opponent_reply', () => {
-    const p = useDungeonPuzzle(multiMove)
+    const p = usePuzzle(multiMove)
 
     const r1 = p.submitMove({ from: 'e4', to: 'f6' })
     expect(r1.kind).toBe('correct-advance')
@@ -71,7 +71,7 @@ describe('useDungeonPuzzle — multi-move', () => {
   })
 
   it('test_wrong_first_move_does_not_advance', () => {
-    const p = useDungeonPuzzle(multiMove)
+    const p = usePuzzle(multiMove)
     const r = p.submitMove({ from: 'e4', to: 'g5' }) // legal knight move, wrong square
     expect(r.kind).toBe('wrong')
     expect(p.plyIndex.value).toBe(0)
@@ -79,7 +79,7 @@ describe('useDungeonPuzzle — multi-move', () => {
   })
 
   it('test_input_locked_while_awaiting_opponent', () => {
-    const p = useDungeonPuzzle(multiMove)
+    const p = usePuzzle(multiMove)
     p.submitMove({ from: 'e4', to: 'f6' })
     // Player tries to move again before the opponent reply commits.
     const r = p.submitMove({ from: 'f6', to: 'd7' })
@@ -88,16 +88,16 @@ describe('useDungeonPuzzle — multi-move', () => {
   })
 })
 
-describe('useDungeonPuzzle — acceptAnyMate', () => {
+describe('usePuzzle — acceptAnyMate', () => {
   it('test_any_mating_move_accepted', () => {
-    const p = useDungeonPuzzle(mateAny)
+    const p = usePuzzle(mateAny)
     // Ra8# is a different move from the authored line (h1h7) but still mate.
     const r = p.submitMove({ from: 'a1', to: 'a8' })
     expect(r.kind).toBe('correct-solved')
   })
 
   it('test_non_mating_move_rejected_even_if_legal', () => {
-    const p = useDungeonPuzzle(mateAny)
+    const p = usePuzzle(mateAny)
     const r = p.submitMove({ from: 'a1', to: 'a4' }) // legal, not mate
     expect(r.kind).toBe('wrong')
   })

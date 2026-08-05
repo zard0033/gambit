@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useDataSyncStore } from '@/stores/data-sync'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
-import { useDungeonProgressStore } from '@/stores/dungeon-progress'
 import { useResumeGameStore } from '@/stores/resume-game'
 import { useConceptProgressStore } from '@/stores/concept-progress'
 import { useUiStore } from '@/stores/ui-store'
@@ -15,7 +14,6 @@ import PlaySetupModal from '@/components/play-setup-modal.vue'
 const authStore = useAuthStore()
 const dataSyncStore = useDataSyncStore()
 const lessonProgressStore = useLessonProgressStore()
-const dungeonProgressStore = useDungeonProgressStore()
 const resumeGameStore = useResumeGameStore()
 const conceptProgressStore = useConceptProgressStore()
 const uiStore = useUiStore()
@@ -49,22 +47,20 @@ const fullBleed = computed(() => route.meta.fullBleed === true)
 // 學習 pager（/learn、/learn/concepts）自管高度與內部捲動，main 不可再加底部 nav padding，否則高度溢位。
 const isLearnPager = computed(() => route.path === '/learn' || route.path === '/learn/concepts')
 
-// RouterView key：param/query 路由（puzzle/lesson/concept-deepen/review-by-gameId）的 setup 只讀一次，
-// 換 param/query 時 vue-router 會重用同一 component instance、setup 不重跑（試煉「下一題」換題無反應的主因）。
+// RouterView key：param/query 路由（practice/lesson/concept-deepen/review-by-gameId）的 setup 只讀一次，
+// 換 param/query 時 vue-router 會重用同一 component instance、setup 不重跑（換題無反應的主因）。
 // 用 fullPath 當 key 強制 remount。learn/concepts 共用同一 LearnPager 實例（分頁滑動不可重繪），固定同一 key。
 const routeKey = computed(() => {
   const n = route.name as string
-  if (n === 'puzzle' || n === 'lesson' || n === 'review' || n === 'concept-deepen') return route.fullPath
+  if (n === 'practice' || n === 'lesson' || n === 'review' || n === 'concept-deepen') return route.fullPath
   if (n === 'learn' || n === 'concepts') return 'learn-pager'
   return n
 })
 
-// 頁面底色套在 <main> 上：深色頁（試煉/對局）的底部 nav 留白區若無底色會露出 body 的 cream
-// （試煉底部未填色 bug）。套在 main 讓 padding 區與內容同色。
+// 頁面底色套在 <main> 上：深色頁的底部 nav 留白區若無底色會露出 body 的 cream。
+// 套在 main 讓 padding 區與內容同色。
 const pageBg = computed(() => {
   switch (route.name) {
-    case 'dungeon':
-      return 'bg-surface-dungeon'
     case 'play':
       return 'bg-surface-deep'
     default:
@@ -81,7 +77,6 @@ watch(() => authStore.userId, (userId) => {
   if (userId) {
     dataSyncStore.flushUnsyncedQueue()
     lessonProgressStore.reconcileOnLogin()
-    dungeonProgressStore.reconcileOnLogin()
     resumeGameStore.reconcileOnLogin()
     conceptProgressStore.reconcileOnLogin()
     uiStore.reconcileOnLogin()
@@ -95,7 +90,6 @@ onMounted(() => {
   const prefetch = (): void => {
     void import('@/views/PlayView.vue')
     void import('@/views/LearnPager.vue')
-    void import('@/views/DungeonMapView.vue')
   }
   if ('requestIdleCallback' in window) window.requestIdleCallback(prefetch)
   else setTimeout(prefetch, 1500)

@@ -17,7 +17,7 @@ export type SubmitResult =
   | { kind: 'correct-solved'; piece: string; captured?: string }
   | { kind: 'correct-advance'; opponentReply: PuzzleMove; piece: string; captured?: string }
 
-export function useDungeonPuzzle(puzzle: Puzzle) {
+export function usePuzzle(puzzle: Puzzle) {
   const chess = new Chess(puzzle.fen)
 
   const phase = ref<'solving' | 'solved'>('solving')

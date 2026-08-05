@@ -14,8 +14,7 @@ export const routes = [
   { path: '/learn/concept/:conceptId', name: 'concept-deepen', component: () => import('@/views/ConceptDeepenView.vue'), meta: { fullBleed: true } },
   { path: '/learn/concept/:conceptId/judge', name: 'concept-judge', component: () => import('@/views/RecognitionFieldView.vue'), meta: { fullBleed: true } },
   { path: '/learn/:lessonId', name: 'lesson',    component: () => import('@/views/LessonView.vue'), meta: { fullBleed: true } },
-  { path: '/dungeon',          name: 'dungeon',     component: () => import('@/views/DungeonMapView.vue') },
-  { path: '/dungeon/:puzzleId', name: 'puzzle',     component: () => import('@/views/DungeonPuzzleView.vue'), meta: { fullBleed: true } },
+  { path: '/practice/:puzzleId', name: 'practice', component: () => import('@/views/PracticePuzzleView.vue'), meta: { fullBleed: true } },
   { path: '/review',          name: 'review',    component: () => import('@/views/MemoryView.vue') },
   { path: '/history',         name: 'history',   component: () => import('@/views/HistoryView.vue') },
   { path: '/profile',         name: 'profile',   component: () => import('@/views/ProfileView.vue') },
@@ -85,7 +84,7 @@ export function createAppRouter() {
       nextTick(() => {
         // preventScroll: this is an a11y focus reset to the page heading, not a viewport move —
         // without it, focusing a top-of-page h1 yanks the scroll up and fights any view that
-        // positions its own initial scroll (e.g. DungeonMapView centring the current node).
+        // positions its own initial scroll.
         document.querySelector('h1')?.focus({ preventScroll: true })
       })
     }

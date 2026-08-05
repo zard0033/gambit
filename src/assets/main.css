@@ -27,7 +27,6 @@
   --color-surface-deep: #103029;
   --color-surface-deep-2: #18443a;
   --color-surface-dungeon: #0b211b;
-  --color-surface-dungeon-2: #0e2a22;
 
   --color-line: #e0d3bd;
   --color-line-subtle: #ece1cd;
@@ -70,16 +69,6 @@
 
   /* 墨韻 (ink garnish) — 墨筆底線/乾筆分隔的墨色。cream 亮底＝深棕墨（暖白墨會消失）*/
   --color-ink-brush: rgba(61, 34, 16, 0.68);
-
-  --color-map-tile-top: #46c7a3;
-  --color-map-tile-face: #1f9e7a;
-  --color-map-tile-socket: #0f6e54;
-  --color-map-tile-lock-top: #ebe2d2;
-  --color-map-tile-lock-face: #d8cdb9;
-  --color-map-tile-lock-socket: #b5a790;
-
-  --color-map-trail: #f8b500;
-  --color-map-trail-base: #d4c5a2;
 
   --color-nav-bg: #103029;
   --color-nav-text: #e7f1ec;
@@ -131,12 +120,6 @@
   --text-display-sm: 2rem;
   --text-display-sm--line-height: 1.2;
   --text-display-sm--letter-spacing: -0.01em;
-}
-
-/* 棋誌「旅程之書」紙頁紋理（journal-book-redesign）：極低透明度 feTurbulence 雜訊，非做舊——
-   只給紙頁一絲纖維感。baseFrequency 0.9 是唯一驗過不顯髒的值，勿調高。 */
-:root {
-  --texture-paper-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 
 /*
@@ -322,7 +305,6 @@
   --color-surface-deep: #123a2c;
   --color-surface-deep-2: #1b5040;
   --color-surface-dungeon: #0e2a20;
-  --color-surface-dungeon-2: #153e30;
 
   /* Line / borders（暗底上需較明顯才分得開卡片；中性暖 hairline，非綠調）*/
   --color-line: rgba(220, 210, 195, 0.1);
@@ -367,15 +349,6 @@
 
   /* 墨韻 — 深色表面＝暖白墨（跟表面走，不跟主題走，值不變）*/
   --color-ink-brush: rgba(236, 230, 218, 0.72);
-
-  /* Learning-map / node coins — jade 亮階（active 面延續 jade 家族，維持玉系不變）*/
-  --color-map-tile-top: #46c7a3;
-  --color-map-tile-face: #279e79;
-  --color-map-tile-socket: #0f5f47;
-  --color-map-tile-lock-top: #2a352e;
-  --color-map-tile-lock-face: #212a24;
-  --color-map-tile-lock-socket: #19201b;
-  --color-map-trail-base: rgba(220, 210, 195, 0.14);
 
   /* Nav — 玉區（J3 深端）；active 那格＝jade 亮階 + 深字 */
   --color-nav-bg: #0e2a20;
@@ -485,38 +458,6 @@
   background-image: linear-gradient(160deg, #1f5f4b, #0e3a2c);
 }
 
-/* 試煉地圖 done-node coin face (DungeonMapView.vue coinBackground()) — noir values
-   reuse this file's own --color-map-tile-top/-face/-socket noir overrides. */
-.dungeon-node-face-done {
-  background: radial-gradient(120% 120% at 50% 18%, #3ab894, #167a5e 55%, #0c5840);
-}
-:root[data-theme='noir'] .dungeon-node-face-done {
-  background: radial-gradient(120% 120% at 50% 18%, #46c7a3, #279e79 55%, #0f5f47);
-}
-/* Check icon on the done coin: dark ink reads on the noir jade face. */
-.dungeon-node-check-done {
-  color: #eafff6;
-}
-:root[data-theme='noir'] .dungeon-node-check-done {
-  color: #06120c;
-}
-
-/* 試煉地圖背景 (DungeonMapView.vue) — noir value = 漆玉（J3）家族，非近黑深墨綠 */
-.dungeon-zone-bg {
-  background: linear-gradient(to top, #0a1f1a 0%, #103029 38%, #15392f 78%, #1a4a3d 100%);
-}
-:root[data-theme='noir'] .dungeon-zone-bg {
-  background: linear-gradient(to top, #0e2a20 0%, #123a2c 38%, #1b5040 78%, #1f5f4b 100%);
-}
-
-/* 試煉地圖固定底部「目前試煉」action bar (DungeonMapView.vue) */
-.dungeon-action-bar {
-  background-image: linear-gradient(160deg, #1e5043, #15392f);
-}
-:root[data-theme='noir'] .dungeon-action-bar {
-  background-image: linear-gradient(160deg, #1b5040, #123a2c);
-}
-
 /* 課程章節進度條 (LearnView.vue) */
 .lesson-progress-fill {
   background-image: linear-gradient(90deg, #3ab894, #f8b500);
@@ -525,8 +466,7 @@
   background-image: linear-gradient(90deg, #279e79, #f8b500);
 }
 
-/* 登入頁沉浸背景 (SignInView.vue) — noir value follows the same 漆玉（J3）wash as
-   .dungeon-zone-bg's first two stops, bookended dark-mid-dark. */
+/* 登入頁沉浸背景 (SignInView.vue) — noir value 走漆玉（J3）wash，bookended dark-mid-dark。 */
 .signin-bg {
   background-image: linear-gradient(175deg, #0c2318 0%, #103029 42%, #0a1f18 100%);
 }
@@ -534,7 +474,7 @@
   background-image: linear-gradient(175deg, #0e2a20 0%, #123a2c 42%, #0e2a20 100%);
 }
 
-/* 試煉結算「石碑題卡」(DungeonPuzzleView.vue) — noir value reuses .game-over-panel's
+/* 練習結算「石碑題卡」(PracticePuzzleView.vue) — noir value reuses .game-over-panel's
    stops (same 結算卡 semantics) at this element's own angle. */
 .puzzle-result-panel {
   background-image: linear-gradient(170deg, #18443a, #0c2118);

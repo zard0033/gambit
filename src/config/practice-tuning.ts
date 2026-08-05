@@ -1,6 +1,6 @@
 /**
- * Dungeon Puzzle Mode tuning knobs (GDD §7). Data-driven per coding standards.
- * Timing values are honoured by DungeonPuzzleView; reduced-motion collapses delays to 0.
+ * Puzzle practice tuning knobs. Data-driven per coding standards.
+ * Timing values are honoured by PracticePuzzleView; reduced-motion collapses delays to 0.
  */
 
 /** Beat before the scripted opponent reply animates (ms). */

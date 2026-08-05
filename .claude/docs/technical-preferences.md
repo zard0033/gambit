@@ -116,6 +116,12 @@
   教過兩次而被對抗審查退回）。**script 寫進 scratchpad、用絕對路徑 `require('<repo>/node_modules/stockfish')`**
   （require 從 script 所在目錄解析，scratchpad 無 node_modules）。已實證真A `8/7p/2r3k1/pp6/7P/5N2/P5P1/4K3 w`
   → `bestmove f3e5`。閘門級唯一解仍以 `concept-deepening-uniqueness-spike`（@spike）為準，此法是設計階段的快速自驗。
+- **長命 vite dev server 會讓 E2E 噴假的 `SyntaxError: Importing binding name 'X' is not found`**
+  （2026-08-05 D2 實踩）：`playwright.config.ts` 是 `reuseExistingServer: !CI`，所以本機那台 dev server
+  會橫跨一整個 session 的所有編輯。改動夠多之後它的模組圖會失準，E2E 出現「某個明明存在且有匯出的
+  binding 找不到」——**typecheck 0、vitest 全綠、chromium 也全綠，只有一兩條 webkit 掛**，看起來像
+  瀏覽器差異，其實是伺服器陳舊。分流：先殺掉 5173 讓 Playwright 重開一台，再跑一次；好了就是這個。
+  `Get-NetTCPConnection -LocalPort 5173 -State Listen | %{ Stop-Process -Id $_.OwningProcess -Force }`
 - **Playwright 背景分頁的 `setTimeout` 會被瀏覽器 throttle**（2026-07-29 難度輪實踩）：多分頁時
   非前景頁的計時器被降頻，量出 3019ms 的假停頓差點誤導調參。量任何跟 `setTimeout` 有關的節奏前，
   先 `bringToFront()` 並關掉其他分頁。

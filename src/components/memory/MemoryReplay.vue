@@ -2,7 +2,7 @@
 /**
  * 棋憶 Move-by-Move Replay (story-009) — the dense surface. Reuses the shipped PgnViewer (Wood12 +
  * Gioco) + Move Annotation Display + the #7 cpLoss display contract. Opens at a ply (from the trend
- * chart → anchor ply by default; deep-linkable for the 棋誌 coupling, story-010). Reads the single
+ * chart → anchor ply by default; deep-linkable, story-010). Reads the single
  * review instance from MemoryContext — runs NO analysis itself (ADR-0014).
  */
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
@@ -238,9 +238,9 @@ onMounted(() => {
             >複習這個概念</RouterLink>
             <RouterLink
               v-if="signpostForCursor.puzzleId"
-              :to="`/dungeon/${signpostForCursor.puzzleId}?from=lesson`"
+              :to="`/practice/${signpostForCursor.puzzleId}`"
               class="inline-flex min-h-[44px] items-center rounded-lg border border-primary/30 px-4 text-sm font-semibold text-primary"
-            >去試煉</RouterLink>
+            >練這個概念</RouterLink>
           </div>
         </div>
       </div>

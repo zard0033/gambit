@@ -1,10 +1,24 @@
 # Dungeon Puzzle Mode (GDD)
 
-> **Status**: Approved (2026-06-05, design-review lean)
+> **Status**: **Partially superseded 2026-08-05（定位 v2 的 D2）**
 > **Tier**: Phase 2 (Feature layer)
 > **Category**: Gameplay (Feature layer)
-> **Depends on**: Chess Board & Move System (#1), Navigation & Routing (#4), Lesson System (progress-store pattern)
-> **Visual blueprint**: `design/gambit-design-system/ui_kits/app/DungeonScreen.jsx`
+> **Depends on**: Chess Board & Move System (#1), Navigation & Routing (#4)
+
+> ### 這份 GDD 有一半已經不存在了
+>
+> **已刪除（外殼）**：關卡地圖與其節點／掛鎖／線性解鎖（`DungeonMapView.vue`）、
+> `dungeon-progress` store 與 `dungeon_progress` 雲端表的讀寫、`/dungeon` 路由、底部 tab 的「試煉」格、
+> 首頁的試煉統計卡、視覺藍圖 `DungeonScreen.jsx`。理由（`production/positioning-v2-2026-08-02.md` D2）：
+> 為了送 30 個 FEN 蓋了地圖＋掛鎖＋進度＋雲端表，而素材需要的只是一個陣列和一顆「下一題」。
+>
+> **仍然有效（解題本體）**：Appendix 的 Puzzle Data Schema（`src/types/puzzle.ts`、
+> `src/data/puzzles/` 30 題）、§3.2 的解題迴圈（交替 solution、錯手回彈、兩段式提示）、
+> Bridge-2 的概念複習連結。這些活在 `PracticePuzzleView.vue`（路由 `/practice/:puzzleId`）——
+> 只有練習模式，沒有鎖也沒有進度，解出來只記進 concept-progress 的 `practiceSolved`。
+> 入口是棋憶回放的概念路標。
+>
+> **`dungeon_progress` 表與其 migration 刻意保留未 drop**，資料還在。
 
 ---
 

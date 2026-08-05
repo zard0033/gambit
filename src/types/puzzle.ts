@@ -1,6 +1,6 @@
 /**
- * Dungeon Puzzle Mode types (GDD: design/gdd/dungeon-puzzle-mode.md — Appendix:
- * Puzzle Data Schema; §3.2).
+ * Puzzle types (GDD: design/gdd/dungeon-puzzle-mode.md — Appendix: Puzzle Data
+ * Schema; §3.2。該 GDD 的關卡外殼已於 2026-08-05 刪除，解題本體仍有效)。
  *
  * Static, front-end-only data. A puzzle is one position (FEN, side-to-move = the
  * player) plus an authored `solution`: an alternating list of plies starting with the

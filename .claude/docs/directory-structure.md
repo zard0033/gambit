@@ -8,7 +8,7 @@
 │   ├── assets/                  # CSS (Tailwind v4 @theme tokens), fonts, static art
 │   ├── components/              # Vue components (chess board, lesson, memory, ui/…)
 │   ├── composables/             # use-* composables (board input/keyboard/fit, reduced-motion)
-│   ├── config/                  # Tuning constants (dungeon, sync, learning-loop…)
+│   ├── config/                  # Tuning constants (practice, sync, learning-loop…)
 │   ├── data/                    # Static content (lessons, puzzles, concepts, concept-deepening)
 │   ├── lib/                     # Cross-feature infra only: supabase client, utils, persona-lint core (ADR-0015)
 │   ├── modules/                 # Domain modules (memory, game-export, learning-loop, opening-id…)

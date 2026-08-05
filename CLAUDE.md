@@ -117,7 +117,7 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 實作任何 UI 前先讀其 `README.md` + `colors_and_type.css`。以下為非協商鐵則：
 
 > **教練人格 SoT = `design/gambit-design-system/persona-neve.md`**（Neve，原創角色）。
-> 寫任何課程／試煉／概念文案前先讀：課程＝Neve 第一人稱對你說、試煉 brief＝第三人稱觀察指對手弱點、概念＝中性。
+> 寫任何課程／練習題／概念文案前先讀：課程＝Neve 第一人稱對你說、練習題 brief＝第三人稱觀察指對手弱點、概念＝中性。
 
 - **色彩**：每屏都要 deep-jade 錨 `#103029`；品牌金 `#F8B500` 只用於 focus / reward 的
   fill / indicator，**絕不當內文**（內文金用 `#8F6200` 且限大字）；內容區 warm cream；陰影暖棕非純黑。
@@ -129,7 +129,7 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 - **動效**：150–300ms，只動 transform / opacity（box-shadow 動畫禁止）；尊重 `prefers-reduced-motion`。
 - **觸控目標 ≥ 44×44px**。
 - **棋盤 / 棋子**：全 app 統一 **Wood12 木紋盤 + Gioco Wood 棋子**（`src/assets/board-theme.css`，main.ts 全域載入）。
-  此主題**必須套到所有 chessground**——對局／課程／試煉的 vue3-chessboard，以及回放／複盤的 lichess PgnViewer
+  此主題**必須套到所有 chessground**——對局／課程／練習的 vue3-chessboard，以及回放／複盤的 lichess PgnViewer
   （後者自帶 `lichess-pgn-viewer.css`、同強度選擇器會蓋過我們，故 board-theme 選擇器加 `body` 前綴出強度）。
   新增任何用棋盤的頁，確認它吃到此主題（別讓 lichess 預設深色盤漏出來）。
 - **標註 / eval 維持上游中性語意，不重新上色**：箭頭／高亮用 chessground 既有 brush，eval 不染品牌金

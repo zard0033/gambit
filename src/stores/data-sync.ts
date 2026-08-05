@@ -309,7 +309,7 @@ export const useDataSyncStore = defineStore('dataSync', () => {
    * it IS their history; for a logged-in user a residual chess:unsynced:* entry (left by a failed
    * upsert in syncGame) would otherwise be re-uploaded by flushUnsyncedQueue on the next app mount,
    * silently resurrecting a history the reset dialog promised was irreversibly gone.
-   * Never touches journal_entries / memory_summaries / lesson or dungeon progress — those are
+   * Never touches journal_entries / memory_summaries / lesson progress — those are
    * separate tables/keys, untouched by design. Returns false on a cloud error so the caller can
    * surface a retry, never throws (mirrors the other delete/upsert helpers here).
    */
@@ -380,40 +380,6 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     return !error
   }
 
-  /**
-   * Fetch the user's solved puzzles (id + hint_used). Returns [] when not logged in or
-   * on error (dungeon progress degrades to the local cache; a read failure must never
-   * surface). All dungeon_progress supabase.from() calls live here per ADR-0011.
-   */
-  async function loadDungeonProgress(): Promise<{ puzzleId: string; hintUsed: boolean }[]> {
-    const authStore = useAuthStore()
-    if (!authStore.userId) return []
-    const { data, error } = await supabase.from('dungeon_progress').select('puzzle_id, hint_used')
-    if (error) return []
-    return (data ?? []).map((r) => ({
-      puzzleId: r.puzzle_id as string,
-      hintUsed: Boolean(r.hint_used),
-    }))
-  }
-
-  /**
-   * Idempotently persist solved puzzles for the logged-in user. Row existence = solved;
-   * `hint_used` is the flag captured at solve time. No-op (returns false) when not logged
-   * in — the caller keeps progress in localStorage and re-flushes on the next login.
-   * Solving is monotonic, so the first write per puzzle wins (ignoreDuplicates).
-   */
-  async function upsertDungeonProgress(
-    entries: { puzzleId: string; hintUsed: boolean }[],
-  ): Promise<boolean> {
-    const authStore = useAuthStore()
-    const userId = authStore.userId
-    if (!userId || entries.length === 0) return false
-    const rows = entries.map((e) => ({ user_id: userId, puzzle_id: e.puzzleId, hint_used: e.hintUsed }))
-    const { error } = await supabase
-      .from('dungeon_progress')
-      .upsert(rows, { onConflict: 'user_id,puzzle_id', ignoreDuplicates: true })
-    return !error
-  }
 
   /**
    * Fetch the player's single in-progress game (續玩對局). Returns null when logged out or on error
@@ -632,8 +598,6 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     upsertLessonProgress,
     loadDeepenedConcepts,
     upsertDeepenedConcepts,
-    loadDungeonProgress,
-    upsertDungeonProgress,
     loadMemorySummaries,
     appendMemorySummary,
     readLocalMemorySummaries,

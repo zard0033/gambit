@@ -18,7 +18,6 @@ import type { ChessConcept } from '@/types/concept'
 import { learned, practiced } from '@/modules/learning-loop/mastery'
 import { puzzles } from '@/data/puzzles'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
-import { useDungeonProgressStore } from '@/stores/dungeon-progress'
 import { useConceptProgressStore } from '@/stores/concept-progress'
 
 const router = useRouter()
@@ -30,7 +29,6 @@ onMounted(() => {
   document.querySelector(`[data-concept="${focusId}"]`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
 })
 const lessonProgress = useLessonProgressStore()
-const dungeonProgress = useDungeonProgressStore()
 const conceptProgress = useConceptProgressStore()
 
 const CONCEPT_PIECE: Record<ChessConcept, string> = {
@@ -54,9 +52,9 @@ const CONCEPT_GROUPS: { key: string; label: string; ids: ChessConcept[] }[] = [
   { key: 'principles', label: '棋局概念', ids: ['center', 'defense'] },
 ]
 
-// A puzzle counts as drilled whether cleared in the dungeon or practised from a lesson (GDD §4.2).
+// 已練＝從課程／棋憶的路標進練習模式解掉（D2 砍掉試煉外殼後，這是唯一的來源）。
 function isSolved(id: string): boolean {
-  return dungeonProgress.isSolved(id) || conceptProgress.isPracticeSolved(id)
+  return conceptProgress.isPracticeSolved(id)
 }
 
 /** Coin progression（三狀態進階感，2026-07-02 redesign）：

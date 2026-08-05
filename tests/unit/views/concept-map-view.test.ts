@@ -27,17 +27,17 @@ function makeRouter() {
       { path: '/learn/concepts', component: ConceptMapView },
       { path: '/learn/concept/:conceptId', component: { template: '<div/>' } },
       { path: '/learn/:lessonId', component: { template: '<div/>' } },
-      { path: '/dungeon/:puzzleId', component: { template: '<div/>' } },
+      { path: '/practice/:puzzleId', component: { template: '<div/>' } },
     ],
   })
 }
 
 function seed(opts: { lessons?: string[]; solved?: string[]; deepened?: string[] } = {}) {
   localStorage.setItem('pgr:lessons:progress', JSON.stringify({ completed: opts.lessons ?? [] }))
-  localStorage.setItem('pgr:dungeon:progress', JSON.stringify({ solved: opts.solved ?? [], hinted: [] }))
+  // 已練的唯一來源＝concept-progress 的 practiceSolved（D2 砍掉試煉外殼後，dungeon 進度不存在了）。
   localStorage.setItem(
     'pgr:concept:practice',
-    JSON.stringify({ practiceSolved: [], deepened: opts.deepened ?? [] }),
+    JSON.stringify({ practiceSolved: opts.solved ?? [], deepened: opts.deepened ?? [] }),
   )
 }
 
