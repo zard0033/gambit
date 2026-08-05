@@ -15,7 +15,6 @@ const ROUTES: readonly [name: string, path: string][] = [
   ['dungeon', '/dungeon'],
   ['puzzle', '/dungeon/l1-capture-queen'],
   ['history', '/history'],
-  ['journal', '/journal'],
   ['profile', '/profile'],
   ['sign-in', '/sign-in'],
   ['not-found', '/definitely-not-a-route'],
@@ -111,7 +110,12 @@ test.describe('UI 視覺守門', () => {
             await settle(page)
             await expect(page).toHaveScreenshot(`${vpName}-${name}.png`, {
               animations: 'disabled',
-              maxDiffPixelRatio: 0.02, // 吸收 sub-pixel 抗鋸齒差異
+              // 吸收 sub-pixel 抗鋸齒差異，但別鬆到吞掉真的改版。曾經是 0.02——2026-08-05 實測
+              // 那個值會**靜默放行**首頁少掉一整張 StatCard ＋一整列 peek（量到 21,808/1,024,000
+              // ＝0.0213，只超標 6%）。原因是本站奶油卡疊在奶油底上，YIQ 色差小、多數變動像素
+              // 根本不被計入。收緊當下另有 5 張基線一起轉紅——都是 0.02 藏著的既有漂移，
+              // 非噪音（diff 圖是卡片位移，不是散點）；全數重生後連跑兩輪 24/24 綠。
+              maxDiffPixelRatio: 0.005,
             })
           })
         }

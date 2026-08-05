@@ -7,7 +7,6 @@ import { UNSYNCED_QUEUE_MAX } from '@/config/sync-tuning'
 import { HISTORY_LOAD_LIMIT } from '@/config/history-config'
 import type { Cursor } from '@/types/game-history'
 import type { ResumeSnapshot } from '@/types/resume'
-import type { JournalEntry } from '@/types/journal'
 import type { MemoryGameSummary } from '@/types/memory'
 import { MEMORY_SUMMARY_SCHEMA_VERSION } from '@/config/memory-config'
 import type { Theme } from '@/lib/theme'
@@ -15,10 +14,6 @@ import type { Theme } from '@/lib/theme'
 export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error'
 
 const UNSYNCED_PREFIX = 'chess:unsynced:'
-/** Guest (logged-out) journal entries — the local-first 棋誌 (ADR-0013 §3). */
-const JOURNAL_ENTRIES_KEY = 'chess:journal:entries'
-/** Logged-in entries that failed to insert; keyed by source_ref_id so retry is idempotent. */
-const JOURNAL_UNSYNCED_PREFIX = 'chess:journal:unsynced:'
 /** Guest (logged-out) memory summaries — local-first 棋憶 (ADR-0014 §5). */
 const MEMORY_SUMMARIES_KEY = 'chess:memory:summaries'
 /** Logged-in summaries that failed to insert; keyed by game_id so retry is idempotent. */
@@ -76,35 +71,6 @@ async function buildRow(game: QueuedGame, userId: string) {
     move_count: game.moves.length,
     opening_eco: null as string | null,
     opening_name: null as string | null,
-  }
-}
-
-/** Map a `journal_entries` DB row to the in-app JournalEntry (ADR-0013 §1). */
-function journalRowToEntry(r: Record<string, unknown>): JournalEntry {
-  return {
-    id: r.id as string,
-    type: r.type as JournalEntry['type'],
-    sourceRefId: r.source_ref_id as string,
-    volume: (r.volume ?? null) as JournalEntry['volume'],
-    templateId: r.template_id as string,
-    params: (r.params ?? {}) as Record<string, string>,
-    body: r.body as string,
-    createdAt: new Date(r.created_at as string).getTime(),
-  }
-}
-
-/** Map a JournalEntry to a `journal_entries` insert row for the given user. */
-function journalEntryToRow(e: JournalEntry, userId: string) {
-  return {
-    id: e.id,
-    user_id: userId,
-    type: e.type,
-    source_ref_id: e.sourceRefId,
-    volume: e.volume,
-    template_id: e.templateId,
-    params: e.params,
-    body: e.body,
-    created_at: new Date(e.createdAt).toISOString(),
   }
 }
 
@@ -502,134 +468,9 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     return !error
   }
 
-  // ── Journal (棋誌) — ADR-0013. journal_entries is the only table with
-  //    event-level idempotency (UNIQUE(user_id, source_ref_id)), NOT row-UUID. ──
 
-  /**
-   * Read locally-held journal entries: guest entries (`chess:journal:entries`) plus any
-   * logged-in entries still queued after an insert failure (`chess:journal:unsynced:*`).
-   * The store merges these with the cloud set. A single corrupt entry is skipped, never fatal.
-   */
-  function readLocalJournalEntries(): JournalEntry[] {
-    if (typeof localStorage === 'undefined') return []
-    const out: JournalEntry[] = []
-    const guestRaw = localStorage.getItem(JOURNAL_ENTRIES_KEY)
-    if (guestRaw) {
-      try {
-        out.push(...(JSON.parse(guestRaw) as JournalEntry[]))
-      } catch {
-        // skip corrupt guest blob
-      }
-    }
-    for (const key of Object.keys(localStorage)) {
-      if (!key.startsWith(JOURNAL_UNSYNCED_PREFIX)) continue
-      const raw = localStorage.getItem(key)
-      if (!raw) continue
-      try {
-        out.push(JSON.parse(raw) as JournalEntry)
-      } catch {
-        // skip corrupt queued entry
-      }
-    }
-    return out
-  }
-
-  function _pushGuestJournalEntry(entry: JournalEntry): void {
-    if (typeof localStorage === 'undefined') return
-    let list: JournalEntry[] = []
-    const raw = localStorage.getItem(JOURNAL_ENTRIES_KEY)
-    if (raw) {
-      try {
-        list = JSON.parse(raw) as JournalEntry[]
-      } catch {
-        list = []
-      }
-    }
-    if (list.some((e) => e.sourceRefId === entry.sourceRefId)) return // local idempotency by event key
-    list.push(entry)
-    localStorage.setItem(JOURNAL_ENTRIES_KEY, JSON.stringify(list))
-  }
-
-  function _queueJournalEntry(entry: JournalEntry): void {
-    if (typeof localStorage === 'undefined') return
-    localStorage.setItem(`${JOURNAL_UNSYNCED_PREFIX}${entry.sourceRefId}`, JSON.stringify(entry))
-  }
-
-  /**
-   * Fetch the user's journal entries, newest first. Returns [] when logged out — the guest's
-   * entries live in localStorage and are merged in by the store. All journal_entries
-   * supabase.from() calls live here per ADR-0011.
-   */
-  async function loadJournalEntries(): Promise<JournalEntry[]> {
-    const authStore = useAuthStore()
-    if (!authStore.userId) return []
-    const { data, error } = await supabase
-      .from('journal_entries')
-      .select('*')
-      .order('created_at', { ascending: false })
-    if (error) throw new Error(error.message ?? 'Failed to load journal entries')
-    return (data ?? []).map(journalRowToEntry)
-  }
-
-  /**
-   * Append a journal entry. Logged in: insert with ON CONFLICT (user_id, source_ref_id) DO
-   * NOTHING (event idempotency — a re-derived/duplicate event is a no-op); on failure queue to
-   * `chess:journal:unsynced:*` for retry. Logged out: write to the guest local-first journal.
-   */
-  async function appendJournalEntry(entry: JournalEntry): Promise<void> {
-    const authStore = useAuthStore()
-    const userId = authStore.userId
-    if (!userId) {
-      _pushGuestJournalEntry(entry)
-      return
-    }
-    try {
-      const { error } = await supabase
-        .from('journal_entries')
-        .upsert(journalEntryToRow(entry, userId), {
-          onConflict: 'user_id,source_ref_id',
-          ignoreDuplicates: true,
-        })
-      if (error) {
-        _queueJournalEntry(entry)
-        return
-      }
-      if (typeof localStorage !== 'undefined') {
-        localStorage.removeItem(`${JOURNAL_UNSYNCED_PREFIX}${entry.sourceRefId}`)
-      }
-    } catch {
-      _queueJournalEntry(entry)
-    }
-  }
-
-  /**
-   * On login, push all locally-held journal entries (guest blob + unsynced queue) to the cloud,
-   * deduped by source_ref_id — the union reconcile (AC-guest-reconcile). Each insert is ON CONFLICT
-   * DO NOTHING, so a re-derived event is a no-op (no duplicate); a failure re-queues to
-   * chess:journal:unsynced for the next login (no loss). Clears the guest blob afterward.
-   * No-op when logged out.
-   */
-  async function flushJournalQueue(): Promise<void> {
-    const authStore = useAuthStore()
-    if (!authStore.userId) return
-    const seen = new Set<string>()
-    const unique: JournalEntry[] = []
-    for (const entry of readLocalJournalEntries()) {
-      if (!seen.has(entry.sourceRefId)) {
-        seen.add(entry.sourceRefId)
-        unique.push(entry)
-      }
-    }
-    for (const entry of unique) {
-      await appendJournalEntry(entry)
-    }
-    if (typeof localStorage !== 'undefined') {
-      localStorage.removeItem(JOURNAL_ENTRIES_KEY)
-    }
-  }
-
-  // ── 棋憶 (Memory) — ADR-0014. memory_summaries mirrors journal: guest localStorage → login
-  //    union reconcile, event-keyed on game_id, schema_version-filtered. ──
+  // ── 棋憶 (Memory) — ADR-0014. guest localStorage → login union reconcile,
+  //    event-keyed on game_id, schema_version-filtered. ──
 
   /** Read locally-held memory summaries: guest blob (`chess:memory:summaries`) + unsynced queue. */
   function readLocalMemorySummaries(): MemoryGameSummary[] {
@@ -793,10 +634,6 @@ export const useDataSyncStore = defineStore('dataSync', () => {
     upsertDeepenedConcepts,
     loadDungeonProgress,
     upsertDungeonProgress,
-    loadJournalEntries,
-    appendJournalEntry,
-    readLocalJournalEntries,
-    flushJournalQueue,
     loadMemorySummaries,
     appendMemorySummary,
     readLocalMemorySummaries,

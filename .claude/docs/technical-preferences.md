@@ -63,7 +63,7 @@
   （`depth-22-spike` 跑 Stockfish 到 depth 22、`memory-budget-spike` 記憶體壓測），本機會卡好幾分鐘像當機。
   CI 用 `grepInvert @spike`（見 `playwright.config.ts`）排除，所以 CI 不慢。
   **本機驗證改用** `npx playwright test --grep-invert @spike`（＝CI 等效、快），
-  或只跑相關 spec（例：改了 router → `npx playwright test journal-view spa-deep-link`）。
+  或只跑相關 spec（例：改了 router → `npx playwright test spa-deep-link visual-regression`）。
 - **npm 11（Node 26 內建）`allow-scripts` 警告非錯誤**：npm 11 預設攔截依賴的 postinstall
   script，`npm install` 會跳 `npm warn allow-scripts stockfish / vue-demi …`。本專案**無害、不用 approve**：
   Stockfish WASM 已 committed 在 `public/stockfish/`（非靠 postinstall 產生）、vue-demi 自偵 Vue 3。
@@ -193,27 +193,6 @@
 - **單元測試驗不到**：`expect(style).toContain('var(--danger)')` 只驗屬性「含」字串、不驗「解析」——
   2026-06-20 棋憶圖表/卡片 4 個元件全黑就是這個，靠 dev-server 截圖才抓到。手寫 token 後**截圖驗一次**。
 
-## 新增棋誌（journal）筆種 pen 的標準路徑（加 pen 前先讀）
-
-棋誌是**從持久狀態決定性推導**的（ADR-0013、zero-AI R9、idempotent）——**不可**從 view 直接
-`dataSync.appendJournalEntry` 任意寫一筆（會繞過 dedup / 決定性 / 跨裝置合併）。新增一個 pen 一律走
-settle 管線，照以下五步（以 2026-06-23 加的 `epiphany`＝沉默關零求助「你自己看出來的」為範本）：
-
-1. **持久化觸發來源**：把觸發事實寫進某個 store 的持久欄位（如 concept-progress 的 `deepenedUnaided`，
-   localStorage-only 即可——**真正的跨裝置 SoT 是寫出去的 journal entry**，它會經 journal queue 同步）。
-2. **`Pen` 型別**（`types/journal.ts`）加新值；`journal_entries.type` 是自由文字欄、**無需 migration**。
-3. **SettleSnapshot**（`modules/journal/settle.ts`）加兩個欄位：可寫清單 + 已寫的 `recorded…RefIds`（dedup）；
-   在 `deriveCandidates` 推 candidate，`PRIORITY` 給優先序。snapshot 必須「全部來自持久狀態」（R5 無暫存）。
-4. **模板**（`data/journal-templates/<pen>.ts`，≥5 變體）＋註冊進 index；**過 persona-lint**——若是情感/肯定類
-   pen，在 `modules/journal/persona-lint.ts` 的 `lintEntryBody` 併入嚴格規則（無 blame/digit，如 solace/epiphany）；
-   共用詞表與通用規則（emoji／xiangqi 用字）在 `lib/persona-lint.ts`（跨功能基建，journal／memory 共用）。
-5. **journal store `evaluate()`** 組 snapshot 新欄位（從 store + 既有 entries 推），view 在事件點呼叫
-   `journal.evaluate()`（idempotent，dedup 保證不重複）。
-
-volume 別自己發明映射——concept 走 `teaches[0]` 課程的 category → `CATEGORY_VOLUME`（`modules/journal/stages.ts`），
-與 arrival 同一 SoT。**chessground 互動觸發的 pen 本機/Playwright 測不到**（合成事件），邏輯靠 unit 全綠，
-實際觸發＋棋誌顯示待實機點一輪。
-
 ## Forbidden Patterns
 
 - [None configured yet — add as architectural decisions are made]
@@ -271,7 +250,7 @@ ADRs live in `docs/architecture/adr-NNNN-*.md`. Existing (adr-0001–adr-0016):
 10. **ADR-0010** — Game Export Tier-1/2/3 Delivery and Synchronous User-Gesture Clipboard Contract
 11. **ADR-0011** — Supabase Authentication and Data Sync Strategy
 12. **ADR-0012** — Bidirectional Lesson-to-Game Linking via a Shared Concept Tag
-13. **ADR-0013** — Journal (棋誌) Data Model, Idempotency, and Session Boundary
+13. **ADR-0013** — Journal (棋誌) Data Model, Idempotency, and Session Boundary — **Superseded 2026-08-05**（棋誌整組下架＝定位 v2 的 D1；`journal_entries` 表保留未 drop）
 14. **ADR-0014** — 棋憶 (Memory) Data Model and Post-Game Review Consumption Boundary
 15. **ADR-0015** — lib/ vs modules/ Placement Criteria
 16. **ADR-0016** — PWA Caching Strategy (autoUpdate; precache app shell, runtime CacheFirst for stockfish/fonts)

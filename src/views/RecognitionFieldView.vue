@@ -8,13 +8,11 @@ import { getRecognitionSet } from '@/data/concept-deepening/recognition'
 import { buildRecognitionSetFromSources } from '@/modules/learning-loop/recognition-runtime'
 import { useConceptProgressStore } from '@/stores/concept-progress'
 import { useRecognitionSourceStore } from '@/stores/recognition-source'
-import { useJournalStore } from '@/stores/journal'
 
 const route = useRoute()
 const router = useRouter()
 const conceptProgress = useConceptProgressStore()
 const recognitionSource = useRecognitionSourceStore()
-const journal = useJournalStore()
 
 const conceptId = route.params.conceptId as string
 const deepening = getConceptDeepening(conceptId)
@@ -50,13 +48,9 @@ function onRecognitionDone(gateUnaided: boolean): void {
   }
   if (deepening) {
     conceptProgress.markDeepened(deepening.conceptId)
-    // unaided requires BOTH phases clean — no aid in the lesson, no miss/trap in the gate — to fire
-    // the epiphany pen.
-    const unaided = lessonUnaided && gateUnaided
-    if (unaided) {
-      conceptProgress.markDeepenedUnaided(deepening.conceptId)
-      void journal.evaluate()
-    }
+    // unaided requires BOTH phases clean — no aid in the lesson, no miss/trap in the gate.
+    // 棋誌下架後這個事實暫時沒有消費端，仍然記著（見 ConceptDeepenView 同段註解）。
+    if (lessonUnaided && gateUnaided) conceptProgress.markDeepenedUnaided(deepening.conceptId)
   }
   showWrapUp.value = true
 }

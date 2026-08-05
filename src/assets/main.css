@@ -642,17 +642,6 @@
   color: var(--color-primary);
 }
 
-/* 棋誌 peek 行首小墨點：不規則墨滴，取代規整圓點（乙做法，決策樣張規格8） */
-.journal-ink-dot {
-  width: 7px;
-  height: 6px;
-  margin-top: 8px;
-  flex-shrink: 0;
-  background: var(--color-ink-brush);
-  border-radius: 62% 38% 55% 45% / 48% 42% 58% 52%;
-  opacity: 0.75;
-}
-
 /* 首頁招呼頭部墨氣下滲（cream：長暈染延伸進內容區；noir：短距離淡出 + 一條極細亮度分界，
    取代長暈染——決策樣張規格：cream 收斂版 / noir 材質分層版）。父層 NeveSceneHeader .scene
    須 position:relative 且此元素放在 scene-content 之後、以 z-index 疊在內容之下。 */

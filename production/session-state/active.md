@@ -1,8 +1,8 @@
 <!-- STATUS -->
 Epic: 定位 v2 刪除期
 Feature: 照死刑名單砍 src ~3,100 行、tests ~1,400 行、文件 ~37,000 行
-Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘已清（`/play` 兩張基線重生，全量 80 綠）。
-**下一步＝D1 棋誌整組刪除**（須早於任何 game-history 動作），再依序 D2 → D4 → D3 → D5 → D6。
+Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1 棋誌整組已刪**。
+**下一步＝D2 試煉關卡外殼**，再依序 D4 → D3 → D5 → D6。
 ⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
 <!-- /STATUS -->
 
@@ -50,8 +50,7 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘已清（`/
    e2e 註解澄清「無課程前置」是現行設計非永久契約、DeepeningWrapUp 多餘 nextTick）；其餘 10 條
    低信心/超出本次範圍略過（理由已附在 workflow 記錄，未寫進本檔——查 runId 或 journal.jsonl）。
    vitest／typecheck／e2e 修復後**重跑待確認**。
-3. **D1 棋誌整組**（保留 `lib/persona-lint.ts`，`modules/memory/persona-lint.ts:9` 在用）。
-   **須早於任何 game-history 動作**（`stores/journal.ts:6`）。
+3. ~~**D1 棋誌整組**~~ ✅ **2026-08-05 完成**（見下方「已施工」）。
 4. **D2 試煉關卡外殼**（保留 `src/data/puzzles/` 30 題）。注意只有 26 題能直接餵 `RecognitionBoard`——
    4 題 mate-in-2 無法用 `types/recognition.ts:25-28` 的單一 `expectedMove` 表達。
 5. **D4 棋憶敘事外殼**（**保留 `MemoryDashboard.vue`**＝主路徑的門，另保留 describe/selection/
@@ -76,20 +75,32 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘已清（`/
 
 ## 已施工（已 commit，工作區乾淨）
 
-- ✅ **像素回歸閘已清**（2026-08-05）：`/play` 兩張紅燈的真因＝**基線是舊的 Skill Level 0–20
-  二十一顆按鈕 UI**，2026-07-29 改成五檔難度輪後從沒重生過。不是 chromium 版本漂移——真是版本
-  問題不會 26 張只挑 2 張紅。已重生兩張，全量像素回歸 80 passed / 0 failed。
-  另：**`/review` 從來不在像素回歸路由表裡**（`visual-regression.spec.ts:8-22`），先前記的
-  「`/review` 基線未重生」是誤記，沒有那張基線。匯出卡目前無視覺守門（要補得先在 spec 內種完局）。
+- ✅ **D1 棋誌整組下架**（2026-08-05）：42 檔、約 3,100 行。名單外自行裁定的三件——
+  ① **`data-sync.ts` 的 journal 持久化層一併拔除**（`journalRowToEntry`／`journalEntryToRow`／
+  `loadJournalEntries`／`appendJournalEntry`／`readLocalJournalEntries`／`flushJournalQueue`
+  ＋兩個 localStorage key 常數），棋誌一死它就是純死碼；這不違反 R1，R1 擋的是砍 data-sync 本身。
+  ② **Supabase `journal_entries` 表與 migration 保留未 drop**，資料還在。
+  ③ **GDD／quick-spec／review-log 刪、ADR-0013 標 Superseded**（ADR 是決策紀錄，且仍是那張表的
+  唯一 schema 描述）。另刪 `.claude/docs/technical-preferences.md` 的「新增棋誌筆種 pen 的標準路徑」
+  整節——留著等於叫未來的 session 去接一個不存在的管線。
+  **`concept-progress.deepenedUnaided` 刻意留著**（`ConceptDeepenView`／`RecognitionFieldView`
+  仍在寫）：唯一消費端是死掉的 epiphany 筆，但它落在認知遷移軸上，是**目前唯一「無求助通關」的
+  持久訊號**。現在是孤兒欄位，別當死碼誤刪。
+  vitest 867 綠（原 964 減掉刪除的 97 個 it）、typecheck 0、e2e 92 綠。
+- 🔴 **像素回歸容差原本鬆到會放行改版**（2026-08-05 由 D1 意外暴露，已修）：`maxDiffPixelRatio`
+  原為 0.02，量到首頁少一整張 StatCard ＋一整列 peek 只有 **0.0213**——僅超標 6%，實際判過。
+  根因是本站**奶油卡疊奶油底**，YIQ 色差小到多數變動像素不被計入，不是閘壞了（用假基線驗過會紅）。
+  收緊成 **0.005** 後另有 5 張一起轉紅（concepts／concept-deepen／lesson／profile／mobile concepts），
+  diff 圖是卡片位移＝**0.02 一直藏著的既有漂移**，非噪音；全數重生後連跑兩輪 24/24 綠。
+  同輪另清掉 `/play` 兩張紅燈：真因是基線停在舊的 Skill Level 0–20 UI（2026-07-29 換五檔難度輪後
+  沒重生），非 chromium 版本漂移。**`/review` 從來不在像素回歸路由表裡**，先前記的「基線未重生」
+  是誤記；匯出卡目前無視覺守門（要補得先在 spec 內種完局）。
 - ✅ **匯出這盤棋接上 UI**（2026-08-05，D7 撤銷）：新 `GameExportCard.vue` 掛在 `MemoryDashboard`
   的 COMPLETE 分支末尾——選這裡是因為 `/review?gameId=` 同時服務「剛下完」與「對局紀錄點進來的
   過去某局」。復活 `use-game-export.ts`＋`tier-delivery.test.ts`；`MemoryContext` 加 `opening`。
-  **桌機刻意繞過 Web Share**（`pointer: coarse` 分流）：ADR-0010 排它 Tier 1 在 iPhone 對，桌機
-  Chrome/Edge 也實作了它，按鈕寫「複製」卻跳出 Windows 系統分享面板。
-  順修兩個既有 bug：① 模板 `{{RESULT_PLAIN}}.` 與 `buildResultPlain()` 自帶句點疊成 `…checkmate..`
-  （測試用 `toContain` 驗前綴，抓不到）；② `historyEntryToCompletedGame` 硬編
-  `endReason: 'resignation'`——註解寫「pgn 永不匯出」，接上匯出那刻就失效，害每局歷史都自稱投降
-  （DB 的 `end_reason` 一直都在，只缺讀回的逆映射）。vitest 964 綠、typecheck 0。
+  **桌機刻意繞過 Web Share**（`pointer: coarse` 分流）：ADR-0010 排它 Tier 1 只在 iPhone 對，桌機
+  Chrome/Edge 也實作了它，按鈕寫「複製」卻跳出 Windows 分享面板。順修兩個既有 bug：句點疊字、
+  `historyEntryToCompletedGame` 硬編 `endReason: 'resignation'` 害每局歷史都自稱投降。
 - 🔴 **賽後檢討看不見「該殺沒殺」**（2026-08-05 用真實對局量出來，未修）：重點步用 cpLoss 選，
   而 **cpLoss 對將殺完全不敏感**（mate − mate = 0）。Eason 8/4 那盤，引擎第 21 手就看到 8 手內
   強制殺，他第 43 手才完成、11 手偏離最短路徑——**現有檢討完全看不到，只會說「你走得很穩」**。
@@ -104,9 +115,8 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘已清（`/
 
 ## 未決 / 待辦
 
-- **像素回歸的 CI 盲區仍在**（非待辦，是常識備忘）：`toHaveScreenshot` 在 CI 是 skip 的
-  （基線 chromium-win32、依平台而異），CI 只跑結構不變量。**動到任何 UI 後本機要自己跑**
-  `npx playwright test visual-regression`——否則基線會像這次一樣悄悄爛掉六天。
+- **像素回歸的 CI 盲區**：`toHaveScreenshot` 在 CI 是 skip 的（基線依平台而異），CI 只跑結構不變量。
+  **動到任何 UI 後本機要自己跑** `npx playwright test visual-regression`。
 - **`HomeView.vue:109`** 的 `Lv.{{ resumeInfo.level }}` 印 raw Skill Level，違反「不顯示 Skill Level
   數值」。D3 砍成一檔後這行連同難度選單一起消失，**不必單獨修**。
 - **missed-mate 從 mate 擴到 material**（v2 的 P2）：若對既有對局跑 `selectMissedMates` 產出 ≥1 題的

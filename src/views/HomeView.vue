@@ -2,16 +2,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { ArrowRight, Target, BookOpen, Library, Swords } from 'lucide-vue-next'
+import { ArrowRight, Target, BookOpen, Swords } from 'lucide-vue-next'
 import { LESSON_TIER_LABELS, LESSON_TIER_PIECES as TIER_PIECE } from '@/types/lesson'
 import { greetingForNow } from '@/lib/utils'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
 import { useDungeonProgressStore } from '@/stores/dungeon-progress'
 import { useUiStore } from '@/stores/ui-store'
 import { useResumeGameStore } from '@/stores/resume-game'
-import { useJournalStore } from '@/stores/journal'
-import { HOMEPAGE_PEEK_COUNT } from '@/config/journal-config'
-import { getLastSeenAt, isUnread } from '@/modules/journal/unread'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { DarkPanel, ChapterBadge, StatCard, SectionLabel, ProgressBar, InkBrush } from '@/components/ui/gambit'
@@ -24,11 +21,6 @@ const { nextLesson } = storeToRefs(progress)
 const dungeon = useDungeonProgressStore()
 const uiStore = useUiStore()
 const resume = useResumeGameStore()
-const journal = useJournalStore()
-
-// 未讀水位：在 mount 前捕捉，使 peek 的未讀點在本次渲染穩定。
-const lastSeenAt = getLastSeenAt()
-const peekEntries = computed(() => journal.recent(HOMEPAGE_PEEK_COUNT))
 
 // 續玩對局（續玩對局）：有進行中對局時，hero 卡換成「繼續對局」。
 const resumeInfo = computed(() => {
@@ -65,10 +57,6 @@ function continueLearning() {
 }
 
 onMounted(() => {
-  // evaluate() 內部自己 await load()，settle 完再 reload 一次——取代單純 load()，
-  // 讓首頁成為 onset/arrival/solace 的其中一個結算觸發點。
-  void journal.evaluate()
-
   if (prefersReducedMotion.value) {
     ready.value = true
     return
@@ -198,7 +186,7 @@ onMounted(() => {
     <SectionLabel as="h2">總覽</SectionLabel>
     <!-- 段落乾筆：寬扁、克制，標籤與內容間的柔性分隔（墨韻母題，鋪量克制） -->
     <InkBrush :width="200" :height="8" :seed="7" :thickness="0.18" aria-hidden="true" />
-    <div class="grid grid-cols-3 gap-2.5 mt-2.5">
+    <div class="grid grid-cols-2 gap-2.5 mt-2.5">
       <RouterLink to="/learn" class="block rounded-card focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold" aria-label="學習進度">
         <StatCard
           :icon="BookOpen"
@@ -213,40 +201,7 @@ onMounted(() => {
           :value="`${dungeon.solvedCount}/${dungeon.totalCount}`"
         />
       </RouterLink>
-      <RouterLink to="/journal" class="block rounded-card focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold" aria-label="棋誌">
-        <StatCard
-          :icon="Library"
-          label="棋誌"
-          :value="journal.entries.length > 0 ? String(journal.entries.length) : '—'"
-        />
-      </RouterLink>
     </div>
-    </div>
-    <!-- 棋誌 peek（總覽下方，露最近 HOMEPAGE_PEEK_COUNT 筆；有新筆才顯示此區塊） -->
-    <div v-if="peekEntries.length > 0" class="fade-rise" :class="{ 'is-in': ready }" style="transition-delay: 120ms">
-      <SectionLabel as="h2" class="mt-5">棋誌</SectionLabel>
-      <!-- 段落乾筆：寬扁、克制，標籤與內容間的柔性分隔（墨韻母題，鋪量克制） -->
-      <InkBrush :width="200" :height="8" :seed="9" :thickness="0.18" aria-hidden="true" />
-      <div class="space-y-2 mt-2.5">
-        <RouterLink
-          v-for="entry in peekEntries"
-          :key="entry.id"
-          to="/journal"
-          class="flex min-h-[44px] items-center gap-2.5 rounded-card border border-line/40 gambit-surface-card px-3 py-2.5 transition-opacity hover:opacity-90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
-          data-testid="journal-peek-entry"
-        >
-          <!-- 行首墨點（乙做法，決策樣張規格8）：不規則墨滴，取代規整圓點；未讀另疊一顆亮綠角標 -->
-          <span class="relative flex-shrink-0" aria-hidden="true">
-            <span class="journal-ink-dot block" />
-            <span
-              v-if="isUnread(entry, lastSeenAt)"
-              class="absolute -right-1 -top-0.5 h-1.5 w-1.5 rounded-full bg-[#7EBEA5]"
-              data-testid="unread-dot"
-            />
-          </span>
-          <p class="flex-1 font-lesson text-[16px] leading-[1.65] text-ink-muted line-clamp-2">{{ entry.body }}</p>
-        </RouterLink>
-      </div>
     </div>
   </div>
   </div>

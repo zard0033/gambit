@@ -15,7 +15,7 @@ import AxeBuilder from '@axe-core/playwright'
 test.describe('ChessBoard accessibility — AC-1', () => {
   test('test_chess_board_a11y_no_serious_or_critical_violations', async ({ page }) => {
     // Guest browsing: opt past the landing gate so /learn/pawn-basics is reachable without
-    // signing in (same pattern as journal-view.spec.ts / spa-deep-link.spec.ts).
+    // signing in (same pattern as spa-deep-link.spec.ts).
     await page.addInitScript(() => sessionStorage.setItem('gambit:guest-entry', '1'))
 
     // pawn-basics has order:1 in the curriculum, so lesson-progress.ts's isUnlocked() always

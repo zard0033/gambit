@@ -7,13 +7,11 @@ import { getConceptDeepening } from '@/data/concept-deepening'
 import { getRecognitionSet } from '@/data/concept-deepening/recognition'
 import { useConceptProgressStore } from '@/stores/concept-progress'
 import { useRecognitionSourceStore } from '@/stores/recognition-source'
-import { useJournalStore } from '@/stores/journal'
 
 const route = useRoute()
 const router = useRouter()
 const conceptProgress = useConceptProgressStore()
 const recognitionSource = useRecognitionSourceStore()
-const journal = useJournalStore()
 
 const deepening = getConceptDeepening(route.params.conceptId as string)
 // fork's third step is a Recognition Gate (spec §15, now its own route/view — RecognitionFieldView,
@@ -50,12 +48,9 @@ function onLessonDone(unaided: boolean): void {
 function finishDeepening(unaided: boolean): void {
   if (deepening) {
     conceptProgress.markDeepened(deepening.conceptId)
-    // Got through unaided → Neve quietly logs "你自己看出來的" in the journal. The recognition lives
-    // there, not as an on-screen self-congratulation (Neve stays calm).
-    if (unaided) {
-      conceptProgress.markDeepenedUnaided(deepening.conceptId)
-      void journal.evaluate()
-    }
+    // 無求助通關的事實仍然記著（`deepenedUnaided`）。棋誌下架後暫時沒有消費端——
+    // 它落在「認知遷移」軸上，留給日後的訊號用，不隨棋誌一起刪。
+    if (unaided) conceptProgress.markDeepenedUnaided(deepening.conceptId)
   }
   showWrapUp.value = true
 }

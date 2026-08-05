@@ -2,8 +2,17 @@
 
 ## Status
 
-Accepted
+Superseded
 
+> **Superseded 2026-08-05（定位 v2 的 D1）**：棋誌整組下架，`src/modules/journal/`、`stores/journal.ts`、
+> `views/JournalView.vue`、`data/journal-templates/`、`config/journal-config.ts`、`types/journal.ts`
+> 與 `data-sync.ts` 的 journal 持久化層全部移除。理由（`production/positioning-v2-2026-08-02.md` D1）：
+> `settle.ts` 的四個閘門**沒有一個讀盤面**，與產品唯一的差異化軸（認知遷移）零交集；三支決定性筆
+> 上限 13 篇，長期唯一還在寫的是「連敗三盤通知」。
+> **Supabase `journal_entries` 表與其 migration 刻意保留、未 drop**——資料還在，本 ADR 對該表的
+> schema 與 idempotency 契約（`UNIQUE(user_id, source_ref_id)`）仍是它的唯一描述。
+> 本文以下內容保留為歷史紀錄，不再描述現行程式。
+>
 > **Accepted 2026-06-16**: `journal_entries` migration applied to live DB (`vfnzekqtvxhewifnmtnz`) via Dashboard SQL Editor. Verified by anon REST probe: `GET …/journal_entries?select=*&limit=1` → HTTP 200 `[]`; unauthenticated POST → HTTP 401 `42501` (RLS enforced). `UNIQUE(user_id, source_ref_id)` + `type text` per spec. Unblocks Journal story-001…006.
 
 ## Date

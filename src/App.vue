@@ -7,7 +7,6 @@ import { useLessonProgressStore } from '@/stores/lesson-progress'
 import { useDungeonProgressStore } from '@/stores/dungeon-progress'
 import { useResumeGameStore } from '@/stores/resume-game'
 import { useConceptProgressStore } from '@/stores/concept-progress'
-import { useJournalStore } from '@/stores/journal'
 import { useUiStore } from '@/stores/ui-store'
 import type { PendingGame } from '@/stores/ui-store'
 import AppNav from '@/components/app-nav.vue'
@@ -19,7 +18,6 @@ const lessonProgressStore = useLessonProgressStore()
 const dungeonProgressStore = useDungeonProgressStore()
 const resumeGameStore = useResumeGameStore()
 const conceptProgressStore = useConceptProgressStore()
-const journalStore = useJournalStore()
 const uiStore = useUiStore()
 const route = useRoute()
 const router = useRouter()
@@ -86,7 +84,6 @@ watch(() => authStore.userId, (userId) => {
     dungeonProgressStore.reconcileOnLogin()
     resumeGameStore.reconcileOnLogin()
     conceptProgressStore.reconcileOnLogin()
-    journalStore.reconcileOnLogin()
     uiStore.reconcileOnLogin()
   }
 }, { immediate: true })

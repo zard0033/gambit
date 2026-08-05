@@ -3,7 +3,6 @@ import { setActivePinia, createPinia } from 'pinia'
 import { useGameLifecycle } from '../../../src/modules/game-lifecycle/use-game-lifecycle'
 import type { GameLifecycleDeps } from '../../../src/modules/game-lifecycle/use-game-lifecycle'
 import { useGameStore } from '../../../src/stores/game-store'
-import { useJournalStore } from '../../../src/stores/journal'
 
 // -----------------------------------------------------------------------
 // Helpers
@@ -233,45 +232,6 @@ describe('CompletedGame — AC-4: disarm-before-navigate call order', () => {
 
     // Assert
     expect(deps.router!.push).toHaveBeenCalledWith('/review')
-  })
-})
-
-// -----------------------------------------------------------------------
-// A1: onGameTerminal is a journal settle trigger point (棋誌 arrival/solace)
-// -----------------------------------------------------------------------
-
-describe('CompletedGame — A1: journal.evaluate() called on game end', () => {
-  beforeEach(() => { setActivePinia(createPinia()) })
-
-  it('test_onGameTerminal_callsJournalEvaluate_onCheckmate', async () => {
-    // Arrange
-    const journal = useJournalStore()
-    const evaluateSpy = vi.spyOn(journal, 'evaluate').mockResolvedValue()
-    const deps = makeTestDeps()
-    const lifecycle = useGameLifecycle(deps)
-
-    // Act
-    playScholarsMate(lifecycle)
-    await new Promise<void>((resolve) => setTimeout(resolve, 0))
-
-    // Assert
-    expect(evaluateSpy).toHaveBeenCalledTimes(1)
-  })
-
-  it('test_onGameTerminal_callsJournalEvaluate_onResignation', async () => {
-    // Arrange
-    const journal = useJournalStore()
-    const evaluateSpy = vi.spyOn(journal, 'evaluate').mockResolvedValue()
-    const deps = makeTestDeps()
-    const lifecycle = useGameLifecycle(deps)
-    lifecycle.startGame('white', 10)
-
-    // Act
-    lifecycle.resign()
-    await new Promise<void>((resolve) => setTimeout(resolve, 0))
-
-    // Assert
-    expect(evaluateSpy).toHaveBeenCalledTimes(1)
   })
 })
 
