@@ -11,6 +11,28 @@ BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 if [ -n "$BRANCH" ]; then
     echo "Branch: $BRANCH"
 
+    # Divergence from the remote. This is the FIRST thing reported on purpose: on 2026-08-05 a
+    # session read a 7-day-old active.md, worked a full day, and found afterwards it had been
+    # redoing work that was already 10 commits ahead on origin. "Recent commits" below looked
+    # perfectly normal — being behind is invisible without asking for it explicitly.
+    git fetch --quiet origin "$BRANCH" 2>/dev/null
+    COUNTS=$(git rev-list --left-right --count "origin/$BRANCH...HEAD" 2>/dev/null)
+    if [ -n "$COUNTS" ]; then
+        BEHIND=$(echo "$COUNTS" | cut -f1)
+        AHEAD=$(echo "$COUNTS" | cut -f2)
+        if [ "$BEHIND" -gt 0 ]; then
+            echo ""
+            echo "🔴 落後 origin/$BRANCH $BEHIND 個 commit（本地領先 $AHEAD）"
+            echo "   動工前先 git pull --rebase，並重讀 active.md——它可能是過期快照。"
+            echo "   遠端新 commit："
+            git log --oneline "HEAD..origin/$BRANCH" 2>/dev/null | head -10 | while read -r line; do
+                echo "     $line"
+            done
+        elif [ "$AHEAD" -gt 0 ]; then
+            echo "本地領先 origin/$BRANCH $AHEAD 個 commit（未 push）"
+        fi
+    fi
+
     # Recent commits
     echo ""
     echo "Recent commits:"

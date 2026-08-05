@@ -102,6 +102,11 @@ game-history 動作），再依序 D2 → D4 → D3 → D5 → D6。
 
 ## 未決 / 待辦
 
+- **本機像素回歸整批處理，期限＝D1 開工前**（2026-08-05 Eason 拍板併案）：`/play` 兩張既有紅燈
+  （新裝 chromium 版本與基線不符，已驗證與改動無關）＋ `/review` 新增匯出按鈕後的基線未重生。
+  **CI 綠不代表這批過了**——`toHaveScreenshot` 在 CI 是 skip 的（基線 chromium-win32、依平台而異），
+  CI 只跑結構不變量。兩者一起：先查清楚 `/play` 為何紅，再決定整批重生還是逐張處理。
+
 - **`HomeView.vue:109`** 的 `Lv.{{ resumeInfo.level }}` 印 raw Skill Level，違反「不顯示 Skill Level
   數值」。D3 砍成一檔後這行連同難度選單一起消失，**不必單獨修**。
 - **missed-mate 從 mate 擴到 material**（v2 的 P2）：若對既有對局跑 `selectMissedMates` 產出 ≥1 題的
