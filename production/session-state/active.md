@@ -55,7 +55,7 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1
    `game-history`／`memory` 全靠它。砍它＝失去本機儲存，不是失去跨裝置。要動必須先拆成
    local-store ＋ cloud-adapter 兩層（v2 的 R1）。（行號原本寫死在這裡，D1/D2 刪過就不準了，故移除。）
 
-## 已施工（已 commit，工作區乾淨）
+## 已施工（已 commit、工作區乾淨；**本機領先 origin 4 個 commit，尚未 push**）
 
 - ✅ **D2 試煉外殼下架，練習模式留下**（2026-08-05）：**名單原本要連 `DungeonPuzzleView` 一起刪，
   Eason 拍板只砍外殼**——那個 view 同時是棋憶回放「練這個概念」路標的唯一出口，落在保留軸上。
@@ -111,8 +111,8 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1
 
 - **像素回歸的 CI 盲區**：`toHaveScreenshot` 在 CI 是 skip 的（基線依平台而異），CI 只跑結構不變量。
   **動到任何 UI 後本機要自己跑** `npx playwright test visual-regression`。
-- **`HomeView.vue:109`** 的 `Lv.{{ resumeInfo.level }}` 印 raw Skill Level，違反「不顯示 Skill Level
-  數值」。D3 砍成一檔後這行連同難度選單一起消失，**不必單獨修**。
+- **`HomeView.vue` 續玩卡的 `Lv.{{ resumeInfo.level }}`** 印 raw Skill Level，違反「不顯示 Skill
+  Level 數值」。D3 砍成一檔後這行連同難度選單一起消失，**不必單獨修**。（不寫行號——它會漂。）
 - **missed-mate 從 mate 擴到 material**（v2 的 P2）：若對既有對局跑 `selectMissedMates` 產出 ≥1 題的
   比例 <30%，主路徑必須先擴到 material 才成立。這是題目供給的第二個旋鈕。
 - v2 末尾另有 8 題待答（棋力現況、下棋 vs 寫 app 時數比、四週對照實驗、自用產品的驗收條件等）。
