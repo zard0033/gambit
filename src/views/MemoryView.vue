@@ -169,6 +169,14 @@ function onHeaderBack(): void {
   else router.push('/')
 }
 
+/** Export/PGN-tag shape of the identified opening. Null unless BOTH name and ECO are known —
+ *  a half-filled `Opening "…" ECO ""` tag pair is worse than omitting them (GDD §3 omission rule). */
+const opening = computed<{ openingName: string; eco: string } | null>(() => {
+  const o = openingResult.value
+  if (!o || o.isUnknown || !o.name || !o.eco) return null
+  return { openingName: o.name, eco: o.eco }
+})
+
 const ctx: MemoryContext = {
   review,
   game,
@@ -177,6 +185,7 @@ const ctx: MemoryContext = {
   fens,
   concepts,
   moments,
+  opening,
   series,
   anchorPly,
   openMoment,

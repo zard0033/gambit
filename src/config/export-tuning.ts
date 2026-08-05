@@ -23,7 +23,9 @@ export const COACH_PROMPT_TEMPLATE = [
   '',
   'Context:',
   '- I played {{PLAYER_COLOR}} against Stockfish (skill level {{AI_SKILL_LEVEL}}).',
-  '- Result: {{RESULT_PLAIN}}.',
+  // No trailing period: every buildResultPlain() sentence already ends with one ("I won by
+  // checkmate."), and the template's own "." made it "…checkmate.." in the real payload.
+  '- Result: {{RESULT_PLAIN}}',
   '{{OPENING_LINE}}',
   '{{REVIEW_HINT_LINE}}',
   '',
@@ -37,6 +39,12 @@ export const COACH_PROMPT_TEMPLATE = [
   '',
   'Keep it encouraging and concrete. Use move numbers so I can follow along on a board.',
   "Don't just list every move — focus on what will actually help me improve.",
+  '',
+  // ponytail: the prompt stays English, only the *reply* is pinned to Chinese. Translating the
+  // whole template would also mean rewriting the GDD §3 RESULT_PLAIN mapping table and ~15 test
+  // assertions, for a string the player never reads — they paste it and read the answer. If the
+  // template is ever fully localized, those three places have to move together.
+  'Please reply in Traditional Chinese (繁體中文).',
 ].join('\n')
 
 /** Default tuning values (game-export-share.md Tuning Knobs table). */
@@ -44,7 +52,8 @@ export const DEFAULT_EXPORT_TUNING = {
   eventTag: 'Chess Training Companion',
   siteTag: 'Chess Training Companion (local)',
   aiNameTemplate: 'Stockfish (level {{N}})',
-  // 2026-08-02：useGameExport composable 已移除（positioning-v2 D7），此欄位已無消費端；下次動這支檔時可清。
+  // 2026-08-02 曾因 useGameExport 被當死碼移除而標記「已無消費端」；2026-08-05 匯出接上 UI
+  // （棋憶儀表板的「複製這盤棋」）後 composable 復活，此欄位又有消費端了。
   feedbackDurationMs: 2000,
   promptTokenBudget: 4000,
   maxPlyBeforeWarn: 200,

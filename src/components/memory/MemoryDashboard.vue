@@ -19,6 +19,7 @@ import RecognitionSignpost from './RecognitionSignpost.vue'
 import EvalShapeChart from './EvalShapeChart.vue'
 import MomentSlideshowDoor from './MomentSlideshowDoor.vue'
 import EmptyMemory from './EmptyMemory.vue'
+import GameExportCard from './GameExportCard.vue'
 
 const ctx = useMemoryContext()
 const memory = useMemoryStore()
@@ -58,6 +59,14 @@ const analysisProgress = computed(() => {
       <MomentSlideshowDoor v-if="ctx.moments.value.length > 0" @open="ctx.openMoment(0)" />
       <!-- 4. Zero-state (steady game, no key moments) -->
       <EmptyMemory v-if="ctx.moments.value.length === 0" />
+      <!-- 5. 帶走這盤:複製成可貼給 AI 的內容(ADR-0010)。放最後——它是工具動作,不是 Neve 的話。 -->
+      <GameExportCard
+        v-if="ctx.game.value"
+        :key="ctx.game.value.completedAt"
+        :game="ctx.game.value"
+        :moments="ctx.moments.value"
+        :opening="ctx.opening.value"
+      />
     </template>
 
     <!-- ANALYZING: Neve's words carry the "still looking" cue above; here just a quiet progress bar

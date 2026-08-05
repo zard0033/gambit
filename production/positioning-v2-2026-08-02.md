@@ -90,7 +90,8 @@ Eason 已下過數盤並回報失敗類型比例 **5:2:3**（完全沒看到／�
 → 為什麼：四格統計全是字面 `'—'`(:36-39，其中一格 label 是「連勝」，違反 no-streak 鐵則)、三列 `locked:'即將推出'`(:62,63,69)。留半頁比留整頁更糟，它會繼續佔一條路由和一格 tab。（附帶：`gambit-compliance.test.ts:29` 已把「連勝」列為禁詞，但 :10-19 的掃描清單不含 ProfileView.vue——機械執行漏掉唯一違規的檔。）
 → 斷：`/profile`、底部一格、`tests/e2e/visual-regression.spec.ts:19` baseline 重拍。→ **半天**。
 
-**D7. `src/modules/game-export/use-game-export.ts`(103) ＋ `tests/.../tier-delivery.test.ts`(264)** ｜ 零呼叫點。**範圍已修正**：三個視角都主張砍整個目錄，那是錯的——`assembler.ts`(182) 的 `buildPgn` 活著（`data-sync.ts:59` 動態 import 寫雲端 PGN、`MemoryView.vue:28`），砍它會落進 :61 catch → PGN 靜默降級成原始 UCI 字串，不紅不炸。→ 斷：無。→ **10 分鐘**。
+**D7. ~~`src/modules/game-export/use-game-export.ts`(103) ＋ `tests/.../tier-delivery.test.ts`(264)~~** ｜ 🔙 **2026-08-05 撤銷，已復活**。當時判「零呼叫點」是對的——它沒有 UI。8/5 Eason 要求把匯出接上 UI（棋憶儀表板「複製這盤棋」），並拍板**匯出屬於產品，不是開發工具**：「原本 app 的構想就是可以去跟 AI 討論自己下的內容」。條件變了，不是當時判錯。當天即產生價值——靠它拿到真實棋譜，才量出「引擎第 21 手就看到 8 手內強制殺、玩家第 43 手才完成」這個現有賽後檢討完全看不到的問題。
+（原記錄保留：`assembler.ts`(182) 的 `buildPgn` 本就活著，`data-sync.ts:59` 動態 import 寫雲端 PGN、`MemoryView.vue:28` 也用，所以砍整個目錄從來就是錯的範圍。）
 
 **D8. concept-deepening 的 `variants` 輪替機制** ｜ `ConceptDeepenView.vue:49-53` 的 `count % variants.length`（8 個 concept 的 `variants.length` 全部＝1，取模恆 0）＋ `ConceptMapView.vue:166` 的「重溫」文案 ＋ `concept-deepening.test.ts:54-55` 把 1 釘死的兩條斷言。**不准砍 `data/concept-deepening/index.ts` 整檔**（見 R2）。→ 斷：無。→ **1 小時**。
 
@@ -172,7 +173,8 @@ v1 的四步問答**整節作廢**。三個理由：
 | D4 棋憶敘事外殼 | **刪表演層**（保留分析／missed-mate／MemoryDashboard） |
 | D5 開局知識卡 ＋ opening-id | **刪**（連 chess-openings 依賴退役） |
 | D6 ProfileView | **刪整頁**，主題切換與重置對話框先搬進 header 齒輪 |
-| D7/D8/D9/D10（零風險四項） | **直接做**，不另外確認 |
+| D7/D8/D9/D10（零風險四項） | **直接做**，不另外確認。⚠️ **D7 已於 2026-08-05 撤銷**——匯出接上 UI 後是保留項目，見上方 D7 條目 |
+| 把你的棋帶出去跟 AI 討論 | **保留項目**（2026-08-05 Eason 拍板）。棋憶儀表板一鍵複製 Coach prompt ＋ PGN；它同時是 Eason 把棋交給 Claude 分析的通道，也是產品功能 |
 | 判斷場搬出 `/learn/concept/*` | **搬，而且先做**——它是 D2/D4 的前置 |
 | 定位第一段的目標 | **兩個都寫**（A 學棋／B 有一個值得做的工程專案） |
 | P1 五盤紙筆實驗 | **降級，不再當施工閘門**——Eason 已提供第一筆資料（5:2:3），量級足以定方向 |

@@ -23,6 +23,8 @@ export interface MemoryContext {
   readonly concepts: ComputedRef<ClassifyResult[]>
   /** The selected ≤5 key moments (F1), ply-ordered. Empty on a steady game (EC-1). */
   readonly moments: ComputedRef<Moment[]>
+  /** Identified opening, when the index recognized the line. Enriches the export prompt. */
+  readonly opening: ComputedRef<{ openingName: string; eco: string } | null>
   /** White-normalized eval series for the shape-of-game chart (F2). */
   readonly series: ComputedRef<Array<number | null>>
   readonly anchorPly: ComputedRef<number | null>

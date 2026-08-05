@@ -26,8 +26,9 @@ game-history 動作），再依序 D2 → D4 → D3 → D5 → D6。
 
 ### 施工順序（依賴決定，不可調換）
 
-1. ~~**零風險四項**~~ ✅ **2026-08-02 完成**：`use-game-export.ts`＋`tier-delivery.test.ts`
-   （`assembler.ts` 保留——`data-sync.ts:59` 靠它寫雲端 PGN）／variants 輪替機制拔除、
+1. ~~**零風險四項**~~ ✅ **2026-08-02 完成**：~~`use-game-export.ts`＋`tier-delivery.test.ts`~~
+   （🔙 **D7 已於 2026-08-05 撤銷、兩檔復活**——匯出接上 UI 後成為保留項目，見下方「已施工」；
+   `assembler.ts` 本就保留，`data-sync.ts:59` 靠它寫雲端 PGN）／variants 輪替機制拔除、
    已深化概念不再給行動召喚（`variants[0]` 直取，資料結構未攤平＝v2 明令不動 `index.ts`）／
    `production/{epics,qa,sprints,gate-checks}`＋49 個 design HTML 共 236 檔（`session-state/` 已排除；
    `session-log.md` 是 gitignored、無 git 保護，搬到本次 session 的 scratchpad——**那裡會被清，
@@ -78,6 +79,20 @@ game-history 動作），再依序 D2 → D4 → D3 → D5 → D6。
 
 ## 已施工（本輪，未 commit）
 
+- ✅ **匯出這盤棋接上 UI**（2026-08-05，D7 撤銷）：新 `GameExportCard.vue` 掛在 `MemoryDashboard`
+  的 COMPLETE 分支末尾——選這裡是因為 `/review?gameId=` 同時服務「剛下完」與「對局紀錄點進來的
+  過去某局」。復活 `use-game-export.ts`＋`tier-delivery.test.ts`；`MemoryContext` 加 `opening`。
+  **桌機刻意繞過 Web Share**（`pointer: coarse` 分流）：ADR-0010 排它 Tier 1 在 iPhone 對，桌機
+  Chrome/Edge 也實作了它，按鈕寫「複製」卻跳出 Windows 系統分享面板。
+  順修兩個既有 bug：① 模板 `{{RESULT_PLAIN}}.` 與 `buildResultPlain()` 自帶句點疊成 `…checkmate..`
+  （測試用 `toContain` 驗前綴，抓不到）；② `historyEntryToCompletedGame` 硬編
+  `endReason: 'resignation'`——註解寫「pgn 永不匯出」，接上匯出那刻就失效，害每局歷史都自稱投降
+  （DB 的 `end_reason` 一直都在，只缺讀回的逆映射）。vitest 964 綠、typecheck 0。
+- 🔴 **賽後檢討看不見「該殺沒殺」**（2026-08-05 用真實對局量出來，未修）：重點步用 cpLoss 選，
+  而 **cpLoss 對將殺完全不敏感**（mate − mate = 0）。Eason 8/4 那盤，引擎第 21 手就看到 8 手內
+  強制殺，他第 43 手才完成、11 手偏離最短路徑——**現有檢討完全看不到，只會說「你走得很穩」**。
+  這是繼 P2（missed-mate 擴到 material）之後的**第三種訊號**：現有 `selectMissedMates` 管的是
+  「放任被將死」，這裡要的是「該殺沒殺／殺得慢」，量的是 mate distance 不是 cp。
 - ✅ **完局屏改版**（`PlayView.vue`）：Neve 頭像＋署名＋font-lesson 講評；主按鈕改
   「我陪你看看剛剛那一步」→ `/review`，再來一局降次要、返回首頁降文字連結。文案改兩句。
   verifier 11/11 PASS（雙尺寸截圖、按鈕 44px、`/review` 實載入）；vitest 957 綠、typecheck 0 error。

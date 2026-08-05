@@ -29,14 +29,34 @@ export function historyEntryToCompletedGame(entry: GameHistoryEntry): CompletedG
     moves,
     playerColor: entry.playerColor,
     result: resultFromPlayer(entry),
-    // History stores no structured endReason; placeholder → buildPgn's Termination tag is "normal"
-    // (correct for every non-abandoned end). The pgn only renders the replay board, never exported.
-    endReason: 'resignation',
+    endReason: endReasonFromDb(entry.endReason),
     completedAt: entry.playedAt.getTime(),
     aiSkillLevel: entry.aiDifficulty,
     playerMoveTimes: [],
     isTerminal: true,
   }
+}
+
+/**
+ * Inverse of data-sync's `mapEndReason` (CompletedGame → DB). Until Game Export shipped, this
+ * function returned a hardcoded 'resignation' placeholder — harmless while endReason only drove the
+ * replay board's PGN `Termination` tag (always "normal" either way), but the export prompt states
+ * the ending in words, so every past game claimed "my opponent resigned" even when it was mate.
+ *
+ * `draw_agreement` exists in the DB CHECK but has no CompletedGame member and is never written by
+ * this app; it falls through to the default, which is safe because buildResultPlain decides
+ * won/lost/draw from `result`, not from this value.
+ */
+function endReasonFromDb(dbValue: string): CompletedGame['endReason'] {
+  const m: Record<string, CompletedGame['endReason']> = {
+    checkmate: 'checkmate',
+    stalemate: 'stalemate',
+    resign: 'resignation',
+    insufficient: 'insufficient-material',
+    fifty_move: 'fifty-move',
+    threefold: 'threefold',
+  }
+  return m[dbValue] ?? 'resignation'
 }
 
 /** Player-relative result (Win/Loss/Draw) + colour → standard PGN result. */
