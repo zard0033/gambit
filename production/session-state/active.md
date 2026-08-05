@@ -55,7 +55,7 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ **D1
    `game-history`／`memory` 全靠它。砍它＝失去本機儲存，不是失去跨裝置。要動必須先拆成
    local-store ＋ cloud-adapter 兩層（v2 的 R1）。（行號原本寫死在這裡，D1/D2 刪過就不準了，故移除。）
 
-## 已施工（已 commit、工作區乾淨；**本機領先 origin 4 個 commit，尚未 push**）
+## 已施工（已 commit、工作區乾淨；push 狀態查 `git log origin/main..HEAD`——數字寫在這裡會腐爛）
 
 - 🔎 **push 前 deep review 收斂（runId `wf_358bd846-92d`，22 條 confirmed）**：修了 12 條。
   真 bug 只有一條——**多手題吃過提示仍顯示「完成」**：D2 刪掉 per-puzzle 的 sticky `hintUsed`
