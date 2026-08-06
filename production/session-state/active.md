@@ -45,15 +45,15 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ D1 �
   **蒸餾**：SoT 寫「先搬 X、Y 再刪」時，這份清單本身可能不完整——砍一整頁前要自己重新掃一次
   「這頁裡還有什麼函式呼叫／連結是全站唯一入口」，不能只信 SoT 列出的搬遷清單。
 
-- 🔎 **push 前 precommit-review（deep，runId `wf_9ab87010-2ba`）**：3 條 confirmed，已修 2、
-  回報未刪 1——settings-menu 主題按鈕觸控目標 36px→改回 44px；新增
+- 🔎 **push 前 precommit-review（deep，runId `wf_9ab87010-2ba`）**：3 條 confirmed 全修——
+  settings-menu 主題按鈕觸控目標 36px→改回 44px；新增
   `tests/unit/components/settings-menu.test.ts`（登出/外觀切換/重置對話框三個真動作補測試，
   原本零覆蓋）；`src/utils/parse-inline-markdown.ts` 隨 D5 刪光唯一消費端與唯一測試後變孤兒，
-  **未動**（CLAUDE.md「看到不相關 dead code 提出來、不自行刪」，等 Eason 裁決）。順手修兩個
-  unverified-minor 真 bug：`popover-content.vue` 的 `sideOffset` 被寫死 `8` 覆蓋呼叫端傳入值、
-  硬編陰影色改用 `shadow-card-hover` token。訪客失去 ProfileView 入口一類的 2 條 findings 經
-  對抗驗證判 rejected（改動前訪客本來就沒有 UI 入口到 /profile，D6 對訪客可觸及性零變化）。
-  vitest 794 綠、typecheck 0。
+  回報後 Eason 裁決一起刪（已刪，CLAUDE.md「不自行刪不相關 dead code」故先報再動手）。
+  順手修兩個 unverified-minor 真 bug：`popover-content.vue` 的 `sideOffset` 被寫死 `8`
+  覆蓋呼叫端傳入值、硬編陰影色改用 `shadow-card-hover` token。訪客失去 ProfileView 入口一類的
+  2 條 findings 經對抗驗證判 rejected（改動前訪客本來就沒有 UI 入口到 /profile，D6 對訪客
+  可觸及性零變化）。vitest 794 綠、typecheck 0。
 
 - ✅ **D5 開局知識卡刪除（縮小範圍）**（2026-08-06）：只刪真死碼四項——
   `data/opening-knowledge-cards.ts`／`components/opening-knowledge-card.vue`／
