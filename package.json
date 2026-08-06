@@ -15,7 +15,6 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@lichess-org/pgn-viewer": "^2.6.0",
     "@supabase/supabase-js": "^2.106.2",
     "chess-openings": "^0.1.1",
     "class-variance-authority": "^0.7.1",

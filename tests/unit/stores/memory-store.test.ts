@@ -63,15 +63,6 @@ describe('useMemoryStore', () => {
     expect(loadMock).toHaveBeenCalled()
   })
 
-  it('neveLine() returns first-or-few on a small window', async () => {
-    loadMock.mockResolvedValue([])
-    readLocalMock.mockReturnValue([summary({ gameId: 'g1' }), summary({ gameId: 'g2' })])
-    const store = useMemoryStore()
-    await store.load()
-
-    expect(store.neveLine().kind).toBe('first-or-few')
-  })
-
   it('reconcileOnLogin() flushes then reloads', async () => {
     loadMock.mockResolvedValue([])
     readLocalMock.mockReturnValue([])

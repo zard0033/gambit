@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import RecognitionGate from '@/components/lesson/RecognitionGate.vue'
 import DeepeningWrapUp from '@/components/lesson/DeepeningWrapUp.vue'
 import { getConceptDeepening } from '@/data/concept-deepening'
 import { getRecognitionSet } from '@/data/concept-deepening/recognition'
 import { buildRecognitionSetFromSources } from '@/modules/learning-loop/recognition-runtime'
+import { candidates } from '@/modules/learning-loop/recommend'
+import { puzzles } from '@/data/puzzles'
 import { useConceptProgressStore } from '@/stores/concept-progress'
 import { useRecognitionSourceStore } from '@/stores/recognition-source'
 
@@ -40,6 +42,15 @@ const recognitionPlayerColor = runtimeSet ? pendingSources[0].playerColor : 'whi
 if (!deepening || !recognitionSet) router.replace('/learn/concepts')
 
 const showWrapUp = ref(false)
+
+// D4 (2026-08): the 棋憶 signpost's own "練這個概念" link died with MemoryReplay — this is its
+// replacement, offered only on the signpost path (a canned lesson completion has no missed-mate
+// to bridge from). One matching puzzle, same source as MemoryReplay's old Bridge-3 link used.
+const practiceHref = computed(() => {
+  if (!fromRecognitionSource || !deepening) return undefined
+  const puzzleId = candidates(deepening.conceptId, puzzles)[0]?.id
+  return puzzleId ? `/practice/${puzzleId}` : undefined
+})
 
 function onRecognitionDone(gateUnaided: boolean): void {
   // Real-board run: retire the consumed positions so a solved missed-mate never resurfaces.
@@ -81,6 +92,7 @@ function closeWrapUp(): void {
       v-if="showWrapUp && deepening"
       :title="deepening.title"
       :essence="deepening.essence"
+      :practice-href="practiceHref"
       @close="closeWrapUp"
     />
   </div>

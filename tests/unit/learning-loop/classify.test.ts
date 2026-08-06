@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import {
-  classify,
-  hungUndefendedMaterial,
-  selectMistakeSignposts,
-  type ClassifiedMistake,
-} from '../../../src/modules/learning-loop/classify'
+import { classify, hungUndefendedMaterial } from '../../../src/modules/learning-loop/classify'
 
 // S-Phase-C — Bridge 3 mistake classifier (GDD §3.4, §4.4; AC-5, AC-6, AC-7).
 // Fixtures are real chess lines, hand-verified with chess.js replay. The classifier reads the
@@ -141,28 +136,5 @@ describe('hungUndefendedMaterial — negative cases (AC-6, false-positive suppre
         signals: noMate,
       }),
     ).toBe('none')
-  })
-})
-
-describe('selectMistakeSignposts — link selection (GDD §4.4)', () => {
-  const mistakes: ClassifiedMistake[] = [
-    { index: 2, concept: 'material', cpLoss: 120 },
-    { index: 8, concept: 'mate', cpLoss: 900 },
-    { index: 5, concept: 'material', cpLoss: 120 },
-  ]
-
-  it('keeps the biggest cpLoss, capped at maxLinks (default 1)', () => {
-    expect(selectMistakeSignposts(mistakes, 1)).toEqual([{ index: 8, concept: 'mate', cpLoss: 900 }])
-  })
-
-  it('breaks cpLoss ties by lower index (deterministic)', () => {
-    expect(selectMistakeSignposts(mistakes, 2)).toEqual([
-      { index: 8, concept: 'mate', cpLoss: 900 },
-      { index: 2, concept: 'material', cpLoss: 120 },
-    ])
-  })
-
-  it('maxLinks 0 shows nothing (excluded knob value)', () => {
-    expect(selectMistakeSignposts(mistakes, 0)).toEqual([])
   })
 })

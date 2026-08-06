@@ -29,7 +29,8 @@ const { prefersReducedMotion } = useReducedMotion()
 const puzzle = getPuzzleById(route.params.puzzleId as string)
 
 // 練習模式是唯一模式（2026-08-05，定位 v2 的 D2 砍掉試煉外殼後）：沒有鎖、沒有線性進度、
-// 沒有雲端表；解出來只記進 concept-progress 的 practiceSolved。入口是棋憶回放的概念路標。
+// 沒有雲端表；解出來只記進 concept-progress 的 practiceSolved。入口是判斷場收尾卡
+// （DeepeningWrapUp 的「練這題」，D4 2026-08 從已刪的棋憶回放 Bridge-3 搬過來的）。
 // Guard: 認不得的題目 → 回課程。
 if (!puzzle) router.replace('/learn')
 
@@ -178,7 +179,8 @@ function reviewConcept(): void {
 }
 
 // 練習是從課程／棋憶岔出來的一趟，解完就回原本的脈絡，不接「下一題」的線性流。
-// 目前唯一入口是棋憶回放的概念路標（MemoryReplay），硬丟回 /learn 會把人從棋憶踢到課程列表；
+// 目前唯一入口是判斷場收尾卡的「練這題」（RecognitionFieldView → DeepeningWrapUp），硬丟回 /learn
+// 會把人從棋憶脈絡踢到課程列表；
 // 有站內上一頁就回上一頁，直接貼網址進來（無 history）才 fallback。
 function goBack(): void {
   if (window.history.state?.back) router.back()

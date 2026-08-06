@@ -8,8 +8,13 @@
 
 import { Chess, type Square } from 'chess.js'
 import type { Moment } from '@/types/memory'
-import type { MoveDesc } from './templates'
 import { MEMORY_BRIGHT_GATE } from '@/config/memory-config'
+
+/** A move described in plain language: which 中文 piece (后/城堡/騎士/主教/國王/兵) moved to which square. */
+export interface MoveDesc {
+  readonly piece: string
+  readonly to: string
+}
 
 /** Chess piece type → 西洋棋 中文 (CLAUDE.md hard rule: 城堡/騎士/主教, never 象棋 車/馬/象). */
 const PIECE_ZH: Record<string, string> = { q: '后', r: '城堡', n: '騎士', b: '主教', k: '國王', p: '兵' }

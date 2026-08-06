@@ -2,7 +2,7 @@
 /**
  * 棋憶 dashboard — zero-state (GDD EC-1 / AC-3). A steady game surfaces nothing; the moment SECTION
  * is replaced by one calm, non-congratulatory line (寧少勿濫), not a labeled list with an apologetic
- * row. The eval view + replay remain available (rendered by the dashboard, not here).
+ * row.
  */
 import { MEMORY_ZERO_STATE_COPY } from '@/config/memory-config'
 </script>

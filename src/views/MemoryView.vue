@@ -1,10 +1,9 @@
 <script setup lang="ts">
 /**
- * 棋憶 (Memory, #22) — the /review shell (story-007). Owns the SINGLE usePostGameReview instance so
- * analysis runs once for the whole 棋憶 stack (AC-14), loads the cross-game window, derives the
- * shared view data, and provides MemoryContext to the three sub-views. The shallow stack
- * (dashboard ⇄ slideshow/replay) is history-backed so the OS/browser back gesture pops to the
- * dashboard (GDD Rule 2). Back from the dashboard returns to the entry origin (Rule 1).
+ * 棋憶 (Memory, #22) — the /review shell (story-007, D4-slimmed). Owns the SINGLE
+ * usePostGameReview instance (AC-14), loads the cross-game window, derives the shared view data,
+ * and provides MemoryContext to the dashboard. D4 (2026-08) retired the slideshow/replay
+ * drill-in, so this is a single flat screen now — no shallow stack, no `?ply=` deep-link.
  */
 import { ref, computed, onMounted, onUnmounted, provide, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -22,15 +21,11 @@ import { useRecognitionSourceStore } from '@/stores/recognition-source'
 import { RECOGNITION_MISSED_MATE_ENABLED } from '@/config/learning-loop-tuning'
 import { identifyOpening, type OpeningResult } from '@/modules/opening-id/opening-index'
 import { selectMoments, gatedCandidates } from '@/modules/memory/selection'
-import { evalWhiteSeries } from '@/modules/memory/derive'
 import { buildGameSummary } from '@/modules/memory/summary'
 import { classifyStage } from '@/modules/memory/stage'
-import { buildPgn } from '@/modules/game-export/assembler'
 import { MEMORY_SUMMARY_SCHEMA_VERSION } from '@/config/memory-config'
 import { MEMORY_CONTEXT, type MemoryContext } from '@/components/memory/memory-context'
 import MemoryDashboard from '@/components/memory/MemoryDashboard.vue'
-import MemoryReplay from '@/components/memory/MemoryReplay.vue'
-import MemorySlideshow from '@/components/memory/MemorySlideshow.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -47,10 +42,6 @@ const openingResult = ref<OpeningResult | null>(null)
 const loadedGame = ref<CompletedGame | null>(null)
 const game = computed(() => loadedGame.value ?? gameStore.completedGame)
 const orientation = computed<'white' | 'black'>(() => game.value?.playerColor ?? 'white')
-const pgn = computed<string>(() => {
-  if (!game.value) return ''
-  try { return buildPgn(game.value) } catch { return '' }
-})
 const fens = computed<string[]>(() => (game.value ? buildFenSequence(game.value.moves) : []))
 
 /** #7 F2b reused: did the player's move i allow a forced mate? (drives classify's mate signal). */
@@ -79,8 +70,6 @@ const concepts = computed<ClassifyResult[]>(() => {
   })
 })
 
-const anchorPly = computed(() => review.biggestSwingCursor.value)
-
 // review exposes analysisResults via Vue's readonly() (DeepReadonly makes nested pv readonly);
 // the pure memory modules take ReadonlyArray<StoredAnalysisEntry|null> (mutable pv) and never read
 // pv — cast away the deep-readonly. ponytail: a cast, not a type change to the shared engine result.
@@ -97,8 +86,6 @@ const moments = computed(() => {
     biggestSwingCursor: review.biggestSwingCursor.value,
   })
 })
-
-const series = computed(() => evalWhiteSeries(results.value))
 
 // ---- recordGame once at COMPLETE (write-once; idempotent per gameId in the store) ----
 let recorded = false
@@ -144,28 +131,9 @@ watch(() => review.phase.value, (p) => {
   if (p === 'COMPLETE' && !recorded) { recorded = true; recordSummary(); captureMissedMates() }
 })
 
-// ---- Shallow-stack navigation (history-backed; GDD Rule 2) ----
-type Mode = 'dashboard' | 'slideshow' | 'replay'
-const mode = ref<Mode>('dashboard')
-const momentIndex = ref(0)
-const replayPly = ref(0)
-
-// ponytail: one-level stack (dashboard ⇄ a subview); a slideshow→replay cross-link REPLACES the
-// subview rather than nesting, so back always pops to the dashboard. Upgrade path: a real stack if
-// deeper nesting is ever wanted.
-function go(target: Mode): void {
-  if (mode.value === 'dashboard') history.pushState({ memSub: true }, '')
-  else history.replaceState({ memSub: true }, '')
-  mode.value = target
-}
-function openMoment(index: number): void { momentIndex.value = index; go('slideshow') }
-function openReplay(ply: number): void { replayPly.value = ply; go('replay') }
-function backToDashboard(): void { if (mode.value !== 'dashboard') history.back() }
-function onPopState(): void { mode.value = 'dashboard' }
-
+// ---- Header back: return to the entry origin (Game Over / 對局紀錄) — GDD Rule 1 ----
 function onHeaderBack(): void {
-  if (mode.value !== 'dashboard') backToDashboard()
-  else if (window.history.length > 1) router.back() // Rule 1: return to entry origin (Game Over / 棋誌)
+  if (window.history.length > 1) router.back()
   else router.push('/')
 }
 
@@ -177,21 +145,7 @@ const opening = computed<{ openingName: string; eco: string } | null>(() => {
   return { openingName: o.name, eco: o.eco }
 })
 
-const ctx: MemoryContext = {
-  review,
-  game,
-  orientation,
-  pgn,
-  fens,
-  concepts,
-  moments,
-  opening,
-  series,
-  anchorPly,
-  openMoment,
-  openReplay,
-  backToDashboard,
-}
+const ctx: MemoryContext = { review, game, moments, opening }
 provide(MEMORY_CONTEXT, ctx)
 
 // ---- Lifecycle ----
@@ -211,23 +165,13 @@ onMounted(async () => {
   const g = game.value
   if (!g) { router.push(idQ ? '/history' : '/'); return }
   openingResult.value = identifyOpening([...g.moves])
-  void memory.load().catch(() => { /* cross-game window best-effort */ })
-  window.addEventListener('popstate', onPopState)
   review.init(g, ({ fen, targetDepth, movetimeMs, signal }) =>
     engine.analyze({ fen, targetDepth, movetimeMs, signal }),
   ).catch(() => { /* aborted / engine error — review stays partially usable */ })
-
-  // Deep-link (story-010): /review?ply=N opens replay at ply N over the dashboard root.
-  const plyQ = route.query.ply
-  if (plyQ !== undefined && plyQ !== null) {
-    const ply = Number(Array.isArray(plyQ) ? plyQ[0] : plyQ)
-    if (Number.isFinite(ply)) openReplay(ply)
-  }
 })
 onUnmounted(() => {
   review.abort()
   engine.dispose()
-  window.removeEventListener('popstate', onPopState)
 })
 </script>
 
@@ -235,14 +179,12 @@ onUnmounted(() => {
   <div class="flex min-h-dvh flex-col items-center p-4">
     <div class="mb-3 flex w-full max-w-md items-center justify-between">
       <Button variant="secondary" size="sm" @click="onHeaderBack">
-        <ArrowLeft :size="16" :stroke-width="1.8" /> {{ mode === 'dashboard' ? '返回' : '回棋憶' }}
+        <ArrowLeft :size="16" :stroke-width="1.8" /> 返回
       </Button>
       <h1 class="font-display text-xl font-bold text-ink" tabindex="-1">棋憶</h1>
       <div class="w-16" />
     </div>
 
-    <MemoryDashboard v-show="mode === 'dashboard'" />
-    <MemorySlideshow v-if="mode === 'slideshow'" :index="momentIndex" />
-    <MemoryReplay v-if="mode === 'replay'" :ply="replayPly" />
+    <MemoryDashboard />
   </div>
 </template>

@@ -184,10 +184,22 @@
 - **`src/modules/game-export/use-game-export.ts`（已接 UI，勿刪）**：2026-08-02 曾依 positioning-v2 D7
   當死碼刪除（當時零呼叫點），**2026-08-05 撤銷並復活**——匯出接上棋憶儀表板的「複製這盤棋」
   （`components/memory/GameExportCard.vue`），Eason 拍板它屬於產品而非開發工具。`tier-delivery.test.ts`
-  一併復活。**`assembler.ts` 亦不可刪**——`buildPgn` 另有兩個活消費端（`stores/data-sync.ts:59` 寫雲端
-  PGN、`views/MemoryView.vue:28`），砍它會靜默降級成原始 UCI 字串。
+  一併復活。**`assembler.ts` 亦不可刪**——`buildPgn` 仍有活消費端（`stores/data-sync.ts` 寫雲端 PGN、
+  `assembler.ts` 自己的匯出組字串路徑），砍它會靜默降級成原始 UCI 字串。（D4 2026-08：`MemoryView.vue`
+  原本也呼叫 `buildPgn` 算一份 `pgn` 塞進 MemoryContext，但唯一讀者是已刪的 `MemoryReplay.vue`，
+  已隨 D4 一併清掉——`buildPgn` 本身仍活著，只是少了這個死路徑。）
 - 🪦 **`opening-knowledge-card.vue` + `opening-knowledge-cards.ts`（v2 D5 判死，尚未執行）**：
   20 張卡全站零呼叫點，開局知識與「察覺」無關。接線＝替與斷層無關的東西發居留證。
+- **`MemoryGameSummary`（`stageCounts`/`conceptCounts`，登記日 2026-08-06，複查期限 2026-11-06）**：
+  D4 砍掉唯一讀者（`cross-game.ts::pickNeveLine`，跨局 Neve 一句話）後，`memory_summaries` 表變成
+  真正的只寫不讀——`stores/memory.ts` 的 `recordGame()`/`load()`/`summaries` 都還在，`MemoryView.vue`
+  每局仍呼叫 `buildGameSummary` 並寫入本機＋雲端，但目前沒有任何程式碼再讀回這份資料。
+  **具名用途**：預定給 active.md 記錄的「該殺沒殺／殺得慢」第三種訊號（mate distance，非 cpLoss）
+  或 P2（missed-mate 從 mate 擴到 material）當跨局資料源——這兩個都還沒實作，屬於尚未定案的候選，
+  不是已排進施工順序的功能。到期仍無讀取端就刪掉：`recordSummary()`/`buildGameSummary` 呼叫、
+  `stores/memory.ts` 的 `recordGame`/`load`/`summaries`/`reconcileOnLogin`、`data-sync.ts` 的
+  memory summary 讀寫、`memory_summaries` 表（drop，不是保留未讀——這張表沒有 D1/D2 那種「其他裝置
+  資料還在」的顧慮，純粹是這次才變成孤兒）。**別當死碼順手清掉。**
 
 > **這份清單的教訓**：上面兩條原本寫「待接 UI，勿刪」，但沒有日期也沒有具名用途——結果是無限期腐爛。
 > 新增 Deferred Cleanup 必須同時給**一個日期**和**一個具名用途**，否則直接刪。

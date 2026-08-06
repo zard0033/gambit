@@ -11,13 +11,17 @@ import type { ClassifyResult } from '@/modules/learning-loop/classify'
 /** Internal moment taxonomy (GDD Rule 12) — drives icon + color + animation, never a visible label. */
 export type MomentKind = 'tactical' | 'bright' | 'plain'
 
-/** Game stage of a position (GDD F5), for the cross-game F4 tagging. */
+/** Game stage of a position (GDD F5). */
 export type Stage = 'opening' | 'middlegame' | 'endgame'
 
 /**
- * Durable per-game summary (the only thing 棋憶 persists across sessions) — feeds the F4 cross-game
- * line. NOT a per-game moment cache (ADR-0014). `stageCounts`/`conceptCounts` count the GATED
- * candidates pre-cap (F1 Step 3), not the displayed ≤5 moments (GDD F4-schema).
+ * Durable per-game summary (the only thing 棋憶 persists across sessions). NOT a per-game moment
+ * cache (ADR-0014). `stageCounts`/`conceptCounts` count the GATED candidates pre-cap (F1 Step 3),
+ * not the displayed ≤5 moments (GDD F4-schema).
+ *
+ * D4 (2026-08) retired the only reader (the cross-game F4 Neve line) — still written every game
+ * (recordSummary in MemoryView). Registered Deferred Cleanup, see
+ * .claude/docs/technical-preferences.md "Deferred Cleanups" (review by 2026-11-06).
  */
 export interface MemoryGameSummary {
   readonly schemaVersion: number
@@ -29,14 +33,6 @@ export interface MemoryGameSummary {
   readonly conceptCounts: Record<string, number>
   readonly anchorStage: Stage | null
 }
-
-/** F4 output: the selected line's signal + numbers, BEFORE template fill (story-005 renders it).
- *  There is deliberately NO weakest-stage variant (vision anti-rating guardrail). */
-export type NeveSignal =
-  | { readonly kind: 'improving'; readonly stage: Stage; readonly n: number }
-  | { readonly kind: 'recurring'; readonly concept: string; readonly n: number }
-  | { readonly kind: 'neutral'; readonly n: number }
-  | { readonly kind: 'first-or-few'; readonly n: number }
 
 /** A selected key moment (F1 output). Selection-relevant fields only; display move strings are
  *  attached by the view layer from the game line. */

@@ -3,11 +3,8 @@
  * The 8×8 squares are baked into the image, so cg-board just stretches it 1:1.
  * Paired with the Gioco Wood piece set (CC BY-NC-SA 4.0) — see public/CREDITS.md.
  *
- * Applies to EVERY chessground in the app — the live board (vue3-chessboard) AND the
- * PgnViewer used by Replay/Review (lichess pgn-viewer). The latter ships its own
- * lichess-pgn-viewer.css with identical-specificity `cg-board` / `body .cg-wrap piece.*` rules
- * that load after this file and would otherwise win, so the board + piece selectors below
- * carry a leading `body ` purely to out-specify the vendored theme (not for scoping).
+ * Applies to EVERY chessground in the app (vue3-chessboard). The board + piece selectors below
+ * carry a leading `body ` for specificity headroom over any future vendored theme.
  */
 
 /* ---- Board surface: full wood texture ---- */
@@ -22,27 +19,11 @@ body cg-board {
    (撐爆木框 / 桌機過大 / mobile 整個跑版). The `.board-fit` class — paired with the useBoardFit
    composable that floors the wrapper to a multiple of 8 — owns the override so cg-board follows
    the wrapper into a square. Global (not per-view scoped) because it bit repeatedly when a new
-   board view forgot to copy the scoped rule (棋憶 失誤動畫). Any `.board-fit` view gets it free.
-   PgnViewer (Replay) sizes via `.lpv`/`.cg-wrap`, has no `.main-wrap`, so this never touches it. */
+   board view forgot to copy the scoped rule (棋憶 失誤動畫). Any `.board-fit` view gets it free. */
 .board-fit .main-wrap {
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
-}
-
-/* ---- Guard vue3-chessboard's cg-wrap from PgnViewer's global aspect rule ----
-   lichess-pgn-viewer.css ships a GLOBAL `.cg-wrap { box-sizing:content-box; height:0;
-   padding-bottom:100% }` aspect trick for ITS own board. vue3-chessboard nests `.cg-wrap`
-   INSIDE its own `.main-board` aspect box (cg-wrap is absolute, already filling a square), so once
-   any 棋憶/複盤 view loads the lichess stylesheet, that rule stacks a SECOND 100% padding onto every
-   vue3-chessboard board → it renders double-height and overflows (棋憶失誤/試煉/深化盤跑版；症狀是
-   「進過棋憶後全站 vue3-chessboard 跟著壞」, because the lichess CSS is global + persistent).
-   vue3-chessboard's cg-wrap always sits under `.main-wrap`; PgnViewer's sits under `.lpv` — scope the
-   reset to `.main-wrap .cg-wrap` so it never touches the PgnViewer board. */
-.main-wrap .cg-wrap {
-  height: 100% !important;
-  padding-bottom: 0 !important;
-  box-sizing: border-box !important;
 }
 
 /* ---- White pieces ---- */
@@ -68,46 +49,6 @@ body .cg-wrap piece.king.black   { background-image: url('/pieces/bK.svg'); }
    (chessground); the play-setup modal applies the same var inline on its preview. */
 :root { --piece-dark-brightness: 1.2; }
 body .cg-wrap piece.black { filter: brightness(var(--piece-dark-brightness)); }
-
-/* ---- PgnViewer chrome — Gambit warm reskin (Replay / Memory-Replay) ----
-   lichess-pgn-viewer.css themes its surrounding chrome (move list, control bar,
-   flip/PGN panes, borders, scrollbars) entirely through `--c-lpv-*` custom
-   properties that fall back to a dark palette. We override only the CHROME vars
-   on `.lpv` so the panels read warm cream + ink/jade like the rest of the app.
-   The leading `body ` out-specifies the vendored file (same trick the board rules
-   above use). Move-quality colors (inaccuracy/mistake/blunder/good/brilliant/
-   interesting) and the board itself are upstream-owned and deliberately untouched
-   — only chrome surfaces, text, borders, and the jade nav/active accent change. */
-body .lpv {
-  --c-lpv-bg: var(--color-surface-base);        /* root + scrollbar track */
-  --c-lpv-bg-movelist: var(--color-surface-card);
-  --c-lpv-bg-controls: var(--color-surface-card);
-  --c-lpv-bg-pane: var(--color-surface-raised); /* flip/download pane */
-  --c-lpv-pgn-text: var(--color-surface-raised);
-  --c-lpv-bg-variation: var(--color-surface-raised);
-
-  --c-lpv-font: var(--color-ink);
-  --c-lpv-font-shy: var(--color-ink-muted);     /* move-number index, dim text */
-  --c-lpv-past-moves: var(--color-ink-faint);   /* ancestor moves in a line */
-  --c-lpv-font-bg: var(--color-line-strong);    /* scrollbar thumb */
-
-  --c-lpv-border: var(--color-line);            /* control dividers */
-  --c-lpv-side-border: var(--color-line-subtle);
-
-  /* Nav/active accent = deep jade (primary = buttons/links/focus per design).
-     Gold stays reserved for reward, so it is intentionally NOT used here. */
-  --c-lpv-accent: var(--color-primary);
-  --c-lpv-accent-over: var(--color-primary-fg);
-  --c-lpv-current-move: var(--color-primary);   /* selected move in the list */
-  --c-lpv-move-hover: var(--color-primary-soft);
-  --c-lpv-fbt-hover: var(--color-surface-hover); /* control button hover */
-}
-
-/* The current-move pill uses white-on-jade; hovering a normal move uses the soft
-   jade tint, so its text must stay ink (the vendor flips it to white-on-accent). */
-body .lpv__moves .move:not(.empty):hover {
-  color: var(--color-ink);
-}
 
 /* ---- Promotion dialog (vue3-chessboard native) — Gambit reskin ----
    The library renders its own <dialog class="promotion-dialog"> with cburnett

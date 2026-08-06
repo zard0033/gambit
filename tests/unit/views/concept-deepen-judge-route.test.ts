@@ -168,3 +168,25 @@ describe('RecognitionFieldView — 棋憶 signpost runtime-source path (?source=
     expect(progress.deepenedUnaided.has('mate')).toBe(true)
   })
 })
+
+describe('RecognitionFieldView — practice-puzzle bridge (D4 2026-08 replacement for the deleted 棋憶回放 Bridge-3 link)', () => {
+  it('test_wrapUp_sourceRecognition_getsPracticeHrefToAMatchingPuzzle', async () => {
+    const { wrapper } = await mountJudgeAt('mate', { source: 'recognition', unaided: '1' })
+    wrapper.findComponent(RecognitionGate).vm.$emit('complete', true)
+    await flushPromises()
+
+    const wrapUp = wrapper.findComponent(DeepeningWrapUp)
+    expect(wrapUp.exists()).toBe(true)
+    expect(wrapUp.props('practiceHref')).toMatch(/^\/practice\//)
+  })
+
+  it('test_wrapUp_cannedLessonPath_getsNoPracticeHref', async () => {
+    // No ?source=recognition — a plain lesson completion has no missed-mate to bridge from.
+    const { wrapper } = await mountJudgeAt('fork', { unaided: '1' })
+    wrapper.findComponent(RecognitionGate).vm.$emit('complete', true)
+    await flushPromises()
+
+    const wrapUp = wrapper.findComponent(DeepeningWrapUp)
+    expect(wrapUp.props('practiceHref')).toBeUndefined()
+  })
+})

@@ -110,23 +110,3 @@ export function classify(
   }
   return 'none'
 }
-
-/** A classified mistake at a move index — the raw input to signpost selection. */
-export interface ClassifiedMistake {
-  index: number
-  concept: ChessConcept
-  cpLoss: number
-}
-
-/**
- * GDD §4.4 link selection: of the classified mistakes, keep the `maxLinks` biggest by cpLoss
- * (tie-break: lower index first, deterministic). Returns at most `maxLinks` signposts.
- */
-export function selectMistakeSignposts(
-  classified: readonly ClassifiedMistake[],
-  maxLinks: number,
-): ClassifiedMistake[] {
-  return [...classified]
-    .sort((a, b) => b.cpLoss - a.cpLoss || a.index - b.index)
-    .slice(0, Math.max(0, maxLinks))
-}

@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { MemoryGameSummary, NeveSignal } from '@/types/memory'
+import type { MemoryGameSummary } from '@/types/memory'
 import { useDataSyncStore } from '@/stores/data-sync'
-import { pickNeveLine } from '@/modules/memory/cross-game'
 import { MEMORY_SUMMARY_SCHEMA_VERSION } from '@/config/memory-config'
 
 /**
@@ -40,11 +39,6 @@ export const useMemoryStore = defineStore('memory', () => {
     await load()
   }
 
-  /** The cross-game Neve line over the loaded window (F4). */
-  function neveLine(): NeveSignal {
-    return pickNeveLine(summaries.value)
-  }
-
   /** On login: flush locally-held summaries to the cloud (union by game_id), then reload. */
   async function reconcileOnLogin(): Promise<void> {
     const dataSync = useDataSyncStore()
@@ -52,5 +46,5 @@ export const useMemoryStore = defineStore('memory', () => {
     await load()
   }
 
-  return { summaries, load, recordGame, neveLine, reconcileOnLogin }
+  return { summaries, load, recordGame, reconcileOnLogin }
 })
