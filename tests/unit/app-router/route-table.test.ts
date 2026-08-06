@@ -10,7 +10,7 @@ describe('route-table', () => {
 
   it('test_routeTable_containsExactlyExpectedRoutes', () => {
     const paths = routes.map((r) => r.path)
-    expect(paths).toEqual(['/', '/play', '/learn', '/learn/concepts', '/learn/concept/:conceptId', '/learn/concept/:conceptId/judge', '/learn/:lessonId', '/practice/:puzzleId', '/review', '/history', '/profile', '/sign-in', '/:pathMatch(.*)*'])
+    expect(paths).toEqual(['/', '/play', '/learn', '/learn/concepts', '/learn/concept/:conceptId', '/learn/concept/:conceptId/judge', '/learn/:lessonId', '/practice/:puzzleId', '/review', '/history', '/sign-in', '/:pathMatch(.*)*'])
   })
 
   it('test_routeTable_playRoute_componentIsFunction', () => {
@@ -42,12 +42,6 @@ describe('route-table', () => {
     const history = routes.find((r) => r.path === '/history')!
     expect(history).toBeDefined()
     expect(history.name).toBe('history')
-  })
-
-  it('test_routeTable_profileRoute_isAuthGuarded', () => {
-    const profile = routes.find((r) => r.path === '/profile')!
-    expect(profile).toBeDefined()
-    expect(profile.name).toBe('profile')
   })
 
   it('test_routeTable_noReservedRoutes_settingsAbsent', () => {

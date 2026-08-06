@@ -14,7 +14,6 @@ const ROUTES: readonly [name: string, path: string][] = [
   ['lesson', '/learn/pawn-basics'], // 第一課，未上鎖
   ['practice', '/practice/l1-capture-queen'],
   ['history', '/history'],
-  ['profile', '/profile'],
   ['sign-in', '/sign-in'],
   ['not-found', '/definitely-not-a-route'],
 ]

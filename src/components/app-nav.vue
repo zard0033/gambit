@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { House, BookOpen, CircleUserRound } from 'lucide-vue-next'
+import { House, BookOpen } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
 import brandMark from '@/assets/brand-mark.svg'
 import { useAuthStore } from '@/stores/auth'
+import SettingsMenu from '@/components/settings-menu.vue'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -58,7 +59,7 @@ const NAV_ITEMS = [
 
       <span class="flex-1" />
 
-      <!-- Account: 登入 when signed out, profile entry when signed in (登出 lives in ProfileView). -->
+      <!-- Account: 登入 when signed out, 設定齒輪 when signed in (D6：登出／對局紀錄／外觀／重置都在裡面). -->
       <RouterLink
         v-if="!authStore.userId"
         to="/sign-in"
@@ -67,15 +68,7 @@ const NAV_ITEMS = [
       >
         登入
       </RouterLink>
-      <RouterLink
-        v-else
-        to="/profile"
-        aria-label="我的"
-        class="flex items-center justify-center h-11 w-11 rounded-full text-ink-on-deep-dim hover:text-ink-on-deep hover:bg-white/8 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
-        active-class="text-white! bg-primary"
-      >
-        <CircleUserRound :size="20" :stroke-width="1.8" aria-hidden="true" />
-      </RouterLink>
+      <SettingsMenu v-else />
     </div>
   </header>
 

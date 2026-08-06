@@ -37,7 +37,7 @@ describe('auth route guard', () => {
     sessionStorage.clear()
   })
 
-  // Guest mode (訪客完局紀錄): history/profile are public once the visitor opts into guest browsing
+  // Guest mode (訪客完局紀錄): history is public once the visitor opts into guest browsing
   // (GUEST_ENTRY_KEY set by the sign-in screen). They read their games from localStorage.
   it('test_authGuard_guest_historyRoute_allowsNavigation', async () => {
     sessionStorage.setItem(GUEST_ENTRY_KEY, '1')
@@ -50,20 +50,6 @@ describe('auth route guard', () => {
 
     await router.push('/history')
     expect(router.currentRoute.value.name).toBe('history')
-    expect(router.currentRoute.value.query.login).toBeUndefined()
-  })
-
-  it('test_authGuard_guest_profileRoute_allowsNavigation', async () => {
-    sessionStorage.setItem(GUEST_ENTRY_KEY, '1')
-    vi.mocked(supabase.auth.getSession).mockResolvedValueOnce({
-      data: { session: null }, error: null,
-    })
-    const router = makeRouter()
-    const authStore = useAuthStore()
-    await authStore.initAuth()
-
-    await router.push('/profile')
-    expect(router.currentRoute.value.name).toBe('profile')
     expect(router.currentRoute.value.query.login).toBeUndefined()
   })
 
@@ -117,18 +103,6 @@ describe('auth route guard', () => {
 
     await router.push('/history')
     expect(router.currentRoute.value.name).toBe('history')
-  })
-
-  it('test_authGuard_authenticated_profileRoute_allowsNavigation (AC-S5-03)', async () => {
-    vi.mocked(supabase.auth.getSession).mockResolvedValueOnce({
-      data: { session: { user: { id: 'uid-1', email: 'a@b.com' } } as never }, error: null,
-    })
-    const router = makeRouter()
-    const authStore = useAuthStore()
-    await authStore.initAuth()
-
-    await router.push('/profile')
-    expect(router.currentRoute.value.name).toBe('profile')
   })
 
   it('test_authGuard_publicRoutes_noRedirect', async () => {

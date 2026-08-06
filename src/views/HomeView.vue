@@ -8,6 +8,7 @@ import { greetingForNow } from '@/lib/utils'
 import { useLessonProgressStore } from '@/stores/lesson-progress'
 import { useUiStore } from '@/stores/ui-store'
 import { useResumeGameStore } from '@/stores/resume-game'
+import { rungForSkillLevel } from '@/config/difficulty-tuning'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { DarkPanel, ChapterBadge, SectionLabel, ProgressBar, InkBrush } from '@/components/ui/gambit'
@@ -28,7 +29,7 @@ const resumeInfo = computed(() => {
     moveCount: r.moves.length,
     colorLabel: r.playerColor === 'white' ? '白' : '黑',
     piece: r.playerColor === 'white' ? 'wP' : 'bP',
-    level: r.level,
+    rungName: rungForSkillLevel(r.level).name,
   }
 })
 
@@ -92,7 +93,7 @@ onMounted(() => {
             <div class="mt-2 flex flex-wrap gap-1.5">
               <span class="inline-flex items-center rounded-md border border-white/10 bg-white/6 px-2 py-0.5 font-num text-[12px] tabular-nums text-ink-on-deep">第 {{ resumeInfo.moveCount }} 手</span>
               <span class="inline-flex items-center rounded-md border border-white/10 bg-white/6 px-2 py-0.5 font-num text-[12px] text-ink-on-deep">執{{ resumeInfo.colorLabel }}</span>
-              <span class="inline-flex items-center rounded-md border border-white/10 bg-white/6 px-2 py-0.5 font-num text-[12px] tabular-nums text-ink-on-deep">Lv.{{ resumeInfo.level }}</span>
+              <span class="inline-flex items-center rounded-md border border-white/10 bg-white/6 px-2 py-0.5 font-num text-[12px] text-ink-on-deep">{{ resumeInfo.rungName }}</span>
             </div>
             <div class="mt-3.5 flex items-center gap-3">
               <Button variant="gold" size="sm" @click.stop="continueGame">

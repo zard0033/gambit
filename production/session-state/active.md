@@ -1,8 +1,8 @@
 <!-- STATUS -->
-Epic: 定位 v2 刪除期
+Epic: 定位 v2 刪除期 — **D1–D9 全部執行或撤銷完畢，刪除期主線收工**
 Feature: 照死刑名單砍 src ~3,100 行、tests ~1,400 行、文件 ~37,000 行
-Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ D1 棋誌＋✅ D2 試煉外殼＋✅ **D4 棋憶敘事外殼**。
-**下一步＝D3 難度五檔→一檔**，再依序 D5 → D6。
+Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ D1 棋誌＋✅ D2 試煉外殼＋✅ D4 棋憶敘事外殼＋🚫 D3 已撤銷＋✅ D5 縮小範圍執行＋✅ **D6 ProfileView 整頁下架**（見下方條目）。
+**下一步＝未決/待辦清單**（見下方，`HomeView.vue` raw Skill Level 顯示因 D3 撤銷重新變成真問題，優先度最高）。
 ⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
 <!-- /STATUS -->
 
@@ -16,11 +16,7 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ D1 �
 斷層＝**認知遷移**（學到的調用不出來），不是情緒問題。目標使用者第一位＝Eason 本人。
 第一筆資料：失敗類型比例 **5:2:3**（沒看到／算不出／評估偏），全在 rung 1。
 
-### 施工順序（依賴決定，不可調換）——1-4 已完成，見下方「已施工」
-
-5. **D3 難度五檔→一檔**（保留 `fallible-pick.ts`）——下一步。
-6. **D5 開局知識卡＋opening-id＋`chess-openings` 依賴**。
-7. **D6 ProfileView 整頁**——主題切換與 `reset-history-dialog` 先搬進 header 齒輪再刪。
+### 施工順序（依賴決定，不可調換）——全部已完成或撤銷，見下方「已施工」
 
 ### 🔴 三個必須記住的陷阱（審查實測，別重新發現）
 
@@ -32,6 +28,43 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ D1 �
    要動必須先拆成 local-store ＋ cloud-adapter 兩層（v2 的 R1）。
 
 ## 已施工（已 commit、工作區乾淨；push 狀態查 `git log origin/main..HEAD`）
+
+- ✅ **D6 ProfileView 整頁下架**（2026-08-06）：核實 SoT 原案時發現漏搬兩項真功能——
+  `authStore.signOut()` 和 `/history` 連結都只有 ProfileView 一個入口，照原案只搬主題切換和
+  重置對話框會讓已登入使用者找不到登出。新建 `settings-menu.vue`（reka-ui Popover，走
+  `ui-design-flow` ➊ 出樣張核可）取代 header 原本連到 `/profile` 的帳號圖示，裝四項：
+  對局紀錄連結／外觀切換（segmented control，沿用原樣式）／重置對局記錄（危險操作紅字）／登出；
+  三個「即將推出」鎖住列（成就勳章／開局資料庫／帳號安全）不搬，本來就是佔位符。新增
+  `src/components/ui/popover/`（reka-ui 家族，跟既有 dialog 同源，零新依賴）。砍
+  `ProfileView.vue`、`/profile` 路由、兩張 e2e baseline 截圖；`route-table.test.ts` 移除
+  profile 斷言、`auth-guard.test.ts` 刪兩個 profile-specific 測試（`/history` 已覆蓋同一段
+  guard 邏輯，覆蓋率無損）。vitest 791 綠、typecheck 0、e2e chromium 全綠（webkit 20 個失敗全是
+  已知 `browserContext.newPage` 環境級逾時 flake，與本次改動無關）。
+  **蒸餾**：SoT 寫「先搬 X、Y 再刪」時，這份清單本身可能不完整——砍一整頁前要自己重新掃一次
+  「這頁裡還有什麼函式呼叫／連結是全站唯一入口」，不能只信 SoT 列出的搬遷清單。
+
+- ✅ **D5 開局知識卡刪除（縮小範圍）**（2026-08-06）：只刪真死碼四項——
+  `data/opening-knowledge-cards.ts`／`components/opening-knowledge-card.vue`／
+  `tests/unit/opening-knowledge-cards/`（兩檔）／`design/gdd/opening-knowledge-cards.md`。
+  **opening-id／chess-openings 保留，沒有照 SoT 原判死一起砍**：核實時發現 `MemoryView.vue`
+  仍在呼叫 `identifyOpening()`，一度以為是「SoT 誤判」，但深查後發現 SoT 的斷點清單本來就打算
+  拔掉那個呼叫（配合 `design/gdd/memory.md:437` 已定義的 EC-8 fallback，理論上可安全砍）——
+  真正的變數是 **D7**：SoT 寫 D5 判決時（2026-08-02）「匯出這盤棋」還是死碼，D7 於 2026-08-05
+  撤銷復活後，`GameExportCard.vue` 才多了對 `opening` 的依賴（`game-export/assembler.ts:108-110,140-141`
+  寫入 PGN `Opening`/`ECO` header 與 AI prompt 開局句），SoT 沒同步更新這個連動。Eason 拍板保留
+  opening-id，只縮小刪除範圍。vitest 794 全綠、typecheck 0。SoT／active.md 已更新。
+  **蒸餾**：跨 D 項的判死決策會互相連動（D7 復活影響 D5 的死碼認定），改死刑名單裡任何一項前，
+  該查一下同名單裡有沒有更晚拍板、可能改變依賴關係的其他項目，不能只信單一條目寫的日期。
+
+- 🚫 **D3 難度五檔→一檔，撤銷**（2026-08-06，未動任何 code）：偵察範圍後才發現原判死理由誤讀了
+  實作——`positioning-v2` 說「五個 rung 全同、真旋鈕只剩 fallible」，但這句話本身沒錯，只是後續
+  推論漏看 `fallible.probability`／cp 帶**在五個 rung 之間本來就不同**（rung1 60%機率虧100-300cp
+  → rung5 完全不犯錯），這才是選單的真實差異來源，`skillLevel`/`depth`/`movetimeMs` 才是啞彈。
+  Eason 拍板：會隨棋力成長挑戰更高檔，選單保留。`config/difficulty-tuning.ts`／
+  `play-setup-modal.vue` 維持現狀，零改動。SoT 表格已更新（見 `positioning-v2-2026-08-02.md`
+  D3 條目與施工順序行）。**蒸餾**：偵察報告只摘了「哪些欄位是啞彈」，沒摘「哪些欄位是真旋鈕」，
+  導致轉述給 Eason 時第一版解釋整個判斷方向反了——下次讀配置檔判斷「選單是否有實質差異」，
+  必須連同差異欄位（此例＝`fallible`）本身的值列出來，不能只列出無差異的欄位。
 
 - ✅ **D4 棋憶敘事外殼下架**（2026-08-06）：刪 8 個表演層元件（Slideshow/Replay/EvalShapeChart/
   ReplayEvalChart/MomentCard/MomentSlideshowDoor/NeveCard/DotBand）＋`pgn-viewer.vue`＋
@@ -65,7 +98,8 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ D1 �
 
 - **像素回歸的 CI 盲區**：`toHaveScreenshot` 在 CI 是 skip 的。動到任何 UI 後本機要自己跑
   `npx playwright test visual-regression`。
-- **`HomeView.vue` 續玩卡印 raw Skill Level**：D3 砍成一檔後這行連同難度選單一起消失，不必單獨修。
+- ✅ **`HomeView.vue` 續玩卡印 raw Skill Level**（2026-08-06 已修）：改印
+  `rungForSkillLevel(r.level).name`（如「進階」）取代 `Lv.{{ level }}`，截圖驗證過。
 - **missed-mate 從 mate 擴到 material**（v2 的 P2）：若對既有對局跑 `selectMissedMates` 產出 ≥1 題的
   比例 <30%，主路徑必須先擴到 material 才成立。
 - v2 末尾另有 8 題待答（棋力現況、下棋 vs 寫 app 時數比、四週對照實驗、自用產品的驗收條件等）。
