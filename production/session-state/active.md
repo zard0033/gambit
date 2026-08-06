@@ -2,7 +2,9 @@
 Epic: 定位 v2 刪除期 — **D1–D9 全部執行或撤銷完畢，刪除期主線收工**
 Feature: 照死刑名單砍 src ~3,100 行、tests ~1,400 行、文件 ~37,000 行
 Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ D1 棋誌＋✅ D2 試煉外殼＋✅ D4 棋憶敘事外殼＋🚫 D3 已撤銷＋✅ D5 縮小範圍執行＋✅ **D6 ProfileView 整頁下架**（見下方條目）。
-**下一步＝未決/待辦清單**（見下方，`HomeView.vue` raw Skill Level 顯示因 D3 撤銷重新變成真問題，優先度最高）。
+**下一步＝未決/待辦清單**（見下方；`HomeView.vue` raw Skill Level 已修，待辦清單裡優先度最高的
+是 missed-mate P2 material 擴展）。push 前 review 抓到 3 條 confirmed（settings-menu 觸控目標／
+零測試覆蓋、`parse-inline-markdown.ts` 變孤兒待 Eason 決定去留），修法見下方「已施工」D6 條目。
 ⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
 <!-- /STATUS -->
 
@@ -42,6 +44,16 @@ Task: ✅ 零風險四項＋✅ 判斷場搬遷＋✅ 像素回歸閘＋✅ D1 �
   已知 `browserContext.newPage` 環境級逾時 flake，與本次改動無關）。
   **蒸餾**：SoT 寫「先搬 X、Y 再刪」時，這份清單本身可能不完整——砍一整頁前要自己重新掃一次
   「這頁裡還有什麼函式呼叫／連結是全站唯一入口」，不能只信 SoT 列出的搬遷清單。
+
+- 🔎 **push 前 precommit-review（deep，runId `wf_9ab87010-2ba`）**：3 條 confirmed，已修 2、
+  回報未刪 1——settings-menu 主題按鈕觸控目標 36px→改回 44px；新增
+  `tests/unit/components/settings-menu.test.ts`（登出/外觀切換/重置對話框三個真動作補測試，
+  原本零覆蓋）；`src/utils/parse-inline-markdown.ts` 隨 D5 刪光唯一消費端與唯一測試後變孤兒，
+  **未動**（CLAUDE.md「看到不相關 dead code 提出來、不自行刪」，等 Eason 裁決）。順手修兩個
+  unverified-minor 真 bug：`popover-content.vue` 的 `sideOffset` 被寫死 `8` 覆蓋呼叫端傳入值、
+  硬編陰影色改用 `shadow-card-hover` token。訪客失去 ProfileView 入口一類的 2 條 findings 經
+  對抗驗證判 rejected（改動前訪客本來就沒有 UI 入口到 /profile，D6 對訪客可觸及性零變化）。
+  vitest 794 綠、typecheck 0。
 
 - ✅ **D5 開局知識卡刪除（縮小範圍）**（2026-08-06）：只刪真死碼四項——
   `data/opening-knowledge-cards.ts`／`components/opening-knowledge-card.vue`／

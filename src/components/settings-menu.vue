@@ -69,7 +69,7 @@ async function handleSignOut() {
           v-for="opt in themeOptions"
           :key="opt.value"
           type="button"
-          class="relative z-10 min-h-9 flex-1 rounded-[7px] font-sans text-sm font-medium transition-colors"
+          class="relative z-10 min-h-11 flex-1 rounded-[7px] font-sans text-sm font-medium transition-colors"
           :class="uiStore.theme === opt.value ? 'text-primary-fg' : 'text-ink-muted'"
           :aria-pressed="uiStore.theme === opt.value"
           @click="uiStore.setTheme(opt.value)"
