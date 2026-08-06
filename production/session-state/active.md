@@ -1,7 +1,7 @@
 <!-- STATUS -->
-Epic: 定位 v2 刪除期 — **主線收工**（D1–D9 全部執行或撤銷）＋ **noir 深色主題整組下架**（2026-08-06）
-Feature: 無進行中 feature；下一步看「未決/待辦」
-Task: health-check Q9（訪客登入/history/reset 缺口）已修復，工作區有 3 檔改動尚未 commit/push
+Epic: 定位 v2 刪除期主線已收工；本輪起接**賽後檢討的可見性**（moments 有算沒顯示）
+Feature: 賽後關鍵步清單（棋憶頁）— 實作完成、主路徑截圖驗過，**尚未 commit/push**
+Task: 未驗完兩項見「未決/待辦」首兩條（AC-7 歷史路徑、棋盤朝向疑慮）
 ⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
 <!-- /STATUS -->
 
@@ -27,7 +27,24 @@ D1（棋誌）／D2（試煉外殼）／D4（棋憶敘事外殼）／D5（開局
 3. **`data-sync.ts` 不是雲端層，是唯一的持久化層**：guest 佇列與 memory 的讀寫都是純 localStorage。
    要動必須先拆成 local-store ＋ cloud-adapter 兩層（v2 的 R1）。
 
-## 已施工（push 狀態查 `git log origin/main..HEAD`；本輪 3 檔尚未 commit，見上方 STATUS）
+## 已施工（push 狀態查 `git log origin/main..HEAD`）
+
+- 🆕 **賽後關鍵步清單**（2026-08-06，尚未 commit）：`selectMoments()` 每盤都在算，D4 之後卻只流向
+  匯出文字與一個沒人讀的統計——這是它的畫面落點。走完 dev-flow（brainstorm→spec→★核可）＋
+  ui-design-flow ➊（三個樣張，Eason 選 C＝共用棋盤＋清單切換）。
+  新增 `modules/memory/moment-display.ts`（純函式：ply→手數、UCI→SAN、判定該顯示引擎建議還是
+  玩家自己那手）＋ `components/memory/KeyMomentsCard.vue`，掛進 `MemoryDashboard` 的 isComplete 分支。
+  **判準用「玩家走的 === bestMove」，不用 Moment 的 `kind`**——`displayKind` 把 anchor 和 bright
+  都壓成 `'bright'`，拿 kind 反推會把最大失誤誤認成好棋。
+  **順手修 `chess-board.vue` 的初始 lastMove 失效**：`watch` 沒 `immediate`、且註冊時 boardApi
+  還不存在，所以「一掛載就要標出某一手」的盤永遠等不到高亮（要點過才出現）。改在
+  `onBoardCreated` 補套，只在 prop 有值時動，`undefined` 的消費端（Play/Review/Replay）行為不變。
+  vitest 800 綠、typecheck 0、E2E 49 過/4 skip（像素回歸 CI 本就 skip）/0 fail、
+  cream × mobile/desktop 截圖驗過（截圖已清）。precommit-review deep runId `wf_73687f35-343`：
+  7 agent、**零 confirmed 真缺陷**，10 條 unverified-minor 中修掉 3 條（memory-context 過時註解、
+  FEN replay 掛錯反應依賴、ply 註解措辭），其餘標不修（見下）。
+  **蒸餾**：單元測試綠不等於畫面對——這次 lastMove 高亮在 7 個單元測試全綠的情況下完全沒顯示，
+  是跑真瀏覽器才看見的。凡「初始狀態就該生效」的 imperative 設定，都要懷疑它有沒有搭上 watch。
 
 - ✅ **health-check Q9 修復：訪客齒輪選單**（2026-08-06）：D6 把重置對局記錄／對局紀錄搬進
   `settings-menu.vue` 後訪客完全看不到入口（`app-nav.vue` 舊邏輯只在登入時掛 SettingsMenu，
@@ -76,6 +93,13 @@ D1（棋誌）／D2（試煉外殼）／D4（棋憶敘事外殼）／D5（開局
 
 ## 未決 / 待辦
 
+- 🔴 **關鍵步清單 AC-7 尚未實測**（歷史對局經 `?gameId=` 進來、分析快取命中時清單要照顯示）：
+  驅動腳本的 selector 抓不到對局紀錄卡片就收工了。元件本身不管資料來源（只讀 ctx.game／
+  ctx.review），風險低，但沒驗過就是沒驗過。
+- 🔴 **棋盤朝向疑慮（可能是既有 bug，非本輪引入）**：驗證那盤對局紀錄顯示「執黑」，但棋憶
+  棋盤是白方視角（rank 1 在下）。`KeyMomentsCard` 的 orientation 取 `game.playerColor`，
+  與 `MemoryView` 既有寫法同源，所以嫌疑在資料層或 history 卡片的執子色顯示。查法：同一盤
+  對照 `game.playerColor` 實際值與紀錄卡片文字。
 - **像素回歸的 CI 盲區**：`toHaveScreenshot` 在 CI 是 skip 的，動 UI 後本機要自己跑。
 - **missed-mate 從 mate 擴到 material**（v2 的 P2）：若既有對局跑 `selectMissedMates` 產出
   ≥1 題比例 <30%，主路徑必須先擴到 material 才成立。**2026-08-06 查過 Eason 現有對局數＝

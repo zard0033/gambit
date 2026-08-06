@@ -11,6 +11,7 @@ import { MEMORY_ANALYZING_COPY } from '@/config/memory-config'
 import { useMemoryContext } from './memory-context'
 import RecognitionSignpost from './RecognitionSignpost.vue'
 import EmptyMemory from './EmptyMemory.vue'
+import KeyMomentsCard from './KeyMomentsCard.vue'
 import GameExportCard from './GameExportCard.vue'
 
 const ctx = useMemoryContext()
@@ -35,7 +36,9 @@ const analysisProgress = computed(() => {
     <template v-if="isComplete">
       <!-- 1. Zero-state (steady game, no key moments) -->
       <EmptyMemory v-if="ctx.moments.value.length === 0" />
-      <!-- 2. 帶走這盤:複製成可貼給 AI 的內容(ADR-0010)。 -->
+      <!-- 2. 這盤值得回頭看的幾手:共用棋盤 + 清單(F1 moments 的畫面落點)。 -->
+      <KeyMomentsCard v-else />
+      <!-- 3. 帶走這盤:複製成可貼給 AI 的內容(ADR-0010)。 -->
       <GameExportCard
         v-if="ctx.game.value"
         :key="ctx.game.value.completedAt"

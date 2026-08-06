@@ -14,8 +14,8 @@ export interface MemoryContext {
   /** The single review instance for this game (analysis owner). */
   readonly review: ReturnType<typeof usePostGameReview>
   readonly game: ComputedRef<CompletedGame | null>
-  /** The selected ≤5 key moments (F1), ply-ordered. Empty on a steady game (EC-1). Feeds the
-   *  export prompt's key-move-number list — no on-screen moment list in D4's slimmed dashboard. */
+  /** The selected ≤5 key moments (F1), ply-ordered. Empty on a steady game (EC-1). Feeds both the
+   *  export prompt's key-move-number list and the on-screen 關鍵步清單 (KeyMomentsCard). */
   readonly moments: ComputedRef<Moment[]>
   /** Identified opening, when the index recognized the line. Enriches the export prompt. */
   readonly opening: ComputedRef<{ openingName: string; eco: string } | null>

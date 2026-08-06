@@ -121,6 +121,11 @@ function onBoardCreated(api: BoardApi): void {
   boardApi.value = api
   // Board is created viewOnly:false (so listeners bind); apply the real disabled state now.
   if (props.disabled) api.setConfig({ viewOnly: true }, false)
+  // Same deal for the initial lastMove: the watch below is not `immediate`, and at watch-registration
+  // time boardApi doesn't exist yet — so a board that must highlight a move from its very first paint
+  // (棋憶 key-moment list) would otherwise never get the tint until the prop changed. Only touched when
+  // the parent actually passed a value, so opt-out consumers (`undefined`) are unaffected.
+  if (props.lastMove) api.setConfig({ lastMove: [props.lastMove[0], props.lastMove[1]] as [Key, Key] }, false)
 }
 
 function onMove(move: Move): void {
