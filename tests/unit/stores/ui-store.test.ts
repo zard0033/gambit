@@ -6,6 +6,7 @@ import { useUiStore } from '@/stores/ui-store'
 describe('useUiStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
+    localStorage.clear()
   })
 
   it('is importable and returns a store', () => {

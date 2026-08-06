@@ -113,7 +113,7 @@ onMounted(() => {
         <div class="relative z-10 flex-1 min-w-0">
           <!-- 墨記眉標：短筆畫 + 明朝金字，取代 NEW GAME（乙做法，決策樣張規格5） -->
           <span class="inline-flex items-center gap-1.5">
-            <!-- 深玉表面：墨色跟表面走，兩主題皆暖白墨（同招呼語 scoped 覆寫模式） -->
+            <!-- 深玉表面：墨色跟表面走，用暖白墨（同招呼語 scoped 覆寫模式） -->
             <InkBrush :width="24" :height="6" :seed="11" :thickness="0.5" style="--color-ink-brush: rgba(236, 230, 218, 0.72)" />
             <span class="font-display font-bold text-[13px] text-ink-on-deep tracking-[0.04em]">今日</span>
           </span>

@@ -3,13 +3,12 @@
  * 墨筆 (InkBrush) — a single variable-width calligraphy brush stroke as a pure-vector SVG path
  * (no raster, no jitter). Shared 墨韻 primitive: use narrow+short as a title underline, or
  * wide+flat as a 乾筆 section divider. Colour comes from `currentColor` (see .ink-brush in
- * main.css) so each theme paints its own ink — deep-jade warm-white, cream dark-umber. The path
+ * main.css) so each surface paints its own ink — deep-jade warm-white, cream dark-umber. The path
  * is deterministic per `seed`, so it never reflows on re-render.
  *
- * 母題共用、明暗兩表現（SoT: design/gambit-design-system/colors_and_type.css「墨韻母題」）。
- * 墨筆底線／乾筆分隔兩主題皆可進日常 UI（2026-07-22 A/B 拍板），鋪量克制——每屏少數錨點；
- * 深色表面（deep-jade 區）兩主題皆用暖白墨（墨色跟表面走，不跟主題走，scoped 覆寫 --color-ink-brush）。
- * 金墨飛濺（InkSplatter）仍限 reward／特殊時刻。
+ * SoT: design/gambit-design-system/colors_and_type.css「墨韻母題」。墨筆底線／乾筆分隔可進日常
+ * UI（2026-07-22 A/B 拍板），鋪量克制——每屏少數錨點；墨色跟表面走：深色表面（deep-jade 區）用
+ * 暖白墨，scoped 覆寫 --color-ink-brush。金墨飛濺（InkSplatter）仍限 reward／特殊時刻。
  */
 const props = withDefaults(
   defineProps<{ width?: number; height?: number; seed?: number; thickness?: number }>(),

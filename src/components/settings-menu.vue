@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * Header 設定齒輪（D6）— ProfileView 整頁下架後唯一的帳號/設定入口。取代原本連到 /profile 的
- * RouterLink。裝 ProfileView 裡真正在動作的三項：對局紀錄連結、重置對局記錄、登入/登出——
+ * RouterLink。裝 ProfileView 裡真正在動作的三項：對局紀錄連結、重置對局記錄、登出——
  * 三個「即將推出」鎖住列（成就勳章／開局資料庫／帳號安全）不搬，本來就是佔位符。
  * 外觀切換已隨 noir 主題整組下架（2026-08-06，Eason 拍板只留 cream+jade）。
  */

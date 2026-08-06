@@ -51,13 +51,13 @@ onMounted(() => {
       >
         棋盤未曾離開，你來了。
       </h1>
-      <!-- 招呼語墨筆：深青底＝跟著表面走的暖白墨（兩主題皆同，見 scoped --color-ink-brush 覆寫），
-           不跟隨 noir 主題切換成深棕墨（全域 token 的預設行為在深色底上會消失）。 -->
+      <!-- 招呼語墨筆：深青底＝暖白墨（見 scoped --color-ink-brush 覆寫；全域 token 的預設深棕墨
+           在深色底上會消失，故此處覆寫）。 -->
       <div class="mt-1.5" aria-hidden="true">
         <InkBrush :width="150" :height="12" :seed="2" />
       </div>
     </div>
-    <!-- 墨氣下滲邊界：cream 長暈染延伸進內容區；noir（玄夜）短距離淡出＋一條極細亮度分界
+    <!-- 墨氣下滲邊界：長暈染延伸進內容區
          （決策樣張 home-ink-fusion-final.html ➊ 拍板，見 main.css .ink-seep） -->
     <div class="ink-seep" aria-hidden="true" />
   </section>
@@ -72,7 +72,7 @@ onMounted(() => {
   overflow: visible;
   width: 100%;
   padding: 26px 0 96px;
-  /* 墨韻母題「跟著表面走，不跟主題走」：此表面兩主題皆是深青／深墨綠，墨色固定用暖白墨。 */
+  /* 墨韻母題跟著表面走：此表面是深青，墨色固定用暖白墨（全域 token 預設深棕墨是給亮面用的）。 */
   --color-ink-brush: rgba(236, 230, 218, 0.72);
   /* Sky = the page's own atmosphere, not a card: nav-join anchors the top edge to AppNav's
      bottom colour (#183E35, no jump), sky-a/sky-b carry the time-of-day temperature. The colour

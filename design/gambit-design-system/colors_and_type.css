@@ -186,7 +186,7 @@
   /* focused element: gold ring + soft glow */
   --focus-gold:   0 0 0 3px var(--accent), 0 0 18px rgba(248, 181, 0, 0.5);
 
-  /* ---- App-chrome（theme-aware）---- */
+  /* ---- App-chrome ---- */
   --nav-elev:     #103029;   /* 底部 nav 抬起面：deep-jade 錨（同 surface-deep） */
 }
 

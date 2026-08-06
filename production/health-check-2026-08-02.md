@@ -181,7 +181,10 @@
 - **人格紀律**：377 條文案零 emoji、零象棋用語（車／馬／象），讚美詞違規僅 1 條。**不必花力氣重審既有文案**，該花的力氣全在「再寫一批」。
 - **零 AI 核心體驗**：徹底落地——找弱點＝Stockfish + chess.js 規則，台詞全是寫死模板，變體選擇決定性（無 random）。可控、可測、不出戲。
 - **視覺一致性**：全站 deep jade / cream / 金色（僅 focus·reward）/ 木紋盤與 Gioco Wood 棋子在課程・深化・試煉三處都吃到主題，**無黑色 token fallback、無破版、無橫向溢出**。
-- **暗色主題（玄夜）**：健康且必要，它靠 `prefers-color-scheme` 自動生效。別砍。
+- ~~**暗色主題（玄夜）**：健康且必要，它靠 `prefers-color-scheme` 自動生效。別砍。~~
+  🪦 **2026-08-06 撤銷**：Eason 拍板砍掉整套雙主題系統，只留 cream+jade。另註：本行原本描述的
+  生效機制也不準確——實際是 `resolveTheme()` 先讀 localStorage、無值才 fallback 到
+  `matchMedia`，不是單純靠 `prefers-color-scheme` 自動生效。
 - **難度弱化機制**：`fallible-pick.ts` 的全寬 MultiPV 挑手是好工程，四維度探針證明 Stockfish 無旋鈕可製造初學者失誤，那份量測紀錄是這個 repo 裡最扎實的一段。剩下的只是把校準面縮到 rung 1–2。
 - **`data-sync.ts` 807 行**：是 ADR-0011 指定的邊界，不是失控。凍結即可，不必重構。
 - **試煉的 30 題內容**：素材本身是好的，問題只在闖關語法與導覽權重，**不要刪內容**。

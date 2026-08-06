@@ -86,7 +86,7 @@ Eason 已下過數盤並回報失敗類型比例 **5:2:3**（完全沒看到／�
 **D5. 開局知識卡 ＋ opening-id** ｜ `src/data/opening-knowledge-cards.ts`(215)、`opening-knowledge-card.vue`(82)、`tests/unit/opening-knowledge-cards/`(165)；`src/modules/opening-id/`(63)＋`tests/unit/opening-id/`(108)＋`chess-openings` 依賴＋兩份 GDD(180+358)。
 → 為什麼：卡片全站**零呼叫點**（只有它自己 import 自己）。開局知識與察覺零關係，接線只是多一個要維護的分頁。→ 斷：僅 `MemoryView.vue:23,204` 的開局名一行；`modules/memory/stage.ts:35` 的 `bookExitPly` 傳 null 走 EC-8。→ **1 小時**。
 
-**D6. ProfileView 整頁**(219) ｜ **先搬再刪**：`:198-209` 主題切換是 `uiStore.setTheme` 的唯一 UI、`:78` 是 `reset-history-dialog.vue` 的唯一掛載點，兩者搬進 header 齒輪。
+**D6. ProfileView 整頁**(219) ｜ **先搬再刪**：`:198-209` 主題切換是 `uiStore.setTheme` 的唯一 UI、`:78` 是 `reset-history-dialog.vue` 的唯一掛載點，兩者搬進 header 齒輪。（🪦 2026-08-06：主題切換段搬進齒輪後，noir 主題本身又整組下架，這段搬遷已隨之作廢——齒輪選單現在不再有外觀切換，見下方 D6 執行記錄。）
 → 為什麼：四格統計全是字面 `'—'`(:36-39，其中一格 label 是「連勝」，違反 no-streak 鐵則)、三列 `locked:'即將推出'`(:62,63,69)。留半頁比留整頁更糟，它會繼續佔一條路由和一格 tab。（附帶：`gambit-compliance.test.ts:29` 已把「連勝」列為禁詞，但 :10-19 的掃描清單不含 ProfileView.vue——機械執行漏掉唯一違規的檔。）
 → 斷：`/profile`、底部一格、`tests/e2e/visual-regression.spec.ts:19` baseline 重拍。→ **半天**。
 

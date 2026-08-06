@@ -6,9 +6,8 @@ defineProps<{ icon: Component; label?: string; value: string; locked?: boolean }
 </script>
 
 <template>
-  <!-- 總覽統計卡：cream 立體墨氣柔化；noir（玄夜）玄黑亮階材質分層（見 .gambit-surface-card）。
-       一般卡 icon/數字/文字三段；locked 灰階 + 角落鎖頭，只留 icon + 「即將推出」並垂直置中對齊
-       一般卡的數字+文字區。 -->
+  <!-- 總覽統計卡：立體墨氣柔化（見 .gambit-surface-card）。一般卡 icon/數字/文字三段；
+       locked 灰階 + 角落鎖頭，只留 icon + 「即將推出」並垂直置中對齊一般卡的數字+文字區。 -->
   <div
     class="relative flex flex-col text-center rounded-card gambit-surface-card
            border border-line px-2.5 py-3"

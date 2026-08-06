@@ -122,6 +122,12 @@
   --text-display-sm--letter-spacing: -0.01em;
 }
 
+/* App is cream-only (noir removed 2026-08-06) — tell the UA so form controls, scrollbars,
+   and text-selection colors don't paint dark for OS-dark-mode users. */
+:root {
+  color-scheme: light;
+}
+
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
@@ -282,7 +288,8 @@
   --scene-glow: rgba(198, 150, 106, 0.22); /* low-sat warm dusk amber */
 }
 
-/* App header + bottom-nav bars (app-nav.vue) */
+/* Shared jade gradient constants (app-nav.vue and friends) — global classes so multiple
+   components/pages reuse the same exact gradient value without repeating it. */
 .app-header-bg {
   background-image: linear-gradient(180deg, #1e5043 0%, #183e35 100%);
 }
@@ -290,8 +297,7 @@
   background-image: linear-gradient(180deg, #1c3e34, #142f28);
 }
 
-/* Deep focus panels — shared by ProfileView hero (identical gradient value) and
-   ui/gambit/dark-panel.vue (開始新對局 / 繼續對局 panels). */
+/* Deep focus panel — ui/gambit/dark-panel.vue (開始新對局 / 繼續對局 panels). */
 .dark-focus-panel {
   background-image: linear-gradient(160deg, #2a6654 0%, #1e4d3e 55%, #1a4238 100%);
 }
