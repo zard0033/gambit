@@ -4,7 +4,7 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { createRouter, createWebHashHistory } from 'vue-router'
 
-// D6: header 齒輪 popover 接住登出／外觀切換／重置對局記錄——三個破壞性/狀態變更操作，
+// D6: header 齒輪 popover 接住登出／重置對局記錄——兩個破壞性操作，
 // precommit-review 標記為 confirmed（無測試釘住任何一個唯一入口）。
 
 vi.mock('@/lib/supabase', () => ({
@@ -16,7 +16,6 @@ vi.mock('@/lib/supabase', () => ({
 
 import SettingsMenu from '@/components/settings-menu.vue'
 import { useAuthStore } from '@/stores/auth'
-import { useUiStore } from '@/stores/ui-store'
 
 function makeRouter() {
   return createRouter({
@@ -37,12 +36,11 @@ async function mountMenu() {
   await router.isReady()
   const authStore = useAuthStore()
   authStore.userId = 'test-user-id' // SettingsMenu only mounts for signed-in users
-  const uiStore = useUiStore()
   const wrapper = mount(SettingsMenu, {
     global: { plugins: [pinia, router] },
     attachTo: document.body, // Popover content teleports to document.body
   })
-  return { wrapper, authStore, uiStore, router }
+  return { wrapper, authStore, router }
 }
 
 function clickByText(text: string): void {
@@ -65,21 +63,6 @@ describe('SettingsMenu', () => {
 
     expect(authStore.signOut).toHaveBeenCalledOnce()
     expect(pushSpy).toHaveBeenCalledWith('/sign-in')
-
-    wrapper.unmount()
-  })
-
-  it('test_settingsMenu_noirButtonClick_callsSetThemeWithNoir', async () => {
-    const { wrapper, uiStore } = await mountMenu()
-    vi.spyOn(uiStore, 'setTheme').mockImplementation(() => {})
-
-    await wrapper.find('[aria-label="設定"]').trigger('click')
-    await flushPromises()
-
-    clickByText('玄夜')
-    await flushPromises()
-
-    expect(uiStore.setTheme).toHaveBeenCalledWith('noir')
 
     wrapper.unmount()
   })

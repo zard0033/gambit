@@ -103,7 +103,7 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 - [ ] `npm run test:unit` **全量**綠（假紅先查 technical-preferences 的 `.vite` 快取處方，別當真紅硬修）
 - [ ] `npm run typecheck` 0 error
 - [ ] 動到啟動／路由／auth／mount 時序 → 補跑 `npm run test:e2e`（見上方「E2E 盲區護欄」）
-- [ ] UI 改動：cream／玄夜 × mobile／desktop 四張截圖，確認無黑色 token fallback
+- [ ] UI 改動：mobile／desktop 兩張截圖（單一 cream 主題，noir 已於 2026-08-06 下架），確認無黑色 token fallback
 - [ ] 新增顏色：WCAG 對比實算 ≥4.5:1（真文字面；raised 面只准裝飾）
 - [ ] `precommit-review` ＋ `/ponytail-review` 過
 - [ ] `active.md` 已更新並 stage 進同一 commit（見上方「active.md 同步守則」）

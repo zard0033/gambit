@@ -79,7 +79,6 @@ watch(() => authStore.userId, (userId) => {
     lessonProgressStore.reconcileOnLogin()
     resumeGameStore.reconcileOnLogin()
     conceptProgressStore.reconcileOnLogin()
-    uiStore.reconcileOnLogin()
   }
 }, { immediate: true })
 

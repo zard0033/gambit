@@ -282,137 +282,19 @@
   --scene-glow: rgba(198, 150, 106, 0.22); /* low-sat warm dusk amber */
 }
 
-/* ============================================================
-   NOIR — 第二主題（dark）production token layer. 顯示名「玄夜」，內部值仍是 'noir'
-   （Supabase user_preferences check constraint 收 'cream'/'noir'，不動）。
-   設計 SoT＝design/gambit-design-system/colors_and_type.css [data-theme="noir"]（玄夜：
-   玄黑紙 × 漆玉——舊「深墨綠」2026-07-22 退役，見該檔頂端護欄註記）。
-   全站映射鐵則：cream 的紙/亮面 → 玄夜用玄黑中性微暖系（禁綠偏禁棕偏）；
-   cream 的深玉區 → 玄夜用漆玉（J3）系；金兩主題不變。
-   Unlayered + :root[data-theme]（specificity 0,2,0）可靠贏過 @theme / @layer base 的 :root tokens。
-   無元件讀 raw hsl(var(--x))，故直接 override --color-* 系列（跳過 HSL bridge）。
-   ⚠ 本 block 只是 token 層——深區頁面（首頁場景 / 對局 / 試煉 / profile hero）寫死的 jade 漸層
-   需另以 theme-aware class 逐頁 tokenize（見下方 component adjustments block）。
-   ============================================================ */
-:root[data-theme='noir'] {
-  color-scheme: dark;
-
-  /* Surface — 玄黑（中性微暖，非綠非棕）；card/raised 拉開亮度好浮起（card/base ≥1.19:1，實算見 WCAG 表）*/
-  --color-surface-base: #131211;
-  --color-surface-card: #272320;
-  --color-surface-raised: #322c27;
-  --color-surface-hover: rgba(230, 220, 205, 0.05);
-  --color-surface-deep: #123a2c;
-  --color-surface-deep-2: #1b5040;
-  --color-surface-dungeon: #0e2a20;
-
-  /* Line / borders（暗底上需較明顯才分得開卡片；中性暖 hairline，非綠調）*/
-  --color-line: rgba(220, 210, 195, 0.1);
-  --color-line-subtle: rgba(220, 210, 195, 0.06);
-  --color-line-strong: rgba(220, 210, 195, 0.16);
-
-  /* Ink — 暖白／中性暖灰。ink 15.2:1、muted/card 5.98:1、faint/card 4.58:1（實算）。
-     faint 排真文字限 base/card 面；raised 面（#322C27，約 4.0:1）只准裝飾/disabled。 */
-  --color-ink: #ede7dc;
-  --color-ink-muted: #a99f92;
-  --color-ink-faint: #948a7d;
-  --color-ink-on-deep: #e6ede8;
-  --color-ink-on-deep-dim: #9bb3a6;
-
-  /* Primary — jade 同色系亮階，玄黑底上的靈魂主操作色 */
-  --color-primary: #33a37e;
-  --color-primary-dark: #277d61;
-  --color-primary-soft: rgba(51, 163, 126, 0.16);
-  --color-primary-fg: #08120d;
-  --color-primary-foreground: #08120d;
-
-  /* Semantic — on-deep 亮版；淺 fill 上用深字（現值已過 4.5:1，沿用不調） */
-  --color-success: #7fd4a8;
-  --color-success-dark: #5fb389;
-  --color-success-light: rgba(127, 212, 168, 0.12);
-  --color-success-fg: #08150f;
-  --color-success-on-deep: #7fd4a8;
-  --color-danger: #e2705a;
-  --color-danger-dark: #c9745e;
-  --color-danger-light: rgba(226, 112, 90, 0.12);
-  --color-danger-fg: #131211;
-  --color-danger-on-deep: #e2705a;
-  --color-hint: #e3b25e;
-  --color-hint-dark: #c99440;
-  --color-hint-light: rgba(227, 178, 94, 0.12);
-  --color-hint-ring: rgba(227, 178, 94, 0.4);
-  --color-hint-fg: #131211;
-
-  /* Gold — 唯一高光不變（兩主題同一支金）；深底金字用亮金 */
-  --color-gold-light: #ffd777;
-  --color-gold-dark: #ffc94d;
-
-  /* 墨韻 — 深色表面＝暖白墨（跟表面走，不跟主題走，值不變）*/
-  --color-ink-brush: rgba(236, 230, 218, 0.72);
-
-  /* Nav — 玉區（J3 深端）；active 那格＝jade 亮階 + 深字 */
-  --color-nav-bg: #0e2a20;
-  --color-nav-text: #e6ede8;
-  --color-nav-dim: #9bb3a6;
-  --color-nav-active-bg: #33a37e;
-  --color-nav-active: #08120d;
-
-  /* shadcn-bridged tokens — 直接 override 解析後的顏色（無 raw hsl 讀者）*/
-  --color-background: #131211;
-  --color-foreground: #ede7dc;
-  --color-card: #272320;
-  --color-card-foreground: #ede7dc;
-  --color-popover: #272320;
-  --color-popover-foreground: #ede7dc;
-  --color-secondary: #322c27;
-  --color-secondary-foreground: #ede7dc;
-  --color-muted: #322c27;
-  --color-muted-foreground: #a99f92;
-  --color-accent: #322c27;
-  --color-accent-foreground: #ede7dc;
-  --color-destructive: #e2705a;
-  --color-destructive-foreground: #131211;
-  --color-border: rgba(220, 210, 195, 0.09);
-  --color-input: rgba(220, 210, 195, 0.14);
-  --color-ring: #f8b500;
-
-  /* Elevation — 暗區柔黑陰影；分層優先靠 luminance */
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-card-hover: 0 8px 26px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.45);
-  --shadow-button: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-/* ============================================================
-   NOIR — component adjustments for hardcoded deep-jade surfaces that don't tokenize
-   cleanly (inline style / Tailwind arbitrary / scoped CSS jade gradients). Each class
-   keeps the cream appearance byte-identical to the pre-existing hardcoded value and
-   only re-tints under :root[data-theme='noir'] into the 深墨綠 palette.
-   ============================================================ */
-
 /* App header + bottom-nav bars (app-nav.vue) */
 .app-header-bg {
   background-image: linear-gradient(180deg, #1e5043 0%, #183e35 100%);
 }
-:root[data-theme='noir'] .app-header-bg {
-  background-image: linear-gradient(180deg, #1b5040 0%, #123a2c 100%);
-}
 .app-bottomnav-bg {
   background-image: linear-gradient(180deg, #1c3e34, #142f28);
 }
-:root[data-theme='noir'] .app-bottomnav-bg {
-  background-image: linear-gradient(180deg, #153e30, #0e2a20);
-}
 
 /* Deep focus panels — shared by ProfileView hero (identical gradient value) and
-   ui/gambit/dark-panel.vue (開始新對局 / 繼續對局 panels). noir value = 玄夜漆玉最亮點
-   （與首頁 hero-card 同一支漸層，見 home-ink-fusion-final.html ➊ 定稿樣張；已刪，見 git 歷史）。 */
+   ui/gambit/dark-panel.vue (開始新對局 / 繼續對局 panels). */
 .dark-focus-panel {
   background-image: linear-gradient(160deg, #2a6654 0%, #1e4d3e 55%, #1a4238 100%);
 }
-:root[data-theme='noir'] .dark-focus-panel {
-  background-image: linear-gradient(160deg, #1f5f4b 0%, #0e3a2c 100%);
-}
-/* cream 限定：hero 內裡淡墨暈（收斂版，決策樣張規格3）；noir 不加——漆玉本身已有 sheen+rim */
 .dark-focus-panel::before {
   content: '';
   position: absolute;
@@ -421,79 +303,34 @@
   pointer-events: none;
   background: radial-gradient(70% 70% at 12% 96%, rgba(0, 0, 0, 0.14) 0%, transparent 60%);
 }
-:root[data-theme='noir'] .dark-focus-panel::before {
-  display: none;
-}
 
-/* NeveSceneHeader（首頁招呼頭部）：--scene-nav-join/-sky-a/-sky-b 是 cream 定案時的深 jade 停駐色。
-   玄夜下改用漆玉（J3）家族——與 .app-header-bg / surface-deep(-2) 同一支色系，非近黑深墨綠。
-   nav-join 對齊 noir .app-header-bg 的底部停駐色（維持「與 AppNav 無縫銜接」的設計意圖）；四時段
-   sky-a/sky-b 在 J3 家族內依亮度排序（afternoon 最亮、night/evening 最深），glow 維持原值。 */
-:root[data-theme='noir'] {
-  --scene-nav-join: #123a2c;
-}
-/* data-scene lives on NeveSceneHeader's <section>, not :root — descendant combinator required. */
-:root[data-theme='noir'] [data-scene='night'] {
-  --scene-sky-a: #123a2c;
-  --scene-sky-b: #0e2a20;
-}
-:root[data-theme='noir'] [data-scene='morning'] {
-  --scene-sky-a: #1b5040;
-  --scene-sky-b: #123a2c;
-}
-:root[data-theme='noir'] [data-scene='afternoon'] {
-  --scene-sky-a: #1f5f4b;
-  --scene-sky-b: #153e30;
-}
-:root[data-theme='noir'] [data-scene='evening'] {
-  --scene-sky-a: #123a2c;
-  --scene-sky-b: #0e2a20;
-}
-
-/* 對局 game-over result card (PlayView.vue) — noir value = 漆玉最亮點，reward/結算時刻共用 hero 支色 */
+/* 對局 game-over result card (PlayView.vue) */
 .game-over-panel {
   background-image: linear-gradient(160deg, #163929, #0c2118);
-}
-:root[data-theme='noir'] .game-over-panel {
-  background-image: linear-gradient(160deg, #1f5f4b, #0e3a2c);
 }
 
 /* 課程章節進度條 (LearnView.vue) */
 .lesson-progress-fill {
   background-image: linear-gradient(90deg, #3ab894, #f8b500);
 }
-:root[data-theme='noir'] .lesson-progress-fill {
-  background-image: linear-gradient(90deg, #279e79, #f8b500);
-}
 
-/* 登入頁沉浸背景 (SignInView.vue) — noir value 走漆玉（J3）wash，bookended dark-mid-dark。 */
+/* 登入頁沉浸背景 (SignInView.vue) */
 .signin-bg {
   background-image: linear-gradient(175deg, #0c2318 0%, #103029 42%, #0a1f18 100%);
 }
-:root[data-theme='noir'] .signin-bg {
-  background-image: linear-gradient(175deg, #0e2a20 0%, #123a2c 42%, #0e2a20 100%);
-}
 
-/* 練習結算「石碑題卡」(PracticePuzzleView.vue) — noir value reuses .game-over-panel's
-   stops (same 結算卡 semantics) at this element's own angle. */
+/* 練習結算「石碑題卡」(PracticePuzzleView.vue) */
 .puzzle-result-panel {
   background-image: linear-gradient(170deg, #18443a, #0c2118);
-}
-:root[data-theme='noir'] .puzzle-result-panel {
-  background-image: linear-gradient(170deg, #1b5040, #123a2c);
 }
 
 /* ============================================================
    墨韻 (INK GARNISH) — 全 app 共通裝飾母題（SoT: design/gambit-design-system/
    colors_and_type.css「墨韻母題」段）。墨筆底線/乾筆分隔（InkBrush）＋金墨飛濺
-   （InkSplatter）。兩主題共用元件、明暗兩表現：墨色靠 --color-ink-brush（cream 深棕墨
-   / noir 暖白墨）；金墨飛濺兩主題品牌金，cream 亮底靠 --fleck-scale 加大粒子補存在感。
-   墨筆/乾筆兩主題皆可進日常 UI（2026-07-22 A/B 拍板），鋪量克制——每屏少數錨點；
-   深色表面兩主題皆暖白墨（墨色跟表面走，scoped 覆寫 --color-ink-brush）。
-   金墨飛濺仍限 reward / 章節扉頁 / Neve 特殊時刻。
+   （InkSplatter）。墨色靠 --color-ink-brush；金墨飛濺靠 --fleck-scale 加大粒子補存在感。
+   鋪量克制——每屏少數錨點；金墨飛濺仍限 reward / 章節扉頁 / Neve 特殊時刻。
    ============================================================ */
-:root { --fleck-scale: 1.6; }                  /* cream 亮底：飛濺粒子放大補存在感 */
-:root[data-theme='noir'] { --fleck-scale: 1; } /* 深底：亮金本就跳，維持原尺寸 */
+:root { --fleck-scale: 1.6; } /* 亮底：飛濺粒子放大補存在感 */
 
 .ink-brush {
   display: block;
@@ -531,8 +368,7 @@
 
 /* ============================================================
    首頁墨韻融合（2026-07-22，➊ 決策樣張 design/demos/home-ink-fusion-final.html 拍板；已刪，見 git 歷史）：
-   cream＝墨氣柔化（沿用既有 Card/StatCard 白邊+暖棕陰影不變）；noir（玄夜）＝材質分層——卡片
-   不柔化，改玄黑亮階漸層＋頂緣 sheen＋暗影＋中性 hairline。共用 class，供 Card/StatCard/棋誌
+   墨氣柔化（沿用既有 Card/StatCard 白邊+暖棕陰影不變）。共用 class，供 Card/StatCard/棋誌
    peek 項目共用，勿逐元件重複手刻。
    ============================================================ */
 /* 只設 top/bottom border-color（longhand）＋background／shadow：left/right 邊色與寬度留給
@@ -546,14 +382,6 @@
     0 6px 16px rgba(61, 34, 16, 0.09),
     0 2px 4px rgba(61, 34, 16, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.55);
-}
-:root[data-theme='noir'] .gambit-surface-card {
-  background: linear-gradient(180deg, var(--color-surface-raised) 0%, var(--color-surface-card) 100%);
-  border-top-color: var(--color-line);
-  border-bottom-color: var(--color-line);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 6px 18px rgba(0, 0, 0, 0.4);
 }
 
 /* 課程卡印框 tag：四角 L 框 + 微 rotate（甲做法，決策樣張規格6）。墨色跟 --color-ink-brush 走。 */
@@ -576,15 +404,9 @@
 .lesson-tag-ink .tr { top: 0; right: 0; border-top-width: 1.4px; border-right-width: 1.4px; }
 .lesson-tag-ink .bl { bottom: 0; left: 0; border-bottom-width: 1.4px; border-left-width: 1.4px; }
 .lesson-tag-ink .br { bottom: 0; right: 0; border-bottom-width: 1.4px; border-right-width: 1.4px; }
-/* noir：cream 的 text-primary-dark（#... 3.11:1 於玄夜卡面不足）改用 noir 亮階 --color-primary
-   (#33a37e ≈4.96:1)，不發明新色。 */
-:root[data-theme='noir'] .lesson-tag-ink {
-  color: var(--color-primary);
-}
 
-/* 首頁招呼頭部墨氣下滲（cream：長暈染延伸進內容區；noir：短距離淡出 + 一條極細亮度分界，
-   取代長暈染——決策樣張規格：cream 收斂版 / noir 材質分層版）。父層 NeveSceneHeader .scene
-   須 position:relative 且此元素放在 scene-content 之後、以 z-index 疊在內容之下。 */
+/* 首頁招呼頭部墨氣下滲（長暈染延伸進內容區——決策樣張規格：cream 收斂版）。父層
+   NeveSceneHeader .scene 須 position:relative 且此元素放在 scene-content 之後、以 z-index 疊在內容之下。 */
 .ink-seep {
   position: absolute;
   left: 0;
@@ -612,21 +434,4 @@
       color-mix(in srgb, var(--scene-sky-b) 10%, transparent) 40%,
       color-mix(in srgb, var(--scene-sky-b) 2%, transparent) 58%,
       transparent 76%);
-}
-:root[data-theme='noir'] .ink-seep {
-  bottom: -14px;
-  height: 40px;
-  background: linear-gradient(180deg,
-    color-mix(in srgb, var(--scene-sky-b) 40%, transparent) 0%,
-    transparent 100%);
-}
-:root[data-theme='noir'] .ink-seep::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 1px;
-  background: var(--color-line);
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.08);
 }
