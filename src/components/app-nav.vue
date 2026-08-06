@@ -59,7 +59,8 @@ const NAV_ITEMS = [
 
       <span class="flex-1" />
 
-      <!-- Account: 登入 when signed out, 設定齒輪 when signed in (D6：登出／對局紀錄／外觀／重置都在裡面). -->
+      <!-- Account: 設定齒輪一律顯示（對局紀錄／重置對局記錄訪客也用得到，health-check Q9 修復），
+           訪客再加一個醒目的「登入」CTA 並排在旁——齒輪內部依 authStore.userId 決定要不要顯示登出鈕. -->
       <RouterLink
         v-if="!authStore.userId"
         to="/sign-in"
@@ -68,7 +69,7 @@ const NAV_ITEMS = [
       >
         登入
       </RouterLink>
-      <SettingsMenu v-else />
+      <SettingsMenu />
     </div>
   </header>
 

@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 定位 v2 刪除期 — **主線收工**（D1–D9 全部執行或撤銷）＋ **noir 深色主題整組下架**（2026-08-06）
 Feature: 無進行中 feature；下一步看「未決/待辦」
-Task: 全部完成，工作區乾淨，尚未 push（見下方「待 push」）
+Task: health-check Q9（訪客登入/history/reset 缺口）已修復，工作區有 3 檔改動尚未 commit/push
 ⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
 <!-- /STATUS -->
 
@@ -27,7 +27,15 @@ D1（棋誌）／D2（試煉外殼）／D4（棋憶敘事外殼）／D5（開局
 3. **`data-sync.ts` 不是雲端層，是唯一的持久化層**：guest 佇列與 memory 的讀寫都是純 localStorage。
    要動必須先拆成 local-store ＋ cloud-adapter 兩層（v2 的 R1）。
 
-## 已施工（工作區乾淨；push 狀態查 `git log origin/main..HEAD`）
+## 已施工（push 狀態查 `git log origin/main..HEAD`；本輪 3 檔尚未 commit，見上方 STATUS）
+
+- ✅ **health-check Q9 修復：訪客齒輪選單**（2026-08-06）：D6 把重置對局記錄／對局紀錄搬進
+  `settings-menu.vue` 後訪客完全看不到入口（`app-nav.vue` 舊邏輯只在登入時掛 SettingsMenu，
+  訪客只給一個「登入」連結）。底層 `resetHistory()`→`deleteGameHistory()` 本來就是
+  guest-safe（`!userId` 時只清 localStorage、直接 return true），純粹缺 UI 入口。
+  修法：SettingsMenu 一律掛載，登出鈕加 `v-if="authStore.userId"` 蓋掉；`app-nav.vue` 訪客
+  同時保留「登入」CTA 與齒輪並排（不互斥）。補 2 條 guest-mode 測試，vitest 786→788 綠、
+  typecheck 0、桌機/手機截圖驗過(截圖已清)。
 
 - ✅ **noir（玄夜）深色主題整組下架**（2026-08-06，Eason 拍板只留 cream+jade）：
   A/B demo 出過兩版提亮修法都不滿意，直接砍掉整套雙主題系統，不修了。刪 `src/lib/theme.ts`
@@ -70,9 +78,8 @@ D1（棋誌）／D2（試煉外殼）／D4（棋憶敘事外殼）／D5（開局
 
 - **像素回歸的 CI 盲區**：`toHaveScreenshot` 在 CI 是 skip 的，動 UI 後本機要自己跑。
 - **missed-mate 從 mate 擴到 material**（v2 的 P2）：若既有對局跑 `selectMissedMates` 產出
-  ≥1 題比例 <30%，主路徑必須先擴到 material 才成立。
-- **health-check Q9（訪客到不了 /profile／history／重置資料）**：舊缺口，D6 沒有讓它變壞也沒有修，
-  待決定要不要補訪客入口，還是併進未來的 IA 調整輪。
+  ≥1 題比例 <30%，主路徑必須先擴到 material 才成立。**2026-08-06 查過 Eason 現有對局數＝
+  個位數**，樣本太小量出來的比例不可信，暫緩建離線量測腳本；等對局數自然累積後再跑。
 - v2 末尾另有 8 題待答（棋力現況、下棋 vs 寫 app 時數比、四週對照實驗、自用產品的驗收條件等）。
 
 ## 護欄備忘

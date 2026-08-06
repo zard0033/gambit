@@ -28,14 +28,14 @@ function makeRouter() {
   })
 }
 
-async function mountMenu() {
+async function mountMenu(userId: string | null = 'test-user-id') {
   const pinia = createPinia()
   setActivePinia(pinia)
   const router = makeRouter()
   router.push('/')
   await router.isReady()
   const authStore = useAuthStore()
-  authStore.userId = 'test-user-id' // SettingsMenu only mounts for signed-in users
+  authStore.userId = userId
   const wrapper = mount(SettingsMenu, {
     global: { plugins: [pinia, router] },
     attachTo: document.body, // Popover content teleports to document.body
@@ -69,6 +69,32 @@ describe('SettingsMenu', () => {
 
   it('test_settingsMenu_resetClick_opensResetHistoryDialog', async () => {
     const { wrapper } = await mountMenu()
+
+    await wrapper.find('[aria-label="設定"]').trigger('click')
+    await flushPromises()
+
+    clickByText('重置對局記錄')
+    await flushPromises()
+
+    expect(document.body.textContent).toContain('這會清除你的對局歷史')
+
+    wrapper.unmount()
+  })
+
+  // health-check Q9 fix (2026-08-06): 訪客先前完全看不到這顆齒輪，reset/history 功能有實作卻無入口。
+  it('test_settingsMenu_guestMode_hidesSignOutButton', async () => {
+    const { wrapper } = await mountMenu(null)
+
+    await wrapper.find('[aria-label="設定"]').trigger('click')
+    await flushPromises()
+
+    expect([...document.querySelectorAll('button')].some((b) => b.textContent?.trim() === '登出')).toBe(false)
+
+    wrapper.unmount()
+  })
+
+  it('test_settingsMenu_guestMode_resetClick_opensResetHistoryDialog', async () => {
+    const { wrapper } = await mountMenu(null)
 
     await wrapper.find('[aria-label="設定"]').trigger('click')
     await flushPromises()
