@@ -1,1 +1,0 @@
-import{o as e}from"./puzzles-DjQRVTEI.js";function t(t,n){return n.filter(n=>e[n.motif]===t).sort((e,t)=>e.order-t.order)}export{t};
