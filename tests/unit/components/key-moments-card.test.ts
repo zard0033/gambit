@@ -26,12 +26,16 @@ function moment(ply: number): Moment {
 }
 
 /** 白方對局：ply0 玩家走 a2a3 但引擎要 e2e4（engine）；ply2 玩家走的就是最佳手（own）。 */
-function mountCard(moves = ['a2a3', 'e7e5', 'g1f3'], bests = ['e2e4', 'd2d4', 'g1f3']): VueWrapper {
+function mountCard(
+  moves = ['a2a3', 'e7e5', 'g1f3'],
+  bests = ['e2e4', 'd2d4', 'g1f3'],
+  playerColor: 'white' | 'black' = 'white',
+): VueWrapper {
   const ctx: MemoryContext = {
     review: {
       analysisResults: computed(() => bests.map(entry)),
     } as unknown as MemoryContext['review'],
-    game: computed(() => ({ moves, playerColor: 'white' })) as unknown as MemoryContext['game'],
+    game: computed(() => ({ moves, playerColor })) as unknown as MemoryContext['game'],
     moments: computed(() => [moment(0), moment(2)]),
     opening: computed(() => null),
   }
@@ -84,6 +88,14 @@ describe('KeyMomentsCard', () => {
     // Assert
     expect(board.props('disabled')).toBe(true)
     expect(board.props('playerColor')).toBe('white')
+  })
+
+  it('執黑對局：棋盤朝向也跟著轉黑（先前只驗過白方，2026-08-07 補黑方回歸）', () => {
+    // Arrange / Act
+    const board = mountCard(undefined, undefined, 'black').findComponent({ name: 'ChessBoard' })
+
+    // Assert
+    expect(board.props('playerColor')).toBe('black')
   })
 
   it('不出現任何評價性文字（GDD Rule 11/12）', () => {
