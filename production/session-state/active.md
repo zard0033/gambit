@@ -1,7 +1,8 @@
 <!-- STATUS -->
 Epic: 定位 v2 刪除期主線已收工；本輪接**賽後檢討的可見性**（moments 有算沒顯示），已收尾
 Feature: 賽後關鍵步清單（棋憶頁）— 已 push；AC-7／棋盤朝向兩項疑慮已實測排除，非 bug
-Task: 無進行中 task；下一步待 Eason 選：先答 v2 的 Q10(難度衝突)/Q12(驗收條件)，還是直接開判斷訓練最小版 dev-flow
+Task: 關鍵步清單「比對＋理由」spec 已核可（見待辦，第一波待實作，尚未動工）；判斷訓練最小版
+  dev-flow 釐清階段拍板中途暫停（Q1/Q1b/Q2 已拍板，Q3 起待續）
 ⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
 <!-- /STATUS -->
 
@@ -29,30 +30,17 @@ D1（棋誌）／D2（試煉外殼）／D4（棋憶敘事外殼）／D5（開局
 
 ## 已施工（push 狀態查 `git log origin/main..HEAD`）
 
-- ✅ **賽後關鍵步清單**（2026-08-06，已 push，commit `c558b6e`）：`selectMoments()` 每盤都在算，D4 之後卻只流向
-  匯出文字與一個沒人讀的統計——這是它的畫面落點。走完 dev-flow（brainstorm→spec→★核可）＋
-  ui-design-flow ➊（三個樣張，Eason 選 C＝共用棋盤＋清單切換）。
-  新增 `modules/memory/moment-display.ts`（純函式：ply→手數、UCI→SAN、判定該顯示引擎建議還是
-  玩家自己那手）＋ `components/memory/KeyMomentsCard.vue`，掛進 `MemoryDashboard` 的 isComplete 分支。
-  **判準用「玩家走的 === bestMove」，不用 Moment 的 `kind`**——`displayKind` 把 anchor 和 bright
-  都壓成 `'bright'`，拿 kind 反推會把最大失誤誤認成好棋。
-  **順手修 `chess-board.vue` 的初始 lastMove 失效**：`watch` 沒 `immediate`、且註冊時 boardApi
-  還不存在，所以「一掛載就要標出某一手」的盤永遠等不到高亮（要點過才出現）。改在
-  `onBoardCreated` 補套，只在 prop 有值時動，`undefined` 的消費端（Play/Review/Replay）行為不變。
-  vitest 800 綠、typecheck 0、E2E 49 過/4 skip（像素回歸 CI 本就 skip）/0 fail、
-  cream × mobile/desktop 截圖驗過（截圖已清）。precommit-review deep runId `wf_73687f35-343`：
-  7 agent、**零 confirmed 真缺陷**，10 條 unverified-minor 中修掉 3 條（memory-context 過時註解、
-  FEN replay 掛錯反應依賴、ply 註解措辭），其餘標不修（見下）。
-  **蒸餾**：單元測試綠不等於畫面對——這次 lastMove 高亮在 7 個單元測試全綠的情況下完全沒顯示，
-  是跑真瀏覽器才看見的。凡「初始狀態就該生效」的 imperative 設定，都要懷疑它有沒有搭上 watch。
-  **2026-08-07 補驗兩項遺留疑慮，單盤黑棋走查未能重現，非系統性排除**：① AC-7（歷史對局經
-  `?gameId=` 進來、含快取命中二次造訪）——實際下場玩一盤黑棋、投降、經 `/history` 點進去驗證
-  兩次，KeyMomentsCard 皆正確渲染。② 棋盤朝向——同一盤黑棋兩條入口（剛結束的即時對局／
-  `?gameId=` 歷史入口）朝向皆正確（rank 1 在上、黑子在下），與紀錄卡片「執黑」標籤一致。
-  樣本僅 1 盤，未覆蓋「歷史對局但分析快取未命中」等其他組合，日後若復發需補更多情境再查。
-  補一條 `key-moments-card.test.ts` 黑方回歸測試（先前只驗過白方），vitest 801 綠、typecheck 0。
-  **蒸餾**：帶著「可能是既有 bug」的疑慮進下一輪前，先花 10 分鐘實機重現一次——這次兩項疑慮
-  都是靜態讀碼看起來沒問題、但沒有實測就懸著，實測後兩個都排除，避免了懸案繼續往下傳。
+- ✅ **賽後關鍵步清單**（2026-08-06 push `c558b6e`；2026-08-07 補黑方回歸測試 `3293d96`）：
+  新增 `modules/memory/moment-display.ts` ＋ `components/memory/KeyMomentsCard.vue`，掛進
+  `MemoryDashboard` 的 isComplete 分支。vitest 801 綠、typecheck 0、E2E 0 fail、截圖驗過。
+  precommit-review deep `wf_73687f35-343` 零 confirmed 真缺陷。
+  **兩個別再踩的點**：① 判準用「玩家走的 === bestMove」，**不可**用 Moment 的 `kind`——
+  `displayKind` 把 anchor 和 bright 都壓成 `'bright'`，拿 kind 反推會把最大失誤誤認成好棋。
+  ② `chess-board.vue` 初始 lastMove 已改在 `onBoardCreated` 補套（watch 沒 `immediate` 且註冊時
+  boardApi 不存在）——別退回純 watch。
+  遺留疑慮 AC-7 與棋盤朝向已於 2026-08-07 實機走查排除（僅 1 盤黑棋樣本，非系統性）。
+  **蒸餾**：① 單元測試綠不等於畫面對——凡「初始狀態就該生效」的 imperative 設定，都要懷疑它
+  有沒有搭上 watch。② 帶著「可能是既有 bug」的疑慮進下一輪前，先花 10 分鐘實機重現一次。
 
 - ✅ **health-check Q9 修復：訪客齒輪選單**（2026-08-06）：D6 把重置對局記錄／對局紀錄搬進
   `settings-menu.vue` 後訪客完全看不到入口（`app-nav.vue` 舊邏輯只在登入時掛 SettingsMenu，
@@ -62,28 +50,13 @@ D1（棋誌）／D2（試煉外殼）／D4（棋憶敘事外殼）／D5（開局
   同時保留「登入」CTA 與齒輪並排（不互斥）。補 2 條 guest-mode 測試，vitest 786→788 綠、
   typecheck 0、桌機/手機截圖驗過(截圖已清)。
 
-- ✅ **noir（玄夜）深色主題整組下架**（2026-08-06，Eason 拍板只留 cream+jade）：
-  A/B demo 出過兩版提亮修法都不滿意，直接砍掉整套雙主題系統，不修了。刪 `src/lib/theme.ts`
-  （resolveTheme/applyTheme/persistTheme/systemTheme/pickNewer 全部）；`ui-store.ts` 移除
-  `theme`/`setTheme`/`reconcileOnLogin`；`App.vue` 移除對應 watcher 呼叫；`data-sync.ts` 移除
-  `loadThemePreference`/`upsertThemePreference`；`main.ts` 移除啟動時 `applyTheme(resolveTheme())`；
-  `settings-menu.vue` 齒輪選單外觀切換段整段拿掉（現只剩對局紀錄／重置對局記錄／登出三項）；
-  `main.css` 移除 16 個 `[data-theme='noir']` 規則區塊、`colors_and_type.css` 移除 noir 設計說明
-  ＋token 區（193-314 行）；`CLAUDE.md` Pre-Push Checklist 的雙主題截圖要求改單一 cream。
-  **Supabase 不動 schema**：`user_preferences` 表（唯一欄位是 theme）保留但不再讀寫，比照
-  D1/D2 的 `dungeon_progress`/`journal_entries` 先例變孤兒表，不 drop、不改 CHECK constraint。
-  刪 `tests/unit/lib/theme.test.ts`；`ui-store.test.ts`/`settings-menu.test.ts` 移除主題相關測試。
-  vitest 784 綠、typecheck 0、e2e 78 過/24 skip（像素回歸 CI 本就 skip）/0 fail、截圖驗證
-  cream/mobile+desktop 皆正確、無黑色 fallback。
-  **蒸餾**：A/B demo 拿去問使用者前，先用瀏覽器 computed style 或獨立元素截圖驗證注入的樣式
-  真的有視覺差異（第一版提亮量太小、螢幕截圖裡幾乎看不出來，白白讓 Eason 看了一輪沒用的比較）。
+- ✅ **noir 深色主題整組下架**（2026-08-06，只留 cream+jade）：刪 `src/lib/theme.ts` 全套 +
+  相關 store/main.ts/settings-menu 讀寫點；`user_preferences` 表孤兒化不 drop。細節查 git log。
+  **蒸餾**：A/B demo 給使用者看前，先用截圖/computed style 驗證注入樣式真的有視覺差異。
 
-- ✅ **D6 ProfileView 整頁下架**（2026-08-06）：核實 SoT 原案時發現漏搬兩項真功能——
-  `authStore.signOut()` 和 `/history` 連結都只有 ProfileView 一個入口。新建 `settings-menu.vue`
-  （reka-ui Popover）取代 header 帳號圖示；`src/components/ui/popover/`（reka-ui 家族，跟既有
-  dialog 同源）。砍 `ProfileView.vue`、`/profile` 路由、對應測試與 baseline 截圖。
-  **蒸餾**：SoT 寫「先搬 X、Y 再刪」時，這份清單本身可能不完整——砍一整頁前要自己重新掃一次
-  「這頁裡還有什麼函式呼叫／連結是全站唯一入口」。
+- ✅ **D6 ProfileView 整頁下架**（2026-08-06）：搬 `authStore.signOut()`／`/history` 連結進新建
+  `settings-menu.vue`（reka-ui Popover），砍 `ProfileView.vue`／`/profile` 路由。
+  **蒸餾**：砍整頁前重新掃一次「這頁裡還有什麼是全站唯一入口」，SoT 清單可能不完整。
 
 - 🔎 **push 前 precommit-review（deep，runId `wf_9ab87010-2ba`）**：3 條 confirmed 全修（觸控目標、
   零測試覆蓋補測試、`parse-inline-markdown.ts` 孤兒回報後 Eason 裁決一起刪）。
@@ -101,14 +74,28 @@ D1（棋誌）／D2（試煉外殼）／D4（棋憶敘事外殼）／D5（開局
 
 ## 未決 / 待辦
 
-- 🆕 **判斷訓練最小版——core 新功能，尚未動工**（2026-08-06 補列，先前只活在
-  `positioning-v2-2026-08-02.md`「核心新功能」段，沒進過任何待辦清單）：獨立訓練模式，
-  進去輸贏不算、關掉 `fallible`；走子前強制答「有沒有機會」、不給即時回饋，局後在 `/review`
-  一次列對照表。判定純 chess.js 窮舉（`missed-mate.ts:44-58` 的 `isUniqueOneMoveMate` 已寫好
-  一半，另一半「有沒有強制贏子」要新寫），不開引擎、不需新引擎路徑，估 ~150 行。閘門（五盤
-  紙筆實驗）已降級不擋路，技術上可以直接開始。跨 PlayView／review／新偵測器，屬中型跨檔
-  功能，該走 dev-flow 出 spec 再實作。落地前建議先定 Q12（驗收條件，文件推薦值：連續 14
-  天每天一盤＋賽後判斷場，第 8 天後至少 3 次主動想起）。
+- 🆕 **關鍵步清單「比對＋理由」——spec 已核可（2026-08-07），待實作**：`KeyMomentsCard` 目前
+  每項只顯示一手（SAN 記號），Eason 要並排比對「原本走法 vs 建議走法」＋一句理由。
+  **關鍵發現：不是從零蓋，是復原**——D4（2026-08）刪棋憶敘事外殼時連坐砍掉的
+  `modules/memory/templates.ts`(`renderMoment()`，zero-AI 純模板，吃 `Moment.kind`/`concept`
+  產生 Neve 語氣理由句) 與 `choreography.ts`(`momentEndState()`，兩手同時箭頭+highlight 定格)，
+  在 git 歷史裡（`e2cb898~1`）完好，相容性已核對：`Moment`/`MEMORY_BRIGHT_GATE`/
+  `annotation-types.ts` 三者皆未變動，可原封復原接線；`describe.ts`(白話文轉換) 甚至沒被刪、
+  現在還活著沒人用。動畫用的 4 個 `ANIM_*` 時間常數當時被砍，要補回 `memory-config.ts`。
+  **第一波 spec(已核可)**：復原 `templates.ts`(只留 `renderMoment`/`MoveDesc`/`MomentText`，
+  `renderNeveLine` 是死掉的 F4 不復原) + `describe.ts` 接線；`moment-display.ts` 擴充成兩手都算
+  白話文(取代 SAN，全站僅此一處使用 SAN 列表)；`KeyMomentsCard.vue` 顯示並排+理由句，棋盤用
+  `momentEndState()` 靜態雙標(不做動畫，動畫留第二波，因手感需真機驗證);`own` 案例也顯示理由
+  (renderMoment 對 bright/plain 都有話講，非新增範圍)；材料類理由先用籠統版(不含「哪顆子」，
+  舊碼本身也沒做完這塊，獨立記債不卡這波)。走 ui-design-flow 出樣張確認白話文取代 SAN。
+- 🔜 **判斷訓練最小版——dev-flow 釐清階段拍板中途暫停**（先前只活在
+  `positioning-v2-2026-08-02.md`「核心新功能」段，2026-08-07 走 `grilling` 開始拍板）：
+  **已拍板**——Q1 不可取代好處成立（訓練長在自己的棋上，lichess 做不到）；Q1b v1 只用自己
+  對局出題，公版題庫（練敏銳度/判斷力，Eason 認為市面無此類產品）記為獨立未來擴充、不進 v1；
+  Q2 這是主線，且是目前唯一還沒蓋出來的主線。**待續（從 Q3 開始）**：現在不做去做別的事會
+  不會更值得（Jobs 視角）、Q12 驗收條件、Q10 難度/fallible 衝突、範圍(mate-only vs
+  強制贏子)、互動確認(純聲明不指認)、跟既有判斷場的關係、對照表 UI 位置。
+  規格草稿與成本估算(~150 行、chess.js 窮舉不開引擎)見 positioning-v2 原段。
 - **像素回歸的 CI 盲區**：`toHaveScreenshot` 在 CI 是 skip 的，動 UI 後本機要自己跑。
 - **missed-mate 從 mate 擴到 material**（v2 的 P2）：若既有對局跑 `selectMissedMates` 產出
   ≥1 題比例 <30%，主路徑必須先擴到 material 才成立。**2026-08-06 查過 Eason 現有對局數＝
@@ -120,7 +107,23 @@ D1（棋誌）／D2（試煉外殼）／D4（棋憶敘事外殼）／D5（開局
 - **Stockfish 無旋鈕可製造初學者級失誤**：要它犯錯只能在引擎外面做（`fallible-pick.ts`）。
   讓子（material odds）已否決，勿再提案。
 - Supabase keep-alive workflow 每 3 天打實表查詢；**GitHub 政策 repo 60 天無 commit 自動停用**。
-- Maia（人類化 NN 引擎）＝日後「陪練角色」的答案，現在不做。
+- **Maia（人類化 NN 引擎）＝日後「陪練角色」；2026-08-07 查證，「要後端所以不做」的前提已翻案**：
+  **只有 Maia-1 可行**——官方 ONNX ~3.3MB／級距（9 檔 Elo 1100–1900），官方前端
+  `csslab/maia-platform-frontend` 已用 `onnxruntime-web` 純 client-side 跑它並與 WASM Stockfish 並存，
+  無後端、無 SharedArrayBuffer。權重 GPL-3.0（本 repo public+MIT，摩擦小）。
+  **Maia-2／3 不走**：無官方 ONNX，要自己 `torch.onnx.export`＋驗數值＋量化；Maia-3 是 AGPL，
+  體積 5M 版 20.97MB／23M 版 91.8MB（float32），23M 直接超出 150MB 預算。又：Maia-2 的「單一模型
+  涵蓋全棋力」對 web 是**退步**——一次只下一檔，Maia-1 的分檔小模型才能只載要的那個。
+  **綠燈後第一驗證項**：查官方前端怎麼從 policy head 取手。**若是 argmax，實際棋力會高於標稱 Elo、
+  失誤遠少於真人**（單一失誤本身低機率），要 temperature sampling 才有真實失誤率——
+  此項未驗證前不可假設「Maia-1100 會像真的 1100 一樣送子」。
+  次要未知：Maia-1 最弱 1100，現行 rung 1 實際 Elo 也沒量過，誰強誰弱不知道
+  （可能形狀＝混合：rung 1 留 fallible-pick、2–5 走 Maia）。
+  **假說（未量測，不可當換引擎的理由）**：`fallible-pick` 刻意避開送子（`maxLossCp` 300 上限、
+  過濾器排除我方被將死），**結構性地不會走進 mate-in-1**，真人 1100 會 → Maia 或許能改變判斷場的
+  題目供給特性（見陷阱 #1）。但供給率至今沒量過，且 P2 是同一問題成本低得多的既定解法。
+  **決策歸屬**：不開獨立線，折進暫停中的判斷訓練 grilling（Q3、Q10 本來就以此為輸入）；
+  規格不該跟 fallible-pick 行為硬耦合。
 
 ## 接手必讀（鐵則不在這個檔）
 
