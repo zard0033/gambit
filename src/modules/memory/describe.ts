@@ -38,37 +38,43 @@ export function describeMove(fenBefore: string, uci: string | null | undefined):
 }
 
 /**
- * The visual kind that drives icon + color (GDD Rule 12 + OQ-R1 ruling in the UX spec).
- * `kind` from selection collapses anchor and bright into 'bright'; here we split out the OQ-R1
- * case: a bare anchor (a swing AGAINST the player, fav below the bright gate) is the player's
- * costly turning point in a loss — it gets a NEUTRAL 'turning-point' treatment, NOT the
- * celebratory star/success of a genuine bright recovery.
+ * 一個 moment 的語氣——**標題與內文的唯一推導來源**。決定短名、決定要套哪個 F3 文案模板。
+ *
+ * 為什麼要收成一支：`selection.ts` 的 `displayKind` 把 anchor（這盤代價最大的一手）和真正的好棋
+ * 都壓成 `'bright'`，而「玩家走的是不是最佳手」（isOwn）根本不在 `Moment` 裡。這兩件事各自被
+ * 拆開判斷過一次，結果同一張卡的標題說「你穩住了自己」、內文說「局面鬆了一點」——
+ * 稱讚與批評同一手（2026-08-08 precommit-review 抓到）。
+ *
+ * - `isOwn`（玩家走的 === 引擎最佳手）時**沒有「更好的」可講**：只有 fav 過得了門檻才是真好棋，
+ *   其餘都是「被迫的局面裡已經走了最好的一手」——不能拿失誤模板去指控一手正確的走法。
+ * - `!isOwn` 時沿用 OQ-R1：光禿禿的 anchor（swing 對玩家不利、fav 低於門檻）是中性的「轉折」，
+ *   不是好棋該有的慶祝。
  */
-export type MomentVisualKind = 'tactical' | 'bright' | 'plain' | 'turning-point'
+export type MomentTone = 'tactical' | 'bright' | 'turning-point' | 'plain' | 'best-anyway'
 
-export function momentVisualKind(m: Moment): MomentVisualKind {
+export function momentTone(m: Moment, isOwn: boolean): MomentTone {
+  const isGenuinelyBright = m.kind === 'bright' && m.fav >= MEMORY_BRIGHT_GATE
+  if (isOwn) return isGenuinelyBright ? 'bright' : 'best-anyway'
   if (m.kind === 'tactical') return 'tactical'
-  if (m.kind === 'bright') {
-    // genuine bright recovery (player outperformed) vs bare anchor (biggest loss) — OQ-R1
-    return m.fav >= MEMORY_BRIGHT_GATE ? 'bright' : 'turning-point'
-  }
+  if (m.kind === 'bright') return isGenuinelyBright ? 'bright' : 'turning-point'
   return 'plain'
 }
 
 /**
- * A moment's plain short name (GDD Rule 11) — the card's headline. No engine-taxonomy label.
- * ponytail: the material case shows a generic 「漏掉一個子」 rather than naming the hung piece —
- * naming it needs a hanging-piece re-derivation (real work); the template degrades cleanly. Upgrade
- * path: pass the resolved hung piece in when F3's hungPiece is wired.
+ * 一個 moment 的白話短名（GDD Rule 11）——卡片的標題。不用引擎術語。
+ * ponytail: material 的情況顯示籠統的「漏掉一個子」而不指名是哪顆子——指名需要 hanging-piece
+ * 推導（見 technical-preferences 的 Deferred Cleanup）。接上之後這裡與 F3 模板會一起變好。
  */
-export function momentShortName(m: Moment): string {
-  switch (momentVisualKind(m)) {
+export function momentShortName(tone: MomentTone, concept: Moment['concept']): string {
+  switch (tone) {
     case 'tactical':
-      return m.concept === 'mate' ? '差點被將死' : '漏掉一個子'
+      return concept === 'mate' ? '差點被將死' : '漏掉一個子'
     case 'bright':
       return '你穩住了自己'
     case 'turning-point':
       return '這盤的轉折'
+    case 'best-anyway':
+      return '已經是最好的一手'
     case 'plain':
       return '被推著走的一段'
   }

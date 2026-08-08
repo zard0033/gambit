@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { describeMove, momentVisualKind, momentShortName } from '@/modules/memory/describe'
+import { describeMove, momentTone, momentShortName } from '@/modules/memory/describe'
 import type { Moment } from '@/types/memory'
 
 const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -22,31 +22,49 @@ describe('describeMove — UCI → plain-language 中文 move', () => {
   })
 })
 
-describe('momentVisualKind — OQ-R1: bare anchor in a loss is a neutral turning point, not a star', () => {
-  it('test_visualKind_tactical', () => {
-    expect(momentVisualKind(moment({ kind: 'tactical', concept: 'material', cp: 290 }))).toBe('tactical')
+describe('momentTone — OQ-R1: bare anchor in a loss is a neutral turning point, not a star', () => {
+  it('test_tone_tactical', () => {
+    expect(momentTone(moment({ kind: 'tactical', concept: 'material', cp: 290 }), false)).toBe('tactical')
   })
-  it('test_visualKind_genuineBright_isStarSuccess', () => {
+  it('test_tone_genuineBright_isStarSuccess', () => {
     // fav >= MEMORY_BRIGHT_GATE (120) → a real recovery → celebratory bright
-    expect(momentVisualKind(moment({ kind: 'bright', fav: 200, anchor: false }))).toBe('bright')
+    expect(momentTone(moment({ kind: 'bright', fav: 200, anchor: false }), true)).toBe('bright')
   })
-  it('test_visualKind_bareAnchorSwingAgainstPlayer_isTurningPoint_notStar', () => {
+  it('test_tone_bareAnchorSwingAgainstPlayer_isTurningPoint_notStar', () => {
     // selection collapses the anchor into kind='bright', but a swing AGAINST the player has low/neg
     // fav → OQ-R1 neutral turning point, NOT the star/success of a genuine recovery.
-    expect(momentVisualKind(moment({ kind: 'bright', anchor: true, cp: 300, fav: Number.NEGATIVE_INFINITY })))
+    expect(momentTone(moment({ kind: 'bright', anchor: true, cp: 300, fav: Number.NEGATIVE_INFINITY }), false))
       .toBe('turning-point')
   })
-  it('test_visualKind_plain', () => {
-    expect(momentVisualKind(moment({ kind: 'plain', cp: 70 }))).toBe('plain')
+  it('test_tone_plain', () => {
+    expect(momentTone(moment({ kind: 'plain', cp: 70 }), false)).toBe('plain')
   })
 })
 
-describe('momentShortName — plain headline per kind (no engine-taxonomy label)', () => {
-  it('test_shortName_perKind', () => {
-    expect(momentShortName(moment({ kind: 'tactical', concept: 'material' }))).toBe('漏掉一個子')
-    expect(momentShortName(moment({ kind: 'tactical', concept: 'mate' }))).toBe('差點被將死')
-    expect(momentShortName(moment({ kind: 'bright', fav: 200 }))).toBe('你穩住了自己')
-    expect(momentShortName(moment({ kind: 'bright', anchor: true, fav: Number.NEGATIVE_INFINITY }))).toBe('這盤的轉折')
-    expect(momentShortName(moment({ kind: 'plain', cp: 70 }))).toBe('被推著走的一段')
+describe('momentTone — 玩家走了最佳手時不得套用失誤語氣', () => {
+  it('test_tone_own_tactical_isBestAnyway_notTactical', () => {
+    // 被迫的局面：最佳手仍然失分，但那不是這一手的問題——不能拿失誤標題指控一手正確的走法
+    expect(momentTone(moment({ kind: 'tactical', concept: 'material', cp: 290 }), true)).toBe('best-anyway')
+  })
+  it('test_tone_own_plain_isBestAnyway', () => {
+    expect(momentTone(moment({ kind: 'plain', cp: 70 }), true)).toBe('best-anyway')
+  })
+  it('test_tone_own_favBelowGate_isBestAnyway_notBright', () => {
+    expect(momentTone(moment({ kind: 'bright', fav: 10 }), true)).toBe('best-anyway')
+  })
+  it('test_tone_notOwn_favAboveGate_isBright_notDowngraded', () => {
+    // 走得好、但不是引擎最佳手：仍是真正的好轉，標題與內文都該一致地稱讚
+    expect(momentTone(moment({ kind: 'bright', fav: 200 }), false)).toBe('bright')
+  })
+})
+
+describe('momentShortName — plain headline per tone (no engine-taxonomy label)', () => {
+  it('test_shortName_perTone', () => {
+    expect(momentShortName('tactical', 'material')).toBe('漏掉一個子')
+    expect(momentShortName('tactical', 'mate')).toBe('差點被將死')
+    expect(momentShortName('bright', 'none')).toBe('你穩住了自己')
+    expect(momentShortName('turning-point', 'none')).toBe('這盤的轉折')
+    expect(momentShortName('best-anyway', 'none')).toBe('已經是最好的一手')
+    expect(momentShortName('plain', 'none')).toBe('被推著走的一段')
   })
 })

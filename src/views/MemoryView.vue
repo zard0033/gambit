@@ -8,7 +8,6 @@
 import { ref, computed, onMounted, onUnmounted, provide, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ArrowLeft } from 'lucide-vue-next'
-import { Button } from '@/components/ui/button'
 import { useGameStore, type CompletedGame } from '@/stores/game-store'
 import { useGameHistoryStore } from '@/stores/game-history'
 import { historyEntryToCompletedGame } from '@/modules/memory/history-game'
@@ -26,6 +25,7 @@ import { classifyStage } from '@/modules/memory/stage'
 import { MEMORY_SUMMARY_SCHEMA_VERSION } from '@/config/memory-config'
 import { MEMORY_CONTEXT, type MemoryContext } from '@/components/memory/memory-context'
 import MemoryDashboard from '@/components/memory/MemoryDashboard.vue'
+import GameExportCard from '@/components/memory/GameExportCard.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -132,10 +132,17 @@ watch(() => review.phase.value, (p) => {
 })
 
 // ---- Header back: return to the entry origin (Game Over / 對局紀錄) — GDD Rule 1 ----
+// 用來源判斷，不用 history.back()：這頁裝成 PWA 後跑在 standalone，**空堆疊時 history.back()
+// 是靜默 no-op**（不報錯、不觸發事件、畫面就是不動），冷啟動直接落在這頁就失靈。
+// 兩個入口剛好分得開：帶 ?gameId 一定是從對局紀錄點進來的，沒有就是下完棋自動導來的。
+// replace 而非 push：返回是「離開這頁」，不該再疊一筆紀錄——否則 history → review → 返回 →
+// review → 返回… 每來回一次就長一層，PWA 的左緣滑動返回會走回一連串舊的 review 頁。
 function onHeaderBack(): void {
-  if (window.history.length > 1) router.back()
-  else router.push('/')
+  router.replace(route.query.gameId ? '/history' : '/')
 }
+
+/** 匯出鈕只在分析跑完後出現（EC-3：不給半成品的可點物）。 */
+const isComplete = computed(() => review.phase.value === 'COMPLETE')
 
 /** Export/PGN-tag shape of the identified opening. Null unless BOTH name and ECO are known —
  *  a half-filled `Opening "…" ECO ""` tag pair is worse than omitting them (GDD §3 omission rule). */
@@ -176,14 +183,32 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex min-h-dvh flex-col items-center p-4">
-    <div class="mb-3 flex w-full max-w-md items-center justify-between">
-      <Button variant="secondary" size="sm" @click="onHeaderBack">
-        <ArrowLeft :size="16" :stroke-width="1.8" /> 返回
-      </Button>
+  <!-- fullBleed：這頁自畫 header，全站 app bar 與底部 tab 都不在。背景與底部 safe-area 因此
+       由這裡自己負責（App.vue 只在非 fullBleed 時補）。 -->
+  <div class="flex min-h-dvh flex-col items-center bg-surface-base px-4 pb-[calc(2rem+env(safe-area-inset-bottom))]">
+    <header
+      class="flex w-full max-w-md items-center gap-0.5 pb-3 pt-[calc(0.5rem+env(safe-area-inset-top))]"
+    >
+      <button
+        type="button"
+        class="flex size-11 items-center justify-center rounded-btn text-ink-muted transition-colors duration-150 hover:bg-surface-hover hover:text-ink focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold motion-reduce:transition-none"
+        aria-label="返回"
+        @click="onHeaderBack"
+      >
+        <ArrowLeft :size="20" :stroke-width="1.8" aria-hidden="true" />
+      </button>
       <h1 class="font-display text-xl font-bold text-ink" tabindex="-1">棋憶</h1>
-      <div class="w-16" />
-    </div>
+
+      <!-- 帶走整盤棋譜。原本住在對話框正下方，看起來像在複製當下那一手（2026-08-08 搬上來）。 -->
+      <GameExportCard
+        v-if="isComplete && game"
+        :key="game.completedAt"
+        class="ml-auto"
+        :game="game"
+        :moments="moments"
+        :opening="opening"
+      />
+    </header>
 
     <MemoryDashboard />
   </div>

@@ -7,11 +7,11 @@ import { MEMORY_CONTEXT, type MemoryContext } from '@/components/memory/memory-c
 import type { StoredAnalysisEntry } from '@/modules/post-game-review/use-post-game-review'
 import type { Moment } from '@/types/memory'
 
-// chessground 在 happy-dom 起不來；這裡驗的是清單與選取，棋盤只需接得住 props。
+// chessground 在 happy-dom 起不來；這裡驗的是對話框與切換，棋盤只需接得住 props。
 vi.mock('@/components/chess-board.vue', () => ({
   default: defineComponent({
     name: 'ChessBoard',
-    props: ['fen', 'playerColor', 'disabled', 'coordinates', 'lastMove'],
+    props: ['fen', 'playerColor', 'disabled', 'coordinates'],
     setup: () => () => null,
   }),
 }))
@@ -42,43 +42,76 @@ function mountCard(
   return mount(KeyMomentsCard, { global: { provide: { [MEMORY_CONTEXT as symbol]: ctx } } })
 }
 
+const nextBtn = (w: VueWrapper) => w.get('[aria-label="下一手"]')
+const prevBtn = (w: VueWrapper) => w.get('[aria-label="上一手"]')
+
 describe('KeyMomentsCard', () => {
-  it('每個 moment 渲染一列，帶手數與 SAN 棋譜', () => {
+  it('一次只顯示一格，段點數量等於 moment 數', () => {
     // Arrange / Act
     const w = mountCard()
 
     // Assert
-    const rows = w.findAll('li button')
-    expect(rows).toHaveLength(2)
-    expect(rows[0].text()).toContain('第 1 手')
-    expect(rows[0].text()).toContain('e4') // 引擎建議 e2e4 → SAN e4
-    expect(rows[1].text()).toContain('第 2 手')
-    expect(rows[1].text()).toContain('Nf3') // 玩家走的 g1f3 → SAN Nf3
+    expect(w.get('[data-testid="moment-dots"]').findAll('span')).toHaveLength(2)
+    expect(w.text()).toContain('第 1 手')
+    expect(w.text()).not.toContain('第 2 手')
   })
 
-  it('依玩家有沒有走到最佳手標示來源', () => {
-    // Arrange / Act
+  it('走法用白話文並排兩手，不出現 SAN 記號', () => {
+    // Arrange / Act — ply0：玩家 a2a3、引擎 e2e4
     const w = mountCard()
 
     // Assert
-    const rows = w.findAll('li button')
-    expect(rows[0].text()).toContain('更好的') // a2a3 ≠ e2e4
-    expect(rows[1].text()).toContain('你走的') // g1f3 === g1f3
+    expect(w.get('[data-testid="moment-played"]').text()).toBe('你走了 把兵移到 a3')
+    expect(w.get('[data-testid="moment-best"]').text()).toBe('更好的是 把兵移到 e4')
   })
 
-  it('預設選第一項，點另一項後棋盤換到該局面', async () => {
+  it('玩家走到最佳手的那一格不顯示「更好的是」', async () => {
+    // Arrange — ply2 玩家走的 g1f3 就是最佳手
+    const w = mountCard()
+
+    // Act
+    await nextBtn(w).trigger('click')
+
+    // Assert
+    expect(w.text()).toContain('第 2 手')
+    expect(w.find('[data-testid="moment-best"]').exists()).toBe(false)
+  })
+
+  it('切換到下一格時棋盤換到該局面', async () => {
     // Arrange
     const w = mountCard()
     const board = w.findComponent({ name: 'ChessBoard' })
     const firstFen = board.props('fen')
 
     // Act
-    await w.findAll('li button')[1].trigger('click')
+    await nextBtn(w).trigger('click')
 
     // Assert
-    expect(w.findAll('li button')[1].attributes('aria-current')).toBe('true')
     expect(board.props('fen')).not.toBe(firstFen)
-    expect(board.props('lastMove')).toEqual(['g1', 'f3'])
+  })
+
+  it('第一格不能再往前、最後一格不能再往後', async () => {
+    // Arrange
+    const w = mountCard()
+
+    // Assert — 起點
+    expect(prevBtn(w).attributes('disabled')).toBeDefined()
+    expect(nextBtn(w).attributes('disabled')).toBeUndefined()
+
+    // Act — 走到最後一格
+    await nextBtn(w).trigger('click')
+
+    // Assert
+    expect(prevBtn(w).attributes('disabled')).toBeUndefined()
+    expect(nextBtn(w).attributes('disabled')).toBeDefined()
+  })
+
+  it('每一格都有 Neve 的一句解釋', () => {
+    // Arrange / Act
+    const w = mountCard()
+
+    // Assert
+    expect(w.get('[data-testid="moment-reason"]').text().length).toBeGreaterThan(0)
   })
 
   it('棋盤唯讀，且朝向跟隨玩家執子色', () => {
@@ -124,8 +157,8 @@ describe('KeyMomentsCard', () => {
     expect(w.find('[data-testid="key-moments"]').exists()).toBe(false)
   })
 
-  it('清單縮短後越界的選取落回第一項，不渲染空殼', async () => {
-    // Arrange — 先選到第二項
+  it('清單縮短後越界的位置落回第一格，不渲染空殼', async () => {
+    // Arrange — 先切到第二格
     const moments = ref<Moment[]>([moment(0), moment(2)])
     const ctx: MemoryContext = {
       review: {
@@ -136,15 +169,14 @@ describe('KeyMomentsCard', () => {
       opening: computed(() => null),
     }
     const w = mount(KeyMomentsCard, { global: { provide: { [MEMORY_CONTEXT as symbol]: ctx } } })
-    await w.findAll('li button')[1].trigger('click')
+    await nextBtn(w).trigger('click')
 
-    // Act — 清單縮到只剩一項
+    // Act — 清單縮到只剩一格
     moments.value = [moment(0)]
     await w.vm.$nextTick()
 
     // Assert
-    const rows = w.findAll('li button')
-    expect(rows).toHaveLength(1)
-    expect(rows[0].attributes('aria-current')).toBe('true')
+    expect(w.get('[data-testid="moment-dots"]').findAll('span')).toHaveLength(1)
+    expect(w.text()).toContain('第 1 手')
   })
 })

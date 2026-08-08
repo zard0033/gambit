@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { buildMomentDisplays } from '@/modules/memory/moment-display'
+import { MEMORY_BRIGHT_GATE } from '@/config/memory-config'
 import type { StoredAnalysisEntry } from '@/modules/post-game-review/use-post-game-review'
 import type { Moment } from '@/types/memory'
 
@@ -16,7 +17,7 @@ function moment(ply: number, over: Partial<Moment> = {}): Moment {
 }
 
 describe('buildMomentDisplays', () => {
-  it('玩家走的不是最佳手時，顯示引擎建議並標 engine', () => {
+  it('玩家走的不是最佳手時，並排兩手並標 engine', () => {
     // Arrange — 玩家走 a2a3，引擎要 e2e4
     const input = {
       moments: [moment(0)],
@@ -30,13 +31,12 @@ describe('buildMomentDisplays', () => {
 
     // Assert
     expect(out).toHaveLength(1)
-    expect(out[0].san).toBe('e4')
     expect(out[0].source).toBe('engine')
-    expect(out[0].from).toBe('e2')
-    expect(out[0].to).toBe('e4')
+    expect(out[0].played).toEqual({ piece: '兵', to: 'a3' })
+    expect(out[0].best).toEqual({ piece: '兵', to: 'e4' })
   })
 
-  it('玩家走的就是最佳手時，顯示玩家那一手並標 own', () => {
+  it('玩家走的就是最佳手時標 own，且不給「更好的」', () => {
     // Arrange — 玩家走 e2e4，引擎也要 e2e4
     const input = {
       moments: [moment(0)],
@@ -50,7 +50,27 @@ describe('buildMomentDisplays', () => {
 
     // Assert
     expect(out[0].source).toBe('own')
-    expect(out[0].san).toBe('e4')
+    expect(out[0].played).toEqual({ piece: '兵', to: 'e4' })
+    expect(out[0].best).toBeNull()
+  })
+
+  it('走法描述用中文棋子名，不用 SAN 記號', () => {
+    // Arrange — b1 的馬走到 d2（SAN 會寫 Nbd2，白話文只講「騎士」與目標格）
+    const fen = 'r1bqkbnr/pppppppp/2n5/8/8/5N2/PPP1PPPP/RNBQKB1R w KQkq - 0 1'
+    const input = {
+      moments: [moment(0)],
+      analysisResults: [entry('b1d2')],
+      fens: [fen, fen],
+      moves: ['a2a3'],
+    }
+
+    // Act
+    const out = buildMomentDisplays(input)
+
+    // Assert
+    expect(out[0].best).toEqual({ piece: '騎士', to: 'd2' })
+    expect(out[0].reason).toContain('把騎士移到 d2')
+    expect(out[0].reason).not.toContain('Nbd2')
   })
 
   it('升變後綴大小寫不同仍視為同一手（own，不是 engine）', () => {
@@ -87,24 +107,7 @@ describe('buildMomentDisplays', () => {
     expect(out.map((m) => m.moveNumber)).toEqual([1, 1, 2])
   })
 
-  it('SAN 帶消歧資訊（同色兩隻馬走得到同格時輸出 Nbd2 而非 Nd2）', () => {
-    // Arrange — b1 與 f3 兩隻白馬都能到 d2（d2 須淨空，否則兩隻都走不過去）
-    const fen = 'r1bqkbnr/pppppppp/2n5/8/8/5N2/PPP1PPPP/RNBQKB1R w KQkq - 0 1'
-    const input = {
-      moments: [moment(0)],
-      analysisResults: [entry('b1d2')],
-      fens: [fen, fen],
-      moves: ['a2a3'],
-    }
-
-    // Act
-    const out = buildMomentDisplays(input)
-
-    // Assert
-    expect(out[0].san).toBe('Nbd2')
-  })
-
-  it('資料不齊的項目整項略過，不產生空殼列', () => {
+  it('資料不齊的項目整項略過，不產生空殼格', () => {
     // Arrange — ply0 缺分析、ply1 走法對不上局面、ply2 完整
     const input = {
       moments: [moment(0), moment(1), moment(2)],
@@ -134,5 +137,182 @@ describe('buildMomentDisplays', () => {
 
     // Assert
     expect(out.map((m) => m.ply)).toEqual([0, 2])
+  })
+})
+
+describe('buildMomentDisplays — 文案模板選擇', () => {
+  // selection.ts 的 displayKind 把 anchor（這盤代價最大的一手）和真正的好棋都壓成 'bright'。
+  // 這組測試守的就是「別對著最大失誤說你穩住了」——active.md 記名的坑。
+  const BRIGHT_PRAISE = '你穩住了'
+
+  it('anchor 被壓成 bright 時不得渲染成好棋文案', () => {
+    // Arrange — kind='bright' 但 anchor 且 fav 遠低於門檻，玩家走的也不是最佳手
+    const input = {
+      moments: [moment(0, { kind: 'bright', anchor: true, fav: -500 })],
+      analysisResults: [entry('e2e4')],
+      fens: [START, AFTER_E4],
+      moves: ['a2a3'],
+    }
+
+    // Act
+    const out = buildMomentDisplays(input)
+
+    // Assert
+    expect(out[0].reason).not.toContain(BRIGHT_PRAISE)
+  })
+
+  it('走得好但不是最佳手：標題與內文一致地當成好轉，不互相矛盾', () => {
+    // Arrange — fav 過得了門檻，但玩家走的 !== bestMove（走了好手，只是不是引擎首選）
+    const input = {
+      moments: [moment(0, { kind: 'bright', fav: MEMORY_BRIGHT_GATE + 100 })],
+      analysisResults: [entry('e2e4')],
+      fens: [START, AFTER_E4],
+      moves: ['a2a3'],
+    }
+
+    // Act
+    const out = buildMomentDisplays(input)
+
+    // Assert — 標題與內文同源，不會一個稱讚一個說局面變壞
+    expect(out[0].shortName).toBe('你穩住了自己')
+    expect(out[0].reason).toContain(BRIGHT_PRAISE)
+    expect(out[0].reason).not.toContain('局面鬆了一點')
+  })
+
+  it('玩家走的就是最佳手：不套失誤標題，也不建議一個「更好的」', () => {
+    // Arrange — tactical moment 但玩家走的就是 bestMove（被迫的局面，最佳手仍失分）
+    const input = {
+      moments: [moment(0, { kind: 'tactical', concept: 'material' })],
+      analysisResults: [entry('e2e4')],
+      fens: [START, AFTER_E4],
+      moves: ['e2e4'],
+    }
+
+    // Act
+    const out = buildMomentDisplays(input)
+
+    // Assert — 不得指控一手正確的走法，更不得憑空建議「走穩一點」
+    expect(out[0].source).toBe('own')
+    expect(out[0].shortName).toBe('已經是最好的一手')
+    expect(out[0].reason).not.toContain('與其')
+    expect(out[0].reason).not.toContain('走穩一點')
+    expect(out[0].reason).toContain('這已經是這裡最好的一手了')
+  })
+
+  it('標題與內文永遠同源：稱讚的格子不得同時說局面變壞', () => {
+    // Arrange — 掃過會走進不同 tone 的四種 moment
+    const cases: Array<{ m: Partial<Moment>; own: boolean }> = [
+      { m: { kind: 'bright', fav: MEMORY_BRIGHT_GATE + 100 }, own: true },
+      { m: { kind: 'bright', anchor: true, fav: -500 }, own: false },
+      { m: { kind: 'tactical', concept: 'mate' }, own: false },
+      { m: { kind: 'plain' }, own: true },
+    ]
+
+    for (const { m, own } of cases) {
+      // Act
+      const out = buildMomentDisplays({
+        moments: [moment(0, m)],
+        analysisResults: [entry('e2e4')],
+        fens: [START, AFTER_E4],
+        moves: [own ? 'e2e4' : 'a2a3'],
+      })
+
+      // Assert
+      const praisedInHeadline = out[0].shortName.includes('穩住')
+      const criticizedInBody = out[0].reason.includes('局面鬆了一點')
+      expect(praisedInHeadline && criticizedInBody).toBe(false)
+    }
+  })
+
+  it('玩家走了最佳手且 fav 過門檻，才給好棋文案', () => {
+    // Arrange — own + kind bright + fav 過門檻
+    const input = {
+      moments: [moment(0, { kind: 'bright', fav: MEMORY_BRIGHT_GATE + 100 })],
+      analysisResults: [entry('e2e4')],
+      fens: [START, AFTER_E4],
+      moves: ['e2e4'],
+    }
+
+    // Act
+    const out = buildMomentDisplays(input)
+
+    // Assert
+    expect(out[0].reason).toContain(BRIGHT_PRAISE)
+  })
+
+  it('tactical + material 在不知道是哪顆子時，不說「沒人守著」那半句', () => {
+    // Arrange — hangingPiece 判定還沒接上，模板拿不到 hungPiece/hungSquare
+    const input = {
+      moments: [moment(0, { kind: 'tactical', concept: 'material' })],
+      analysisResults: [entry('e2e4')],
+      fens: [START, AFTER_E4],
+      moves: ['a2a3'],
+    }
+
+    // Act
+    const out = buildMomentDisplays(input)
+
+    // Assert — 只留「與其…不如先…」，不吐沒有資訊的那半句
+    expect(out[0].reason).not.toContain('沒人守著')
+    expect(out[0].reason).toBe('與其把兵移到 a3，不如先把兵移到 e4。')
+  })
+
+  it('tactical + mate 講將殺威脅，不講子力', () => {
+    // Arrange
+    const input = {
+      moments: [moment(0, { kind: 'tactical', concept: 'mate' })],
+      analysisResults: [entry('e2e4')],
+      fens: [START, AFTER_E4],
+      moves: ['a2a3'],
+    }
+
+    // Act
+    const out = buildMomentDisplays(input)
+
+    // Assert
+    expect(out[0].reason).toContain('將殺')
+    expect(out[0].reason).toContain('把兵移到 e4')
+  })
+})
+
+describe('buildMomentDisplays — 盤面標註', () => {
+  it('失誤格在走子前的局面同時標出兩手', () => {
+    // Arrange — 玩家 a2a3、引擎 e2e4
+    const input = {
+      moments: [moment(0)],
+      analysisResults: [entry('e2e4')],
+      fens: [START, AFTER_E4],
+      moves: ['a2a3'],
+    }
+
+    // Act
+    const out = buildMomentDisplays(input)
+
+    // Assert — 局面停在走子前，兩手各一箭頭一高亮
+    expect(out[0].fen).toBe(START)
+    expect(out[0].annotations).toEqual([
+      { kind: 'arrow', role: 'playedMove', from: 'a2', to: 'a3' },
+      { kind: 'highlight', role: 'playedMove', square: 'a3' },
+      { kind: 'arrow', role: 'keySquare', from: 'e2', to: 'e4' },
+      { kind: 'highlight', role: 'keySquare', square: 'e4' },
+    ])
+  })
+
+  it('好棋格走到對手回應之後的局面', () => {
+    // Arrange — 玩家走了最佳手 e2e4，對手回 e7e5
+    const input = {
+      moments: [moment(0)],
+      analysisResults: [entry('e2e4'), entry('g1f3')],
+      fens: [START, AFTER_E4, AFTER_E4],
+      moves: ['e2e4', 'e7e5'],
+    }
+
+    // Act
+    const out = buildMomentDisplays(input)
+
+    // Assert — 盤面已含黑兵到 e5；對手的回應用灰色（次要）而非與自己那手同色
+    expect(out[0].fen).toContain('4p3')
+    expect(out[0].annotations).toContainEqual({ kind: 'arrow', role: 'keySquare', from: 'e2', to: 'e4' })
+    expect(out[0].annotations).toContainEqual({ kind: 'arrow', role: 'playedMove', from: 'e7', to: 'e5' })
   })
 })

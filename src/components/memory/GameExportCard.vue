@@ -82,36 +82,43 @@ watch(state, (s) => {
   else if (s === 'COPYING') lastTier.value = 'copy'
 })
 
+/**
+ * 標籤刻意短：這顆鈕住在 header 右上（2026-08-08），旁邊還有「← 棋憶」。原本的
+ * 「複製這盤棋」放在對話框正下方，看起來像在複製當下那一手——搬上來就是為了斷掉這個誤讀，
+ * 完整說明退到 aria-label。
+ */
 const label = computed(() => {
   if (done.value) return lastTier.value === 'share' ? '已分享' : '已複製'
-  return isTouch ? '分享這盤棋' : '複製這盤棋'
+  return '棋譜'
 })
 const icon = computed(() => (isTouch ? Share2 : Copy))
 </script>
 
 <template>
-  <div class="flex flex-col gap-2">
-    <Button
-      variant="secondary"
-      size="sm"
-      class="w-full"
+  <div>
+    <button
+      type="button"
+      class="flex min-h-11 items-center gap-1.5 rounded-btn px-2.5 font-sans text-sm text-ink-muted transition-colors duration-150 hover:bg-surface-hover hover:text-ink disabled:opacity-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold motion-reduce:transition-none"
       :disabled="busy"
-      :aria-label="done ? label : `${label}，貼給 AI 一起看`"
+      :aria-label="done ? label : `${isTouch ? '分享' : '複製'}整盤棋譜，貼給 AI 一起看`"
       @click="onExportTap"
     >
-      <component :is="done ? Check : icon" :size="16" :stroke-width="1.8" />
+      <component :is="done ? Check : icon" :size="17" :stroke-width="1.8" aria-hidden="true" />
       {{ label }}
-    </Button>
-    <p class="text-center font-sans text-xs text-ink-muted">貼給 AI，就能一起看這盤怎麼走的。</p>
+    </button>
 
     <!-- Tier 3: neither Web Share nor Clipboard available (or both refused) — show the text so the
-         player can select it by hand. Never a dead end. -->
-    <div v-if="state === 'FALLBACK'" class="flex flex-col gap-2">
+         player can select it by hand. Never a dead end. Fixed overlay because the button now lives
+         in a one-line header that a 6-row textarea would blow apart. -->
+    <div
+      v-if="state === 'FALLBACK'"
+      class="fixed inset-x-4 top-24 z-40 flex flex-col gap-2 rounded-card border border-line bg-surface-card p-3 shadow-card"
+    >
       <textarea
         :value="fallbackText"
         readonly
         rows="6"
-        class="w-full rounded-card border border-line bg-surface-card p-3 font-sans text-base text-ink"
+        class="w-full rounded-card border border-line bg-surface-base p-3 font-sans text-base text-ink"
         aria-label="這盤棋的內容，請自行選取複製"
         @focus="(e) => (e.target as HTMLTextAreaElement).select()"
       />

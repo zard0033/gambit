@@ -1,33 +1,43 @@
 /**
- * 棋憶 — 關鍵步清單的顯示資料。純函式，把 F1 選出的 `Moment[]` 接上「那一手長什麼樣」。
+ * 棋憶 — 對話框每一格的顯示資料。純函式，把 F1 選出的 `Moment[]` 接上「那一手長什麼樣、
+ * Neve 要說什麼、盤上標什麼」。
  *
- * 每項回答同一個問題：這一步值得看的是哪一手？
- *   - 玩家走的就是引擎最佳手 → 看你自己走的那手（`source: 'own'`）
- *   - 否則 → 看引擎建議的那手（`source: 'engine'`）
+ * 每格回答同一件事：這一步發生了什麼？
+ *   - 玩家走的就是引擎最佳手 → 只講你自己那手（`source: 'own'`，不顯示「更好的」）
+ *   - 否則 → 並排「你走了 / 更好的是」（`source: 'engine'`）
  *
  * 判準刻意用「玩家走的 === bestMove」而不是 Moment 的 `kind`：`displayKind` 把 anchor 和 bright
  * 都壓成 `'bright'`（selection.ts），拿 kind 反推會把最大失誤誤認成好棋。
  *
- * UCI→SAN 在這裡轉，因為 SAN 需要當下局面才算得出來（`Nbd2` 的消歧要看還有沒有第二隻馬走得到）。
+ * 走法一律白話文（「把主教移到 g5」），不用 SAN——目標讀者看不懂棋譜記號。
  */
 import { Chess } from 'chess.js'
 import type { Moment } from '@/types/memory'
+import type { Annotation } from '@/modules/move-annotation/annotation-types'
 import type { StoredAnalysisEntry } from '@/modules/post-game-review/use-post-game-review'
+import { describeMove, momentShortName, momentTone, type MoveDesc } from './describe'
+import { renderMoment } from './templates'
+import { momentEndState } from './choreography'
 
 export interface MomentDisplay {
   /** Position index i — 原 Moment 的 ply，供 v-for key 與排序用。 */
   readonly ply: number
   /** 玩家讀得懂的手數（1-based 回合數，非 ply）。 */
   readonly moveNumber: number
-  /** 值得看的那一手，SAN 棋譜格式（`Nbd2` / `Qh5+`）。 */
-  readonly san: string
-  /** 這一手的來源：引擎建議，或玩家自己走對的那手。 */
+  /** 這一格的來源：引擎建議，或玩家自己走對的那手。 */
   readonly source: 'engine' | 'own'
-  /** 該步走之前的局面。 */
+  /** 白話短名（「差點被將死」），卡片的標題。 */
+  readonly shortName: string
+  /** 你實際走的那一手，白話文。 */
+  readonly played: MoveDesc
+  /** 更好的那一手；`source === 'own'` 時為 null（沒有更好的可講）。 */
+  readonly best: MoveDesc | null
+  /** Neve 的一句解釋（F3 模板）。 */
+  readonly reason: string
+  /** 這一格要顯示的局面（失誤＝走子前；好棋＝走完＋對手回應之後）。 */
   readonly fen: string
-  /** 那一手的起訖格，供棋盤高亮。 */
-  readonly from: string
-  readonly to: string
+  /** 盤上的標註（失誤＝兩手同時標；好棋＝你的那手＋對手回應）。 */
+  readonly annotations: Annotation[]
 }
 
 export interface BuildMomentDisplaysInput {
@@ -44,25 +54,50 @@ function normalizeUci(uci: string): string {
   return uci.toLowerCase()
 }
 
-function uciToSan(fen: string, rawUci: string): { san: string; from: string; to: string } | null {
-  // 引擎與歷史快取都可能給出大寫升變後綴（`e7e8Q`），chess.js 只收小寫。
+/**
+ * 這一手在這個局面走不走得出來。快取跨版本或資料損毀時走法會對不上盤面，整格跳過而不是
+ * 顯示半套資訊——少一格，好過一格指不到任何一手。
+ */
+function isLegalUci(fen: string, rawUci: string): boolean {
   const uci = normalizeUci(rawUci)
-  const from = uci.slice(0, 2)
-  const to = uci.slice(2, 4)
-  const promotion = uci.length === 5 ? (uci[4] as 'q' | 'r' | 'b' | 'n') : undefined
   try {
-    const move = new Chess(fen).move({ from, to, promotion })
-    return { san: move.san, from, to }
+    new Chess(fen).move({
+      from: uci.slice(0, 2),
+      to: uci.slice(2, 4),
+      promotion: uci.length === 5 ? (uci[4] as 'q' | 'r' | 'b' | 'n') : undefined,
+    })
+    return true
   } catch {
-    // 走法對不上局面（快取跨版本、資料損毀）——整項跳過，不顯示半套資訊
-    return null
+    return false
   }
 }
 
 /**
- * 把 F1 的 moments 轉成清單顯示資料，依手數排序。
- * 資料不齊的項目（缺分析、缺 FEN、走法非法）直接略過而不是顯示佔位符 —— 清單短一項，
- * 好過一列指不到任何一手的空殼。
+ * 依 tone 組出這一格的標題與內文。兩者**同源**（`momentTone`）——分開推導會讓標題稱讚、
+ * 內文批評同一手（2026-08-08 precommit-review 抓到）。
+ */
+function renderCopy(
+  moment: Moment,
+  isOwn: boolean,
+  played: MoveDesc,
+  best: MoveDesc | null,
+): { shortName: string; reason: string } {
+  const tone = momentTone(moment, isOwn)
+  const shortName = momentShortName(tone, moment.concept)
+
+  // isOwn 的兩個 tone 沒有「更好的」可講；其餘一定有（!isOwn ⇒ best 已在上面驗過非 null）。
+  if (tone === 'bright' || tone === 'best-anyway') {
+    return { shortName, reason: renderMoment({ tone, played }) }
+  }
+  if (tone === 'tactical') {
+    return { shortName, reason: renderMoment({ tone, concept: moment.concept, played, best: best! }) }
+  }
+  return { shortName, reason: renderMoment({ tone, played, best: best! }) }
+}
+
+/**
+ * 把 F1 的 moments 轉成對話框每一格的顯示資料，依手數排序。
+ * 資料不齊的項目（缺分析、缺 FEN、走法非法）直接略過。
  */
 export function buildMomentDisplays(input: BuildMomentDisplaysInput): MomentDisplay[] {
   const { moments, analysisResults, fens, moves } = input
@@ -71,22 +106,35 @@ export function buildMomentDisplays(input: BuildMomentDisplaysInput): MomentDisp
   for (const moment of moments) {
     const i = moment.ply
     const fen = fens[i]
-    const played = moves[i]
-    const best = analysisResults[i]?.bestMove
-    if (!fen || !played || !best) continue
+    const playedUci = moves[i]
+    const bestUci = analysisResults[i]?.bestMove
+    if (!fen || !playedUci || !bestUci) continue
 
-    const isOwn = normalizeUci(played) === normalizeUci(best)
-    const converted = uciToSan(fen, isOwn ? played : best)
-    if (!converted) continue
+    const isOwn = normalizeUci(playedUci) === normalizeUci(bestUci)
+    if (!isLegalUci(fen, playedUci)) continue
+    if (!isOwn && !isLegalUci(fen, bestUci)) continue
+
+    const played = describeMove(fen, playedUci)
+    const best = isOwn ? null : describeMove(fen, bestUci)
+    if (!played || (!isOwn && !best)) continue
+
+    const frame = momentEndState({
+      preMoveFen: fen,
+      playedUci,
+      bestUci: isOwn ? null : bestUci,
+      // 好棋才需要對手的回應；終局最後一手沒有下一手，momentEndState 吃得下 null。
+      replyUci: isOwn ? moves[i + 1] ?? null : null,
+    })
 
     out.push({
       ply: i,
       moveNumber: Math.floor(i / 2) + 1,
-      san: converted.san,
       source: isOwn ? 'own' : 'engine',
-      fen,
-      from: converted.from,
-      to: converted.to,
+      ...renderCopy(moment, isOwn, played, best),
+      played,
+      best,
+      fen: frame.fen,
+      annotations: frame.annotations,
     })
   }
 

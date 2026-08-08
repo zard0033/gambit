@@ -15,7 +15,8 @@ export const routes = [
   { path: '/learn/concept/:conceptId/judge', name: 'concept-judge', component: () => import('@/views/RecognitionFieldView.vue'), meta: { fullBleed: true } },
   { path: '/learn/:lessonId', name: 'lesson',    component: () => import('@/views/LessonView.vue'), meta: { fullBleed: true } },
   { path: '/practice/:puzzleId', name: 'practice', component: () => import('@/views/PracticePuzzleView.vue'), meta: { fullBleed: true } },
-  { path: '/review',          name: 'review',    component: () => import('@/views/MemoryView.vue') },
+  // fullBleed: 棋憶自畫 header（← 棋憶 ／ 棋譜），不要全站 app bar 再疊一層。
+  { path: '/review',          name: 'review',    component: () => import('@/views/MemoryView.vue'), meta: { fullBleed: true } },
   { path: '/history',         name: 'history',   component: () => import('@/views/HistoryView.vue') },
   { path: '/sign-in',         name: 'sign-in',   component: () => import('@/views/SignInView.vue'), meta: { fullBleed: true } },
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },
