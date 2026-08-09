@@ -1,7 +1,7 @@
 <!-- STATUS -->
 Epic: 棋憶（/review）改造——統一 Neve 對話框 + 深青互動格就地走
 Feature: 設計已全數拍板（2026-08-08，見下方「本輪設計決定」）
-Task: wave 1（對話框 + 白話文說明格 + 頁面 header）**已完成並過 review，待 push**；wave 2（深青
+Task: wave 1（對話框 + 白話文說明格 + 頁面 header）**已完成並 push**；wave 2（深青
   互動格就地走 + 路標下架）未開始
 ⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
 ⚠️ `/review` 要改 fullBleed＝動路由 meta → push 前必補跑 `npm run test:e2e`（E2E 盲區護欄）。
@@ -88,6 +88,10 @@ D3（難度五檔）原判死理由誤讀實作，撤銷保留。判決表全文
    要動必須先拆成 local-store ＋ cloud-adapter 兩層（v2 的 R1）。
 
 ## 已施工（push 狀態查 `git log origin/main..HEAD`）
+
+- ✅ **`CONTEXT.md` 專案詞彙表**（2026-08-09，試行中）：15 個詞，已 `@`-include 進 `CLAUDE.md` 常駐。
+  **只有詞義不放規則**（抄規則＝第二份 SoT，會漂）。**判準＝下個 session 是否真省掉解釋術語的成本**，
+  沒省到就砍。檔尾「待確認」四題待 Eason 回。
 
 - ✅ **賽後關鍵步清單**（2026-08-06 `c558b6e`；2026-08-07 補黑方回歸測試 `3293d96`）：
   `modules/memory/moment-display.ts` ＋ `components/memory/KeyMomentsCard.vue`，掛在 `MemoryDashboard`。

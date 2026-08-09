@@ -12,6 +12,13 @@ rather than a game requiring physics or 3D rendering.
 
 See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 
+## Project Language
+
+專案詞彙表——一個詞指什麼、不要用哪些同義詞、哪些詞長得像但不是同一件事。
+**只有詞義，規則不在裡面**；它最多指向本檔與各 SoT，不複述規則。
+
+@CONTEXT.md
+
 ## Technology Stack
 
 - **Platform**: Web App (TypeScript + Browser APIs)
