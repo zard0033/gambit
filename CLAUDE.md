@@ -125,6 +125,9 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 
 > **教練人格 SoT = `design/gambit-design-system/persona-neve.md`**（Neve，原創角色）。
 > 寫任何課程／練習題／概念文案前先讀：課程＝Neve 第一人稱對你說、練習題 brief＝第三人稱觀察指對手弱點、概念＝中性。
+> **交付前去 AI 味**：課程／練習題／概念／UI 文案寫完，套進程式碼或交出去之前先跑一次
+> `humanizer-zh-tw`（英文介面字串跑 `humanizer-en`，Embedded mode）。人格 SoT 優先於 humanizer 的
+> 風格規則——Neve 的語感（沉靜、短句、偶爾的人味）是這裡的樣本，衝突時照 persona-neve.md。
 
 - **色彩**：每屏都要 deep-jade 錨 `#103029`；品牌金 `#F8B500` 只用於 focus / reward 的
   fill / indicator，**絕不當內文**（內文金用 `#8F6200` 且限大字）；內容區 warm cream；陰影暖棕非純黑。
