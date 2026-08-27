@@ -8,6 +8,8 @@ A single-player chess training app I built and use myself: play against Stockfis
 
 It has one user. That's not a caveat, it's the constraint I built around. I only ever had to be right for myself, so when my own usage told me my product thesis was wrong, I could act on it instead of defending a roadmap to anyone else.
 
+I built it with Claude Code. 280 of the 324 commits carry a `Co-Authored-By: Claude` trailer, including the ones linked below, so you can go and look. The decisions stayed mine: what to build, what to delete, and eventually which of my own claims to stop believing. That last one is what the rest of this README is about, so being vague about how the code got written would be an odd place to start.
+
 **That's the real subject of this repo.** In August 2026 I tested my own positioning doc against actual engine data, found two of its three central claims didn't hold, and deleted roughly 33,000 lines (code, tests, and planning docs together) over the following week. [How that happened â†’](#the-call-i-reversed-on-myself)
 
 ---
@@ -47,7 +49,7 @@ Four commits, five days, one rewritten thesis. What survived is one loop: play â
 
 - **Play against Stockfish 18** (WASM, runs entirely client-side, no server round-trip per move), with tunable difficulty
 - **Post-game review** in two passes, walking through what you played versus what was best, move by move
-- **Blind tactics drills**: puzzles built from your own missed forced wins, mixed with decoys that don't announce whether there's an answer
+- **Blind tactics drills**: puzzles built from your own missed forced wins, shown without announcing whether the position holds one. Decoys (the half that makes the question genuinely two-sided) exist only in the hand-authored concept drills so far; the own-game generator does not produce them yet
 - **30 curated tactics puzzles** for deliberate practice outside your own games
 - **Game export**: one tap to copy a game as PGN plus a ready-to-paste prompt, for taking a position to an AI or a stronger player to discuss
 - **Installable PWA** with offline support after first load; Google OAuth or guest mode, synced through Supabase
@@ -93,7 +95,7 @@ Requires Node 26+. The Supabase client is created at import time and needs a nat
 
 Numbers I can point at, not estimates:
 
-- 318 commits, February to August 2026
+- 324 commits, February to August 2026
 - 80 test files (unit + E2E)
 - ~15,650 lines of application source (`src/`) as of the last commit
 

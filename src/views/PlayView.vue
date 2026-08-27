@@ -186,8 +186,9 @@ async function requestAiMove(): Promise<void> {
     // existed holds an arbitrary 0–20 Skill Level, and this maps it onto the nearest rung.
     const rung = rungForSkillLevel(chosenLevel.value)
     const startedAt = Date.now()
+    const requestedFen = fen.value
     const engineResult = await engine.play({
-      fen: fen.value,
+      fen: requestedFen,
       skillLevel: rung.skillLevel,
       depth: rung.depth,
       movetimeMs: rung.movetimeMs,
@@ -204,6 +205,17 @@ async function requestAiMove(): Promise<void> {
     if (pause > 0) await new Promise((resolve) => setTimeout(resolve, pause))
     // The board can have moved on while we waited (resign, new game, navigation) — drop a stale move.
     if (phase.value !== 'AI_THINKING') return
+    // Phase alone is not enough. A liveness respawn (TR-chess-engine-009) settles this promise with
+    // a move computed for the checkpoint FEN, which is the position at the *start* of the terminated
+    // search. If the player resigned and started a new game inside the respawn window, phase is
+    // AI_THINKING again but the board is a different one — applying that move plays something the
+    // engine never analysed, or silently concedes the new game when it is illegal there.
+    if (fen.value !== requestedFen) {
+      // Re-ask for the live position. The engine is IDLE again by now, so this is the call that
+      // actually produces the new game's move — returning without it would deadlock AI_THINKING.
+      void requestAiMove()
+      return
+    }
     lifecycle.handleAiMove(engineResult.bestMove)
   } catch {
     // Engine error — treat as AI resignation so the board doesn't stay permanently disabled
