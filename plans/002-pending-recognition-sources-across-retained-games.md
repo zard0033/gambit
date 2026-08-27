@@ -1,4 +1,36 @@
-# Plan 002: `pendingFor` serves unconsumed missed mates from every retained game, not just the newest one
+# Plan 002 — REJECTED (2026-08-27): the premise is false, do not execute
+
+> **This plan is wrong. Do not run it.** It was rejected on 2026-08-27, during
+> Step 1, by its own STOP condition ("an existing test asserts the old behaviour
+> deliberately — report the test name and stop").
+>
+> **Why it is wrong**: the plan claims unconsumed missed mates from an older game
+> become *permanently* unreachable once a newer game is captured. They do not.
+> `pendingFor` picks the latest game **among the still-unconsumed sources**, so
+> once the newer game's drills are consumed, the older game's entries become the
+> latest unconsumed and surface next. It is a queue, one game at a time — not a
+> drop. `tests/unit/stores/recognition-source-store.test.ts:70`
+> (`test_pendingFor_fallsToOlderGameWhenLatestFullyConsumed`) pins exactly that,
+> and `:119` pins the interaction with the trim. The behaviour is designed and
+> tested, not an oversight.
+>
+> **What was actually true**: only the citations. `pendingFor` really does filter
+> to one `gameId`, and the comments really do say "only ever serves the latest
+> game". The finding drew a false consequence from accurate evidence — which is
+> the failure mode an audit that verifies `file:line` does not catch.
+>
+> **The one real, deliberate loss** (not a bug, not worth a plan):
+> `RECOGNITION_SOURCE_GAMES_MAX = 3` (`src/config/learning-loop-tuning.ts:44`),
+> so a 4th distinct game evicts the oldest game's unconsumed entries. That is the
+> localStorage bound, it is intentional, and `:119` covers it.
+>
+> Everything below is the original plan, kept unexecuted as the record.
+
+---
+
+## Original plan (rejected — see above)
+
+### Plan 002: `pendingFor` serves unconsumed missed mates from every retained game, not just the newest one
 
 > **Executor instructions**: Follow this plan step by step. Run every
 > verification command and confirm the expected result before moving to the

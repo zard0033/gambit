@@ -17,7 +17,7 @@ is in "Findings considered and rejected".
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
 | 001  | Liveness respawn settles the orphaned `play()` promise | P1 | S | — | DONE |
-| 002  | `pendingFor` serves unconsumed mates across all retained games | P2 | S | — | TODO |
+| 002  | `pendingFor` serves unconsumed mates across all retained games | P2 | S | — | REJECTED — premise false; older games queue rather than being stranded, pinned by `recognition-source-store.test.ts:70` |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
 
@@ -33,7 +33,7 @@ Vetted by opening every cited location. Ordered by leverage.
 | # | Finding | Category | Impact | Effort | Risk | Evidence | Plan |
 |---|---------|----------|--------|--------|------|----------|------|
 | 1 | Liveness-probe respawn orphans the in-flight `play()` promise; the board freezes in `AI_THINKING` with no fallback | correctness | HIGH — unrecoverable-without-reload deadlock on iPhone Safari, the platform the probe exists for | S | LOW | `src/modules/chess-engine/play-engine.ts:197-202`; `src/views/PlayView.vue:189`; `tests/unit/chess-engine/visibility-liveness.test.ts:190` | 001 |
-| 2 | `pendingFor` narrows to the newest game, stranding unconsumed missed mates from earlier games | correctness | MED — directly undercuts the product thesis ("剛下完的那盤棋變成明天的題目") whenever play-rate outruns review-rate | S | LOW | `src/stores/recognition-source.ts:101-108`, comment at `:68-69` | 002 |
+| 2 | ~~`pendingFor` narrows to the newest game, stranding unconsumed missed mates from earlier games~~ **FALSE POSITIVE, withdrawn 2026-08-27** — older games queue, they are not stranded (`tests/unit/stores/recognition-source-store.test.ts:70`). The citations were accurate; the consequence drawn from them was not. See the rejection note at the top of `002-*.md`. | — | — | — | — | — | 002 (REJECTED) |
 | 3 | `user_preferences` migration encodes the retired `noir` theme and has zero application readers | tech-debt / decision-drift | LOW — no runtime effect; misleads a future reader into thinking theme sync exists | S | LOW | `supabase/migrations/20260830053143_create_user_preferences.sql:10`; `grep -rn "user_preferences" src/` → 0 hits | — |
 
 ## Direction findings
@@ -90,6 +90,15 @@ as mate. Effort M.
 
 So nobody re-audits these:
 
+- **`pendingFor` strands older games' missed mates** — withdrawn 2026-08-27 after
+  it had already been written up as plan 002. `pendingFor` picks the latest game
+  *among still-unconsumed sources*, so an older game surfaces once the newer one
+  is done: a queue, not a drop. `tests/unit/stores/recognition-source-store.test.ts:70`
+  and `:119` pin that contract deliberately. Every `file:line` in the original
+  finding was correct — the wrong part was the consequence inferred from them,
+  which is the class of error an evidence-check does not catch. Only genuine
+  loss: `RECOGNITION_SOURCE_GAMES_MAX = 3` evicts a 4th unreviewed game's
+  entries, which is the intended localStorage bound.
 - **`data-sync.ts` is an 800-line module mixing local storage and cloud sync** —
   already recorded as R1 in `positioning-v2:107` with an explicit unlock
   condition. Not a new finding. *(Side note worth acting on: that line says
