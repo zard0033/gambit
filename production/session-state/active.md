@@ -89,22 +89,22 @@ D3（難度五檔）原判死理由誤讀實作，撤銷保留。判決表全文
 
 ## 已施工（push 狀態查 `git log origin/main..HEAD`）
 
-- ✅ **`CONTEXT.md` 專案詞彙表**（2026-08-09，試行中）：15 個詞，已 `@`-include 進 `CLAUDE.md` 常駐。
+- ✅ **`CONTEXT.md` 專案詞彙表**（2026-08-09，試行中）：15 個詞，`@`-include 進 `CLAUDE.md` 常駐。
   **只有詞義不放規則**（抄規則＝第二份 SoT，會漂）。**判準＝下個 session 是否真省掉解釋術語的成本**，
   沒省到就砍。檔尾「待確認」四題待 Eason 回。
-
-- ✅ **賽後關鍵步清單**（2026-08-06 `c558b6e`；2026-08-07 補黑方回歸測試 `3293d96`）：
-  `modules/memory/moment-display.ts` ＋ `components/memory/KeyMomentsCard.vue`，掛在 `MemoryDashboard`。
-  **本輪會大改它**（清單→carousel），但兩個坑仍成立：① 判準用「玩家走的 === bestMove」，
-  **不可**用 Moment 的 `kind`——`displayKind` 把 anchor 和 bright 都壓成 `'bright'`，拿 kind 反推會把
-  最大失誤誤認成好棋（舊 `MemorySlideshow.vue` 的 `templateKind` 已解過這題，復原時照抄）。
-  ② `chess-board.vue` 初始 lastMove 在 `onBoardCreated` 補套，別退回純 watch。
+- ✅ **賽後關鍵步清單**（`c558b6e`／`3293d96`，wave 1 已改成 carousel）：兩個坑仍成立——
+  ① 判準用「玩家走的 === bestMove」，**不可**用 Moment 的 `kind`（`displayKind` 把 anchor 壓成
+  `'bright'`，反推會把最大失誤講成好棋）；② `chess-board.vue` 初始 lastMove 在 `onBoardCreated`
+  補套，別退回純 watch。
 - ✅ health-check Q9 訪客齒輪選單、noir 深色主題整組下架（只留 cream+jade）、D6 ProfileView 下架、
   D5 開局知識卡（縮小範圍）、D1 棋誌＋D2 試煉外殼下架、D4 棋憶敘事外殼下架、匯出接上 UI（D7 撤銷復活）。
   細節查 git log。**蒸餾**：砍整頁前重掃「這頁裡還有什麼是全站唯一入口」；跨 D 項的判死決策會互相連動。
-- 🔴 **像素回歸容差**已收緊到 0.005；`toHaveScreenshot` 在 CI 是 skip 的，動 UI 後本機要自己跑
-  `npx playwright test visual-regression`。
+- 🔴 **像素回歸容差** 0.005；`toHaveScreenshot` 在 CI 是 skip 的，動 UI 後本機自己跑 `npx playwright test visual-regression`。
 - 🔴 **賽後檢討看不見「該殺沒殺」**：cpLoss 對將殺不敏感，第三種訊號候選（mate distance，非 cp）。
+- ✅ **liveness 重生孤兒化 `play()` promise 已修**（`02f712d`）：worker 重生那次的結果被丟棄，原本被
+  await 的 promise 永不 settle → `PlayView` 永久卡 `AI_THINKING`。**蒸餾**：測試裡的 `.catch(() => {})` 是警訊。
+- ✅ **`plans/`**（`0582e4e`／`22181c8`，評估 shadcn/improve plugin 的副產物；002 已判 false positive 撤回）。
+  **蒸餾**：稽核引用 `file:line` 全對 ≠ 結論對；擋下錯誤結論的是 plan 的 STOP 條件，不是它的 vet 階段。
 
 ## 待辦（本輪之外）
 
@@ -112,8 +112,9 @@ D3（難度五檔）原判死理由誤讀實作，撤銷保留。判決表全文
   局後一次列對照表（約 150 行，chess.js 窮舉不開引擎）。**已拍板**——Q1 不可取代好處成立、
   Q1b v1 只用自己對局出題、Q2 這是主線。**待續（Q3 起）**：現在做值不值得（Jobs 視角）、Q12 驗收條件、
   Q10 難度/fallible 衝突、範圍（mate-only vs 強制贏子）、跟既有判斷場的關係。
-  **前置閘門：五盤紙筆實驗（P1，日期 2026-08-09）跑完前一行都不寫**——若察覺命中率 >70%，
-  斷層不在察覺，v2 主軸作廢。
+  **前置閘門已解除（P1，2026-08-13 跑完）**：五盤紙筆實驗，rung 5（關 fallible，
+  排除「認出引擎故意送的子」的混淆），命中率約 1–2/5，遠低於 70% 門檻——v2 主軸
+  （斷層卡在察覺階段）不被推翻，成立。Q3 起的釐清可以繼續。
 - **「是哪顆子沒人守」的判定（hanging-piece）**：`renderMoment` 的 material 分支需要 `hungPiece`/
   `hungSquare` 才講得出「你的**后**留在 **f7**，沒人守著」。這段判定沒人寫過，模板一直是 fallback。
   2026-08-08 拍板：**沒有這兩個值就整句不講**（只留「與其…不如先…」），不吐沒資訊的空話。
