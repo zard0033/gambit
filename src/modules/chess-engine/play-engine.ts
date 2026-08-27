@@ -141,6 +141,14 @@ export function usePlayEngine(
     depth?: number
     fallible?: FallibleConfig
   } | null = null
+  /**
+   * Settlers for the play() promise the checkpoint belongs to. The liveness respawn uses these
+   * so a terminated search always settles its caller instead of leaving it pending forever.
+   */
+  let _checkpointSettlers: {
+    resolve: (result: PlayResult) => void
+    reject: (err: Error) => void
+  } | null = null
   let _livenessRegistered = false
 
   function _recordHeartbeat(): void {
@@ -188,22 +196,31 @@ export function usePlayEngine(
       _probePending = false
       // Worker unresponsive — terminate and respawn
       const checkpoint = _checkpoint
+      const settlers = _checkpointSettlers
       _checkpoint = null
+      _checkpointSettlers = null
       if (_worker) {
         _worker.onmessage = null
         _worker.terminate()
         _worker = null
       }
       state.value = 'UNINITIALIZED'
-      // Best-effort respawn; original play() Promise is orphaned but engine stays operational
+      // Respawn and hand the result back to the caller that is still awaiting the terminated
+      // search. Leaving it pending deadlocks PlayView in AI_THINKING with no fallback.
       ;(async () => {
         try {
           await init()
           if (checkpoint && state.value === 'IDLE') {
-            play(checkpoint).catch(() => {})
+            play(checkpoint).then(
+              (result) => settlers?.resolve(result),
+              (err: Error) => settlers?.reject(err),
+            )
+            return
           }
+          settlers?.reject(new EngineTimeoutError())
         } catch {
-          // init sets CRASHED; nothing more to do
+          // init sets CRASHED; the caller's catch turns this into an AI resign.
+          settlers?.reject(new EngineTimeoutError())
         }
       })()
     }, LIVENESS_PROBE_TIMEOUT_MS)
@@ -338,6 +355,7 @@ export function usePlayEngine(
             drainTimer = null
             worker.onmessage = null
             _checkpoint = null
+            _checkpointSettlers = null
             state.value = 'IDLE'
             // cancelSearch completed — but we still reject with CanceledError (already set)
             // resolve/reject already called above; the drain is a side-effect only.
@@ -375,6 +393,7 @@ export function usePlayEngine(
         depth: input.depth,
         fallible: input.fallible,
       }
+      _checkpointSettlers = { resolve, reject }
       sendSearch()
 
       worker.onmessage = (ev: MessageEvent<string>) => {
@@ -425,6 +444,7 @@ export function usePlayEngine(
           const bestMoveToken =
             kind === 'move' ? (pickFallibleMove(ordered, input.fallible) ?? engineBest) : engineBest
           _checkpoint = null
+          _checkpointSettlers = null
           state.value = 'IDLE'
           cleanup()
           resolve({

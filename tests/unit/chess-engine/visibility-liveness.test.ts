@@ -4,7 +4,7 @@
  * TR-chess-engine-009: visibilitychange → probe after 60s background → respawn if no readyok
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { usePlayEngine } from '../../../src/modules/chess-engine/play-engine'
+import { usePlayEngine, EngineTimeoutError } from '../../../src/modules/chess-engine/play-engine'
 import type { IStockfishWorker, VisibilityEventTarget } from '../../../src/modules/chess-engine/play-engine'
 
 // -----------------------------------------------------------------------
@@ -204,6 +204,98 @@ describe('usePlayEngine — iOS Visibility Liveness Probe (TR-chess-engine-009)'
 
     // State must NOT have changed from stale bestmove (race guard or null onmessage)
     expect(engine.state.value).toBe(stateAfterRespawn)
+  })
+
+  // -----------------------------------------------------------------------
+  // AC-9: When liveness probe respawns the engine, the original play() promise resolves
+  //       with the respawned search's move (not left pending forever)
+  // -----------------------------------------------------------------------
+
+  it('test_visibilityProbeRespawn_resolvesOriginalPromise_whenRespawnSucceeds', async () => {
+    const workers: MockStockfishWorker[] = []
+    const factory = (): IStockfishWorker => {
+      const w = new MockStockfishWorker()
+      workers.push(w)
+      return w
+    }
+
+    const engine = usePlayEngine(factory, target)
+    disposers.push(() => engine.dispose())
+
+    // Initialize and complete handshake
+    const initPromise = engine.init()
+    workers[0].simulateResponse('uciok')
+    workers[0].simulateResponse('readyok')
+    await initPromise
+
+    // Start a play() and hold its promise
+    const playPromise = engine.play({ fen: 'startpos', skillLevel: 5, movetimeMs: 100 })
+
+    // Trigger probe timeout: advance past 60s background + 1s probe timeout
+    vi.setSystemTime(61_000)
+    target.dispatch(new Event('visibilitychange'))
+    vi.advanceTimersByTime(1_001)
+    await Promise.resolve()
+
+    // At this point: workers[0] is terminated, init() is running for workers[1]
+    // Complete handshake for respawned Worker
+    expect(workers.length).toBe(2)
+    workers[1].simulateResponse('uciok')
+    workers[1].simulateResponse('readyok')
+    // Wait for init promise and subsequent play() to be set up
+    await Promise.resolve()
+    await Promise.resolve()
+
+    // Now play() is re-issued and onmessage is set to play handler
+    // Simulate bestmove from respawned search
+    workers[1].simulateResponse('bestmove e2e4')
+    await Promise.resolve()
+
+    // The original playPromise should now resolve with the respawned search's move
+    const result = await playPromise
+    expect(result.bestMove).toBe('e2e4')
+  }, 10000) // Increase timeout for this test
+
+  // -----------------------------------------------------------------------
+  // AC-9: When liveness probe respawns and respawn fails, the original play()
+  //       promise rejects with EngineTimeoutError (not left pending forever)
+  // -----------------------------------------------------------------------
+
+  it('test_visibilityProbeRespawn_rejectsOriginalPromise_whenRespawnFails', async () => {
+    const workers: MockStockfishWorker[] = []
+    const factory = (): IStockfishWorker => {
+      const w = new MockStockfishWorker()
+      workers.push(w)
+      return w
+    }
+
+    const engine = usePlayEngine(factory, target)
+    disposers.push(() => engine.dispose())
+
+    // Initialize and complete handshake
+    const initPromise = engine.init()
+    workers[0].simulateResponse('uciok')
+    workers[0].simulateResponse('readyok')
+    await initPromise
+
+    // Start a play() and hold its promise
+    const playPromise = engine.play({ fen: 'startpos', skillLevel: 5, movetimeMs: 100 })
+
+    // Trigger probe timeout
+    vi.setSystemTime(61_000)
+    target.dispatch(new Event('visibilitychange'))
+    vi.advanceTimersByTime(1_001)
+    await Promise.resolve()
+
+    // Respawned Worker (workers[1]) never completes handshake
+    // Advance time to let init() timeout and set state to CRASHED
+    expect(workers.length).toBe(2)
+    // Don't simulate any response — init() will timeout and fail
+    vi.advanceTimersByTime(5_000) // arbitrary wait for init() to give up
+    await Promise.resolve()
+
+    // The original playPromise should now reject
+    await expect(playPromise).rejects.toBeInstanceOf(EngineTimeoutError)
   })
 
   // -----------------------------------------------------------------------
