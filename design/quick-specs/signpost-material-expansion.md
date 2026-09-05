@@ -1,5 +1,13 @@
 # 棋憶 signpost 概念擴充 — material「無守衛之子」可證明子集 v1
 
+> ⚠️ **施工點已全數失效（2026-09-05，棋憶 wave 2）——判斷仍有效，file:line 一律不可照抄**。
+> 本文件的 §3 起處處把施工位置寫死在 `src/modules/learning-loop/recognition-runtime.ts` 與
+> `src/components/memory/RecognitionSignpost.vue`（含路由 `?source=recognition`），這三者已整支刪除。
+> **新落點**＝`src/components/memory/KeyMomentsCard.vue` 的深青互動格（`cells` 陣列與 `deepSources` 快照）。
+> 其中「一屏一卡、mate > material 排他」那條規則在 carousel 形態下**已不是同一個問題**——一次只有
+> 一格在畫面上，它變成排序與配額問題，不是互斥問題。真要施工 P2 時照現況重寫 §3，不要沿用行號。
+> 仍然有效的部分：§1 的四層誠實性落差、§2 的可證明子集定義、D1–D6 的裁決與那兩個門檻數字。
+>
 > **性質**：概念擴充設計案。回應 Eason 2026-07-11 拍板：「擴 signpost 概念覆蓋（material）需先過設計——『唯一最佳』無 chess.js 級證明、review 引擎無 MultiPV，勿直接寫 code」（`production/session-state/active.md:97-99`）。本文件即該設計案。
 > **狀態**：**Accepted——2026-07-13 Eason 拍板，D1–D6 全數照推薦定案**（含 D2 推翻率門檻 5%、D4 召回門檻「數週內平均 <1 次/5 局即檢討」兩個數字正式生效）。施工前仍須依序過 §3.3 上線前置——**下一步＝D6 離線量測腳本**（推翻率 ≤5% 才開旗施工）。
 > **輸入**：5 份現況盤點（pipeline／classifier／engine／gate／vision）＋ 4 份路線提案（provable／engine／ux／skeptic）＋ 8 份雙 lens 對抗審查（honesty／engineering，全數 MAJOR-REVISE、零 KILL）。本文件＝總編收斂稿：provable 為骨架、ux 的提問語意與文案紀律、skeptic 的量測前置、engine 派降為 v2 條件路徑；全部 critical 發現的修正已內建為規格條件（對照表 §2.3；替代案去處 §4）。

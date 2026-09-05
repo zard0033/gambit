@@ -17,7 +17,7 @@ import type { Annotation } from '@/modules/move-annotation/annotation-types'
 import type { StoredAnalysisEntry } from '@/modules/post-game-review/use-post-game-review'
 import { describeMove, momentShortName, momentTone, type MoveDesc } from './describe'
 import { renderMoment } from './templates'
-import { momentEndState } from './choreography'
+import { momentEndState, momentStepFens } from './choreography'
 
 export interface MomentDisplay {
   /** Position index i — 原 Moment 的 ply，供 v-for key 與排序用。 */
@@ -38,6 +38,8 @@ export interface MomentDisplay {
   readonly fen: string
   /** 盤上的標註（失誤＝兩手同時標；好棋＝你的那手＋對手回應）。 */
   readonly annotations: Annotation[]
+  /** 從 `fen` 往前看的後續畫面（失誤＝[你走完, 更好那手走完]；好棋＝空，定格已是終態）。 */
+  readonly stepFens: readonly string[]
 }
 
 export interface BuildMomentDisplaysInput {
@@ -118,13 +120,14 @@ export function buildMomentDisplays(input: BuildMomentDisplaysInput): MomentDisp
     const best = isOwn ? null : describeMove(fen, bestUci)
     if (!played || (!isOwn && !best)) continue
 
-    const frame = momentEndState({
+    const choreography = {
       preMoveFen: fen,
       playedUci,
       bestUci: isOwn ? null : bestUci,
       // 好棋才需要對手的回應；終局最後一手沒有下一手，momentEndState 吃得下 null。
       replyUci: isOwn ? moves[i + 1] ?? null : null,
-    })
+    }
+    const frame = momentEndState(choreography)
 
     out.push({
       ply: i,
@@ -135,6 +138,7 @@ export function buildMomentDisplays(input: BuildMomentDisplaysInput): MomentDisp
       best,
       fen: frame.fen,
       annotations: frame.annotations,
+      stepFens: momentStepFens(choreography),
     })
   }
 

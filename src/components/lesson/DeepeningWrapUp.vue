@@ -5,14 +5,10 @@
  * 拆路由時抽出以免複製。棋盤留在後面（非整頁切換），故本元件不遮蓋呼叫端的棋盤內容。
  */
 import { ref, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-vue-next'
 
-/** `practiceHref`: optional — when set (RecognitionFieldView passes it on the 棋憶 signpost path,
- *  D4 2026-08: it's the replacement for MemoryReplay's deleted "練這個概念" link), a second CTA
- *  offers one matching puzzle for this concept. Omitted elsewhere (plain lesson deepening). */
-defineProps<{ title: string; essence: string; practiceHref?: string }>()
+defineProps<{ title: string; essence: string }>()
 const emit = defineEmits<{ close: [] }>()
 
 const wrapOverlay = ref<HTMLElement | null>(null)
@@ -78,16 +74,9 @@ function onWrapKeydown(e: KeyboardEvent): void {
         <!-- 精髓：這個戰術濃縮成一句，讓人離開前再回味一次 -->
         <p class="w-full font-lesson text-[16px] leading-relaxed text-ink">{{ essence }}</p>
 
-        <RouterLink
-          v-if="practiceHref"
-          :to="practiceHref"
-          data-testid="deepening-wrapup-practice"
-          class="mt-6 inline-flex min-h-[44px] w-full items-center justify-center rounded-lg border border-primary/30 px-4 text-sm font-semibold text-primary"
-        >練這題</RouterLink>
         <Button
           variant="gold"
-          class="w-full justify-center text-sm"
-          :class="practiceHref ? 'mt-2' : 'mt-6'"
+          class="mt-6 w-full justify-center text-sm"
           data-testid="deepening-wrapup-return"
           @click="emit('close')"
         >回棋理地圖 <ArrowRight :size="16" :stroke-width="1.8" /></Button>

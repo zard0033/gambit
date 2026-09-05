@@ -75,14 +75,6 @@ describe('ConceptDeepenView → judge route handoff', () => {
     expect(router.currentRoute.value.query.unaided).toBe('0')
   })
 
-  it('test_onLessonDone_sourceRecognition_forwardsSourceQueryToJudgeRoute', async () => {
-    const { wrapper, router } = await mountDeepenAt('fork', { source: 'recognition' })
-    wrapper.findComponent(LessonPlayer).vm.$emit('complete', true)
-    await flushPromises()
-
-    expect(router.currentRoute.value.query.source).toBe('recognition')
-  })
-
   it('test_onLessonDone_conceptWithoutJudgementField_finishesInPlaceNoNavigation', async () => {
     // material has no recognitionSet — must NOT navigate to a judge route that doesn't exist for it.
     const { wrapper, router } = await mountDeepenAt('material')
@@ -136,57 +128,27 @@ describe('RecognitionFieldView — epiphany requires both phases unaided', () =>
   })
 })
 
-describe('RecognitionFieldView — 棋憶 signpost runtime-source path (?source=recognition)', () => {
-  // This path was moved wholesale in the migration (ConceptDeepenView → RecognitionFieldView) and
-  // had zero view-level coverage before or after — the canned-set tests above never touch
-  // recognitionSource at all. This is the differentiated "your own missed mate" path, not the
-  // canned lesson content, so it's the one most worth locking down.
-  it('test_judgeView_sourceRecognition_seedsRealBoardAndConsumesOnComplete', async () => {
+describe('RecognitionFieldView — 只吃公版題（wave 2 之後）', () => {
+  // 玩家自己漏看的將殺不再走這條路：棋憶頁的深青互動格就地承接（wave 2，2026-09），
+  // `?source=recognition` 與 runtime set 已隨路標一起刪除。這裡守的是「這頁只認公版題」。
+  it('test_judgeView_pendingMissedMate_stillServesCannedSetAndLeavesItUnconsumed', async () => {
     const source = useRecognitionSourceStore()
     source.captureMate('game-1', 'black', [
       { ply: 5, fen: '6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1', mateMoveUci: 'a1a8' },
     ])
-    expect(source.pendingFor('mate')).toHaveLength(1)
 
-    const { wrapper } = await mountJudgeAt('mate', { source: 'recognition', unaided: '1' })
+    const { wrapper } = await mountJudgeAt('mate', { unaided: '1' })
     const gate = wrapper.findComponent(RecognitionGate)
 
-    expect(gate.props('playerColor')).toBe('black') // real-board runs carry the player's own colour
-    expect(gate.props('set').boards).toEqual([
-      expect.objectContaining({
-        kind: 'real',
-        fen: '6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1',
-        expectedMove: { from: 'a1', to: 'a8' },
-      }),
-    ])
+    expect(gate.props('playerColor')).toBe('white') // 公版題一律白方先手
+    expect(gate.props('set').boards).not.toContainEqual(
+      expect.objectContaining({ fen: '6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1' }),
+    )
 
     gate.vm.$emit('complete', true)
     await flushPromises()
 
-    expect(source.pendingFor('mate')).toHaveLength(0) // consumed — never resurfaces
-    const progress = useConceptProgressStore()
-    expect(progress.deepenedUnaided.has('mate')).toBe(true)
-  })
-})
-
-describe('RecognitionFieldView — practice-puzzle bridge (D4 2026-08 replacement for the deleted 棋憶回放 Bridge-3 link)', () => {
-  it('test_wrapUp_sourceRecognition_getsPracticeHrefToAMatchingPuzzle', async () => {
-    const { wrapper } = await mountJudgeAt('mate', { source: 'recognition', unaided: '1' })
-    wrapper.findComponent(RecognitionGate).vm.$emit('complete', true)
-    await flushPromises()
-
-    const wrapUp = wrapper.findComponent(DeepeningWrapUp)
-    expect(wrapUp.exists()).toBe(true)
-    expect(wrapUp.props('practiceHref')).toMatch(/^\/practice\//)
-  })
-
-  it('test_wrapUp_cannedLessonPath_getsNoPracticeHref', async () => {
-    // No ?source=recognition — a plain lesson completion has no missed-mate to bridge from.
-    const { wrapper } = await mountJudgeAt('fork', { unaided: '1' })
-    wrapper.findComponent(RecognitionGate).vm.$emit('complete', true)
-    await flushPromises()
-
-    const wrapUp = wrapper.findComponent(DeepeningWrapUp)
-    expect(wrapUp.props('practiceHref')).toBeUndefined()
+    // 這一題屬於棋憶頁，不該被概念地圖的公版題流程順手消費掉。
+    expect(source.pendingFor('mate')).toHaveLength(1)
   })
 })

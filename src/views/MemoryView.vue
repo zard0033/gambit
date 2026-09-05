@@ -111,7 +111,7 @@ function recordSummary(): void {
 
 // Forward-only capture (ADR-0014 rationale): analysisResults holds bestMove/evalMate only during THIS
 // review session, so lift the missed forced mates into the recognition-source store at COMPLETE — the
-// signpost/judgement-field seed. Both colors: black orientation (board flip + tap geometry) was
+// 深青互動格 seed. Both colors: black orientation (board flip + tap geometry) was
 // Playwright-verified 2026-07-11, and evalMate is side-to-move convention (ADR-0007) so the
 // evalMate === 1 filter holds for black games unchanged.
 function captureMissedMates(): void {

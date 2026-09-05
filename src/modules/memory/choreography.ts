@@ -29,7 +29,7 @@ function parseUci(uci: string): UciParts | null {
 }
 
 /** 對 `fen` 套用一手 UCI 後的 FEN；走法非法或格式壞掉時回 null。 */
-function applyUci(fen: string, uci: string): string | null {
+export function applyUci(fen: string, uci: string): string | null {
   const p = parseUci(uci)
   if (!p) return null
   try {
@@ -53,6 +53,18 @@ export interface ChoreographyInput {
 export interface MomentFrame {
   readonly fen: string
   readonly annotations: Annotation[]
+}
+
+/**
+ * 定格之後可以往前看的畫面（wave 2 的步進鈕）。失誤格的定格停在走子前、兩手只是箭頭，所以再給
+ * 兩個畫面：你走完的樣子、更好那手走完的樣子——看棋子真的移過去，比看箭頭好懂。
+ * 好棋格的定格本來就已經走到對手回應之後，沒有下一格可看，回空陣列。
+ */
+export function momentStepFens(input: ChoreographyInput): string[] {
+  if (!input.bestUci) return []
+  const playedFen = applyUci(input.preMoveFen, input.playedUci)
+  const bestFen = applyUci(input.preMoveFen, input.bestUci)
+  return playedFen && bestFen ? [playedFen, bestFen] : []
 }
 
 /**

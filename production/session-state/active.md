@@ -1,48 +1,12 @@
 <!-- STATUS -->
 Epic: 棋憶（/review）改造——統一 Neve 對話框 + 深青互動格就地走
-Feature: 設計已全數拍板（2026-08-08，見下方「本輪設計決定」）
-Task: wave 1（對話框 + 白話文說明格 + 頁面 header）**已完成並 push**；wave 2（深青
-  互動格就地走 + 路標下架）未開始
+Feature: wave 1／wave 2 皆已實作完畢
+Task: wave 2（深青互動格就地走 + 路標下架 + 步進鈕）**已完成，待 review→push**
 ⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
-⚠️ `/review` 要改 fullBleed＝動路由 meta → push 前必補跑 `npm run test:e2e`（E2E 盲區護欄）。
 <!-- /STATUS -->
 
 > **交接快照**：只留現況＋待辦＋未固化決策；施工細節在 git，D1–D6 全文在 `archive-2026-07.md` 與 git log。
 > **收尾覆寫本檔，紅線 ≤150 行**。**定位 SoT ＝ `production/positioning-v2-2026-08-02.md`**——提任何功能/重構/UI 前**先讀**。
-
-## 🎨 本輪設計決定（2026-08-08 拍板，樣張逐版比對後定案）
-
-樣張檔 `public/_demo-key-moments.html` 是**拋棄式**的，開工後刪掉，不要 commit。
-
-1. **形態＝統一 Neve 對話框 carousel**：棋盤在上、對話框在下、一次一手、左右切換。取代原本的「共用棋盤＋
-   五列清單」。清單那五列的高度就是這次省下來的。
-2. **顏色規則（新增進設計系統，管的不只這頁）**：**Neve 說的話統一用對話框；淺卡＝她在說明，
-   深青＝她要你做一件事，而且就在這一格做**。深青格才有行動出口，段點條上是金色點。
-3. **判斷場路標整張下架**，內容改由對話框的**第一格**承載。理由：它跟關鍵步清單都在講「你漏掉的東西」，
-   兩張深青卡同屏會互相稀釋；併進 carousel 後跨局的 pending 仍有家（永遠排最前面）。
-4. **深青格＝就地走，不跳頁**（原本點 CTA 會導去 `/learn/concept/mate?source=recognition`，
-   且中間夾一整段深化課才到判斷場）。棋盤可動、**盤面全乾淨零標記**（預先標＝幫他縮小範圍），
-   走出那一手就通關；走不出來點次要的「看答案」。`/learn/concept/:id/judge` 那頁**保留**——
-   概念地圖進去的公版題還走它。
-5. **能做互動格的只有唯一解局面**（目前＝`selectMissedMates` 驗過的 mate-in-1）。其餘的手沒有唯一答案，
-   做成互動會判錯玩家走對的手（v2 陷阱 #2）。要擴大＝先做 v2 的 P2（mate → material 前瞻判定）。
-6. **說明格內容**：白話文取代 SAN（全站僅此處用 SAN 列表）、並排「你走了 / 更好的是」、一句 Neve 理由，
-   棋盤同時標兩手（你走的＝次要色，更好的＝金）。
-7. **切換鈕 `‹ ↻ ›` 三顆一組收在頭像列**，重播坐中間。底部留給行動出口。原本掛棋盤右下角的重播圓鈕
-   會壓在棋子上，取消。
-8. **swing 數字（`−2.1`）拿掉**：對初學者是沒解釋的數字。
-9. **頁面 header**：`/review` 改 **fullBleed**，自畫一列 `← 棋憶`（返回與頁名合體）＋ 右上「⧉ 棋譜」。
-   代價＝底部 tab 一起消失，已接受（這頁是看完就走，不是常駐據點）。
-   **header 要吃 `env(safe-area-inset-top)`**——standalone 沒有瀏覽器 chrome 擋動態島。
-10. **返回落點用來源判斷，不用 `history.back()`**：有 `?gameId=` → 回 `/history`（從對局紀錄來），
-    無 → 回 `/`（下完棋自動導來）。**iOS standalone PWA 的 `history.back()` 在空堆疊時是靜默 no-op**
-    （不報錯、不觸發事件、畫面不動），冷啟動落在深層頁就失靈。
-11. **「複製這盤棋」→「⧉ 棋譜」移進 header 右上**：原本緊貼對話框下方，看起來像在複製當下這一手。
-
-**PWA 查證結論（2026-08-08，供日後其他頁沿用）**：iOS **12.2 起** standalone PWA 的左緣滑動返回是
-原生啟用且 **app 停不掉**；**Android 不保證**有返回鍵（W3C manifest 規格明文）。所以返回鍵仍要自畫——
-手勢是隱形的，初學者不會知道。另：**棋盤左緣離螢幕邊僅約 26px，落在 iOS 邊緣返回手勢觸發帶上**，
-拖 a 檔棋子可能誤觸；這是既有狀況（對局頁一樣），但深青互動格要玩家在盤上走子，實機須確認一次。
 
 ## precommit-review 留下的技術債（deep `wf_9edc6475-d91`，29 條 confirmed，4 條 major 已修）
 
@@ -63,13 +27,15 @@ Task: wave 1（對話框 + 白話文說明格 + 頁面 header）**已完成並 p
 - **元件測試裡 `ChessBoard` mock 不 expose `boardRef`/`squareToRect`**，所以 `MoveAnnotationDisplay`
   在單元測試中永不渲染——標註那條路目前只有純模組測試守著。
 
-## 未決（實作中會撞到，撞到再問）
+## 未決 → 已於 wave 2 拍板（2026-09-05）
 
-- **深青格走錯了怎麼辦**：舊 `RecognitionBoard` 有 `missedHint`，但就地走的錯誤回饋尚未定。
-- **`markDeepened` 語意**：`RecognitionFieldView:61` 完成判斷場會**無條件**標記「已深化」，唯一消費端是
-  概念地圖的標籤。就地走之後這個標記由誰下、還要不要下，未定。
-- **切換鈕中間那顆 `↻`**：定案是 `‹ ↻ ›`，但重播是給動畫用的，動畫在 wave 2。wave 1 只放兩顆——
-  按了沒事的鈕比不放更糟。動畫落地時補上中間那顆。
+- **深青格走錯了**：棋子靜默滑回（`resetPosition()`），不計次、無懲罰 UI。沿用判斷場既有作法。
+  查證修正：`missedHint` 不在 `RecognitionBoard` 而在 `RecognitionGate`，且只用於「答『這裡沒有』
+  但其實有」的情境，就地走沒有那個動作，所以本來就轉不過來。
+- **`markDeepened`**：深青格通關**只做 `markConsumed`，不標已深化**。走一手將殺 ≠ 走完深化課，
+  標了概念地圖會說謊。
+- **中間那顆鈕**：不做自動重播，改成**循環步進**（原局面 → 你走了 → 更好的是 → 繞回）。
+  圖示用 `▸` 不用 `↻`（↻ 讀起來是重播）。深青格通關前 disabled——步進正解等於直接給答案。
 
 ## 🔪 定位 v2 刪除期（2026-08-02 拍板，2026-08-06 執行完畢）
 
@@ -105,6 +71,31 @@ D3（難度五檔）原判死理由誤讀實作，撤銷保留。判決表全文
   await 的 promise 永不 settle → `PlayView` 永久卡 `AI_THINKING`。**蒸餾**：測試裡的 `.catch(() => {})` 是警訊。
 - ✅ **`plans/`**（`0582e4e`／`22181c8`，評估 shadcn/improve plugin 的副產物；002 已判 false positive 撤回）。
   **蒸餾**：稽核引用 `file:line` 全對 ≠ 結論對；擋下錯誤結論的是 plan 的 STOP 條件，不是它的 vet 階段。
+- ✅ **棋憶 wave 2（2026-09-05，待 push）**：深青互動格併進 carousel 最前面（pending 的 missed mate
+  一格一題，棋盤可動、零標記、就地走）、`RecognitionSignpost` 與 `?source=recognition` 整條路徑刪除、
+  三顆鈕的中間那顆做循環步進。**四個實作事實**：
+  ① `KeyMomentsCard` 是**單一 ChessBoard 換 `:fen`**，不是多盤 translateX carousel，所以
+     `RecognitionBoard` 那套 360ms `reapplyFen` + `dispatchEvent(resize)` 的 stale-bounds 修法
+     **不適用也不需要**——別看到「carousel」就把它抄過來。
+  ② 深青格的來源快照在 **setup 同步取**（`pendingFor('mate')`），不可放 `onMounted`：mount 後才填
+     會讓首次 render 空掉一輪（單元測試同步斷言全紅）。而它必須是快照不是 reactive 讀取——
+     通關會 `markConsumed`，跟著 store 走的話格子在玩家走對的當下從腳下消失。
+  ③ 通關後 `step` 設 1（走完那一手的畫面），且步進歸零的 watch **只能掛 `index`**。掛上 `isSolved`
+     會在通關的下一個 flush 把 step 覆寫回 0，棋子當場彈回走子前，讀起來像「你走錯了」。
+  ④ 通關時機的截圖要等 ~800ms：chessground 的移動動畫還在跑，拍到的是起始幀（棋子還在原位、
+     但 check ring 已經套上），會誤判成 FEN 沒更新。
+  **驗證**：vitest 843 綠、`vue-tsc` 0 error、E2E 78 綠、mobile/desktop 截圖、tap-to-move 座標點擊
+  實走 e1e8 通關、白方 pending ＋ 黑方本局的朝向翻轉實機驗過（切格翻轉、標註幾何跟上、高亮不殘留）。
+  **review（deep，runId `wf_eded828f-0e1`）抓到而自驗漏掉的**：
+  ⑤ 通關後切走再切回，`watch(index)` 無條件把 step 歸零 → 盤面退回走子前，而對話框寫著「就是這一手」，
+     且通關後盤已鎖住，玩家無法自己重走。**與 ③ 是同一個症狀的第二條觸發路徑**——修好一條不代表另一條
+     也好了，這種「同症狀多路徑」要各留一條測試。
+  ⑥ `:last-move="null"` 原本毫無 runtime 效果（`onBoardCreated` 只處理 truthy、watch 非 immediate），
+     測試卻把它當保證鎖住＝假驗證。真正的問題是玩家自己走出正解後 chessground 留下的原生高亮，
+     `setPosition` 不清它，會跟著切到下一格；改成真的綁值（通關＝標出那一手，其餘 null）才同時解掉。
+  ⑦ 三份 SoT 同時漂掉（`persona-neve.md` 深青「現例」、`positioning-v2` 的現在式現況宣稱、
+     `quick-specs/signpost-material-expansion.md` 整份施工點）。**刪一支元件要順手 grep 全 repo 的 SoT**，
+     這次只想到改 CONTEXT.md。
 
 ## 待辦（本輪之外）
 

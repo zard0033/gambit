@@ -27,8 +27,8 @@ Gambit 的教練角色，全站對玩家說話的聲音。人格 SoT＝`design/g
 名字像不是巧合，是親戚：
 
 - **判斷場**＝**局後**。既有功能，`/learn/concept/:conceptId/judge`
-  （`RecognitionFieldView.vue`）。題目來自公版題，或從你自己漏掉的將殺生成
-  （`recognition-runtime.ts`）。
+  （`RecognitionFieldView.vue`），從概念地圖進入，**只出公版題**。你自己漏掉的將殺不走這裡——
+  那些由棋憶頁的**深青互動格**就地承接（2026-09 wave 2）。
 - **判斷訓練**＝**局中**。待辦功能，走子前強制答「有／沒有」、不給回饋、局後一次列對照表。
   尚未實作，dev-flow 釐清階段暫停中（前置閘門＝五盤紙筆實驗 P1）。
 

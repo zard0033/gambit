@@ -28,6 +28,13 @@
     （autoUpdate 會在下次載入自癒）。bash 跑帶 base 的 build 要 `MSYS_NO_PATHCONV=1`（MSYS 會把
     `/gambit/` 靜默改寫成 Windows 絕對路徑、壞掉 manifest base）。
   - Audio playback requires user gesture on iOS
+  - **返回鍵一律自畫，不靠手勢也不靠 `history.back()`**（2026-08-08 查證，供所有頁沿用）：
+    iOS **12.2 起** standalone PWA 的左緣滑動返回是原生啟用且 **app 停不掉**，但手勢是隱形的
+    ——初學者不會知道；**Android 更不保證**有返回鍵（W3C manifest 規格明文）。且
+    **`history.back()` 在 iOS standalone 空堆疊時是靜默 no-op**（不報錯、不觸發事件、畫面不動），
+    冷啟動落在深層頁就失靈——落點要用來源判斷（如 `/review`：有 `?gameId=` 回 `/history`、無則回 `/`）。
+  - **棋盤左緣離螢幕邊僅約 26px，落在 iOS 邊緣返回手勢的觸發帶上**：拖 a 檔棋子可能誤觸退頁。
+    對局頁既有狀況；棋憶的深青互動格（2026-09 wave 2）也要玩家在盤上走子，**實機須確認一次**。
 
 ## Naming Conventions
 

@@ -4,18 +4,28 @@
  * is rendered (AC-1 asserts its absence). Progressive pre-COMPLETE (EC-3): selection runs only
  * at COMPLETE, so a card never appears then vanishes. D4 (2026-08) retired the slideshow/replay
  * drill-in and the cross-game Neve line — lichess already does the replay-as-narrative job; the
- * only thing on the cognitive-transfer path is the missed-mate signpost below.
+ * only thing on the cognitive-transfer path is the missed-mate deep cell, which lives inside
+ * KeyMomentsCard (wave 2, 2026-09) rather than as a card of its own.
  */
-import { computed } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { MEMORY_ANALYZING_COPY } from '@/config/memory-config'
+import { useRecognitionSourceStore } from '@/stores/recognition-source'
 import { useMemoryContext } from './memory-context'
-import RecognitionSignpost from './RecognitionSignpost.vue'
 import EmptyMemory from './EmptyMemory.vue'
 import KeyMomentsCard from './KeyMomentsCard.vue'
 
 const ctx = useMemoryContext()
+const recognitionSource = useRecognitionSourceStore()
 
 const isComplete = computed(() => ctx.review.phase.value === 'COMPLETE')
+// 沒有 moment 但有「你漏看的將殺」時仍要出卡：那一格是 KeyMomentsCard 畫的，走 EmptyMemory
+// 會把它一起吞掉——steady game 正是最需要那一格的情況。
+// **一旦亮出來就不收回**（latch，非 computed）：深青格通關會 `markConsumed`，跟著 store 走的話
+// steady game 這一路會在玩家走對的當下把整張卡換成 EmptyMemory，通關那句話永遠來不及顯示。
+const cardShown = ref(false)
+watchEffect(() => {
+  if (ctx.moments.value.length > 0 || recognitionSource.hasPending('mate')) cardShown.value = true
+})
 // Two-pass progress (preview then deep): preview fills every slot before deep begins, so a non-null
 // count would hit 100% after preview and freeze through the longer deep pass. Count both passes.
 const analysisProgress = computed(() => {
@@ -28,14 +38,11 @@ const analysisProgress = computed(() => {
 
 <template>
   <div class="flex w-full max-w-md flex-col gap-4">
-    <!-- 0. 判斷場路標：只有存在「你自己漏看的將殺」時才現身，邀你回到那個局面重新認一次。 -->
-    <RecognitionSignpost />
-
     <!-- COMPLETE: reveal the game-specific surfaces together — nothing tappable-incomplete (EC-3) -->
     <template v-if="isComplete">
-      <!-- 1. Zero-state (steady game, no key moments) -->
-      <EmptyMemory v-if="ctx.moments.value.length === 0" />
-      <!-- 2. 這盤值得回頭看的幾手:棋盤 + Neve 對話框(F1 moments 的畫面落點)。 -->
+      <!-- 1. Zero-state (steady game, no key moments and nothing missed) -->
+      <EmptyMemory v-if="!cardShown" />
+      <!-- 2. 值得回頭看的幾手:棋盤 + Neve 對話框(深青互動格 + F1 moments 的畫面落點)。 -->
       <KeyMomentsCard v-else />
     </template>
 

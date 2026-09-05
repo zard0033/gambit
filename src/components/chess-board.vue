@@ -155,7 +155,9 @@ watch(
 
 watch(
   () => props.playerColor,
-  (color) => { boardApi.value?.setConfig({ orientation: color }, false) },
+  // movable.color 要跟著換，不能只轉 orientation：它只在建立時設過一次，換了執棋色卻沒更新的話
+  // 盤是轉過來了、棋子卻拖不動（棋憶的深青互動格會連續換不同局面，最可能先撞到）。
+  (color) => { boardApi.value?.setConfig({ orientation: color, movable: { color } }, false) },
 )
 
 watch(

@@ -1,20 +1,15 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import RecognitionGate from '@/components/lesson/RecognitionGate.vue'
 import DeepeningWrapUp from '@/components/lesson/DeepeningWrapUp.vue'
 import { getConceptDeepening } from '@/data/concept-deepening'
 import { getRecognitionSet } from '@/data/concept-deepening/recognition'
-import { buildRecognitionSetFromSources } from '@/modules/learning-loop/recognition-runtime'
-import { candidates } from '@/modules/learning-loop/recommend'
-import { puzzles } from '@/data/puzzles'
 import { useConceptProgressStore } from '@/stores/concept-progress'
-import { useRecognitionSourceStore } from '@/stores/recognition-source'
 
 const route = useRoute()
 const router = useRouter()
 const conceptProgress = useConceptProgressStore()
-const recognitionSource = useRecognitionSourceStore()
 
 const conceptId = route.params.conceptId as string
 const deepening = getConceptDeepening(conceptId)
@@ -28,14 +23,9 @@ const deepening = getConceptDeepening(conceptId)
 // localStorage directly already could pre-migration. Not worth a signed/opaque token for that.
 const lessonUnaided = route.query.unaided === '1'
 
-// 棋憶 signpost path (?source=recognition): seed the judgement field with the player's OWN missed-mate
-// positions instead of the canned set. Same fallback rules as the pre-migration ConceptDeepenView.
-const fromRecognitionSource = route.query.source === 'recognition'
-const pendingSources = deepening && fromRecognitionSource ? recognitionSource.pendingFor(deepening.conceptId) : []
-const runtimeSet = deepening ? buildRecognitionSetFromSources(deepening.conceptId, pendingSources) : undefined
-const recognitionSet = runtimeSet ?? (deepening ? getRecognitionSet(deepening.conceptId) : undefined)
-// Real-board runs carry the player's colour; canned sets are all white-to-move.
-const recognitionPlayerColor = runtimeSet ? pendingSources[0].playerColor : 'white'
+// 公版題（概念地圖進來的那條路）。玩家自己漏看的將殺不再走這裡——wave 2 之後那些局面由棋憶頁的
+// 深青互動格就地承接，不跳頁、不夾一段深化課。canned sets are all white-to-move.
+const recognitionSet = deepening ? getRecognitionSet(deepening.conceptId) : undefined
 
 // Unknown concept, or this concept has no judgement field at all (deep link / stale link) → back to
 // the map. No lock to bypass: deepening is always open (Calm rule).
@@ -43,20 +33,7 @@ if (!deepening || !recognitionSet) router.replace('/learn/concepts')
 
 const showWrapUp = ref(false)
 
-// D4 (2026-08): the 棋憶 signpost's own "練這個概念" link died with MemoryReplay — this is its
-// replacement, offered only on the signpost path (a canned lesson completion has no missed-mate
-// to bridge from). One matching puzzle, same source as MemoryReplay's old Bridge-3 link used.
-const practiceHref = computed(() => {
-  if (!fromRecognitionSource || !deepening) return undefined
-  const puzzleId = candidates(deepening.conceptId, puzzles)[0]?.id
-  return puzzleId ? `/practice/${puzzleId}` : undefined
-})
-
 function onRecognitionDone(gateUnaided: boolean): void {
-  // Real-board run: retire the consumed positions so a solved missed-mate never resurfaces.
-  if (runtimeSet) {
-    recognitionSource.markConsumed(pendingSources.map((s) => `${s.gameId}:${s.ply}`))
-  }
   if (deepening) {
     conceptProgress.markDeepened(deepening.conceptId)
     // unaided requires BOTH phases clean — no aid in the lesson, no miss/trap in the gate.
@@ -82,7 +59,7 @@ function closeWrapUp(): void {
       v-if="deepening && recognitionSet"
       :set="recognitionSet"
       :title="deepening.title"
-      :player-color="recognitionPlayerColor"
+      player-color="white"
       back-to="/learn/concepts"
       back-label="返回概念"
       @complete="onRecognitionDone"
@@ -92,7 +69,6 @@ function closeWrapUp(): void {
       v-if="showWrapUp && deepening"
       :title="deepening.title"
       :essence="deepening.essence"
-      :practice-href="practiceHref"
       @close="closeWrapUp"
     />
   </div>

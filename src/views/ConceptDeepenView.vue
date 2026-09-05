@@ -6,21 +6,16 @@ import DeepeningWrapUp from '@/components/lesson/DeepeningWrapUp.vue'
 import { getConceptDeepening } from '@/data/concept-deepening'
 import { getRecognitionSet } from '@/data/concept-deepening/recognition'
 import { useConceptProgressStore } from '@/stores/concept-progress'
-import { useRecognitionSourceStore } from '@/stores/recognition-source'
 
 const route = useRoute()
 const router = useRouter()
 const conceptProgress = useConceptProgressStore()
-const recognitionSource = useRecognitionSourceStore()
 
 const deepening = getConceptDeepening(route.params.conceptId as string)
 // fork's third step is a Recognition Gate (spec §15, now its own route/view — RecognitionFieldView,
 // 2026-08-03 遷移); concepts without one keep the single-board silent gate inside LessonPlayer (their
-// variant still carries all 3 steps). Same fallback rules as RecognitionFieldView uses to rebuild it.
-const fromRecognitionSource = route.query.source === 'recognition'
-const hasJudgementField = deepening
-  ? (fromRecognitionSource && recognitionSource.hasPending(deepening.conceptId)) || !!getRecognitionSet(deepening.conceptId)
-  : false
+// variant still carries all 3 steps).
+const hasJudgementField = deepening ? !!getRecognitionSet(deepening.conceptId) : false
 
 // Unknown concept → back to the map. No lock to bypass: deepening is always open (Calm rule).
 if (!deepening) router.replace('/learn/concepts')
@@ -34,11 +29,9 @@ function onLessonDone(unaided: boolean): void {
   if (!deepening) return
   if (hasJudgementField) {
     // lessonUnaided rides the URL — no in-memory state survives this navigation (2026-08-03 判斷場
-    // 搬遷). ?source=recognition is forwarded so RecognitionFieldView can rebuild the same runtime set.
-    // replace, not push: pre-migration this was an in-place phase switch with no new history entry —
-    // Back left the whole deepening flow rather than restarting the lesson from step 0.
+    // 搬遷). replace, not push: pre-migration this was an in-place phase switch with no new history
+    // entry — Back left the whole deepening flow rather than restarting the lesson from step 0.
     const query: Record<string, string> = { unaided: unaided ? '1' : '0' }
-    if (fromRecognitionSource) query.source = 'recognition'
     router.replace({ name: 'concept-judge', params: { conceptId: deepening.conceptId }, query })
     return
   }

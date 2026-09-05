@@ -1,18 +1,32 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, vi } from 'vitest'
-import { mount, type VueWrapper } from '@vue/test-utils'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { mount, flushPromises, type VueWrapper } from '@vue/test-utils'
 import { defineComponent, computed, ref } from 'vue'
+import { setActivePinia, createPinia } from 'pinia'
 import KeyMomentsCard from '@/components/memory/KeyMomentsCard.vue'
 import { MEMORY_CONTEXT, type MemoryContext } from '@/components/memory/memory-context'
+import { useRecognitionSourceStore } from '@/stores/recognition-source'
 import type { StoredAnalysisEntry } from '@/modules/post-game-review/use-post-game-review'
 import type { Moment } from '@/types/memory'
 
-// chessground 在 happy-dom 起不來；這裡驗的是對話框與切換，棋盤只需接得住 props。
+// chessground 在 happy-dom 起不來；這裡驗的是對話框與切換，棋盤只需接得住 props 與 resetPosition
+// （深青格走錯時元件會呼叫它把棋子滑回去）。
+// `boardRef` 給一個真的 element：KeyMomentsCard 的 `v-if="boardEl"` 靠它，回 null 的話
+// MoveAnnotationDisplay 永不渲染，「盤面零標記」那條斷言就會恆真而驗不到東西。
+const resetPosition = vi.fn()
 vi.mock('@/components/chess-board.vue', () => ({
   default: defineComponent({
     name: 'ChessBoard',
-    props: ['fen', 'playerColor', 'disabled', 'coordinates'],
-    setup: () => () => null,
+    props: ['fen', 'playerColor', 'disabled', 'coordinates', 'lastMove'],
+    emits: ['move-made'],
+    setup: (_p, { expose }) => {
+      expose({
+        boardRef: document.createElement('div'),
+        squareToRect: () => ({ left: 0, top: 0, width: 40, height: 40 }),
+        resetPosition,
+      })
+      return () => null
+    },
   }),
 }))
 
@@ -35,15 +49,39 @@ function mountCard(
     review: {
       analysisResults: computed(() => bests.map(entry)),
     } as unknown as MemoryContext['review'],
-    game: computed(() => ({ moves, playerColor })) as unknown as MemoryContext['game'],
+    game: computed(() => ({ moves, playerColor, completedAt: GAME_ID })) as unknown as MemoryContext['game'],
     moments: computed(() => [moment(0), moment(2)]),
     opening: computed(() => null),
   }
   return mount(KeyMomentsCard, { global: { provide: { [MEMORY_CONTEXT as symbol]: ctx } } })
 }
 
-const nextBtn = (w: VueWrapper) => w.get('[aria-label="下一手"]')
-const prevBtn = (w: VueWrapper) => w.get('[aria-label="上一手"]')
+/**
+ * 深青互動格的題目：底線將殺。黑王 g8 被自己的 f7/g7/h7 三兵封死，白后 e1→e8 將死。
+ * chess.js 窮舉驗過是**唯一解**（`e1e8`），符合「只有唯一解局面能做成互動格」的鐵則。
+ */
+const MATE_FEN = '6k1/5ppp/8/8/8/8/5PPP/4Q1K1 w - - 0 1'
+const MATE_UCI = 'e1e8'
+const GAME_ID = 1700000000000
+const OTHER_GAME_ID = '1699999999999'
+
+/** 讓 store 有一題待解的將殺（預設掛在另一局，與本局的 moment 不重疊）。 */
+function seedPendingMate(gameId = OTHER_GAME_ID, ply = 8): void {
+  useRecognitionSourceStore().captureMate(gameId, 'white', [
+    { ply, fen: MATE_FEN, mateMoveUci: MATE_UCI },
+  ])
+}
+
+const nextBtn = (w: VueWrapper) => w.get('[aria-label="下一格"]')
+const prevBtn = (w: VueWrapper) => w.get('[aria-label="上一格"]')
+const stepBtn = (w: VueWrapper) => w.get('[data-testid="moment-step"]')
+const board = (w: VueWrapper) => w.findComponent({ name: 'ChessBoard' })
+
+beforeEach(() => {
+  setActivePinia(createPinia())
+  localStorage.clear()
+  resetPosition.mockClear()
+})
 
 describe('KeyMomentsCard', () => {
   it('一次只顯示一格，段點數量等於 moment 數', () => {
@@ -164,7 +202,7 @@ describe('KeyMomentsCard', () => {
       review: {
         analysisResults: computed(() => ['e2e4', 'd2d4', 'g1f3'].map(entry)),
       } as unknown as MemoryContext['review'],
-      game: computed(() => ({ moves: ['a2a3', 'e7e5', 'g1f3'], playerColor: 'white' })) as unknown as MemoryContext['game'],
+      game: computed(() => ({ moves: ['a2a3', 'e7e5', 'g1f3'], playerColor: 'white', completedAt: GAME_ID })) as unknown as MemoryContext['game'],
       moments: computed(() => moments.value),
       opening: computed(() => null),
     }
@@ -178,5 +216,196 @@ describe('KeyMomentsCard', () => {
     // Assert
     expect(w.get('[data-testid="moment-dots"]').findAll('span')).toHaveLength(1)
     expect(w.text()).toContain('第 1 手')
+  })
+})
+
+describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
+  it('有待解的將殺時，第一格是可動的深青格且盤面零標記', async () => {
+    // Arrange
+    seedPendingMate()
+
+    // Act — flushPromises 等 overlay 掛上；少了它「零標記」會恆真（見上面那條的對照組）
+    const w = mountCard()
+    await flushPromises()
+
+    // Assert — 深青格排在兩個說明格之前，共三格
+    expect(w.get('[data-testid="moment-dots"]').findAll('span')).toHaveLength(3)
+    expect(w.find('[data-testid="deep-prompt"]').exists()).toBe(true)
+    expect(board(w).props('fen')).toBe(MATE_FEN)
+    expect(board(w).props('disabled')).toBe(false)
+    expect(board(w).props('lastMove')).toBeNull() // 連對手上一手的原生高亮也關掉
+    expect(w.findComponent({ name: 'MoveAnnotationDisplay' }).props('annotations')).toHaveLength(0)
+  })
+
+  it('沒有待解的將殺時，格子與 wave 1 完全一樣（棋盤唯讀）', async () => {
+    // Arrange / Act — overlay 掛在 onMounted 之後的 geomTick 上，要等它才看得到標註
+    const w = mountCard()
+    await flushPromises()
+
+    // Assert — 說明格**有**標註（這條是上面「深青格零標記」的對照組：沒有它，那條斷言恆真）
+    expect(w.get('[data-testid="moment-dots"]').findAll('span')).toHaveLength(2)
+    expect(w.find('[data-testid="deep-prompt"]').exists()).toBe(false)
+    expect(board(w).props('disabled')).toBe(true)
+    expect(w.findComponent({ name: 'MoveAnnotationDisplay' }).props('annotations')).not.toHaveLength(0)
+  })
+
+  it('深青格用該局面自己的執子色，不用本局的', () => {
+    // Arrange — pending 是白方的題目，本局玩家執黑
+    seedPendingMate()
+
+    // Act
+    const w = mountCard(['a2a3', 'e7e5', 'g1f3'], ['e2e4', 'd2d4', 'g1f3'], 'black')
+
+    // Assert
+    expect(board(w).props('playerColor')).toBe('white')
+  })
+
+  it('走出那一手就通關，並把局面退休掉不再冒出來', async () => {
+    // Arrange
+    seedPendingMate()
+    const w = mountCard()
+
+    // Act
+    await board(w).vm.$emit('move-made', { from: 'e1', to: 'e8' })
+
+    // Assert
+    expect(w.find('[data-testid="deep-solved"]').exists()).toBe(true)
+    expect(resetPosition).not.toHaveBeenCalled()
+    expect(useRecognitionSourceStore().pendingFor('mate')).toHaveLength(0)
+  })
+
+  it('走錯的手棋子靜默滑回，不通關也不退休', async () => {
+    // Arrange
+    seedPendingMate()
+    const w = mountCard()
+
+    // Act
+    await board(w).vm.$emit('move-made', { from: 'g2', to: 'g3' })
+
+    // Assert
+    expect(resetPosition).toHaveBeenCalledTimes(1)
+    expect(w.find('[data-testid="deep-solved"]').exists()).toBe(false)
+    expect(useRecognitionSourceStore().pendingFor('mate')).toHaveLength(1)
+  })
+
+  it('看答案同樣把局面退休掉——找不到的人不該每次進來都撞同一題', async () => {
+    // Arrange
+    seedPendingMate()
+    const w = mountCard()
+
+    // Act
+    await w.get('[data-testid="deep-reveal"]').trigger('click')
+
+    // Assert
+    expect(w.find('[data-testid="deep-solved"]').exists()).toBe(true)
+    expect(useRecognitionSourceStore().pendingFor('mate')).toHaveLength(0)
+    expect(board(w).props('fen')).not.toBe(MATE_FEN) // 已經走出那一手
+  })
+
+  it('本局漏看的將殺只出現一次——深青格講過就不再有說明格', () => {
+    // Arrange — pending 掛在本局的 ply 0，與第一個 moment 同一手
+    seedPendingMate(String(GAME_ID), 0)
+
+    // Act
+    const w = mountCard()
+
+    // Assert — 原本兩格說明，ply0 被深青格吸收，總數仍是 2（1 深青 + 1 說明）
+    expect(w.get('[data-testid="moment-dots"]').findAll('span')).toHaveLength(2)
+    expect(w.find('[data-testid="deep-prompt"]').exists()).toBe(true)
+  })
+
+  it('通關後切走再切回，盤面停在走完那一手，不退回走子前', async () => {
+    // Arrange — 通關（此時盤面＝將殺後）
+    seedPendingMate()
+    const w = mountCard()
+    await board(w).vm.$emit('move-made', { from: 'e1', to: 'e8' })
+    const solvedFen = board(w).props('fen')
+    expect(solvedFen).not.toBe(MATE_FEN)
+
+    // Act — 切到說明格再切回來
+    await nextBtn(w).trigger('click')
+    await prevBtn(w).trigger('click')
+
+    // Assert — 對話框說「就是這一手」，畫面上就必須有那一手；退回 MATE_FEN 等於文圖互相矛盾，
+    // 而且通關後盤是鎖的，玩家無法自己重走一次。
+    expect(w.find('[data-testid="deep-solved"]').exists()).toBe(true)
+    expect(board(w).props('fen')).toBe(solvedFen)
+    expect(board(w).props('lastMove')).toEqual(['e1', 'e8'])
+  })
+
+  it('切離已通關的深青格時，它的 last-move 高亮不跟著跑到下一格', async () => {
+    // Arrange — 通關後 chessground 自己畫的高亮還在盤上（setPosition 不清它）
+    seedPendingMate()
+    const w = mountCard()
+    await board(w).vm.$emit('move-made', { from: 'e1', to: 'e8' })
+    expect(board(w).props('lastMove')).toEqual(['e1', 'e8'])
+
+    // Act
+    await nextBtn(w).trigger('click')
+
+    // Assert — 明確傳 null 才會清掉；不傳的話那層底色會留在說明格的盤上
+    expect(board(w).props('lastMove')).toBeNull()
+  })
+
+  it('通關前步進鈕是停用的——步進正解等於直接給答案', async () => {
+    // Arrange
+    seedPendingMate()
+    const w = mountCard()
+
+    // Assert
+    expect(stepBtn(w).attributes('disabled')).toBeDefined()
+
+    // Act — 通關後才能回看那一手
+    await board(w).vm.$emit('move-made', { from: 'e1', to: 'e8' })
+
+    // Assert
+    expect(stepBtn(w).attributes('disabled')).toBeUndefined()
+  })
+})
+
+describe('KeyMomentsCard — 步進鈕', () => {
+  it('說明格循環三個畫面：原局面 → 你走了 → 更好的是 → 回原局面', async () => {
+    // Arrange
+    const w = mountCard()
+    const base = board(w).props('fen')
+
+    // Act / Assert — 每一步的局面都不同，且第三下繞回原局面
+    await stepBtn(w).trigger('click')
+    const played = board(w).props('fen')
+    expect(played).not.toBe(base)
+
+    await stepBtn(w).trigger('click')
+    const best = board(w).props('fen')
+    expect(best).not.toBe(base)
+    expect(best).not.toBe(played)
+
+    await stepBtn(w).trigger('click')
+    expect(board(w).props('fen')).toBe(base)
+  })
+
+  it('切到別格再切回來時步進位置歸零，不停在上次看到的畫面', async () => {
+    // Arrange
+    const w = mountCard()
+    const base = board(w).props('fen')
+    await stepBtn(w).trigger('click')
+    expect(board(w).props('fen')).not.toBe(base)
+
+    // Act — 切走再切回
+    await nextBtn(w).trigger('click')
+    await prevBtn(w).trigger('click')
+
+    // Assert
+    expect(board(w).props('fen')).toBe(base)
+  })
+
+  it('玩家自己走對的那一格沒有後續畫面，步進鈕停用', async () => {
+    // Arrange — ply2 玩家走的就是最佳手（own）
+    const w = mountCard()
+
+    // Act
+    await nextBtn(w).trigger('click')
+
+    // Assert
+    expect(stepBtn(w).attributes('disabled')).toBeDefined()
   })
 })

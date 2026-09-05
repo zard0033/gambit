@@ -8,7 +8,7 @@
 
 **Gambit 把你剛下完的那盤棋，變成明天的題目——而且不告訴你裡面有沒有東西。**
 
-其餘一切（課程、題庫、回放、賽後分析、開局資料）lichess 都做得更多、更好、免費。這句話是這個 repo 唯一抄不走的東西，而它已經跑得起來（`src/modules/learning-loop/recognition-runtime.ts`）。
+其餘一切（課程、題庫、回放、賽後分析、開局資料）lichess 都做得更多、更好、免費。這句話是這個 repo 唯一抄不走的東西，而它已經跑得起來——**2026-09 的棋憶 wave 2 起，落點是 `src/components/memory/KeyMomentsCard.vue` 的深青互動格**（就地走，不跳頁）。
 
 ---
 
@@ -18,7 +18,7 @@
 
 | 階段 | repo 現況（實測） |
 | --- | --- |
-| 1 察覺 | **已有 v1**：`data/concept-deepening/recognition.ts:16` 判斷場（6 盤含 2 誘餌、不預告有沒有答案）＋ `recognition-runtime.ts` 從玩家自己漏掉的將殺生成。缺口＝只涵蓋 fork／mate 2/8 概念、只在課後觸發、**runtime 那條沒有誘餌**（:24 每盤 `kind:'real'`，答案恆為「有」） |
+| 1 察覺 | **已有 v1**：`data/concept-deepening/recognition.ts:16` 判斷場（6 盤含 2 誘餌、不預告有沒有答案，**只出公版題**）＋ 棋憶的深青互動格從玩家自己漏掉的將殺出題（`KeyMomentsCard.vue`，2026-09 wave 2 起；在那之前是 `recognition-runtime.ts` ＋ 判斷場路標，兩者皆已刪除）。缺口＝公版題只涵蓋 fork／mate 2/8 概念、只在課後觸發；**自家局面那條沒有誘餌**，答案恆為「有」 |
 | 2 候選 | 題庫 30 題（自 2026-06-23 未動） |
 | 3 計算 | 全站零覆蓋 |
 | 4 評估 | 21 課、8 個概念深化 |
@@ -59,7 +59,7 @@ Eason 已下過數盤並回報失敗類型比例 **5:2:3**（完全沒看到／�
 
 分層只有兩層，每項二選一：**在這條迴圈上（留）／不在（刪）**。要例外必須同時給出**一個日期和一個具名用途**——`.claude/docs/technical-preferences.md` 的「Deferred Cleanups」四項全部沒有日期，那份清單就是「素材層」的前身，已經演示過結局：無限期腐爛。v1 的素材層與支援層定義相同（都是「不投資但保留」），真名叫「我不想現在決定」，本版廢除。
 
-**前置搬遷（順序不可顛倒）**：判斷場目前住在 `/learn/concept/:conceptId` 第三相位，唯一 UI 入口是 `MemoryDashboard.vue:41` 掛的 `RecognitionSignpost.vue:36`。**先給它自己的路由與入口，才能執行下面任何一刀**——順序顛倒的話，被稱為主路徑的東西中途完全不可達。
+**前置搬遷（已完成，2026-08-03）**：判斷場當時住在 `/learn/concept/:conceptId` 第三相位，唯一 UI 入口是 `MemoryDashboard` 掛的判斷場路標。已搬到自己的路由 `/learn/concept/:conceptId/judge`（`RecognitionFieldView.vue`）；2026-09 wave 2 再把自家局面那條移進棋憶的深青互動格，路標與 `?source=recognition` 隨之刪除。判斷場現在只出公版題，入口是概念地圖。
 
 ---
 
@@ -105,7 +105,7 @@ Eason 已下過數盤並回報失敗類型比例 **5:2:3**（完全沒看到／�
 ## 緩刑名單（技術上砍不掉；不接受「已拍板／刻意保留」）
 
 - **R1. `src/stores/data-sync.ts`(807) ＋ auth 那層**：它**不是雲端層**。`:286-300` guest 讀本機佇列、`:513/:537/:635` 是純 localStorage 讀寫，而 `game-history.ts:34/58/83`、`journal.ts:25-26`、`memory.ts:31-32,39,51` 以它為**唯一持久化來源**。砍掉不是失去跨裝置，是失去本機儲存；「換成 20 行 JSON 匯出」取代的是備份，不是 append/read/dedup/queue。另有 15 個測試檔 `vi.mock('@/lib/supabase')`，模組不存在時 `vi.mock` 直接拋錯。**解鎖條件**：先拆成 local-store ＋ cloud-adapter 兩層。在那之前只有 `SignInView.vue`(71) 與 landing gate（`router/index.ts:36,47-49`）可動。
-- **R2. `src/data/concept-deepening/index.ts`(352)**：`ConceptDeepenView.vue` 是 `RecognitionGate` 的唯一掛載點，而 :38 `if (!deepening) router.replace('/learn/concepts')`、:29-31 的 `?source=recognition` 被 `deepening &&` 短路。砍它＝判斷場永遠到不了。**解鎖條件**＝判斷場先搬到自己的路由。
+- **R2. `src/data/concept-deepening/index.ts`(352)**：**解鎖條件已達成**（判斷場 2026-08-03 搬到 `/learn/concept/:conceptId/judge`，掛載點改為 `RecognitionFieldView.vue`；`?source=recognition` 已於 2026-09 wave 2 刪除）。要重估這一刀時照現況重讀，別照本段舊描述施工。
 - **R3. `src/components/lesson/LessonPlayer.vue`(500)**：`ConceptDeepenView.vue:4` 消費，判斷場的前兩相位跑在它裡面（:41 註解「LessonPlayer (step0/1) → RecognitionGate」）。同 R2 解鎖條件。
 - **R4. `src/stores/game-history.ts`(113)＋`types/game-history`＋`config/history-config.ts`(2 行)**：`MemoryView.vue:14`、`data-sync.ts:7-8`、`reset-history-dialog.vue:11` 在用。`HistoryView.vue`(181)＋`history-row.vue`(76) 那一頁可砍，**store 不行**。
 - **R5. `modules/game-export/assembler.ts`(182)＋`types.ts`＋353 行測試**：見 D7。

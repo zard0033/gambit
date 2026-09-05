@@ -46,7 +46,7 @@ function load(): PersistShape {
 }
 
 /**
- * Recognition-source store (棋憶 signpost → RecognitionGate, v1: mate only). Holds missed-mate
+ * Recognition-source store (棋憶 深青互動格, v1: mate only). Holds missed-mate
  * positions captured at review COMPLETE and drives the deepening page's real-board judgement field.
  * Idempotent by `gameId:ply`; consumed ids are excluded so a solved position never resurfaces.
  */
@@ -108,7 +108,7 @@ export const useRecognitionSourceStore = defineStore('recognitionSource', () => 
   }
 
   /**
-   * Whether a concept has any pending judgement-field source (drives the signpost's visibility).
+   * Whether a concept has any pending source (drives whether 棋憶 shows a card at all).
    * Kill switch: false whenever `RECOGNITION_MISSED_MATE_ENABLED` is false (delegates to `pendingFor`).
    */
   function hasPending(conceptId: string): boolean {
