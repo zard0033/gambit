@@ -316,3 +316,68 @@ describe('buildMomentDisplays — 盤面標註', () => {
     expect(out[0].annotations).toContainEqual({ kind: 'arrow', role: 'playedMove', from: 'e7', to: 'e5' })
   })
 })
+
+/**
+ * hanging-piece 判定接線（2026-09-05）。`classify` 早就算出「哪顆子、在哪一格」再丟掉，`renderCopy`
+ * 現在用同一組輸入重算一次。這組守的是**接線**：判定回得出來時標題與內文要一起點名，回不出來時
+ * 兩邊要一起退回籠統版——只修一邊會讓標題說「后沒人守著」、內文卻不提是哪顆子。
+ */
+describe('buildMomentDisplays — material 的 hanging piece', () => {
+  // 白 Nb1-c3?? 撞上 d4 的兵；黑 dxc3 收下騎士，白方無子可回吃。
+  const HUNG_FEN = '4k3/8/8/8/3p4/8/8/1N2K3 w - - 0 1'
+  const AFTER_NC3 = '4k3/8/8/8/3p4/2N5/8/4K3 b - - 1 1'
+
+  function build(moves: string[]) {
+    return buildMomentDisplays({
+      moments: [moment(0, { kind: 'tactical', concept: 'material', cp: 300 })],
+      analysisResults: [entry('e1e2')],
+      fens: [HUNG_FEN, AFTER_NC3],
+      moves,
+    })
+  }
+
+  it('判定回得出來時，標題與內文都點名是哪顆子、在哪一格', () => {
+    const out = build(['b1c3', 'd4c3'])
+
+    expect(out[0].shortName).toBe('騎士沒人守著')
+    expect(out[0].reason).toContain('c3')
+    expect(out[0].reason).toContain('沒人守著')
+  })
+
+  it('子是玩家自己送過去的（被吃格＝落點）時不說「留在」', () => {
+    // 「留在」會把主動送子講成疏忽——玩家這一手正是把騎士放上 c3 的。
+    expect(build(['b1c3', 'd4c3'])[0].reason).not.toContain('留在')
+  })
+
+  it('沒有對手回應（對局結束在這一手）→ 判定無從算起，兩邊一起退回籠統版', () => {
+    const out = build(['b1c3'])
+
+    expect(out[0].shortName).toBe('漏掉一個子')
+    expect(out[0].reason).not.toContain('沒人守著')
+  })
+})
+
+/**
+ * precommit-review（deep, `wf_004dd5a2-dd4`）抓到的一條：「那裡沒人守著」的指涉物是 played 片語裡的
+ * 格號，而吃過路兵的片語刻意不報格號（被吃的兵不在落點上）——兩個各自正確的決定疊起來就成了
+ * 「你用兵吃過路兵，那裡沒人守著」，「那裡」指不到東西。`hungMaterialDetail` 排除的是**對手回應**
+ * 是 e.p.，不是玩家這一手是 e.p.，所以這條路真的走得到。
+ */
+describe('buildMomentDisplays — 吃過路兵那一手被吃時，句子仍要指得出格子', () => {
+  it('片語不報格號時，句子自己把格號寫出來', () => {
+    // 白 e5xf6 e.p.，黑 g7xf6 收下那顆兵（普通吃子，不是 e.p.）——f6 無白方守子。
+    const fen = '4k1n1/6p1/8/4Pp2/8/8/8/4K3 w - f6 0 1'
+    const afterEp = '4k1n1/6p1/5P2/8/8/8/8/4K3 b - - 0 1'
+
+    const out = buildMomentDisplays({
+      moments: [moment(0, { kind: 'tactical', concept: 'material', cp: 300 })],
+      analysisResults: [entry('e1e2')],
+      fens: [fen, afterEp],
+      moves: ['e5f6', 'g7f6'],
+    })
+
+    expect(out[0].reason).toContain('用兵吃過路兵')
+    expect(out[0].reason).toContain('f6 沒人守著')
+    expect(out[0].reason).not.toContain('那裡沒人守著')
+  })
+})

@@ -46,49 +46,73 @@ function applyUci(chess: Chess, uci: string): Move | null {
   }
 }
 
+/** Which player piece was hung, and where it stood. `square` is always the captured piece's own
+ *  square (en-passant is excluded upstream, so it equals the capturer's destination). */
+export interface HungMaterial {
+  /** chess.js piece type of the player's lost piece ('q', 'r', …). */
+  readonly piece: string
+  /** The square it stood on. */
+  readonly square: string
+}
+
 /**
- * GDD §4.4 predicate: after the player's move, did the opponent's ACTUAL reply capture an undefended
- * player piece with no compensating recapture? Replays the real line with chess.js (same technique as
- * `puzzles.test.ts`); legality-based, one-ply, no static-exchange eval.
+ * GDD §4.4 predicate, detail form: after the player's move, did the opponent's ACTUAL reply capture an
+ * undefended player piece with no compensating recapture — and if so, which piece on which square?
+ * Replays the real line with chess.js (same technique as `puzzles.test.ts`); legality-based, one-ply,
+ * no static-exchange eval.
  *
- * Returns `true` only when confident the material was hung. Ambiguous cases (a pinned-only defender,
- * en-passant, promotion-captures) return `false` — prefer-silence over a wrong label (GDD EC-10, AC-6).
+ * Returns non-null only when confident the material was hung. Ambiguous cases (a pinned-only defender,
+ * en-passant, promotion-captures) return `null` — prefer-silence over a wrong label (GDD EC-10, AC-6).
+ *
+ * The identity was always computed here and thrown away as a boolean; 棋憶's F3 material template needs
+ * it to say「你的后留在 f7，沒人守著」instead of a fallback that names nothing.
  */
-export function hungUndefendedMaterial(
+export function hungMaterialDetail(
   fen: string,
   playerMoveUci: string,
   opponentReplyUci: string,
-): boolean {
+): HungMaterial | null {
   const chess = new Chess(fen)
-  if (!applyUci(chess, playerMoveUci)) return false
+  if (!applyUci(chess, playerMoveUci)) return null
 
   const reply = applyUci(chess, opponentReplyUci)
-  if (!reply || !reply.captured) return false
+  if (!reply || !reply.captured) return null
   // Excluded from v1 (GDD §4.4): en-passant (captured pawn is not on the destination square) and
   // promotion-captures (value accounting differs). Rare; stay silent rather than mislabel.
-  if (reply.flags.includes('e') || reply.flags.includes('p')) return false
+  if (reply.flags.includes('e') || reply.flags.includes('p')) return null
 
   const square = reply.to
   const capturedValue = PIECE_VALUE[reply.captured]
   const capturerValue = PIECE_VALUE[reply.piece]
   const playerColor = reply.color === 'w' ? 'b' : 'w'
 
+  const hung: HungMaterial = { piece: reply.captured, square }
+
   // `attackers` is geometric — it includes a piece that is pinned (the defender that *looks* like it
   // guards the square but cannot legally recapture). Zero attackers ⇒ genuinely undefended (AC-5).
   const defenders = chess.attackers(square, playerColor)
-  if (defenders.length === 0) return true
+  if (defenders.length === 0) return hung
 
   // A geometric defender exists. If none can LEGALLY recapture (the only defender is absolutely
   // pinned), stay silent — conservative reading per AC-6(b).
   const legalRecaptures = chess.moves({ verbose: true }).filter((m) => m.to === square && m.captured)
-  if (legalRecaptures.length === 0) return false
+  if (legalRecaptures.length === 0) return null
 
   // Compensation (one ply, no SEE): every legal recapture lands on `square`, taking the capturer.
   // If that capturer is worth ≥ the lost piece, the player wins the material back — not hung (AC-6a).
-  if (capturerValue >= capturedValue) return false
+  if (capturerValue >= capturedValue) return null
 
   // Recapture exists but wins back less than was lost (e.g. hung a queen, can only take a knight).
-  return true
+  return hung
+}
+
+/** Boolean form of `hungMaterialDetail` — the GDD §4.4 predicate `classify` gates on. */
+export function hungUndefendedMaterial(
+  fen: string,
+  playerMoveUci: string,
+  opponentReplyUci: string,
+): boolean {
+  return hungMaterialDetail(fen, playerMoveUci, opponentReplyUci) !== null
 }
 
 /**

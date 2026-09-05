@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { describeMove, momentTone, momentShortName } from '@/modules/memory/describe'
+import { describeMove, movePhrase, momentTone, momentShortName } from '@/modules/memory/describe'
 import type { Moment } from '@/types/memory'
 
 const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -19,6 +19,56 @@ describe('describeMove — UCI → plain-language 中文 move', () => {
   it('test_describe_malformedUci_returnsNull', () => {
     expect(describeMove(START, 'zz')).toBeNull()
     expect(describeMove(START, null)).toBeNull()
+  })
+  it('test_describe_uppercasePromotionSuffix_stillDescribed', () => {
+    // `a7a8Q` === `a7a8q`；chess.js 的 move() 只收小寫，不正規化就會把整格靜默丟掉。
+    expect(describeMove('8/P7/8/8/8/8/8/K6k w - - 0 1', 'a7a8Q')).toEqual({
+      piece: '兵', to: 'a8', promotion: '后',
+    })
+  })
+  it('test_describe_illegalButWellFormedUci_returnsNull', () => {
+    // `.move()` gates on legality now; `.get(from)` used to happily describe a move that can't be made.
+    expect(describeMove(START, 'e2e5')).toBeNull()
+  })
+})
+
+/**
+ * 走法白話文原本只講 piece + to，於是吃子的一手被說成「把后移到 f7」——把整手棋的重點（吃掉了
+ * f7 的兵）藏起來，2026-08-08 precommit-review 列為最影響理解的一條。
+ */
+describe('movePhrase — 吃子／升變／易位不能被說成單純的移動', () => {
+  const phrase = (fen: string, uci: string) => movePhrase(describeMove(fen, uci)!)
+
+  it('test_phrase_quietMove_saysMovedTo', () => {
+    expect(phrase(START, 'e2e4')).toBe('把兵移到 e4')
+  })
+  it('test_phrase_capture_namesVictimAndSquare', () => {
+    const fen = 'rnbqkbnr/ppp2ppp/8/3pp3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3'
+    expect(phrase(fen, 'f3e5')).toBe('用騎士吃掉 e5 的兵')
+  })
+  it('test_phrase_castling_neverSaysKingMovedTwoSquares', () => {
+    const fen = 'rnbqk2r/pppp1ppp/5n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4'
+    expect(phrase(fen, 'e1g1')).toBe('做短易位')
+    const long = 'r3kbnr/pppq1ppp/2np4/4p3/4P1b1/2NP1N2/PPPBQPPP/R3KB1R w KQkq - 6 7'
+    expect(phrase(long, 'e1c1')).toBe('做長易位')
+  })
+  it('test_phrase_promotion_namesTheNewPiece', () => {
+    expect(phrase('8/4P3/8/8/8/8/8/K6k w - - 0 1', 'e7e8q')).toBe('把兵移到 e8 升變成后')
+    expect(phrase('5r2/4P3/8/8/8/8/8/K6k w - - 0 1', 'e7f8q')).toBe('用兵吃掉 f8 的城堡升變成后')
+  })
+  it('test_phrase_enPassant_namesNoSquare_becauseVictimIsNotThere', () => {
+    // 過路兵被吃時不在落點上；照一般吃子模板講會指到一個空格。
+    const fen = 'rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3'
+    expect(phrase(fen, 'e5f6')).toBe('用兵吃過路兵')
+  })
+  it('test_phrase_hasNoComma_soItCanBeEmbeddedMidSentence', () => {
+    // 片語會被塞進「與其X，不如先Y。」中間——自帶逗號會把句子斷成兩截。
+    const fens: Array<[string, string]> = [
+      [START, 'e2e4'],
+      ['5r2/4P3/8/8/8/8/8/K6k w - - 0 1', 'e7f8q'],
+      ['rnbqk2r/pppp1ppp/5n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4', 'e1g1'],
+    ]
+    for (const [fen, uci] of fens) expect(phrase(fen, uci)).not.toMatch(/[，,。]/)
   })
 })
 
@@ -61,6 +111,8 @@ describe('momentTone — 玩家走了最佳手時不得套用失誤語氣', () =
 describe('momentShortName — plain headline per tone (no engine-taxonomy label)', () => {
   it('test_shortName_perTone', () => {
     expect(momentShortName('tactical', 'material')).toBe('漏掉一個子')
+    // hanging-piece 判定接上後才點得出是哪顆子；給不出來仍退回籠統版（prefer-silence）。
+    expect(momentShortName('tactical', 'material', '后')).toBe('后沒人守著')
     expect(momentShortName('tactical', 'mate')).toBe('差點被將死')
     expect(momentShortName('bright', 'none')).toBe('你穩住了自己')
     expect(momentShortName('turning-point', 'none')).toBe('這盤的轉折')

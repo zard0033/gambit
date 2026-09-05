@@ -18,7 +18,7 @@
  */
 
 import type { ClassifyResult } from '@/modules/learning-loop/classify'
-import type { MoveDesc } from './describe'
+import { movePhrase, type MoveDesc } from './describe'
 
 /**
  * 一個 moment 的解釋所需的全部素材。依 tone 分成兩族：
@@ -34,17 +34,12 @@ export type MomentText =
       readonly concept: ClassifyResult
       readonly played: MoveDesc
       readonly best: MoveDesc
-      /** material 專用：沒人守的那顆子（中文）與它所在的格。見 technical-preferences 的 Deferred Cleanup。 */
+      /** material 專用：沒人守的那顆子（中文）與它所在的格，由 `hungMaterialDetail` 供給；判定給不出來時同時缺席。 */
       readonly hungPiece?: string
       readonly hungSquare?: string
     }
   | { readonly tone: 'turning-point'; readonly played: MoveDesc; readonly best: MoveDesc }
   | { readonly tone: 'plain'; readonly played: MoveDesc; readonly best: MoveDesc }
-
-/** 「把主教移到 g5」——白話文的走法片語。 */
-function movePhrase(m: MoveDesc): string {
-  return `把${m.piece}移到 ${m.to}`
-}
 
 /** F3：渲染一個 moment 的解釋。 */
 export function renderMoment(m: MomentText): string {
@@ -67,6 +62,15 @@ export function renderMoment(m: MomentText): string {
       // 「你的子留在那裡，沒人守著」——一句沒有資訊的話，比不講更糟；回顧態本來就沉默優先。
       if (!m.hungPiece || !m.hungSquare) {
         return `與其${played}，不如先${best}。`
+      }
+      // 「留在」只有在子本來就在那裡時才是真的。被吃的那格 === 這一手的落點時，是玩家自己把它
+      // 送過去的——說「留在」等於把主動送子講成疏忽，而且落點已經在後半句講過一次，不重複。
+      if (m.hungSquare === m.played.to) {
+        // 「那裡」的指涉物是 played 片語裡的格號。吃過路兵的片語刻意不報格號（被吃的兵不在落點上），
+        // 兩個各自正確的決定疊起來就成了一句指不到東西的話——那時把格號自己寫出來。
+        // 新增任何不報格號的片語都要回來看這一行。
+        const where = m.played.enPassant ? `${m.hungSquare} ` : '那裡'
+        return `你${played}，${where}沒人守著。不如先${best}。`
       }
       return `你的${m.hungPiece}留在 ${m.hungSquare}，沒人守著。與其${played}，不如先${best}。`
     }

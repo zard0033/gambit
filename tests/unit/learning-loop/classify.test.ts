@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { classify, hungUndefendedMaterial } from '../../../src/modules/learning-loop/classify'
+import {
+  classify,
+  hungMaterialDetail,
+  hungUndefendedMaterial,
+} from '../../../src/modules/learning-loop/classify'
 
 // S-Phase-C — Bridge 3 mistake classifier (GDD §3.4, §4.4; AC-5, AC-6, AC-7).
 // Fixtures are real chess lines, hand-verified with chess.js replay. The classifier reads the
@@ -72,6 +76,53 @@ describe('classify — Signal H (material, AC-5)', () => {
         signals: noMate,
       }),
     ).toBe('material')
+  })
+})
+
+/**
+ * 判定一直算得出「哪顆子、在哪一格」，只是丟成 boolean——棋憶的 F3 material 模板因此永遠只能講
+ * fallback 那句。這組把 detail 形式釘住：正例要指得出子與格，負例要 null（不是「未知的 hung」）。
+ */
+describe('hungMaterialDetail — 指名是哪顆子、在哪一格', () => {
+  it('玩家把子送到那一格：回報被吃的子與該格（＝這一手的落點）', () => {
+    // White Nb1-c3?? into a pawn on d4; ...dxc3 takes the knight.
+    expect(hungMaterialDetail('4k3/8/8/8/3p4/8/8/1N2K3 w - - 0 1', 'b1c3', 'd4c3')).toEqual({
+      piece: 'n',
+      square: 'c3',
+    })
+  })
+
+  it('子本來就留在那裡：回報的格與這一手的落點無關', () => {
+    // 白后早就站在 c3，白方走了無關的 Ke1-f1，黑方 dxc3 收下后。
+    expect(hungMaterialDetail('4k3/8/8/8/3p4/2Q5/8/4K3 w - - 0 1', 'e1f1', 'd4c3')).toEqual({
+      piece: 'q',
+      square: 'c3',
+    })
+  })
+
+  it('每個 AC-6 負例都回 null，不是「不知道是哪顆子的 hung」', () => {
+    const negatives: Array<[string, string, string]> = [
+      ['4k3/8/8/b7/8/8/1P6/1N2K3 w - - 0 1', 'b1c3', 'a5c3'],
+      ['4r1k1/8/8/4n3/8/3N4/4B2P/4K3 w - - 0 1', 'h2h3', 'e5d3'],
+      ['4k3/8/8/8/3p4/8/4P3/4K3 w - - 0 1', 'e2e4', 'd4e3'],
+      ['4k3/8/8/8/8/8/1p5P/R3K3 w - - 0 1', 'h2h3', 'b2a1q'],
+    ]
+    for (const [fen, played, reply] of negatives) {
+      expect(hungMaterialDetail(fen, played, reply)).toBeNull()
+    }
+  })
+
+  it('boolean 形式與 detail 形式永遠同調', () => {
+    const cases: Array<[string, string, string]> = [
+      ['4k3/8/8/8/3p4/8/8/1N2K3 w - - 0 1', 'b1c3', 'd4c3'],
+      ['4k3/8/8/b7/8/8/1P6/1N2K3 w - - 0 1', 'b1c3', 'a5c3'],
+      ['4k3/8/8/8/3p4/2Q5/8/4K3 w - - 0 1', 'e1f1', 'd4c3'],
+    ]
+    for (const [fen, played, reply] of cases) {
+      expect(hungUndefendedMaterial(fen, played, reply)).toBe(
+        hungMaterialDetail(fen, played, reply) !== null,
+      )
+    }
   })
 })
 

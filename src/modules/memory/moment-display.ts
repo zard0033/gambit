@@ -15,7 +15,8 @@ import { Chess } from 'chess.js'
 import type { Moment } from '@/types/memory'
 import type { Annotation } from '@/modules/move-annotation/annotation-types'
 import type { StoredAnalysisEntry } from '@/modules/post-game-review/use-post-game-review'
-import { describeMove, momentShortName, momentTone, type MoveDesc } from './describe'
+import { hungMaterialDetail, type HungMaterial } from '@/modules/learning-loop/classify'
+import { describeMove, momentShortName, momentTone, pieceZh, type MoveDesc } from './describe'
 import { renderMoment } from './templates'
 import { momentEndState, momentStepFens } from './choreography'
 
@@ -83,16 +84,28 @@ function renderCopy(
   isOwn: boolean,
   played: MoveDesc,
   best: MoveDesc | null,
+  hung: HungMaterial | null,
 ): { shortName: string; reason: string } {
   const tone = momentTone(moment, isOwn)
-  const shortName = momentShortName(tone, moment.concept)
+  const hungPiece = hung ? pieceZh(hung.piece) : undefined
+  const shortName = momentShortName(tone, moment.concept, hungPiece)
 
   // isOwn 的兩個 tone 沒有「更好的」可講；其餘一定有（!isOwn ⇒ best 已在上面驗過非 null）。
   if (tone === 'bright' || tone === 'best-anyway') {
     return { shortName, reason: renderMoment({ tone, played }) }
   }
   if (tone === 'tactical') {
-    return { shortName, reason: renderMoment({ tone, concept: moment.concept, played, best: best! }) }
+    return {
+      shortName,
+      reason: renderMoment({
+        tone,
+        concept: moment.concept,
+        played,
+        best: best!,
+        hungPiece,
+        hungSquare: hung?.square,
+      }),
+    }
   }
   return { shortName, reason: renderMoment({ tone, played, best: best! }) }
 }
@@ -120,6 +133,13 @@ export function buildMomentDisplays(input: BuildMomentDisplaysInput): MomentDisp
     const best = isOwn ? null : describeMove(fen, bestUci)
     if (!played || (!isOwn && !best)) continue
 
+    // 是哪顆子沒人守：`classify` 判 'material' 時就算過一次，只是丟成 boolean。這裡用同一組輸入
+    // （同一手、同一個對手回應）重算，兩邊的結論必然一致。判定給不出來時 null，模板會省掉那一句。
+    const hung =
+      moment.concept === 'material' && moves[i + 1]
+        ? hungMaterialDetail(fen, playedUci, moves[i + 1]!)
+        : null
+
     const choreography = {
       preMoveFen: fen,
       playedUci,
@@ -133,7 +153,7 @@ export function buildMomentDisplays(input: BuildMomentDisplaysInput): MomentDisp
       ply: i,
       moveNumber: Math.floor(i / 2) + 1,
       source: isOwn ? 'own' : 'engine',
-      ...renderCopy(moment, isOwn, played, best),
+      ...renderCopy(moment, isOwn, played, best, hung),
       played,
       best,
       fen: frame.fen,

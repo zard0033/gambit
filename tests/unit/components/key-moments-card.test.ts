@@ -103,6 +103,21 @@ describe('KeyMomentsCard', () => {
     expect(w.get('[data-testid="moment-best"]').text()).toBe('更好的是 把兵移到 e4')
   })
 
+  it('吃子的一手不會被說成單純的移動，且卡片與 Neve 那句用同一組字', async () => {
+    // Arrange — ply0 玩家走的就是最佳手（own）；ply2 白兵 e4 吃掉 d5 的黑兵，引擎要 g1f3。
+    // 卡片曾經自己硬編「把{piece}移到 {to}」，於是同一手在卡片上是「把兵移到 d5」、
+    // 在 Neve 的句子裡是「用兵吃掉 d5 的兵」——兩種說法。現在兩邊都走 movePhrase。
+    const w = mountCard(['e2e4', 'd7d5', 'e4d5'], ['e2e4', 'd7d5', 'g1f3'])
+
+    // Act
+    await nextBtn(w).trigger('click')
+
+    // Assert
+    expect(w.get('[data-testid="moment-played"]').text()).toBe('你走了 用兵吃掉 d5 的兵')
+    expect(w.get('[data-testid="moment-best"]').text()).toBe('更好的是 把騎士移到 f3')
+    expect(w.get('[data-testid="moment-reason"]').text()).toContain('用兵吃掉 d5 的兵')
+  })
+
   it('玩家走到最佳手的那一格不顯示「更好的是」', async () => {
     // Arrange — ply2 玩家走的 g1f3 就是最佳手
     const w = mountCard()

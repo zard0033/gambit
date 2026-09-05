@@ -33,14 +33,25 @@ describe('lintNeve (AC-11b)', () => {
 describe('渲染出來的每一句 Neve 文案都要過 lint', () => {
   const played = { piece: '騎士', to: 'd2' }
   const best = { piece: '主教', to: 'g5' }
+  const capture = { piece: '后', to: 'f7', captured: '兵' }
+  const promotion = { piece: '兵', to: 'e8', promotion: '后' }
+  const castle = { piece: '國王', to: 'g1', castle: 'short' } as const
+  const enPassant = { piece: '兵', to: 'f6', captured: '兵', enPassant: true }
 
   const SENTENCES = {
     'tactical/material（接上 hanging-piece 判定後）': renderMoment({
       tone: 'tactical', concept: 'material', played, best, hungPiece: '后', hungSquare: 'f7',
     }),
+    'tactical/material（子是玩家自己送過去的，落點＝被吃格）': renderMoment({
+      tone: 'tactical', concept: 'material', played: capture, best, hungPiece: '后', hungSquare: 'f7',
+    }),
     'tactical/material（判定未接，首句省略）': renderMoment({
       tone: 'tactical', concept: 'material', played, best,
     }),
+    '吃子的走法片語': renderMoment({ tone: 'plain', played: capture, best }),
+    '升變的走法片語': renderMoment({ tone: 'plain', played: promotion, best }),
+    '易位的走法片語': renderMoment({ tone: 'bright', played: castle }),
+    '吃過路兵的走法片語': renderMoment({ tone: 'plain', played: enPassant, best }),
     'tactical/mate': renderMoment({ tone: 'tactical', concept: 'mate', played, best }),
     'tactical/none（分類器沒給概念）': renderMoment({
       tone: 'tactical', concept: 'none', played, best,
@@ -69,6 +80,13 @@ describe('渲染出來的每一句 Neve 文案都要過 lint', () => {
   for (const [tone, concept] of SHORT_NAMES) {
     it(`momentShortName — ${tone}/${concept}`, () => {
       expect(lintNeve(momentShortName(tone, concept))).toEqual([])
+    })
+  }
+
+  // 點名子力的短名也要過 lint：象棋術語（車/馬/象）最容易從這裡漏出去。
+  for (const piece of ['后', '城堡', '騎士', '主教', '兵']) {
+    it(`momentShortName — tactical/material 點名「${piece}」`, () => {
+      expect(lintNeve(momentShortName('tactical', 'material', piece))).toEqual([])
     })
   }
 })

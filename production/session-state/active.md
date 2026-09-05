@@ -1,7 +1,7 @@
 <!-- STATUS -->
-Epic: 棋憶（/review）改造——統一 Neve 對話框 + 深青互動格就地走
-Feature: wave 1／wave 2 皆已實作完畢
-Task: wave 2（深青互動格就地走 + 路標下架 + 步進鈕）**已完成，待 review→push**
+Epic: 棋憶（/review）文案準確度——hanging-piece 判定接線 ＋ 走法白話文補上吃子／升變／易位
+Feature: 已實作完畢，待 review→push
+Task: 下一步＝判斷訓練釐清 Q3 起（P2 仍卡在對局數個位數，樣本不足）
 ⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
 <!-- /STATUS -->
 
@@ -15,17 +15,18 @@ Task: wave 2（深青互動格就地走 + 路標下架 + 步進鈕）**已完成
 語氣——玩家走了最佳手時不套失誤模板）、金色內文改回墨色（`text-gold-dark` 是 large-copy-only）、
 好棋定格兩支箭頭同色（對手回應改灰）。**未修，按優先序**：
 
-- **白話文吃掉吃子／升變／入堡資訊**：「把后移到 f7」實際是「吃掉 f7 的兵」。`describeMove` 只講
-  piece + to。這是最影響理解的一條，接 hanging-piece 判定時一起做。
+- ✅ **白話文吃掉吃子／升變／入堡資訊**（2026-09-05 已修，見下方「已施工」）。
 - **`geomTick` + ResizeObserver 那套幾何接線已經第三次複製貼上**（PracticePuzzleView／
   LessonPlayer／KeyMomentsCard）。第三次是抽 composable 的門檻，下次動到就抽。
-- **`lintNeve` 仍無產品呼叫端**：只有測試在跑（本輪已把 F3 模板與短名的每個分支接進測試層）。
-  元件內硬編的文案（「你走了」「更好的是」）不在覆蓋內。
+- **`lintNeve` 仍無產品呼叫端**：只有測試在跑（F3 模板與短名的每個分支、吃子／升變／易位片語都在
+  測試層過 lint）。元件內硬編的文案（「你走了」「更好的是」）不在覆蓋內。
 - **Tier-3 匯出 fallback 面板** `fixed top-24` 是魔術數字、不吃 safe-area、無焦點管理。
 - **`isComplete` 在 `MemoryView` 與 `MemoryDashboard` 各算一份**，該經 MemoryContext 共用。
 - **返回落點只認兩個入口**（有無 `?gameId`），將來多一個入口會靜默走錯。
 - **元件測試裡 `ChessBoard` mock 不 expose `boardRef`/`squareToRect`**，所以 `MoveAnnotationDisplay`
-  在單元測試中永不渲染——標註那條路目前只有純模組測試守著。
+  在單元測試中永不渲染——標註那條路只有純模組測試守著。**`key-moments-card.test.ts` 已修**
+  （mock 給真 element ＋ 斷言前 `flushPromises` 等 `onMounted` 的 geomTick），其餘元件測試檔照舊。
+  修之前那裡的「零標記」斷言是恆真的，改的時候記得配一條「有標註」的對照組，否則驗不到東西。
 
 ## 未決 → 已於 wave 2 拍板（2026-09-05）
 
@@ -71,31 +72,42 @@ D3（難度五檔）原判死理由誤讀實作，撤銷保留。判決表全文
   await 的 promise 永不 settle → `PlayView` 永久卡 `AI_THINKING`。**蒸餾**：測試裡的 `.catch(() => {})` 是警訊。
 - ✅ **`plans/`**（`0582e4e`／`22181c8`，評估 shadcn/improve plugin 的副產物；002 已判 false positive 撤回）。
   **蒸餾**：稽核引用 `file:line` 全對 ≠ 結論對；擋下錯誤結論的是 plan 的 STOP 條件，不是它的 vet 階段。
-- ✅ **棋憶 wave 2（2026-09-05，待 push）**：深青互動格併進 carousel 最前面（pending 的 missed mate
+- ✅ **棋憶 wave 2（2026-09-05，`2ba583b` 已 push）**：深青互動格併進 carousel 最前面（pending 的 missed mate
   一格一題，棋盤可動、零標記、就地走）、`RecognitionSignpost` 與 `?source=recognition` 整條路徑刪除、
-  三顆鈕的中間那顆做循環步進。**四個實作事實**：
-  ① `KeyMomentsCard` 是**單一 ChessBoard 換 `:fen`**，不是多盤 translateX carousel，所以
-     `RecognitionBoard` 那套 360ms `reapplyFen` + `dispatchEvent(resize)` 的 stale-bounds 修法
-     **不適用也不需要**——別看到「carousel」就把它抄過來。
-  ② 深青格的來源快照在 **setup 同步取**（`pendingFor('mate')`），不可放 `onMounted`：mount 後才填
-     會讓首次 render 空掉一輪（單元測試同步斷言全紅）。而它必須是快照不是 reactive 讀取——
-     通關會 `markConsumed`，跟著 store 走的話格子在玩家走對的當下從腳下消失。
-  ③ 通關後 `step` 設 1（走完那一手的畫面），且步進歸零的 watch **只能掛 `index`**。掛上 `isSolved`
-     會在通關的下一個 flush 把 step 覆寫回 0，棋子當場彈回走子前，讀起來像「你走錯了」。
-  ④ 通關時機的截圖要等 ~800ms：chessground 的移動動畫還在跑，拍到的是起始幀（棋子還在原位、
-     但 check ring 已經套上），會誤判成 FEN 沒更新。
-  **驗證**：vitest 843 綠、`vue-tsc` 0 error、E2E 78 綠、mobile/desktop 截圖、tap-to-move 座標點擊
-  實走 e1e8 通關、白方 pending ＋ 黑方本局的朝向翻轉實機驗過（切格翻轉、標註幾何跟上、高亮不殘留）。
-  **review（deep，runId `wf_eded828f-0e1`）抓到而自驗漏掉的**：
-  ⑤ 通關後切走再切回，`watch(index)` 無條件把 step 歸零 → 盤面退回走子前，而對話框寫著「就是這一手」，
-     且通關後盤已鎖住，玩家無法自己重走。**與 ③ 是同一個症狀的第二條觸發路徑**——修好一條不代表另一條
-     也好了，這種「同症狀多路徑」要各留一條測試。
-  ⑥ `:last-move="null"` 原本毫無 runtime 效果（`onBoardCreated` 只處理 truthy、watch 非 immediate），
-     測試卻把它當保證鎖住＝假驗證。真正的問題是玩家自己走出正解後 chessground 留下的原生高亮，
-     `setPosition` 不清它，會跟著切到下一格；改成真的綁值（通關＝標出那一手，其餘 null）才同時解掉。
-  ⑦ 三份 SoT 同時漂掉（`persona-neve.md` 深青「現例」、`positioning-v2` 的現在式現況宣稱、
-     `quick-specs/signpost-material-expansion.md` 整份施工點）。**刪一支元件要順手 grep 全 repo 的 SoT**，
-     這次只想到改 CONTEXT.md。
+  三顆鈕的中間那顆做循環步進（review deep，runId `wf_eded828f-0e1`）。**還會咬人的五件事**：
+  ① `KeyMomentsCard` 是**單一 ChessBoard 換 `:fen`**，不是多盤 translateX carousel——`RecognitionBoard`
+     那套 360ms `reapplyFen` + `dispatchEvent(resize)` 的 stale-bounds 修法不適用，別看到「carousel」就抄。
+  ② 深青格的來源要 **setup 同步取的快照**（`pendingFor('mate')`）：放 `onMounted` 首次 render 會空一輪；
+     跟著 store 走則會在玩家走對的當下（`markConsumed`）從腳下消失。
+  ③ 步進歸零的 watch **只能掛 `index`**，且切回已通關的格子要還原成「走完那一手」的畫面。掛 `isSolved`
+     或無條件歸零，棋子都會彈回走子前，而對話框寫著「就是這一手」。**同症狀兩條觸發路徑，各留一條測試。**
+  ④ `:last-move` 要真的綁值（通關＝標出那一手，其餘 null）。原本傳 `null` 毫無 runtime 效果
+     （`onBoardCreated` 只處理 truthy、watch 非 immediate），測試把它當保證＝假驗證。
+  ⑤ 標題不寫「這盤」（Eason 拍板）：`pendingFor` 回**最近一局**，A 局漏題沒解就下 B 局，B 局的棋憶
+     第一格會是 A 局的題目。**不改成「只收本局」**——路標已刪，那會讓跨局題目失去唯一入口。
+  **蒸餾**：刪一支元件要順手 grep 全 repo 的 SoT（這次 `persona-neve.md`／`positioning-v2`／
+  `quick-specs/signpost-material-expansion.md` 三份同時漂掉，只想到改 CONTEXT.md）。
+
+- ✅ **hanging-piece 判定接線 ＋ 走法白話文（2026-09-05，本輪）**：`classify.ts` 的
+  `hungUndefendedMaterial` 一直算出「哪顆子、在哪一格」再丟成 boolean，抽出 `hungMaterialDetail`
+  回 detail、boolean 版變成 `!== null`（`classify` 行為零變化）。`moment-display` 用同一組輸入
+  （同一手＋同一個對手回應）重算，所以不必動 `Moment` 型別／`selection.ts`／`MemoryView.vue`。
+  `describeMove` 從 `.get(from)` 改 `.move()`，一次拿到 captured／promotion／castle／en-passant。**四件事**：
+  ① **`movePhrase` 是走法片語的唯一出處**（`describe.ts`）。`KeyMomentsCard` 原本自己硬編
+     `把{piece}移到 {to}`，於是卡片說「把后移到 f7」、Neve 那句說「用后吃掉 f7 的兵」。要顯示走法就呼叫它。
+  ② **`.move()` 只收小寫升變後綴**：`a7a8Q` 會被當非法手丟掉整格（既有測試立刻轉紅）。`isLegalUci`
+     早就有 `normalizeUci`，只有 `describeMove` 漏了。片語內也不准有逗號——它會被塞進「與其X，不如先Y。」中間。
+  ③ **「留在」在玩家自己把子送過去時是說反的**：`hungSquare === played.to` 就是這一手放上去的，說「留在」
+     等於把主動送子講成疏忽。改成「你${played}，那裡沒人守著。不如先${best}。」這是最常見的送子形狀，不是邊角。
+  ④ **吃過路兵的被吃子不在落點上**，照一般吃子模板會指到一個空格；`enPassant` 旗標讓片語不報格號。
+  **驗證**：vitest 870 綠、`vue-tsc` 0、375/1280 實跑 `/review`（1.e4 e5 2.Nf3 Nc6 3.Nxe5?? Nxe5 →
+  「你用騎士吃掉 e5 的兵，那裡沒人守著。不如先把主教移到 b5。」標題「騎士沒人守著」）。
+  **蒸餾**：判定給不出來時標題與內文必須**一起**退回籠統版，只修一邊會標題點名、內文不提。
+  **review（deep，runId `wf_004dd5a2-dd4`）抓到而自驗漏掉的**：⑤「那裡沒人守著」的指涉物是 played
+  片語裡的格號，而吃過路兵的片語**刻意不報格號**——兩個各自正確的決定疊起來成了「你用兵吃過路兵，
+  那裡沒人守著」，「那裡」指不到東西。`hungMaterialDetail` 擋的是**對手回應**是 e.p.，不是玩家這一手是，
+  所以走得到（verifier 用 `4k1n1/6p1/8/4Pp2/8/8/8/4K3 w - f6 0 1` 實測）。已修＋留測試。
+  **蒸餾**：兩個各自正確的局部決定會疊出一個沒人做過的錯誤決定，這種缺陷單看任一邊的 diff 都看不出來。
 
 ## 待辦（本輪之外）
 
@@ -106,12 +118,7 @@ D3（難度五檔）原判死理由誤讀實作，撤銷保留。判決表全文
   **前置閘門已解除（P1，2026-08-13 跑完）**：五盤紙筆實驗，rung 5（關 fallible，
   排除「認出引擎故意送的子」的混淆），命中率約 1–2/5，遠低於 70% 門檻——v2 主軸
   （斷層卡在察覺階段）不被推翻，成立。Q3 起的釐清可以繼續。
-- **「是哪顆子沒人守」的判定（hanging-piece）**：`renderMoment` 的 material 分支需要 `hungPiece`/
-  `hungSquare` 才講得出「你的**后**留在 **f7**，沒人守著」。這段判定沒人寫過，模板一直是 fallback。
-  2026-08-08 拍板：**沒有這兩個值就整句不講**（只留「與其…不如先…」），不吐沒資訊的空話。
-  同一個缺口也讓 `momentShortName` 對送后只能說「漏掉一個子」。接上判定後兩處都會自動變好。
-  排在 P2（mate → material）那一批一起做。
-- **missed-mate 從 mate 擴到 material**（v2 的 P2，也是上面第 5 點擴大互動格的前置）：若既有對局跑
+- **missed-mate 從 mate 擴到 material**（v2 的 P2，也是擴大深青互動格題目供給的前置）：若既有對局跑
   `selectMissedMates` 產出 ≥1 題比例 <30%，主路徑必須先擴到 material 才成立。2026-08-06 查過 Eason
   現有對局數＝個位數，樣本太小，等累積後再量。
 - v2 末尾另有 8 題待答（棋力現況、下棋 vs 寫 app 時數比、四週對照實驗、自用產品的驗收條件等）。

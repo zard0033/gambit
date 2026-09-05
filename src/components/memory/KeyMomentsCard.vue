@@ -23,6 +23,7 @@ import { ChevronLeft, ChevronRight, Play } from 'lucide-vue-next'
 import { buildFenSequence } from '@/modules/post-game-review/use-post-game-review'
 import { buildMomentDisplays, type MomentDisplay } from '@/modules/memory/moment-display'
 import { applyUci } from '@/modules/memory/choreography'
+import { movePhrase } from '@/modules/memory/describe'
 import { useBoardFit } from '@/composables/use-board-fit'
 import { useRecognitionSourceStore } from '@/stores/recognition-source'
 import type { MissedMateSource } from '@/modules/learning-loop/missed-mate'
@@ -352,14 +353,14 @@ onBeforeUnmount(() => {
         <!-- 兩手同字級，靠明度＋粗細＋領頭詞區分。**不用金色**：`text-gold-dark` 是設計系統
              明文的 large-copy-only（在 15px 上對比不足），金一律留給 focus / reward。 -->
         <p class="font-sans text-[15px] text-ink-muted" data-testid="moment-played">
-          你走了 把{{ current.display.played.piece }}移到 {{ current.display.played.to }}
+          你走了 {{ movePhrase(current.display.played) }}
         </p>
         <p
           v-if="current.display.best"
           class="font-sans text-[15px] font-bold text-ink"
           data-testid="moment-best"
         >
-          更好的是 把{{ current.display.best.piece }}移到 {{ current.display.best.to }}
+          更好的是 {{ movePhrase(current.display.best) }}
         </p>
 
         <!-- Neve 的解釋（回顧態，文楷）。CJK 不可斜體——假斜會扭曲字形。 -->
