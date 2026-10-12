@@ -127,7 +127,8 @@ D3（難度五檔）原判死理由誤讀實作，撤銷保留。判決表全文
 
 - **Stockfish 無旋鈕可製造初學者級失誤**：要它犯錯只能在引擎外面做（`fallible-pick.ts`）。
   讓子（material odds）已否決，勿再提案。
-- Supabase keep-alive workflow 每 3 天打實表查詢；**GitHub 政策 repo 60 天無 commit 自動停用**。
+- Supabase keep-alive workflow **每天一次、每次連打 5 次**實表查詢、只認 200。舊版每 3 天一次仍在 2026-09-10～13 間
+  被暫停（之後連續 10 次 exit 6），所以是**降低機率不是保證**，變紅多半＝已暫停（看 log：000／exit 6＝DNS 已撤，去 dashboard 按 Resume）；**GitHub 政策 repo 60 天無 commit 自動停用**。
 - **Maia（人類化 NN 引擎）＝日後「陪練角色」**：2026-08-07 查證，「要後端所以不做」的前提已翻案——
   **只有 Maia-1 可行**（官方 ONNX ~3.3MB／級距，9 檔 Elo 1100–1900，`onnxruntime-web` 純 client-side，
   權重 GPL-3.0）；**Maia-2／3 不走**（無官方 ONNX、AGPL、23M 版 91.8MB 超出 150MB 預算；且「單一模型
