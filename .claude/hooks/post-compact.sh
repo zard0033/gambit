@@ -2,7 +2,7 @@
 # post-compact.sh — fires after conversation compaction
 # Reminds Claude to restore session state from the file-backed checkpoint.
 
-ACTIVE="production/session-state/active.md"
+ACTIVE=".omc/notepad.md"
 
 echo "=== Context Restored After Compaction ==="
 

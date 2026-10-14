@@ -15,8 +15,14 @@ CLAUDE.local.md
 .serena/
 production/session-logs/
 production/session-state/*
-!production/session-state/active.md
 !production/session-state/archive-*.md
+
+# === OMC（2026-10-14 起取代 session-state/active.md）===
+# .omc/ 是 OMC 的本機執行期狀態；只追蹤跨機要接力的 notepad 與 wiki（.omc/.gitignore 是為了壓住 OMC 自動補的 wiki/ 忽略）
+.omc/*
+!.omc/.gitignore
+!.omc/notepad.md
+!.omc/wiki/
 
 # === Internal Planning (not for public) ===
 

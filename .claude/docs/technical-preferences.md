@@ -201,7 +201,7 @@
   D4 砍掉唯一讀者（`cross-game.ts::pickNeveLine`，跨局 Neve 一句話）後，`memory_summaries` 表變成
   真正的只寫不讀——`stores/memory.ts` 的 `recordGame()`/`load()`/`summaries` 都還在，`MemoryView.vue`
   每局仍呼叫 `buildGameSummary` 並寫入本機＋雲端，但目前沒有任何程式碼再讀回這份資料。
-  **具名用途**：預定給 active.md 記錄的「該殺沒殺／殺得慢」第三種訊號（mate distance，非 cpLoss）
+  **具名用途**：預定給 wiki `review-traps` 頁記錄的「該殺沒殺／殺得慢」第三種訊號（mate distance，非 cpLoss）
   或 P2（missed-mate 從 mate 擴到 material）當跨局資料源——這兩個都還沒實作，屬於尚未定案的候選，
   不是已排進施工順序的功能。到期仍無讀取端就刪掉：`recordSummary()`/`buildGameSummary` 呼叫、
   `stores/memory.ts` 的 `recordGame`/`load`/`summaries`/`reconcileOnLogin`、`data-sync.ts` 的

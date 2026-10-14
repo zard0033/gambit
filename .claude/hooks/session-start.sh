@@ -27,7 +27,7 @@ if [ -n "$BRANCH" ]; then
         if [ "$BEHIND" -gt 0 ]; then
             echo ""
             echo "🔴 落後 origin/$BRANCH $BEHIND 個 commit（本地領先 $AHEAD）"
-            echo "   動工前先 git pull --rebase，並重讀 active.md——它可能是過期快照。"
+            echo "   動工前先 git pull --rebase，並重讀 .omc/notepad.md——它可能是過期快照。"
             echo "   遠端新 commit："
             git log --oneline "HEAD..origin/$BRANCH" 2>/dev/null | head -10 | while read -r line; do
                 echo "     $line"
@@ -82,7 +82,7 @@ if [ -d "src" ]; then
 fi
 
 # --- Active session state recovery ---
-STATE_FILE="production/session-state/active.md"
+STATE_FILE=".omc/notepad.md"
 if [ -f "$STATE_FILE" ]; then
     echo ""
     echo "=== ACTIVE SESSION STATE DETECTED ==="

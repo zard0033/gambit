@@ -40,8 +40,9 @@
 └── production/                  # Positioning SoT, handoff snapshot, tooling notes
     ├── positioning-v2-*.md      # Positioning SoT — read before proposing any feature/refactor
     ├── health-check-*.md        # Full product health check (findings + what was refuted)
-    ├── session-state/           # active.md — handoff snapshot (TRACKED in git on purpose)
+    ├── session-state/           # archive-*.md only — old handoff snapshots, frozen (active.md retired 2026-10-14)
     └── session-logs/            # Session audit trail (gitignored)
+├── .omc/                        # OMC state; only notepad.md + wiki/ are TRACKED (handoff + knowledge base, cross-machine)
 ```
 
 > **The template's process pipeline was deleted on 2026-08-02** — `epics/`, `sprints/`, `qa/`,
@@ -51,7 +52,8 @@
 > gate-check, qa-*, …) are therefore **inoperable by design — do not "repair" them, and do not
 > recreate the directories**. Retrieval is `git show` on any commit before 607aba9.
 
-> **active.md is intentionally version-controlled** (not gitignored as the upstream template
-> assumes). This is a solo, multi-machine setup (home + work computer); committing the handoff
-> snapshot lets `git pull` carry "where we are / what's next" across machines. It is still a
-> *whiteboard* — durable rules/guardrails live in CLAUDE.md and its `@`-included docs, never here.
+> **`.omc/notepad.md` and `.omc/wiki/` are intentionally version-controlled** (OMC treats `.omc/`
+> as local state and even re-adds a `wiki/` ignore rule — `.omc/.gitignore` is written to neutralise
+> that). This is a solo, multi-machine setup (home + work computer); committing them lets `git pull`
+> carry "where we are / what's next" and the knowledge base across machines. The notepad is still a
+> *whiteboard* — durable rules/guardrails live in CLAUDE.md and its `@`-included docs, never there.

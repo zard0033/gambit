@@ -98,10 +98,12 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 > Always push explicitly with `git push origin main` — never bare `git push` — so a
 > branch that tracks `upstream` can never push your work to the template repo.
 
-> **active.md 同步守則**：push 前先更新 `production/session-state/active.md`（完成項標 ✅、更新下一步），
-> 一起 stage 進同一個 commit，不必單獨推。不寫 commit hash（查 `git log` 即可，hash 在 active.md 裡是冗餘）。
-> session-state 與歸檔檔**只准寫檔名／環境變數名，禁貼 token 或 credential 的實際值**——
-> 這些檔在 git 白名單內，貼了就進歷史、洗不掉。
+> **延續狀態走 OMC（2026-10-14 起，取代 `session-state/active.md`）**，三個面各司其職，`.omc/notepad.md` 與 `.omc/wiki/` 進 git 跨機接力：
+> - **現況＋下一步** → notepad Priority Context（`notepad_write_priority`，≤500 字，OMC 開場自動注入）。push 前更新、stage 進同一個 commit。
+> - **待辦／未拍板** → notepad MANUAL（`notepad_write_manual`，不自動清）。
+> - **拍板的決策、踩過的坑、護欄、蒸餾** → wiki（`wiki_add`／`wiki_ingest`，分類 decision／debugging／environment／pattern）；要查先 `wiki_query`。
+> 不寫 commit hash（查 `git log` 即可）。notepad 與 wiki **只准寫檔名／環境變數名，禁貼 token 或 credential 的實際值**——
+> 這些檔在 git 白名單內，貼了就進歷史、洗不掉。歷史快照在 `production/session-state/archive-*.md`，不再更新。
 
 ### Pre-Push Checklist
 
@@ -113,9 +115,9 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
 - [ ] UI 改動：mobile／desktop 兩張截圖（單一 cream 主題，noir 已於 2026-08-06 下架），確認無黑色 token fallback
 - [ ] 新增顏色：WCAG 對比實算 ≥4.5:1（真文字面；raised 面只准裝飾）
 - [ ] `precommit-review` ＋ `/ponytail-review` 過
-- [ ] `active.md` 已更新並 stage 進同一 commit（見上方「active.md 同步守則」）
+- [ ] notepad Priority Context 已更新並 stage 進同一 commit（見上方「延續狀態走 OMC」）
 - [ ] `git push origin main`，永不裸 push
-- [ ] **蒸餾一句**：這次有沒有「換個任務還會用到」的通則？有 → 寫進 `active.md` 或該領域 SoT 檔；
+- [ ] **蒸餾一句**：這次有沒有「換個任務還會用到」的通則？有 → `wiki_add`（或該領域 SoT 檔）；
       沒有 → 明講「無」，不硬湊。（不叫 `/retrospective`——它是 user-invoked，沒人手動叫就永遠不會跑。）
 
 ## Visual Design System (Gambit)

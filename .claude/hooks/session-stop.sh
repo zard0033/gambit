@@ -14,7 +14,7 @@ MODIFIED_FILES=$(git diff --name-only 2>/dev/null)
 # --- Archive active session state on shutdown (do NOT delete) ---
 # active.md persists across clean exits so multi-session recovery works.
 # It is only valid to delete active.md manually or when explicitly superseded.
-STATE_FILE="production/session-state/active.md"
+STATE_FILE=".omc/notepad.md"
 if [ -f "$STATE_FILE" ]; then
     {
         echo "## Archived Session State: $TIMESTAMP"

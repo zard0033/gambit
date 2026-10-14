@@ -7,7 +7,7 @@ echo "=== SESSION STATE BEFORE COMPACTION ==="
 echo "Timestamp: $(date)"
 
 # --- Active session state file ---
-STATE_FILE="production/session-state/active.md"
+STATE_FILE=".omc/notepad.md"
 if [ -f "$STATE_FILE" ]; then
     echo ""
     echo "## Active Session State (from $STATE_FILE)"
@@ -21,7 +21,7 @@ if [ -f "$STATE_FILE" ]; then
 else
     echo ""
     echo "## No active session state file found"
-    echo "Consider maintaining production/session-state/active.md for better recovery."
+    echo "Consider maintaining .omc/notepad.md (OMC notepad) for better recovery."
 fi
 
 # --- Files modified this session (unstaged + staged + untracked) ---
