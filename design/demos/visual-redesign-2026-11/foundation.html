@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gambit 樣張・地基</title>
+<style>
+/* ---------- 字型：與 src/assets/fonts.css 同名。Sarasa 兩個檔是樣張重切的子集（見頁尾說明）---------- */
+@font-face { font-family: 'Sarasa UI TC'; font-weight: 400; font-display: swap; src: url('./fonts/sarasa-ui-tc-400.recut.woff2') format('woff2'); }
+@font-face { font-family: 'Sarasa UI TC'; font-weight: 700; font-display: swap; src: url('./fonts/sarasa-ui-tc-700.recut.woff2') format('woff2'); }
+@font-face { font-family: 'BIZ UDPMincho'; font-weight: 600 700; font-display: swap; src: url('/fonts/biz-udpmincho-700.woff2') format('woff2'); }
+@font-face { font-family: 'Noto Serif TC'; font-weight: 600 700; font-display: swap; src: url('/fonts/noto-serif-tc-600.woff2') format('woff2'); }
+@font-face { font-family: 'LXGW WenKai TC'; font-weight: 400; font-display: swap; src: url('/fonts/lxgw-wenkai-tc-400.woff2') format('woff2'); }
+@font-face { font-family: 'Cubic 11'; font-weight: 400; font-display: swap; src: url('/fonts/cubic-11.woff2') format('woff2'); }
+@font-face { font-family: 'Cinzel'; font-weight: 400 900; font-display: swap; src: url('/fonts/cinzel-wordmark.woff2') format('woff2'); }
+
+:root {
+  /* ---- 以下照抄 src/assets/main.css 的 @theme，值沒有改 ---- */
+  --font-sans: 'Sarasa UI TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  --font-display: 'BIZ UDPMincho', 'Noto Serif TC', 'Songti TC', serif;
+  --font-lesson: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+  --font-num: 'Cubic 11', 'Sarasa UI TC', ui-monospace, monospace;
+  --font-brand: 'Cinzel', 'BIZ UDPMincho', serif;
+
+  --color-surface-base: #faf6f0;
+  --color-surface-card: #fcf9f3;
+  --color-surface-raised: #f4ead8;
+  --color-surface-deep: #103029;
+  --color-surface-deep-2: #18443a;
+  --color-line: #e0d3bd;
+  --color-line-subtle: #ece1cd;
+  --color-line-strong: #cdb999;
+  --color-ink: #3d2210;
+  --color-ink-muted: #7a5c44;
+  --color-ink-on-deep: #e7f1ec;
+  --color-ink-on-deep-dim: #9bbdb1;
+  --color-primary: #1c7059;
+  --color-primary-dark: #155747;
+  --color-primary-fg: #ffffff;
+  --color-danger-on-deep: #e08e79;
+  --color-gold: #f8b500;
+  --color-gold-ink: #3a2408;
+  --shadow-card: 0 1px 2px rgba(61, 34, 16, 0.04), 0 4px 14px rgba(61, 34, 16, 0.06);
+  --shadow-button: 0 1px 2px rgba(61, 34, 16, 0.1);
+  --radius-btn: 8px;
+  --radius-card: 12px;
+
+  /* ---- 地基要補進 @theme 的（現在散在各檔手寫）---- */
+  --text-page: 26px;      /* 頁面標題，明朝 */
+  --text-title: 22px;     /* 卡片標題、這一手的標題，明朝 */
+  --text-heading: 18px;   /* 頂列標題，明朝 */
+  --text-body: 16px;      /* 內文與按鈕，黑體；Neve 的話，文楷 */
+  --text-label: 13px;     /* 標籤 */
+  --text-caption: 12px;   /* 計數 */
+  --text-notation: 14px;  /* 棋譜，Cubic 11 */
+  --page-x: 16px;         /* 左緣一：頁面邊距（標題、區段標籤、卡片外緣） */
+  --card-x: 16px;         /* 左緣二：卡內文字起點＝頁面邊距＋16＝32 */
+  /* 陰影只有一個色相：暖棕。米白上用墨色 #3d2210，深青上用更深的同色相 #180c04（取代現況的 rgba(10,30,24) 與純黑）。 */
+  --shadow-lift: 0 2px 6px rgba(61, 34, 16, 0.14), 0 10px 24px rgba(61, 34, 16, 0.2);
+  --shadow-on-deep: 0 12px 28px rgba(24, 12, 4, 0.55);
+  --wood-edge-on-deep: rgba(24, 12, 4, 0.5);
+  --wood-edge-on-cream: rgba(61, 34, 16, 0.4);
+  --wood-inset: rgba(36, 18, 6, 0.45);
+  --hairline-on-deep: rgba(231, 241, 236, 0.14);
+  --ink-brush-on-deep: rgba(236, 230, 218, 0.72); /* NeveSceneHeader 現有的值 */
+  --dur-fast: 150ms;
+  --dur: 220ms;
+  --dur-slow: 280ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+* { box-sizing: border-box; margin: 0; }
+body {
+  padding: 40px 48px 72px;
+  background: #dedcd8;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+ol, ul { list-style: none; padding: 0; }
+:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; } /* 金＝focus 指示 */
+
+/* ---------- 樣張頁本身（不是 app 的一部分）---------- */
+.sheet-head { max-width: 760px; margin-bottom: 32px; color: #3b3a38; }
+.sheet-head h1 { margin: 2px 0 8px; font: 700 26px/34px var(--font-sans); }
+.sheet-head p { font-size: 15px; line-height: 26px; color: #5d5b57; }
+.sheet-kicker { font-size: 13px; line-height: 20px; letter-spacing: 0.04em; }
+.sheet-sub { margin: 64px 0 20px; max-width: 760px; color: #3b3a38; }
+.sheet-sub h2 { font: 700 18px/26px var(--font-sans); }
+.sheet-sub p { margin-top: 4px; font-size: 14px; line-height: 24px; color: #5d5b57; }
+.sheet { display: flex; gap: 64px; align-items: flex-start; width: max-content; }
+.frame { position: relative; width: 390px; }
+.frame figcaption { height: 44px; font-size: 13px; line-height: 20px; color: #5d5b57; }
+.frame figcaption b { display: block; font: 700 13px/20px ui-monospace, Consolas, monospace; color: #3b3a38; }
+.frame-notes { margin-top: 12px; padding-left: 0; font-size: 13px; line-height: 21px; color: #5d5b57; }
+.frame-notes li { position: relative; padding-left: 44px; margin-bottom: 4px; }
+.frame-notes li b { position: absolute; left: 0; top: 2px; padding: 0 5px; border: 1px solid #a9a6a0; border-radius: 3px; font: 700 11px/1.5 var(--font-sans); color: #3b3a38; }
+/* 真機可視高的刻度：畫在手機框外，不進單張截圖 */
+.fold { position: absolute; left: 394px; width: 52px; border-top: 1px solid #a9a6a0; font: 11px/1.3 ui-monospace, Consolas, monospace; color: #77746f; padding: 2px 0 0 6px; white-space: nowrap; }
+.fold-664 { top: calc(44px + 664px); }
+.fold-763 { top: calc(44px + 763px); }
+
+.phone { position: relative; width: 390px; height: 844px; overflow: hidden; background: var(--color-surface-base); }
+.screen { position: relative; display: flex; flex-direction: column; height: 100%; }
+
+/* ============================================================
+   共用零件
+   ============================================================ */
+.lucide { flex: none; display: block; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 0 20px;
+  border: 1px solid transparent; border-radius: var(--radius-btn);
+  font: 700 var(--text-body)/1 var(--font-sans); white-space: nowrap;
+  transition: transform var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+}
+.btn:active { transform: translateY(1px); }
+.btn-sm { min-height: 44px; padding: 0 16px; }
+.btn-primary { background: var(--color-primary); color: var(--color-primary-fg); box-shadow: var(--shadow-button); }
+.btn-gold { background: var(--color-gold); color: var(--color-gold-ink); box-shadow: var(--shadow-button); }
+.btn-secondary { background: var(--color-surface-card); border-color: var(--color-line-strong); color: var(--color-ink); }
+.btn-on-deep { background: transparent; border-color: rgba(231, 241, 236, 0.22); color: var(--color-ink-on-deep); }
+.btn-danger-on-deep { border-color: rgba(224, 142, 121, 0.5); color: var(--color-danger-on-deep); }
+
+/* 唯一的返回鍵 */
+.back-btn {
+  flex: none; display: grid; place-items: center; width: 44px; height: 44px;
+  border: 0; border-radius: 10px; background: rgba(255, 255, 255, 0.08); color: var(--color-ink-on-deep);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.back-btn:active { transform: scale(0.95); }
+.icon-btn {
+  display: grid; place-items: center; width: 44px; height: 44px;
+  border: 0; border-radius: 10px; background: none; color: var(--color-ink-on-deep-dim);
+}
+
+/* 唯一的裝飾：標題底下的一筆墨（向量取自 ink-brush.vue）。墨色跟表面走；贏的那一筆是金（reward 指示）。 */
+.ink-brush { display: block; margin-top: 6px; color: var(--ink-brush-on-deep); filter: blur(0.35px); }
+.ink-brush path { fill: currentColor; }
+.ink-brush.is-reward { color: var(--color-gold); filter: none; }
+
+.section-label {
+  margin: 18px 0 8px;
+  font: 700 var(--text-label)/18px var(--font-sans); letter-spacing: 0.06em; color: var(--color-ink-muted);
+}
+.eyebrow {
+  font: 700 var(--text-label)/18px var(--font-sans); letter-spacing: 0.06em; color: var(--color-ink-on-deep-dim);
+}
+.eyebrow-jade { color: var(--color-primary-dark); }
+.card-title { margin-top: 4px; font: 700 var(--text-title)/1.3 var(--font-display); }
+.num { font: var(--text-caption)/1 var(--font-num); font-variant-numeric: tabular-nums; color: var(--color-ink-muted); }
+
+.progress { display: flex; align-items: center; gap: 10px; }
+.progress-track { flex: 1; height: 6px; overflow: hidden; border-radius: 999px; background: var(--color-line-subtle); }
+.progress-track i { display: block; height: 100%; border-radius: 999px; background: var(--color-primary); transform-origin: left; }
+
+/* ---------- 木框（唯一一種）＋ Wood12 ＋ Gioco Wood ---------- */
+.wood {
+  position: relative; width: 358px; padding: 15px; border-radius: var(--radius-card);
+  background: linear-gradient(160deg, #6f4b30, #523722);
+}
+.wood-on-deep {
+  box-shadow: 0 0 0 1px var(--wood-edge-on-deep), var(--shadow-on-deep),
+    inset 0 1px 0 rgba(255, 228, 194, 0.2), inset 0 -2px 6px var(--wood-inset);
+}
+.wood-on-cream {
+  box-shadow: 0 0 0 1px var(--wood-edge-on-cream), var(--shadow-lift),
+    inset 0 1px 0 rgba(255, 228, 194, 0.2), inset 0 -2px 6px var(--wood-inset);
+}
+.cg { position: relative; width: 328px; height: 328px; background: url('/board/wood12.jpg') 0 0 / 100% 100% no-repeat; }
+.pc { position: absolute; z-index: 2; width: 41px; height: 41px; }
+.pc-b { filter: brightness(1.2); } /* --piece-dark-brightness，同 board-theme.css */
+.sq-last { position: absolute; width: 41px; height: 41px; background: #9bc70069; } /* chessground 預設 last-move */
+.annot { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; pointer-events: none; }
+.coord {
+  position: absolute; transform: translate(-50%, -50%);
+  font: 11px/1 var(--font-num); color: rgba(233, 217, 186, 0.9); text-shadow: 0 1px 0 var(--wood-inset);
+}
+
+/* ---------- Neve 對話框（唯一一種；淺卡＝她在說明，深青＝她要你動手）---------- */
+.neve-box { padding: 15px; border: 1px solid transparent; border-radius: var(--radius-card); }
+.neve-box.is-light { background: var(--color-surface-card); border-color: var(--color-line); color: var(--color-ink); box-shadow: var(--shadow-card); }
+.neve-box.is-deep { background: var(--color-surface-deep); color: var(--color-ink-on-deep); box-shadow: var(--shadow-lift); }
+.neve-head { display: flex; align-items: center; gap: 10px; min-height: 36px; margin-bottom: 6px; }
+.neve-head.has-nav { min-height: 46px; margin-bottom: 8px; }
+.neve-avatar { flex: none; border-radius: 50%; object-fit: cover; }
+.neve-avatar.on-cream { box-shadow: 0 0 0 1px var(--color-line); }
+.neve-avatar.on-deep { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25); filter: brightness(1.1); }
+/* 名牌只有這一種：人格檔規定的點陣「NEVE」，11px 正好在 Cubic 11 的格線上 */
+.neve-name { font: 11px/1 var(--font-num); letter-spacing: 0.08em; color: var(--color-ink-muted); }
+.is-deep .neve-name { color: var(--color-ink-on-deep-dim); }
+.neve-say { font: var(--text-body)/1.8 var(--font-lesson); }
+.neve-nav { display: flex; margin-left: auto; border: 1px solid var(--color-line); border-radius: var(--radius-btn); }
+.is-deep .neve-nav { border-color: var(--hairline-on-deep); }
+.neve-nav.is-hidden { visibility: hidden; } /* 分析中：位置留著，不畫停用的控制項 */
+.step-btn {
+  display: grid; place-items: center; width: 44px; height: 44px;
+  border: 0; background: transparent; color: var(--color-ink-muted);
+}
+.is-deep .step-btn { color: var(--color-ink-on-deep); }
+.step-btn + .step-btn { border-left: 1px solid var(--color-line); }
+.is-deep .step-btn + .step-btn { border-left-color: var(--hairline-on-deep); }
+.step-btn:disabled .lucide { opacity: 0.35; }
+.text-link { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-body); text-decoration: underline; text-underline-offset: 4px; }
+.text-link.on-deep { color: var(--color-ink-on-deep); text-decoration-color: rgba(231, 241, 236, 0.4); }
+
+/* ============================================================
+   骨架一：外框頁（米白內容＋一條深青頂帶＋底部導覽）
+   ============================================================ */
+.shell { background: var(--color-surface-base); }
+.band { flex: none; overflow: hidden; background: var(--color-surface-deep); color: var(--color-ink-on-deep); } /* overflow：卡片的陰影不滲到米白上 */
+.brand-row { display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 6px 0 var(--page-x); }
+.brand { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+.brand-mark { width: auto; height: 18px; }
+.wordmark { transform: translateY(1px); font: 900 18px/1 var(--font-brand); letter-spacing: 0.04em; }
+.band-body { padding: 4px var(--page-x) 20px; }
+.greet { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: var(--text-body); }
+.page-title { font: 700 var(--text-page)/34px var(--font-display); }
+
+.content { flex: 1; min-height: 0; padding: 0 var(--page-x) 96px; overflow-y: auto; scrollbar-width: none; }
+.content::-webkit-scrollbar { display: none; }
+
+/* 深青上的浮起面：#18443a。首頁那張卡坐在頂帶裡，米白從它下面才開始。 */
+.deep-card {
+  margin: 0 var(--page-x) 20px; padding: 15px;
+  border: 1px solid var(--hairline-on-deep); border-radius: var(--radius-card);
+  background: var(--color-surface-deep-2); color: var(--color-ink-on-deep); box-shadow: var(--shadow-on-deep);
+}
+.deep-card.is-live { border-left: 4px solid var(--color-gold); padding-left: 12px; } /* 金＝進行中的指示，現況就有 */
+.deep-card-meta { margin-top: 2px; font-size: var(--text-body); color: var(--color-ink-on-deep-dim); }
+.deep-card-actions { display: flex; align-items: center; gap: 18px; margin-top: 14px; }
+
+.card {
+  display: block; padding: 15px; border: 1px solid var(--color-line); border-radius: var(--radius-card);
+  background: var(--color-surface-card); box-shadow: var(--shadow-card);
+}
+.card-accent { border-left: 4px solid var(--color-primary); padding-left: 12px; }
+.card-row { display: flex; align-items: center; gap: 12px; }
+.card-main { flex: 1; min-width: 0; }
+.card .btn { margin-top: 12px; }
+.card .progress { margin-top: 14px; }
+.chapter-badge {
+  position: relative; flex: none; display: grid; place-items: center; border-radius: 50%;
+  background: var(--color-surface-card);
+  box-shadow: 0 0 0 2.5px var(--color-gold), 0 4px 14px rgba(61, 34, 16, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.chapter-badge i { position: absolute; border-radius: 50%; background: rgba(28, 112, 89, 0.5); }
+.chapter-badge svg { display: block; }
+.chapter-badge svg * { fill: var(--color-primary); stroke: none; }
+
+.row-link {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 64px; padding: 9px 9px 9px 15px;
+  border: 1px solid var(--color-line); border-radius: var(--radius-card); background: var(--color-surface-card);
+  box-shadow: var(--shadow-card);
+}
+.row-main { display: grid; gap: 2px; }
+.row-title { font: 700 var(--text-body)/1.4 var(--font-sans); }
+.row-meta { font-size: var(--text-label); line-height: 1.4; color: var(--color-ink-muted); }
+.row-go { display: flex; align-items: center; gap: 2px; font: 700 var(--text-label)/1 var(--font-sans); color: var(--color-primary-dark); }
+
+.tabbar { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 var(--page-x) 14px; pointer-events: none; }
+.tabbar-pill {
+  display: flex; gap: 4px; padding: 6px; border-radius: 999px; pointer-events: auto;
+  background: var(--color-surface-deep); box-shadow: var(--shadow-lift);
+}
+.tab {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px; border-radius: 999px;
+  font: 700 var(--text-label)/1 var(--font-sans); color: var(--color-ink-on-deep-dim);
+}
+.tab.is-active { background: var(--color-surface-deep-2); color: #fff; }
+
+/* 404：共用的 Neve 淺卡，右邊一顆倒下的國王（Gioco 剪影，取代現況的 Unicode 棋子） */
+.lost { margin-top: 20px; }
+.lost-row { display: flex; align-items: center; gap: 12px; }
+.lost-main { flex: 1; min-width: 0; }
+.fallen-king { flex: none; width: 64px; height: 64px; margin-right: 6px; transform: rotate(64deg); } /* 正在倒下，不是平躺：平躺的剪影認不出是國王 */
+.fallen-king * { fill: var(--color-line-strong); stroke: none; }
+.lost-actions { margin-top: 16px; }
+
+/* ============================================================
+   骨架二：棋盤頁（深青底＋頂列＋木盤＋下方一塊）
+   ============================================================ */
+.board-page { background: var(--color-surface-deep); color: var(--color-ink-on-deep); }
+.top-row { flex: none; display: flex; align-items: center; gap: 12px; height: 60px; padding: 0 var(--page-x); }
+.top-titles { flex: 1; min-width: 0; }
+.top-title { font: 700 var(--text-heading)/22px var(--font-display); }
+.top-sub { display: block; font-size: var(--text-label); line-height: 18px; color: var(--color-ink-on-deep-dim); white-space: nowrap; }
+.top-action {
+  display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 0 0 8px;
+  border: 0; background: none; font-size: var(--text-body); color: var(--color-ink-on-deep);
+}
+.top-action.is-hidden { visibility: hidden; }
+.board-wrap { flex: none; padding: 4px var(--page-x) 0; }
+.side { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 12px var(--page-x) 16px; }
+
+.ident { flex: none; display: flex; align-items: center; justify-content: space-between; height: 24px; }
+.you { font-size: var(--text-body); line-height: 1; }
+.status { display: flex; align-items: center; gap: 8px; width: 80px; font: 700 var(--text-body)/1 var(--font-sans); } /* 固定寬：「輪到你」換成「思考中」左緣不動 */
+.turn-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--color-gold); }
+
+.moves-label {
+  flex: none; margin-top: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--hairline-on-deep);
+  font: 700 var(--text-label)/18px var(--font-sans); letter-spacing: 0.06em; color: var(--color-ink-on-deep-dim);
+}
+.moves { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding-top: 4px; font: var(--text-notation)/1 var(--font-num); font-variant-numeric: tabular-nums; }
+.moves::-webkit-scrollbar { display: none; }
+.moves li { display: grid; grid-template-columns: 40px 1fr 1fr; align-items: center; height: 28px; }
+.mv-n { color: var(--color-ink-on-deep-dim); }
+.mv.is-latest { justify-self: start; margin-left: -8px; padding: 5px 8px 4px; border-radius: 4px; background: rgba(231, 241, 236, 0.16); color: #fff; }
+.actions { flex: none; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 12px; border-top: 1px solid var(--hairline-on-deep); }
+
+/* 完局：結果是這一刻的標題，直接寫在深青上；一筆墨在底下。Neve 的淺卡只說話，出口在卡片外。 */
+.side.is-over { overflow-y: auto; scrollbar-width: none; padding-bottom: 0; }
+.side.is-over::-webkit-scrollbar { display: none; }
+.side.is-over .moves { flex: none; overflow: visible; padding-bottom: 8px; }
+.result { flex: none; }
+.side.is-over .moves-label { margin-top: 12px; }
+.result-title { font: 700 var(--text-page)/34px var(--font-display); }
+.result .ink-brush { margin-top: 2px; transform-origin: left center; }
+.result .neve-box { margin-top: 10px; }
+.result-actions { display: flex; gap: 12px; margin-top: 10px; }
+.result-actions .btn:first-child { flex: 1; }
+.enter { animation: rise var(--dur-slow) var(--ease-out) both; }
+.enter .ink-brush { animation: stroke var(--dur) var(--ease-out) 120ms both; }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+@keyframes stroke { from { opacity: 0; transform: scaleX(0.2); } }
+@media (prefers-reduced-motion: reduce) { .enter, .enter .ink-brush { animation: none; } .btn, .back-btn { transition: none; } }
+
+/* ============================================================
+   棋憶：棋盤頁的頂列＋米白內容
+   ============================================================ */
+.review-page { background: var(--color-surface-base); }
+.review-body { flex: 1; min-height: 0; padding: 12px var(--page-x) 16px; overflow-y: auto; scrollbar-width: none; }
+.review-body::-webkit-scrollbar { display: none; }
+.dots { display: flex; align-items: center; justify-content: center; gap: 6px; height: 24px; }
+.dots i { width: 6px; height: 6px; border-radius: 999px; background: var(--color-line-strong); }
+.dots i.is-on { width: 18px; background: var(--color-primary); }
+.dots i.is-on.is-ask { background: var(--color-gold); } /* 深青格的段點是金（人格檔的分工表） */
+/* 對話框定高：裝得下最長的一般模板（三行說明）。更長的只在框內捲，框外的東西不動。 */
+.moment-box { display: flex; flex-direction: column; height: 264px; }
+.moment-title { font: 700 var(--text-title)/30px var(--font-display); }
+.moves-said { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; margin: 4px 0 8px; font-size: var(--text-body); line-height: 24px; }
+.moves-said dt { color: var(--color-ink-muted); }
+.moves-said dd { font-weight: 700; color: var(--color-ink); }
+.moment-scroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
+.moment-scroll::-webkit-scrollbar { display: none; }
+.moment-box .progress { margin-top: 16px; }
+.from-game { margin-bottom: 2px; font-size: var(--text-label); line-height: 18px; color: var(--color-ink-on-deep-dim); }
+.end-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+
+/* ============================================================
+   語彙表（樣張附錄）
+   ============================================================ */
+.kit { width: max-content; margin-top: 64px; }
+.kit > h2 { font: 700 18px/1.4 var(--font-sans); color: #3b3a38; }
+.kit > p { margin: 4px 0 20px; font-size: 14px; color: #5d5b57; }
+.kit-grid { display: grid; grid-template-columns: repeat(3, 390px); gap: 24px 64px; align-items: start; }
+.kit-cell { padding: 16px; border-radius: 12px; }
+.kit-cell.on-cream-bg { background: var(--color-surface-base); }
+.kit-cell.on-deep-bg { background: var(--color-surface-deep); color: var(--color-ink-on-deep); }
+.kit-cell > h3 { margin-bottom: 12px; font: 700 13px/1.4 var(--font-sans); letter-spacing: 0.06em; color: var(--color-ink-muted); }
+.kit-cell.on-deep-bg > h3 { color: var(--color-ink-on-deep-dim); }
+.kit-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.kit-stack { display: grid; gap: 14px; }
+.type-list { display: grid; gap: 10px; }
+.type-list small { display: block; font: 12px/1.4 var(--font-sans); color: var(--color-ink-muted); }
+.sheet-foot { max-width: 760px; margin-top: 40px; font-size: 13px; line-height: 1.7; color: #5d5b57; }
+
+</style>
+</head>
+<body>
+<header class="sheet-head">
+  <p class="sheet-kicker">Gambit 第 0 波樣張 · 2026-11-17 · 第二版</p>
+  <h1>地基：只把現有的語彙收齊</h1>
+  <p>沒有加任何新圖像或新裝飾。兩種頁：外框頁（米白內容加一條深青頂帶）與棋盤頁（深青底、木盤、Neve 對話框）。一個返回鍵、一個木框、一個 Neve 對話框、一筆墨。B 與 C 都疊在這一層上面。每張下面標了哪些是還沒拍板的提案。右側兩條刻度是真機的可視高：Safari 分頁約 664，主畫面 PWA 約 763。</p>
+</header>
+<div class="sheet">
+<figure class="frame"><figcaption><b>home-returning</b>首頁・回訪（15:00，下過 4 盤）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="home-returning"><div class="screen shell">
+  <header class="band">
+    <div class="brand-row"><a class="brand" href="#" aria-label="GAMBIT 首頁"><svg class="brand-mark" viewBox="423 143 406 919" aria-hidden="true"><g transform="translate(0,1254) scale(0.1,-0.1)" fill="#F8B500"><path d="M6205 11016 c-64 -29 -105 -94 -105 -167 0 -51 11 -73 67 -131 l46 -46 -12 -129 c-41 -430 -186 -833 -348 -961 -80 -63 -120 -77 -218 -77 -83 0 -96 3 -165 36 -118 57 -267 197 -423 398 l-41 53 22 39 c46 79 18 190 -58 229 -51 26 -125 26 -167 0 -98 -60 -94 -228 7 -280 21 -11 47 -20 58 -20 21 0 42 -18 42 -37 0 -8 28 -60 62 -116 83 -138 191 -364 233 -489 55 -168 68 -259 62 -438 -6 -155 -11 -186 -61 -375 -40 -150 -52 -285 -38 -416 35 -307 172 -558 425 -775 74 -65 65 -107 -34 -157 -42 -21 -49 -31 -65 -93 -1 -7 -55 -37 -119 -68 -120 -58 -155 -91 -155 -143 0 -43 64 -96 200 -167 76 -40 142 -82 157 -100 39 -46 79 -142 100 -237 25 -117 25 -474 -1 -638 -64 -419 -207 -816 -397 -1101 -83 -125 -214 -257 -297 -299 -114 -58 -128 -93 -63 -164 55 -60 71 -97 71 -164 -1 -108 -39 -161 -235 -329 -139 -118 -233 -214 -271 -279 -104 -178 -102 -390 4 -544 78 -112 76 -108 58 -136 -9 -14 -51 -49 -93 -78 -42 -28 -91 -65 -110 -81 l-33 -28 0 -150 c0 -83 5 -158 10 -169 124 -231 3224 -272 3812 -49 85 32 88 38 88 215 l0 151 -27 26 c-16 13 -67 53 -116 87 -111 80 -117 90 -80 143 65 94 77 115 96 168 28 79 33 209 12 290 -39 150 -118 254 -329 434 -179 152 -221 207 -233 304 -8 68 10 120 62 181 69 80 61 111 -43 166 -256 135 -510 573 -641 1105 -62 255 -75 361 -76 615 0 239 10 323 53 438 37 102 86 150 231 226 124 65 191 122 191 162 0 60 -47 102 -178 160 -71 31 -89 43 -96 66 -15 51 -22 58 -75 84 -104 51 -99 75 34 202 58 54 127 129 154 166 217 292 278 673 166 1028 -43 137 -58 252 -52 408 10 269 71 436 336 920 35 63 42 71 75 76 21 3 49 15 64 26 32 23 72 97 72 133 0 40 -42 113 -79 137 -24 17 -49 23 -86 23 -123 0 -200 -122 -146 -232 11 -25 21 -49 21 -56 0 -18 -155 -207 -241 -293 -98 -98 -181 -153 -272 -181 -176 -53 -329 22 -447 221 -115 195 -203 524 -234 877 l-5 61 39 32 c63 51 89 121 70 191 -27 101 -142 157 -235 116z"/></g></svg><span class="wordmark">GAMBIT</span></a><button class="icon-btn on-deep" type="button" aria-label="設定"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+    <div class="band-body">
+      <p class="greet"><img class="neve-avatar neve-avatar-36 on-deep" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span>午安</span></p>
+      <h1 class="page-title">棋盤未曾離開，你來了。</h1>
+      <svg class="ink-brush" width="290" height="12" viewBox="0 0 290 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2.5,5.2 L8.7,5.1 L14.9,5.0 L21.1,4.9 L27.3,4.8 L33.5,4.7 L39.7,4.6 L45.9,4.5 L52.1,4.4 L58.3,4.3 L64.5,4.2 L70.7,4.1 L76.8,4.0 L83.0,3.9 L89.2,3.9 L95.4,3.8 L101.6,3.8 L107.8,3.7 L114.0,3.7 L120.2,3.7 L126.4,3.7 L132.6,3.8 L138.8,3.8 L145.0,3.8 L151.2,5.0 L157.4,4.8 L163.6,4.5 L169.8,4.3 L176.0,4.3 L182.2,4.5 L188.4,4.9 L194.6,5.2 L200.8,5.4 L207.0,5.5 L213.2,5.4 L219.3,5.3 L225.5,5.3 L231.7,5.4 L237.9,5.7 L244.1,6.0 L250.3,6.1 L256.5,6.2 L262.7,6.3 L268.9,6.4 L275.1,6.4 L281.3,6.5 L287.5,6.6 L287.5,7.2 L281.3,7.1 L275.1,7.0 L268.9,7.0 L262.7,6.9 L256.5,6.8 L250.3,6.7 L244.1,6.6 L237.9,6.7 L231.7,6.8 L225.5,6.7 L219.3,6.5 L213.2,6.3 L207.0,6.1 L200.8,6.0 L194.6,6.0 L188.4,6.2 L182.2,6.5 L176.0,6.6 L169.8,6.5 L163.6,6.2 L157.4,5.8 L151.2,5.6 L145.0,6.7 L138.8,6.8 L132.6,6.8 L126.4,6.9 L120.2,7.0 L114.0,7.0 L107.8,7.1 L101.6,7.2 L95.4,7.2 L89.2,7.3 L83.0,7.3 L76.8,7.4 L70.7,7.5 L64.5,7.5 L58.3,7.5 L52.1,7.6 L45.9,7.6 L39.7,7.6 L33.5,7.6 L27.3,7.6 L21.1,7.6 L14.9,7.6 L8.7,7.6 L2.5,7.5 Z"/></svg>
+    </div>
+    <div class="deep-card">
+  <p class="eyebrow">今日</p>
+  <p class="card-title">開始新對局</p>
+  <p class="deep-card-meta">自選強度與執子</p>
+  <div class="deep-card-actions"><a class="btn btn-gold btn-sm" href="#">開始對局 <svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div>
+</div>
+  </header>
+  <main class="content">
+    <h2 class="section-label">繼續學習</h2>
+<div class="card card-accent">
+  <div class="card-row">
+    <div class="card-main">
+      <p class="eyebrow eyebrow-jade">基礎規則</p>
+      <p class="card-title">騎士與后</p>
+      <a class="btn btn-primary btn-sm" href="#">繼續 · 第 3 課 <svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+    </div>
+    <div class="chapter-badge" style="width:52px;height:52px" aria-hidden="true"><i style="left:24.5px;top:1px;width:3px;height:3px"></i><i style="left:47px;top:24.5px;width:3px;height:3px"></i><i style="left:24.5px;top:47px;width:3px;height:3px"></i><i style="left:1px;top:24.5px;width:3px;height:3px"></i><svg viewBox="0 0 50 50" width="33" height="33"><path fill-rule="evenodd" clip-rule="evenodd" d="M25 12.264C21.4394 12.2643 18.5528 14.919 18.5528 18.1948C18.5528 19.8985 19.3519 21.5201 20.7427 22.6449H19.0769C17.7645 22.6449 16.6778 23.6223 16.6778 24.802V25.2397C16.6778 26.4194 17.7645 27.3973 19.0769 27.3973H21.4531C21.4531 34.6899 12.1109 33.8536 12.7643 44.1763L24.9993 44.1683L37.2348 44.1763C37.8881 33.8533 28.546 34.6899 28.546 27.3973H30.9222C32.2345 27.3973 33.3213 26.4194 33.3213 25.2397V24.802C33.3213 23.6223 32.2346 22.6449 30.9222 22.6449H29.2564C30.6472 21.52 31.4463 19.8985 31.4463 18.1948C31.4463 14.919 28.5605 12.2644 25 12.264Z" fill="#000" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+  </div>
+  <div class="progress"><div class="progress-track"><i style="transform:scaleX(0.095)"></i></div><span class="num">2/21</span></div>
+</div><h2 class="section-label">上一盤</h2>
+<a class="row-link" href="#">
+  <span class="row-main"><span class="row-title">你贏了 · 對 初學</span><span class="row-meta">11 月 16 日 · 執白</span></span>
+  <span class="row-go">棋憶 <svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span>
+</a>
+  </main>
+  <nav class="tabbar" aria-label="主要導覽"><div class="tabbar-pill">
+  <a href="#" class="tab is-active" aria-current="page"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>首頁</span></a>
+  <a href="#" class="tab"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg><span>學習</span></a>
+</div></nav>
+</div></section>
+<ul class="frame-notes"><li><b>提案</b>「棋盤未曾離開，你來了。」用明朝當頁面題詞。人格檔規定 Neve 的話一律文楷加對話框，這一句是例外，等第 7 節 6 裁決。</li><li><b>提案</b>「開始新對局」卡收進頂帶，米白從卡片下面才開始。卡片裡的排法沒動。</li><li><b>待定</b>順序照 2026-07-22：對局、學習，「上一盤」排最後。Safari 可視高 664 時它在導覽底下，要捲。往上移的版本在下面的對照。</li></ul></figure>
+<figure class="frame"><figcaption><b>home-resume</b>首頁・有一盤沒下完（22:00）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="home-resume"><div class="screen shell">
+  <header class="band">
+    <div class="brand-row"><a class="brand" href="#" aria-label="GAMBIT 首頁"><svg class="brand-mark" viewBox="423 143 406 919" aria-hidden="true"><g transform="translate(0,1254) scale(0.1,-0.1)" fill="#F8B500"><path d="M6205 11016 c-64 -29 -105 -94 -105 -167 0 -51 11 -73 67 -131 l46 -46 -12 -129 c-41 -430 -186 -833 -348 -961 -80 -63 -120 -77 -218 -77 -83 0 -96 3 -165 36 -118 57 -267 197 -423 398 l-41 53 22 39 c46 79 18 190 -58 229 -51 26 -125 26 -167 0 -98 -60 -94 -228 7 -280 21 -11 47 -20 58 -20 21 0 42 -18 42 -37 0 -8 28 -60 62 -116 83 -138 191 -364 233 -489 55 -168 68 -259 62 -438 -6 -155 -11 -186 -61 -375 -40 -150 -52 -285 -38 -416 35 -307 172 -558 425 -775 74 -65 65 -107 -34 -157 -42 -21 -49 -31 -65 -93 -1 -7 -55 -37 -119 -68 -120 -58 -155 -91 -155 -143 0 -43 64 -96 200 -167 76 -40 142 -82 157 -100 39 -46 79 -142 100 -237 25 -117 25 -474 -1 -638 -64 -419 -207 -816 -397 -1101 -83 -125 -214 -257 -297 -299 -114 -58 -128 -93 -63 -164 55 -60 71 -97 71 -164 -1 -108 -39 -161 -235 -329 -139 -118 -233 -214 -271 -279 -104 -178 -102 -390 4 -544 78 -112 76 -108 58 -136 -9 -14 -51 -49 -93 -78 -42 -28 -91 -65 -110 -81 l-33 -28 0 -150 c0 -83 5 -158 10 -169 124 -231 3224 -272 3812 -49 85 32 88 38 88 215 l0 151 -27 26 c-16 13 -67 53 -116 87 -111 80 -117 90 -80 143 65 94 77 115 96 168 28 79 33 209 12 290 -39 150 -118 254 -329 434 -179 152 -221 207 -233 304 -8 68 10 120 62 181 69 80 61 111 -43 166 -256 135 -510 573 -641 1105 -62 255 -75 361 -76 615 0 239 10 323 53 438 37 102 86 150 231 226 124 65 191 122 191 162 0 60 -47 102 -178 160 -71 31 -89 43 -96 66 -15 51 -22 58 -75 84 -104 51 -99 75 34 202 58 54 127 129 154 166 217 292 278 673 166 1028 -43 137 -58 252 -52 408 10 269 71 436 336 920 35 63 42 71 75 76 21 3 49 15 64 26 32 23 72 97 72 133 0 40 -42 113 -79 137 -24 17 -49 23 -86 23 -123 0 -200 -122 -146 -232 11 -25 21 -49 21 -56 0 -18 -155 -207 -241 -293 -98 -98 -181 -153 -272 -181 -176 -53 -329 22 -447 221 -115 195 -203 524 -234 877 l-5 61 39 32 c63 51 89 121 70 191 -27 101 -142 157 -235 116z"/></g></svg><span class="wordmark">GAMBIT</span></a><button class="icon-btn on-deep" type="button" aria-label="設定"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+    <div class="band-body">
+      <p class="greet"><img class="neve-avatar neve-avatar-36 on-deep" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span>晚安</span></p>
+      <h1 class="page-title">棋盤未曾離開，你來了。</h1>
+      <svg class="ink-brush" width="290" height="12" viewBox="0 0 290 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2.5,5.2 L8.7,5.1 L14.9,5.0 L21.1,4.9 L27.3,4.8 L33.5,4.7 L39.7,4.6 L45.9,4.5 L52.1,4.4 L58.3,4.3 L64.5,4.2 L70.7,4.1 L76.8,4.0 L83.0,3.9 L89.2,3.9 L95.4,3.8 L101.6,3.8 L107.8,3.7 L114.0,3.7 L120.2,3.7 L126.4,3.7 L132.6,3.8 L138.8,3.8 L145.0,3.8 L151.2,5.0 L157.4,4.8 L163.6,4.5 L169.8,4.3 L176.0,4.3 L182.2,4.5 L188.4,4.9 L194.6,5.2 L200.8,5.4 L207.0,5.5 L213.2,5.4 L219.3,5.3 L225.5,5.3 L231.7,5.4 L237.9,5.7 L244.1,6.0 L250.3,6.1 L256.5,6.2 L262.7,6.3 L268.9,6.4 L275.1,6.4 L281.3,6.5 L287.5,6.6 L287.5,7.2 L281.3,7.1 L275.1,7.0 L268.9,7.0 L262.7,6.9 L256.5,6.8 L250.3,6.7 L244.1,6.6 L237.9,6.7 L231.7,6.8 L225.5,6.7 L219.3,6.5 L213.2,6.3 L207.0,6.1 L200.8,6.0 L194.6,6.0 L188.4,6.2 L182.2,6.5 L176.0,6.6 L169.8,6.5 L163.6,6.2 L157.4,5.8 L151.2,5.6 L145.0,6.7 L138.8,6.8 L132.6,6.8 L126.4,6.9 L120.2,7.0 L114.0,7.0 L107.8,7.1 L101.6,7.2 L95.4,7.2 L89.2,7.3 L83.0,7.3 L76.8,7.4 L70.7,7.5 L64.5,7.5 L58.3,7.5 L52.1,7.6 L45.9,7.6 L39.7,7.6 L33.5,7.6 L27.3,7.6 L21.1,7.6 L14.9,7.6 L8.7,7.6 L2.5,7.5 Z"/></svg>
+    </div>
+    <div class="deep-card is-live">
+  <p class="eyebrow">進行中</p>
+  <p class="card-title">繼續對局</p>
+  <p class="deep-card-meta">第 3 手 · 執黑 · 對 初學</p>
+  <div class="deep-card-actions"><a class="btn btn-gold btn-sm" href="#">繼續 <svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a><a class="text-link on-deep" href="#">另開新對局</a></div>
+</div>
+  </header>
+  <main class="content">
+    <h2 class="section-label">繼續學習</h2>
+<div class="card card-accent">
+  <div class="card-row">
+    <div class="card-main">
+      <p class="eyebrow eyebrow-jade">基礎規則</p>
+      <p class="card-title">騎士與后</p>
+      <a class="btn btn-primary btn-sm" href="#">繼續 · 第 3 課 <svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+    </div>
+    <div class="chapter-badge" style="width:52px;height:52px" aria-hidden="true"><i style="left:24.5px;top:1px;width:3px;height:3px"></i><i style="left:47px;top:24.5px;width:3px;height:3px"></i><i style="left:24.5px;top:47px;width:3px;height:3px"></i><i style="left:1px;top:24.5px;width:3px;height:3px"></i><svg viewBox="0 0 50 50" width="33" height="33"><path fill-rule="evenodd" clip-rule="evenodd" d="M25 12.264C21.4394 12.2643 18.5528 14.919 18.5528 18.1948C18.5528 19.8985 19.3519 21.5201 20.7427 22.6449H19.0769C17.7645 22.6449 16.6778 23.6223 16.6778 24.802V25.2397C16.6778 26.4194 17.7645 27.3973 19.0769 27.3973H21.4531C21.4531 34.6899 12.1109 33.8536 12.7643 44.1763L24.9993 44.1683L37.2348 44.1763C37.8881 33.8533 28.546 34.6899 28.546 27.3973H30.9222C32.2345 27.3973 33.3213 26.4194 33.3213 25.2397V24.802C33.3213 23.6223 32.2346 22.6449 30.9222 22.6449H29.2564C30.6472 21.52 31.4463 19.8985 31.4463 18.1948C31.4463 14.919 28.5605 12.2644 25 12.264Z" fill="#000" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+  </div>
+  <div class="progress"><div class="progress-track"><i style="transform:scaleX(0.095)"></i></div><span class="num">2/21</span></div>
+</div><h2 class="section-label">上一盤</h2>
+<a class="row-link" href="#">
+  <span class="row-main"><span class="row-title">你贏了 · 對 初學</span><span class="row-meta">11 月 16 日 · 執白</span></span>
+  <span class="row-go">棋憶 <svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span>
+</a>
+  </main>
+  <nav class="tabbar" aria-label="主要導覽"><div class="tabbar-pill">
+  <a href="#" class="tab is-active" aria-current="page"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>首頁</span></a>
+  <a href="#" class="tab"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg><span>學習</span></a>
+</div></nav>
+</div></section>
+<ul class="frame-notes"><li><b>沿用</b>左邊的金邊是現況就有的「進行中」指示。三顆標籤併成一行字，重複的徽章拿掉。</li><li><b>改</b>寫「第 3 手」，算回合，和對局頁、棋憶同一種算法。現況首頁寫第 5 手，算的是半手。</li></ul></figure>
+<figure class="frame"><figcaption><b>play-midgame</b>對局・中局（執黑，對 初學）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="play-midgame"><div class="screen board-page">
+  <header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button><div class="top-titles"><h1 class="top-title">對 初學</h1><span class="top-sub">執白</span></div></header>
+  <div class="board-wrap"><div class="wood wood-on-deep"><div class="cg" role="img" aria-label="棋盤"><i class="sq-last" style="left:0px;top:0px"></i><i class="sq-last" style="left:41px;top:0px"></i><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:287px;top:287px"><img class="pc pc-b" src="/pieces/bN.svg" alt="" style="left:246px;top:287px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:205px;top:287px"><img class="pc pc-b" src="/pieces/bQ.svg" alt="" style="left:164px;top:287px"><img class="pc pc-b" src="/pieces/bK.svg" alt="" style="left:123px;top:287px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:82px;top:287px"><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:0px;top:287px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:287px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:246px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:205px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:164px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:82px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:41px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:0px;top:246px"><img class="pc pc-b" src="/pieces/bN.svg" alt="" style="left:82px;top:205px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:123px;top:164px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:41px;top:123px"><img class="pc" src="/pieces/wN.svg" alt="" style="left:0px;top:82px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:287px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:246px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:205px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:164px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:123px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:82px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:0px;top:41px"><img class="pc" src="/pieces/wR.svg" alt="" style="left:287px;top:0px"><img class="pc" src="/pieces/wN.svg" alt="" style="left:246px;top:0px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:205px;top:0px"><img class="pc" src="/pieces/wQ.svg" alt="" style="left:164px;top:0px"><img class="pc" src="/pieces/wK.svg" alt="" style="left:123px;top:0px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:82px;top:0px"><img class="pc" src="/pieces/wR.svg" alt="" style="left:41px;top:0px"></div><span class="coord" style="left:7.5px;top:35.5px">1</span><span class="coord" style="left:7.5px;top:76.5px">2</span><span class="coord" style="left:7.5px;top:117.5px">3</span><span class="coord" style="left:7.5px;top:158.5px">4</span><span class="coord" style="left:7.5px;top:199.5px">5</span><span class="coord" style="left:7.5px;top:240.5px">6</span><span class="coord" style="left:7.5px;top:281.5px">7</span><span class="coord" style="left:7.5px;top:322.5px">8</span><span class="coord" style="left:35.5px;top:350.5px">h</span><span class="coord" style="left:76.5px;top:350.5px">g</span><span class="coord" style="left:117.5px;top:350.5px">f</span><span class="coord" style="left:158.5px;top:350.5px">e</span><span class="coord" style="left:199.5px;top:350.5px">d</span><span class="coord" style="left:240.5px;top:350.5px">c</span><span class="coord" style="left:281.5px;top:350.5px">b</span><span class="coord" style="left:322.5px;top:350.5px">a</span></div></div>
+  <section class="side">
+    <div class="ident" aria-live="polite"><span class="you">你執黑</span><span class="status"><i class="turn-dot"></i>輪到你</span></div>
+    <h2 class="moves-label">棋譜</h2>
+    <ol class="moves"><li><span class="mv-n">1.</span><span class="mv">g4</span><span class="mv">e5</span></li><li><span class="mv-n">2.</span><span class="mv">Nh3</span><span class="mv">Nf6</span></li><li><span class="mv-n">3.</span><span class="mv is-latest">Rg1</span><span class="mv"></span></li></ol>
+    <div class="actions"><button class="btn btn-on-deep" type="button">悔棋</button><button class="btn btn-on-deep btn-danger-on-deep" type="button">投降</button></div>
+  </section>
+</div></section>
+<ul class="frame-notes"><li><b>提案</b>對局頁全屏：沒有底部導覽，也沒有品牌頂欄與齒輪，只有自畫的返回鍵。動到鐵則原文，等第 7 節 4a 拍板。</li><li><b>提案</b>側板的中文與按鈕回黑體，推翻 2026-06-09 的決定。棋譜仍是 Cubic 11。</li><li><b>排法</b>對手在盤的上方（頂列），你在盤的下方，和盤面方向一致。</li></ul></figure>
+<figure class="frame"><figcaption><b>play-gameover-win</b>對局・贏了（點標題重播進場）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="play-gameover-win"><div class="screen board-page">
+  <header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button><div class="top-titles"><h1 class="top-title">對 初學</h1><span class="top-sub">執白</span></div></header>
+  <div class="board-wrap"><div class="wood wood-on-deep"><div class="cg" role="img" aria-label="棋盤"><i class="sq-last" style="left:0px;top:123px"></i><i class="sq-last" style="left:82px;top:41px"></i><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:287px;top:287px"><img class="pc pc-b" src="/pieces/bN.svg" alt="" style="left:246px;top:287px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:205px;top:287px"><img class="pc pc-b" src="/pieces/bK.svg" alt="" style="left:123px;top:287px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:82px;top:287px"><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:0px;top:287px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:287px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:246px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:205px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:164px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:82px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:41px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:0px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:123px;top:164px"><img class="pc pc-b" src="/pieces/bN.svg" alt="" style="left:41px;top:123px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:82px;top:82px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:287px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:246px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:205px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:164px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:123px;top:41px"><img class="pc pc-b" src="/pieces/bQ.svg" alt="" style="left:82px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:0px;top:41px"><img class="pc" src="/pieces/wR.svg" alt="" style="left:287px;top:0px"><img class="pc" src="/pieces/wN.svg" alt="" style="left:246px;top:0px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:205px;top:0px"><img class="pc" src="/pieces/wQ.svg" alt="" style="left:164px;top:0px"><img class="pc" src="/pieces/wK.svg" alt="" style="left:123px;top:0px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:82px;top:0px"><img class="pc" src="/pieces/wR.svg" alt="" style="left:41px;top:0px"></div><span class="coord" style="left:7.5px;top:35.5px">1</span><span class="coord" style="left:7.5px;top:76.5px">2</span><span class="coord" style="left:7.5px;top:117.5px">3</span><span class="coord" style="left:7.5px;top:158.5px">4</span><span class="coord" style="left:7.5px;top:199.5px">5</span><span class="coord" style="left:7.5px;top:240.5px">6</span><span class="coord" style="left:7.5px;top:281.5px">7</span><span class="coord" style="left:7.5px;top:322.5px">8</span><span class="coord" style="left:35.5px;top:350.5px">h</span><span class="coord" style="left:76.5px;top:350.5px">g</span><span class="coord" style="left:117.5px;top:350.5px">f</span><span class="coord" style="left:158.5px;top:350.5px">e</span><span class="coord" style="left:199.5px;top:350.5px">d</span><span class="coord" style="left:240.5px;top:350.5px">c</span><span class="coord" style="left:281.5px;top:350.5px">b</span><span class="coord" style="left:322.5px;top:350.5px">a</span></div></div>
+  <section class="side is-over">
+    <div class="result enter" data-replay>
+      <h2 class="result-title">你贏了</h2>
+      <svg class="ink-brush is-reward" width="84" height="12" viewBox="0 0 84 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2.5,5.2 L4.2,5.1 L5.9,5.0 L7.7,4.9 L9.4,4.8 L11.1,4.7 L12.8,4.6 L14.5,4.5 L16.2,4.4 L18.0,4.3 L19.7,4.2 L21.4,4.1 L23.1,4.0 L24.8,3.9 L26.5,3.9 L28.3,3.8 L30.0,3.8 L31.7,3.7 L33.4,3.7 L35.1,3.7 L36.8,3.7 L38.6,3.8 L40.3,3.8 L42.0,3.8 L43.7,5.0 L45.4,4.8 L47.2,4.5 L48.9,4.3 L50.6,4.3 L52.3,4.5 L54.0,4.9 L55.7,5.2 L57.5,5.4 L59.2,5.5 L60.9,5.4 L62.6,5.3 L64.3,5.3 L66.0,5.4 L67.8,5.7 L69.5,6.0 L71.2,6.1 L72.9,6.2 L74.6,6.3 L76.3,6.4 L78.1,6.4 L79.8,6.5 L81.5,6.6 L81.5,7.2 L79.8,7.1 L78.1,7.0 L76.3,7.0 L74.6,6.9 L72.9,6.8 L71.2,6.7 L69.5,6.6 L67.8,6.7 L66.0,6.8 L64.3,6.7 L62.6,6.5 L60.9,6.3 L59.2,6.1 L57.5,6.0 L55.7,6.0 L54.0,6.2 L52.3,6.5 L50.6,6.6 L48.9,6.5 L47.2,6.2 L45.4,5.8 L43.7,5.6 L42.0,6.7 L40.3,6.8 L38.6,6.8 L36.8,6.9 L35.1,7.0 L33.4,7.0 L31.7,7.1 L30.0,7.2 L28.3,7.2 L26.5,7.3 L24.8,7.3 L23.1,7.4 L21.4,7.5 L19.7,7.5 L18.0,7.5 L16.2,7.6 L14.5,7.6 L12.8,7.6 L11.1,7.6 L9.4,7.6 L7.7,7.6 L5.9,7.6 L4.2,7.6 L2.5,7.5 Z"/></svg>
+      <div class="neve-box is-light">
+        <div class="neve-head"><img class="neve-avatar neve-avatar-36 on-cream" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span class="neve-name">NEVE</span></div>
+        <p class="neve-say">將殺成立了。</p>
+      </div>
+      <div class="result-actions">
+        <button class="btn btn-gold" type="button">我陪你看看剛剛那一步 <svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+        <button class="btn btn-on-deep" type="button">再下一盤</button>
+      </div>
+    </div>
+    <h2 class="moves-label">棋譜</h2>
+    <ol class="moves"><li><span class="mv-n">1.</span><span class="mv">g4</span><span class="mv">e5</span></li><li><span class="mv-n">2.</span><span class="mv">Nh3</span><span class="mv">Nf6</span></li><li><span class="mv-n">3.</span><span class="mv">Rg1</span><span class="mv">Nxg4</span></li><li><span class="mv-n">4.</span><span class="mv">f3</span><span class="mv">Qh4+</span></li><li><span class="mv-n">5.</span><span class="mv">Nf2</span><span class="mv is-latest">Qxf2#</span></li></ol>
+  </section>
+</div></section>
+<ul class="frame-notes"><li><b>提案</b>結果直接寫在深青上，底下一筆墨。贏的那一筆是金（獎勵指示），輸與和是一般墨色；字不染金，驚嘆號拿掉。</li><li><b>排法</b>Neve 的淺卡只說話，兩顆出口放在卡片外（人格檔：淺卡沒有行動出口）。664 可視高時兩顆都看得到，棋譜在下面可捲。</li><li><b>改</b>次要按鈕寫「再下一盤」，現況是「再來一局」。</li></ul></figure>
+<figure class="frame"><figcaption><b>review-analysing</b>棋憶・分析中（約 10 秒）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="review-analysing"><div class="screen review-page">
+  <div class="band"><header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button><div class="top-titles"><h1 class="top-title">棋憶</h1><span class="top-sub">11 月 16 日 · 執白 · 對 初學</span></div><button class="top-action is-hidden" type="button"><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>棋譜</button></header></div>
+  <main class="review-body" aria-busy="true">
+    <div class="wood wood-on-cream"><div class="cg" role="img" aria-label="棋盤"><i class="sq-last" style="left:205px;top:205px"></i><i class="sq-last" style="left:205px;top:41px"></i><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:0px;top:0px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:82px;top:0px"><img class="pc pc-b" src="/pieces/bQ.svg" alt="" style="left:123px;top:0px"><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:287px;top:0px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:0px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:41px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:82px;top:41px"><img class="pc pc-b" src="/pieces/bK.svg" alt="" style="left:164px;top:41px"><img class="pc" src="/pieces/wQ.svg" alt="" style="left:205px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:246px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:287px;top:41px"><img class="pc" src="/pieces/wN.svg" alt="" style="left:41px;top:82px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:123px;top:82px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:164px;top:123px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:82px;top:164px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:0px;top:205px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:41px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:123px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:205px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:246px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:287px;top:246px"><img class="pc pc-b" src="/pieces/bN.svg" alt="" style="left:0px;top:287px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:82px;top:287px"><img class="pc" src="/pieces/wK.svg" alt="" style="left:123px;top:287px"><img class="pc" src="/pieces/wR.svg" alt="" style="left:287px;top:287px"></div><span class="coord" style="left:7.5px;top:35.5px">8</span><span class="coord" style="left:7.5px;top:76.5px">7</span><span class="coord" style="left:7.5px;top:117.5px">6</span><span class="coord" style="left:7.5px;top:158.5px">5</span><span class="coord" style="left:7.5px;top:199.5px">4</span><span class="coord" style="left:7.5px;top:240.5px">3</span><span class="coord" style="left:7.5px;top:281.5px">2</span><span class="coord" style="left:7.5px;top:322.5px">1</span><span class="coord" style="left:35.5px;top:350.5px">a</span><span class="coord" style="left:76.5px;top:350.5px">b</span><span class="coord" style="left:117.5px;top:350.5px">c</span><span class="coord" style="left:158.5px;top:350.5px">d</span><span class="coord" style="left:199.5px;top:350.5px">e</span><span class="coord" style="left:240.5px;top:350.5px">f</span><span class="coord" style="left:281.5px;top:350.5px">g</span><span class="coord" style="left:322.5px;top:350.5px">h</span></div>
+    <div class="dots" aria-hidden="true"></div>
+    <div class="neve-box is-light moment-box" aria-live="polite">
+      <div class="neve-head has-nav"><img class="neve-avatar neve-avatar-36 on-cream" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span class="neve-name">NEVE</span><span class="neve-nav is-hidden">
+  <button class="step-btn" type="button" aria-label="上一格"><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+  <button class="step-btn" type="button" aria-label="看下一個畫面"><svg class="lucide" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+  <button class="step-btn" type="button" aria-label="下一格"><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+</span></div>
+      <p class="neve-say">讓我順著你的每一步，慢慢看過這盤。</p>
+      <div class="progress"><div class="progress-track"><i style="transform:scaleX(0.67)"></i></div><span class="num">67%</span></div>
+    </div>
+    
+  </main>
+</div></section>
+<ul class="frame-notes"><li><b>排法</b>盤面是這一盤的終局，分析前就畫得出來。對話框和完成態同高（264），切過去不跳。</li><li><b>排法</b>分析中 ‹ ▷ › 與「棋譜」不畫，位置留著。進度條緊接在那句話下面。</li></ul></figure>
+<figure class="frame"><figcaption><b>review-moment</b>棋憶・最後一格</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="review-moment"><div class="screen review-page">
+  <div class="band"><header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button><div class="top-titles"><h1 class="top-title">棋憶</h1><span class="top-sub">11 月 16 日 · 執白 · 對 初學</span></div><button class="top-action" type="button"><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>棋譜</button></header></div>
+  <main class="review-body">
+    <div class="wood wood-on-cream"><div class="cg" role="img" aria-label="棋盤"><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:0px;top:0px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:82px;top:0px"><img class="pc pc-b" src="/pieces/bQ.svg" alt="" style="left:123px;top:0px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:205px;top:0px"><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:287px;top:0px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:0px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:41px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:82px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:246px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:287px;top:41px"><img class="pc pc-b" src="/pieces/bK.svg" alt="" style="left:164px;top:82px"><img class="pc pc-b" src="/pieces/bN.svg" alt="" style="left:123px;top:123px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:164px;top:123px"><img class="pc pc-b" src="/pieces/bN.svg" alt="" style="left:41px;top:164px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:82px;top:164px"><img class="pc" src="/pieces/wN.svg" alt="" style="left:82px;top:205px"><img class="pc" src="/pieces/wQ.svg" alt="" style="left:205px;top:205px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:0px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:41px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:82px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:123px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:205px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:246px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:287px;top:246px"><img class="pc" src="/pieces/wR.svg" alt="" style="left:0px;top:287px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:82px;top:287px"><img class="pc" src="/pieces/wK.svg" alt="" style="left:164px;top:287px"><img class="pc" src="/pieces/wR.svg" alt="" style="left:287px;top:287px"><svg class="annot" viewBox="0 0 328 328" aria-hidden="true">
+    <rect x="0" y="205" width="41" height="41" fill="#888888" opacity="0.30"/>
+    <rect x="41" y="205" width="41" height="41" fill="#c4882a" opacity="0.35"/>
+    <rect x="42.5" y="206.5" width="38" height="38" fill="none" stroke="#c4882a" stroke-width="3" opacity="0.9"/>
+    <g opacity="0.85"><line x1="20.5" y1="266.5" x2="20.5" y2="238.5" stroke="#888888" stroke-width="5" stroke-linecap="round"/><polygon points="20.5,225.5 28.5,238.5 12.5,238.5" fill="#888888"/></g><g opacity="0.85"><line x1="102.5" y1="184.5" x2="70.7" y2="216.3" stroke="#c4882a" stroke-width="5" stroke-linecap="round"/><polygon points="61.5,225.5 65.0,210.7 76.3,222.0" fill="#c4882a"/></g>
+  </svg></div><span class="coord" style="left:7.5px;top:35.5px">8</span><span class="coord" style="left:7.5px;top:76.5px">7</span><span class="coord" style="left:7.5px;top:117.5px">6</span><span class="coord" style="left:7.5px;top:158.5px">5</span><span class="coord" style="left:7.5px;top:199.5px">4</span><span class="coord" style="left:7.5px;top:240.5px">3</span><span class="coord" style="left:7.5px;top:281.5px">2</span><span class="coord" style="left:7.5px;top:322.5px">1</span><span class="coord" style="left:35.5px;top:350.5px">a</span><span class="coord" style="left:76.5px;top:350.5px">b</span><span class="coord" style="left:117.5px;top:350.5px">c</span><span class="coord" style="left:158.5px;top:350.5px">d</span><span class="coord" style="left:199.5px;top:350.5px">e</span><span class="coord" style="left:240.5px;top:350.5px">f</span><span class="coord" style="left:281.5px;top:350.5px">g</span><span class="coord" style="left:322.5px;top:350.5px">h</span></div>
+    <div class="dots" aria-hidden="true"><i></i><i></i><i class="is-on"></i></div>
+    <div class="neve-box is-light moment-box" aria-live="polite">
+      <div class="neve-head has-nav"><img class="neve-avatar neve-avatar-36 on-cream" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span class="neve-name">NEVE</span><span class="neve-nav">
+  <button class="step-btn" type="button" aria-label="上一格"><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+  <button class="step-btn" type="button" aria-label="看下一個畫面"><svg class="lucide" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+  <button class="step-btn" type="button" aria-label="下一格" disabled><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+</span></div>
+      <h2 class="moment-title">第 9 手 · 兵沒人守</h2>
+      <dl class="moves-said"><dt>你走了</dt><dd>把兵移到 a3</dd><dt>更好的是</dt><dd>把主教移到 b3</dd></dl>
+      <div class="moment-scroll"><p class="neve-say">你的兵留在 c2，沒人守著。與其把兵移到 a3，不如先把主教移到 b3。</p></div>
+    </div>
+    <div class="end-actions"><button class="btn btn-primary" type="button">再下一盤</button><button class="btn btn-secondary" type="button">回首頁</button></div>
+  </main>
+</div></section>
+<ul class="frame-notes"><li><b>提案</b>頂列寫出是哪一盤。深青格的題目可能來自別盤，那一格怎麼標見下面的補畫。</li><li><b>排法</b>對話框定高 264，裝得下三行說明（補畫有三行的例子）。看完最後一格，下面出現兩顆出口。</li><li><b>改</b>標題的間隔號用「·」。字型檔裡沒有「・」，會掉到系統字。</li></ul></figure>
+<figure class="frame"><figcaption><b>empty-or-404</b>邊界・404</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="empty-or-404"><div class="screen shell">
+  <header class="band">
+    <div class="brand-row"><a class="brand" href="#" aria-label="GAMBIT 首頁"><svg class="brand-mark" viewBox="423 143 406 919" aria-hidden="true"><g transform="translate(0,1254) scale(0.1,-0.1)" fill="#F8B500"><path d="M6205 11016 c-64 -29 -105 -94 -105 -167 0 -51 11 -73 67 -131 l46 -46 -12 -129 c-41 -430 -186 -833 -348 -961 -80 -63 -120 -77 -218 -77 -83 0 -96 3 -165 36 -118 57 -267 197 -423 398 l-41 53 22 39 c46 79 18 190 -58 229 -51 26 -125 26 -167 0 -98 -60 -94 -228 7 -280 21 -11 47 -20 58 -20 21 0 42 -18 42 -37 0 -8 28 -60 62 -116 83 -138 191 -364 233 -489 55 -168 68 -259 62 -438 -6 -155 -11 -186 -61 -375 -40 -150 -52 -285 -38 -416 35 -307 172 -558 425 -775 74 -65 65 -107 -34 -157 -42 -21 -49 -31 -65 -93 -1 -7 -55 -37 -119 -68 -120 -58 -155 -91 -155 -143 0 -43 64 -96 200 -167 76 -40 142 -82 157 -100 39 -46 79 -142 100 -237 25 -117 25 -474 -1 -638 -64 -419 -207 -816 -397 -1101 -83 -125 -214 -257 -297 -299 -114 -58 -128 -93 -63 -164 55 -60 71 -97 71 -164 -1 -108 -39 -161 -235 -329 -139 -118 -233 -214 -271 -279 -104 -178 -102 -390 4 -544 78 -112 76 -108 58 -136 -9 -14 -51 -49 -93 -78 -42 -28 -91 -65 -110 -81 l-33 -28 0 -150 c0 -83 5 -158 10 -169 124 -231 3224 -272 3812 -49 85 32 88 38 88 215 l0 151 -27 26 c-16 13 -67 53 -116 87 -111 80 -117 90 -80 143 65 94 77 115 96 168 28 79 33 209 12 290 -39 150 -118 254 -329 434 -179 152 -221 207 -233 304 -8 68 10 120 62 181 69 80 61 111 -43 166 -256 135 -510 573 -641 1105 -62 255 -75 361 -76 615 0 239 10 323 53 438 37 102 86 150 231 226 124 65 191 122 191 162 0 60 -47 102 -178 160 -71 31 -89 43 -96 66 -15 51 -22 58 -75 84 -104 51 -99 75 34 202 58 54 127 129 154 166 217 292 278 673 166 1028 -43 137 -58 252 -52 408 10 269 71 436 336 920 35 63 42 71 75 76 21 3 49 15 64 26 32 23 72 97 72 133 0 40 -42 113 -79 137 -24 17 -49 23 -86 23 -123 0 -200 -122 -146 -232 11 -25 21 -49 21 -56 0 -18 -155 -207 -241 -293 -98 -98 -181 -153 -272 -181 -176 -53 -329 22 -447 221 -115 195 -203 524 -234 877 l-5 61 39 32 c63 51 89 121 70 191 -27 101 -142 157 -235 116z"/></g></svg><span class="wordmark">GAMBIT</span></a><button class="icon-btn on-deep" type="button" aria-label="設定"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+    <div class="band-body">
+      <h1 class="page-title">找不到這個頁面</h1>
+      <svg class="ink-brush" width="186" height="12" viewBox="0 0 186 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2.5,5.2 L6.4,5.1 L10.4,5.0 L14.3,4.9 L18.2,4.8 L22.2,4.7 L26.1,4.6 L30.0,4.5 L34.0,4.4 L37.9,4.3 L41.8,4.2 L45.8,4.1 L49.7,4.0 L53.7,3.9 L57.6,3.9 L61.5,3.8 L65.5,3.8 L69.4,3.7 L73.3,3.7 L77.3,3.7 L81.2,3.7 L85.1,3.8 L89.1,3.8 L93.0,3.8 L96.9,5.0 L100.9,4.8 L104.8,4.5 L108.7,4.3 L112.7,4.3 L116.6,4.5 L120.5,4.9 L124.5,5.2 L128.4,5.4 L132.3,5.5 L136.3,5.4 L140.2,5.3 L144.2,5.3 L148.1,5.4 L152.0,5.7 L156.0,6.0 L159.9,6.1 L163.8,6.2 L167.8,6.3 L171.7,6.4 L175.6,6.4 L179.6,6.5 L183.5,6.6 L183.5,7.2 L179.6,7.1 L175.6,7.0 L171.7,7.0 L167.8,6.9 L163.8,6.8 L159.9,6.7 L156.0,6.6 L152.0,6.7 L148.1,6.8 L144.2,6.7 L140.2,6.5 L136.3,6.3 L132.3,6.1 L128.4,6.0 L124.5,6.0 L120.5,6.2 L116.6,6.5 L112.7,6.6 L108.7,6.5 L104.8,6.2 L100.9,5.8 L96.9,5.6 L93.0,6.7 L89.1,6.8 L85.1,6.8 L81.2,6.9 L77.3,7.0 L73.3,7.0 L69.4,7.1 L65.5,7.2 L61.5,7.2 L57.6,7.3 L53.7,7.3 L49.7,7.4 L45.8,7.5 L41.8,7.5 L37.9,7.5 L34.0,7.6 L30.0,7.6 L26.1,7.6 L22.2,7.6 L18.2,7.6 L14.3,7.6 L10.4,7.6 L6.4,7.6 L2.5,7.5 Z"/></svg>
+    </div>
+  </header>
+  <main class="content">
+    <div class="neve-box is-light lost">
+      <div class="lost-row">
+        <div class="lost-main">
+          <div class="neve-head"><img class="neve-avatar neve-avatar-36 on-cream" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span class="neve-name">NEVE</span></div>
+          <p class="neve-say">看來這一步走到了棋盤之外。</p>
+        </div>
+        <svg class="fallen-king" viewBox="0 0 50 50" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M25.006 3.8679C23.2033 3.96766 21.7783 5.1017 21.7778 6.4863C21.7778 7.05148 22.0223 8.1302 22.4708 8.583H16.7053V13.6886H23.0109L20.4007 16.5217L23.0741 18.6886C17.4898 19.0513 11.0531 20.3315 9.92007 22.6861C8.65167 25.3237 16.1352 38.2851 16.1352 38.2851H33.8652C33.8652 38.2851 41.3487 25.3231 40.0803 22.6861C38.9466 20.3286 32.486 19.0461 26.9013 18.6871L29.6112 16.5217L27.001 13.6886H33.3066V8.583H27.5411C27.9895 8.13028 28.234 7.0515 28.234 6.4863C28.2335 5.1018 26.809 3.9676 25.0063 3.8679H25.006Z" fill="#000" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/>
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M13.242 38.286C11.8052 38.286 10.615 39.5025 10.615 40.9707V41.5156L10.6276 44.2003H39.3766L39.3891 41.5156V40.9707C39.3891 39.5025 38.1988 38.286 36.7621 38.286H25.0021H13.242Z" fill="#000" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div class="lost-actions"><a class="btn btn-primary" href="#"><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>回首頁</a></div>
+  </main>
+  <nav class="tabbar" aria-label="主要導覽"><div class="tabbar-pill">
+  <a href="#" class="tab"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>首頁</span></a>
+  <a href="#" class="tab"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg><span>學習</span></a>
+</div></nav>
+</div></section>
+<ul class="frame-notes"><li><b>改</b>這一張從「空的對局紀錄」換成 404。倒下的國王改用 Gioco 剪影（現有資產），取代現況的 Unicode 棋子與 56px 的「404」。</li><li><b>待定</b>那句話現況是黑體說明文字。這裡當成 Neve 說的，裝進共用的淺卡；不算的話改回黑體、拿掉頭像。</li></ul></figure>
+</div>
+<div class="sheet-sub">
+  <h2>對照與補畫</h2>
+  <p>不在七張之內。第一張是首頁順序的對照，其餘是審查指出沒畫到的狀態。</p>
+</div>
+<div class="sheet">
+<figure class="frame"><figcaption><b>x-home-order-b</b>對照・「上一盤」移到頂帶正下方</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-extra="x-home-order-b"><div class="screen shell">
+  <header class="band">
+    <div class="brand-row"><a class="brand" href="#" aria-label="GAMBIT 首頁"><svg class="brand-mark" viewBox="423 143 406 919" aria-hidden="true"><g transform="translate(0,1254) scale(0.1,-0.1)" fill="#F8B500"><path d="M6205 11016 c-64 -29 -105 -94 -105 -167 0 -51 11 -73 67 -131 l46 -46 -12 -129 c-41 -430 -186 -833 -348 -961 -80 -63 -120 -77 -218 -77 -83 0 -96 3 -165 36 -118 57 -267 197 -423 398 l-41 53 22 39 c46 79 18 190 -58 229 -51 26 -125 26 -167 0 -98 -60 -94 -228 7 -280 21 -11 47 -20 58 -20 21 0 42 -18 42 -37 0 -8 28 -60 62 -116 83 -138 191 -364 233 -489 55 -168 68 -259 62 -438 -6 -155 -11 -186 -61 -375 -40 -150 -52 -285 -38 -416 35 -307 172 -558 425 -775 74 -65 65 -107 -34 -157 -42 -21 -49 -31 -65 -93 -1 -7 -55 -37 -119 -68 -120 -58 -155 -91 -155 -143 0 -43 64 -96 200 -167 76 -40 142 -82 157 -100 39 -46 79 -142 100 -237 25 -117 25 -474 -1 -638 -64 -419 -207 -816 -397 -1101 -83 -125 -214 -257 -297 -299 -114 -58 -128 -93 -63 -164 55 -60 71 -97 71 -164 -1 -108 -39 -161 -235 -329 -139 -118 -233 -214 -271 -279 -104 -178 -102 -390 4 -544 78 -112 76 -108 58 -136 -9 -14 -51 -49 -93 -78 -42 -28 -91 -65 -110 -81 l-33 -28 0 -150 c0 -83 5 -158 10 -169 124 -231 3224 -272 3812 -49 85 32 88 38 88 215 l0 151 -27 26 c-16 13 -67 53 -116 87 -111 80 -117 90 -80 143 65 94 77 115 96 168 28 79 33 209 12 290 -39 150 -118 254 -329 434 -179 152 -221 207 -233 304 -8 68 10 120 62 181 69 80 61 111 -43 166 -256 135 -510 573 -641 1105 -62 255 -75 361 -76 615 0 239 10 323 53 438 37 102 86 150 231 226 124 65 191 122 191 162 0 60 -47 102 -178 160 -71 31 -89 43 -96 66 -15 51 -22 58 -75 84 -104 51 -99 75 34 202 58 54 127 129 154 166 217 292 278 673 166 1028 -43 137 -58 252 -52 408 10 269 71 436 336 920 35 63 42 71 75 76 21 3 49 15 64 26 32 23 72 97 72 133 0 40 -42 113 -79 137 -24 17 -49 23 -86 23 -123 0 -200 -122 -146 -232 11 -25 21 -49 21 -56 0 -18 -155 -207 -241 -293 -98 -98 -181 -153 -272 -181 -176 -53 -329 22 -447 221 -115 195 -203 524 -234 877 l-5 61 39 32 c63 51 89 121 70 191 -27 101 -142 157 -235 116z"/></g></svg><span class="wordmark">GAMBIT</span></a><button class="icon-btn on-deep" type="button" aria-label="設定"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+    <div class="band-body">
+      <p class="greet"><img class="neve-avatar neve-avatar-36 on-deep" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span>午安</span></p>
+      <h1 class="page-title">棋盤未曾離開，你來了。</h1>
+      <svg class="ink-brush" width="290" height="12" viewBox="0 0 290 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2.5,5.2 L8.7,5.1 L14.9,5.0 L21.1,4.9 L27.3,4.8 L33.5,4.7 L39.7,4.6 L45.9,4.5 L52.1,4.4 L58.3,4.3 L64.5,4.2 L70.7,4.1 L76.8,4.0 L83.0,3.9 L89.2,3.9 L95.4,3.8 L101.6,3.8 L107.8,3.7 L114.0,3.7 L120.2,3.7 L126.4,3.7 L132.6,3.8 L138.8,3.8 L145.0,3.8 L151.2,5.0 L157.4,4.8 L163.6,4.5 L169.8,4.3 L176.0,4.3 L182.2,4.5 L188.4,4.9 L194.6,5.2 L200.8,5.4 L207.0,5.5 L213.2,5.4 L219.3,5.3 L225.5,5.3 L231.7,5.4 L237.9,5.7 L244.1,6.0 L250.3,6.1 L256.5,6.2 L262.7,6.3 L268.9,6.4 L275.1,6.4 L281.3,6.5 L287.5,6.6 L287.5,7.2 L281.3,7.1 L275.1,7.0 L268.9,7.0 L262.7,6.9 L256.5,6.8 L250.3,6.7 L244.1,6.6 L237.9,6.7 L231.7,6.8 L225.5,6.7 L219.3,6.5 L213.2,6.3 L207.0,6.1 L200.8,6.0 L194.6,6.0 L188.4,6.2 L182.2,6.5 L176.0,6.6 L169.8,6.5 L163.6,6.2 L157.4,5.8 L151.2,5.6 L145.0,6.7 L138.8,6.8 L132.6,6.8 L126.4,6.9 L120.2,7.0 L114.0,7.0 L107.8,7.1 L101.6,7.2 L95.4,7.2 L89.2,7.3 L83.0,7.3 L76.8,7.4 L70.7,7.5 L64.5,7.5 L58.3,7.5 L52.1,7.6 L45.9,7.6 L39.7,7.6 L33.5,7.6 L27.3,7.6 L21.1,7.6 L14.9,7.6 L8.7,7.6 L2.5,7.5 Z"/></svg>
+    </div>
+    <div class="deep-card">
+  <p class="eyebrow">今日</p>
+  <p class="card-title">開始新對局</p>
+  <p class="deep-card-meta">自選強度與執子</p>
+  <div class="deep-card-actions"><a class="btn btn-gold btn-sm" href="#">開始對局 <svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div>
+</div>
+  </header>
+  <main class="content">
+    <h2 class="section-label">上一盤</h2>
+<a class="row-link" href="#">
+  <span class="row-main"><span class="row-title">你贏了 · 對 初學</span><span class="row-meta">11 月 16 日 · 執白</span></span>
+  <span class="row-go">棋憶 <svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span>
+</a><h2 class="section-label">繼續學習</h2>
+<div class="card card-accent">
+  <div class="card-row">
+    <div class="card-main">
+      <p class="eyebrow eyebrow-jade">基礎規則</p>
+      <p class="card-title">騎士與后</p>
+      <a class="btn btn-primary btn-sm" href="#">繼續 · 第 3 課 <svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+    </div>
+    <div class="chapter-badge" style="width:52px;height:52px" aria-hidden="true"><i style="left:24.5px;top:1px;width:3px;height:3px"></i><i style="left:47px;top:24.5px;width:3px;height:3px"></i><i style="left:24.5px;top:47px;width:3px;height:3px"></i><i style="left:1px;top:24.5px;width:3px;height:3px"></i><svg viewBox="0 0 50 50" width="33" height="33"><path fill-rule="evenodd" clip-rule="evenodd" d="M25 12.264C21.4394 12.2643 18.5528 14.919 18.5528 18.1948C18.5528 19.8985 19.3519 21.5201 20.7427 22.6449H19.0769C17.7645 22.6449 16.6778 23.6223 16.6778 24.802V25.2397C16.6778 26.4194 17.7645 27.3973 19.0769 27.3973H21.4531C21.4531 34.6899 12.1109 33.8536 12.7643 44.1763L24.9993 44.1683L37.2348 44.1763C37.8881 33.8533 28.546 34.6899 28.546 27.3973H30.9222C32.2345 27.3973 33.3213 26.4194 33.3213 25.2397V24.802C33.3213 23.6223 32.2346 22.6449 30.9222 22.6449H29.2564C30.6472 21.52 31.4463 19.8985 31.4463 18.1948C31.4463 14.919 28.5605 12.2644 25 12.264Z" fill="#000" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+  </div>
+  <div class="progress"><div class="progress-track"><i style="transform:scaleX(0.095)"></i></div><span class="num">2/21</span></div>
+</div>
+  </main>
+  <nav class="tabbar" aria-label="主要導覽"><div class="tabbar-pill">
+  <a href="#" class="tab is-active" aria-current="page"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>首頁</span></a>
+  <a href="#" class="tab"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg><span>學習</span></a>
+</div></nav>
+</div></section>
+<ul class="frame-notes"><li><b>提案</b>兩位審查都要求往上移：它是主迴圈的入口，664 可視高時也看得到。代價是動到 2026-07-22 的卡片順序，課程卡的按鈕換它落到導覽後面。</li></ul></figure>
+<figure class="frame"><figcaption><b>x-gameover-loss</b>補畫・輸了（投降）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-extra="x-gameover-loss"><div class="screen board-page">
+  <header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button><div class="top-titles"><h1 class="top-title">對 初學</h1><span class="top-sub">執白</span></div></header>
+  <div class="board-wrap"><div class="wood wood-on-deep"><div class="cg" role="img" aria-label="棋盤"><i class="sq-last" style="left:0px;top:0px"></i><i class="sq-last" style="left:41px;top:0px"></i><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:287px;top:287px"><img class="pc pc-b" src="/pieces/bN.svg" alt="" style="left:246px;top:287px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:205px;top:287px"><img class="pc pc-b" src="/pieces/bQ.svg" alt="" style="left:164px;top:287px"><img class="pc pc-b" src="/pieces/bK.svg" alt="" style="left:123px;top:287px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:82px;top:287px"><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:0px;top:287px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:287px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:246px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:205px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:164px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:82px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:41px;top:246px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:0px;top:246px"><img class="pc pc-b" src="/pieces/bN.svg" alt="" style="left:82px;top:205px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:123px;top:164px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:41px;top:123px"><img class="pc" src="/pieces/wN.svg" alt="" style="left:0px;top:82px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:287px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:246px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:205px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:164px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:123px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:82px;top:41px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:0px;top:41px"><img class="pc" src="/pieces/wR.svg" alt="" style="left:287px;top:0px"><img class="pc" src="/pieces/wN.svg" alt="" style="left:246px;top:0px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:205px;top:0px"><img class="pc" src="/pieces/wQ.svg" alt="" style="left:164px;top:0px"><img class="pc" src="/pieces/wK.svg" alt="" style="left:123px;top:0px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:82px;top:0px"><img class="pc" src="/pieces/wR.svg" alt="" style="left:41px;top:0px"></div><span class="coord" style="left:7.5px;top:35.5px">1</span><span class="coord" style="left:7.5px;top:76.5px">2</span><span class="coord" style="left:7.5px;top:117.5px">3</span><span class="coord" style="left:7.5px;top:158.5px">4</span><span class="coord" style="left:7.5px;top:199.5px">5</span><span class="coord" style="left:7.5px;top:240.5px">6</span><span class="coord" style="left:7.5px;top:281.5px">7</span><span class="coord" style="left:7.5px;top:322.5px">8</span><span class="coord" style="left:35.5px;top:350.5px">h</span><span class="coord" style="left:76.5px;top:350.5px">g</span><span class="coord" style="left:117.5px;top:350.5px">f</span><span class="coord" style="left:158.5px;top:350.5px">e</span><span class="coord" style="left:199.5px;top:350.5px">d</span><span class="coord" style="left:240.5px;top:350.5px">c</span><span class="coord" style="left:281.5px;top:350.5px">b</span><span class="coord" style="left:322.5px;top:350.5px">a</span></div></div>
+  <section class="side is-over">
+    <div class="result enter" data-replay>
+      <h2 class="result-title">你輸了</h2>
+      <svg class="ink-brush" width="84" height="12" viewBox="0 0 84 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2.5,5.2 L4.2,5.1 L5.9,5.0 L7.7,4.9 L9.4,4.8 L11.1,4.7 L12.8,4.6 L14.5,4.5 L16.2,4.4 L18.0,4.3 L19.7,4.2 L21.4,4.1 L23.1,4.0 L24.8,3.9 L26.5,3.9 L28.3,3.8 L30.0,3.8 L31.7,3.7 L33.4,3.7 L35.1,3.7 L36.8,3.7 L38.6,3.8 L40.3,3.8 L42.0,3.8 L43.7,5.0 L45.4,4.8 L47.2,4.5 L48.9,4.3 L50.6,4.3 L52.3,4.5 L54.0,4.9 L55.7,5.2 L57.5,5.4 L59.2,5.5 L60.9,5.4 L62.6,5.3 L64.3,5.3 L66.0,5.4 L67.8,5.7 L69.5,6.0 L71.2,6.1 L72.9,6.2 L74.6,6.3 L76.3,6.4 L78.1,6.4 L79.8,6.5 L81.5,6.6 L81.5,7.2 L79.8,7.1 L78.1,7.0 L76.3,7.0 L74.6,6.9 L72.9,6.8 L71.2,6.7 L69.5,6.6 L67.8,6.7 L66.0,6.8 L64.3,6.7 L62.6,6.5 L60.9,6.3 L59.2,6.1 L57.5,6.0 L55.7,6.0 L54.0,6.2 L52.3,6.5 L50.6,6.6 L48.9,6.5 L47.2,6.2 L45.4,5.8 L43.7,5.6 L42.0,6.7 L40.3,6.8 L38.6,6.8 L36.8,6.9 L35.1,7.0 L33.4,7.0 L31.7,7.1 L30.0,7.2 L28.3,7.2 L26.5,7.3 L24.8,7.3 L23.1,7.4 L21.4,7.5 L19.7,7.5 L18.0,7.5 L16.2,7.6 L14.5,7.6 L12.8,7.6 L11.1,7.6 L9.4,7.6 L7.7,7.6 L5.9,7.6 L4.2,7.6 L2.5,7.5 Z"/></svg>
+      <div class="neve-box is-light">
+        <div class="neve-head"><img class="neve-avatar neve-avatar-36 on-cream" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span class="neve-name">NEVE</span></div>
+        <p class="neve-say">這盤先投降了。輸贏都是練習的一部分。</p>
+      </div>
+      <div class="result-actions">
+        <button class="btn btn-gold" type="button">我陪你看看剛剛那一步 <svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+        <button class="btn btn-on-deep" type="button">再下一盤</button>
+      </div>
+    </div>
+    <h2 class="moves-label">棋譜</h2>
+    <ol class="moves"><li><span class="mv-n">1.</span><span class="mv">g4</span><span class="mv">e5</span></li><li><span class="mv-n">2.</span><span class="mv">Nh3</span><span class="mv">Nf6</span></li><li><span class="mv-n">3.</span><span class="mv is-latest">Rg1</span><span class="mv"></span></li></ol>
+  </section>
+</div></section>
+<ul class="frame-notes"><li><b>排法</b>同一個版面，那一筆是一般墨色。和局相同，只換標題與那句話。</li></ul></figure>
+<figure class="frame"><figcaption><b>x-review-long</b>補畫・三行說明的一格</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-extra="x-review-long"><div class="screen review-page">
+  <div class="band"><header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button><div class="top-titles"><h1 class="top-title">棋憶</h1><span class="top-sub">11 月 16 日 · 執白 · 對 初學</span></div><button class="top-action" type="button"><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>棋譜</button></header></div>
+  <main class="review-body">
+    <div class="wood wood-on-cream"><div class="cg" role="img" aria-label="棋盤"><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:0px;top:0px"><img class="pc pc-b" src="/pieces/bN.svg" alt="" style="left:41px;top:0px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:82px;top:0px"><img class="pc pc-b" src="/pieces/bK.svg" alt="" style="left:164px;top:0px"><img class="pc pc-b" src="/pieces/bN.svg" alt="" style="left:246px;top:0px"><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:287px;top:0px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:0px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:41px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:82px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:123px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:205px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:246px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:287px;top:41px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:82px;top:123px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:164px;top:123px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:82px;top:164px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:164px;top:164px"><img class="pc pc-b" src="/pieces/bQ.svg" alt="" style="left:287px;top:164px"><img class="pc" src="/pieces/wN.svg" alt="" style="left:205px;top:205px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:0px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:41px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:82px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:123px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:205px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:246px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:287px;top:246px"><img class="pc" src="/pieces/wR.svg" alt="" style="left:0px;top:287px"><img class="pc" src="/pieces/wN.svg" alt="" style="left:41px;top:287px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:82px;top:287px"><img class="pc" src="/pieces/wQ.svg" alt="" style="left:123px;top:287px"><img class="pc" src="/pieces/wK.svg" alt="" style="left:164px;top:287px"><img class="pc" src="/pieces/wR.svg" alt="" style="left:287px;top:287px"><svg class="annot" viewBox="0 0 328 328" aria-hidden="true">
+    <rect x="164" y="123" width="41" height="41" fill="#888888" opacity="0.30"/>
+    <rect x="287" y="164" width="41" height="41" fill="#c4882a" opacity="0.35"/>
+    <rect x="288.5" y="165.5" width="38" height="38" fill="none" stroke="#c4882a" stroke-width="3" opacity="0.9"/>
+    <g opacity="0.85"><line x1="225.5" y1="225.5" x2="190.3" y2="155.1" stroke="#888888" stroke-width="5" stroke-linecap="round"/><polygon points="184.5,143.5 197.5,151.5 183.2,158.7" fill="#888888"/></g><g opacity="0.85"><line x1="225.5" y1="225.5" x2="295.9" y2="190.3" stroke="#c4882a" stroke-width="5" stroke-linecap="round"/><polygon points="307.5,184.5 299.5,197.5 292.3,183.2" fill="#c4882a"/></g>
+  </svg></div><span class="coord" style="left:7.5px;top:35.5px">8</span><span class="coord" style="left:7.5px;top:76.5px">7</span><span class="coord" style="left:7.5px;top:117.5px">6</span><span class="coord" style="left:7.5px;top:158.5px">5</span><span class="coord" style="left:7.5px;top:199.5px">4</span><span class="coord" style="left:7.5px;top:240.5px">3</span><span class="coord" style="left:7.5px;top:281.5px">2</span><span class="coord" style="left:7.5px;top:322.5px">1</span><span class="coord" style="left:35.5px;top:350.5px">a</span><span class="coord" style="left:76.5px;top:350.5px">b</span><span class="coord" style="left:117.5px;top:350.5px">c</span><span class="coord" style="left:158.5px;top:350.5px">d</span><span class="coord" style="left:199.5px;top:350.5px">e</span><span class="coord" style="left:240.5px;top:350.5px">f</span><span class="coord" style="left:281.5px;top:350.5px">g</span><span class="coord" style="left:322.5px;top:350.5px">h</span></div>
+    <div class="dots" aria-hidden="true"><i></i><i></i><i class="is-on"></i></div>
+    <div class="neve-box is-light moment-box" aria-live="polite">
+      <div class="neve-head has-nav"><img class="neve-avatar neve-avatar-36 on-cream" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span class="neve-name">NEVE</span><span class="neve-nav">
+  <button class="step-btn" type="button" aria-label="上一格"><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+  <button class="step-btn" type="button" aria-label="看下一個畫面"><svg class="lucide" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+  <button class="step-btn" type="button" aria-label="下一格" disabled><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+</span></div>
+      <h2 class="moment-title">第 4 手 · 差點被將死</h2>
+      <dl class="moves-said"><dt>你走了</dt><dd>用騎士吃掉 e5 的兵</dd><dt>更好的是</dt><dd>用騎士吃掉 h4 的后</dd></dl>
+      <div class="moment-scroll"><p class="neve-say">這裡你忽略了對手的將殺。與其用騎士吃掉 e5 的兵，先用騎士吃掉 h4 的后，把王照顧好。</p></div>
+    </div>
+    <div class="end-actions"><button class="btn btn-primary" type="button">再下一盤</button><button class="btn btn-secondary" type="button">回首頁</button></div>
+  </main>
+</div></section>
+<ul class="frame-notes"><li><b>量測</b>將殺模板加兩個吃子片語，是一般情況下最長的句子，剛好三行。對話框高度不變，兩顆出口的位置和兩行時一樣。局面是另外擺的。</li></ul></figure>
+<figure class="frame"><figcaption><b>x-review-deep</b>補畫・深青格（題目來自別盤）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-extra="x-review-deep"><div class="screen review-page">
+  <div class="band"><header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button><div class="top-titles"><h1 class="top-title">棋憶</h1><span class="top-sub">11 月 16 日 · 執白 · 對 初學</span></div><button class="top-action" type="button"><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>棋譜</button></header></div>
+  <main class="review-body">
+    <div class="wood wood-on-cream"><div class="cg" role="img" aria-label="棋盤"><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:0px;top:0px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:82px;top:0px"><img class="pc pc-b" src="/pieces/bQ.svg" alt="" style="left:123px;top:0px"><img class="pc pc-b" src="/pieces/bK.svg" alt="" style="left:164px;top:0px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:205px;top:0px"><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:287px;top:0px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:0px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:41px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:82px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:123px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:205px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:246px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:287px;top:41px"><img class="pc pc-b" src="/pieces/bN.svg" alt="" style="left:82px;top:82px"><img class="pc pc-b" src="/pieces/bN.svg" alt="" style="left:205px;top:82px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:164px;top:123px"><img class="pc" src="/pieces/wQ.svg" alt="" style="left:287px;top:123px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:82px;top:164px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:164px;top:164px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:0px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:41px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:82px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:123px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:205px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:246px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:287px;top:246px"><img class="pc" src="/pieces/wR.svg" alt="" style="left:0px;top:287px"><img class="pc" src="/pieces/wN.svg" alt="" style="left:41px;top:287px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:82px;top:287px"><img class="pc" src="/pieces/wK.svg" alt="" style="left:164px;top:287px"><img class="pc" src="/pieces/wN.svg" alt="" style="left:246px;top:287px"><img class="pc" src="/pieces/wR.svg" alt="" style="left:287px;top:287px"></div><span class="coord" style="left:7.5px;top:35.5px">8</span><span class="coord" style="left:7.5px;top:76.5px">7</span><span class="coord" style="left:7.5px;top:117.5px">6</span><span class="coord" style="left:7.5px;top:158.5px">5</span><span class="coord" style="left:7.5px;top:199.5px">4</span><span class="coord" style="left:7.5px;top:240.5px">3</span><span class="coord" style="left:7.5px;top:281.5px">2</span><span class="coord" style="left:7.5px;top:322.5px">1</span><span class="coord" style="left:35.5px;top:350.5px">a</span><span class="coord" style="left:76.5px;top:350.5px">b</span><span class="coord" style="left:117.5px;top:350.5px">c</span><span class="coord" style="left:158.5px;top:350.5px">d</span><span class="coord" style="left:199.5px;top:350.5px">e</span><span class="coord" style="left:240.5px;top:350.5px">f</span><span class="coord" style="left:281.5px;top:350.5px">g</span><span class="coord" style="left:322.5px;top:350.5px">h</span></div>
+    <div class="dots" aria-hidden="true"><i class="is-on is-ask"></i><i></i><i></i><i></i></div>
+    <div class="neve-box is-deep moment-box" aria-live="polite">
+      <div class="neve-head has-nav"><img class="neve-avatar neve-avatar-36 on-deep" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span class="neve-name">NEVE</span><span class="neve-nav">
+  <button class="step-btn" type="button" aria-label="上一格" disabled><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+  <button class="step-btn" type="button" aria-label="看下一個畫面"><svg class="lucide" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+  <button class="step-btn" type="button" aria-label="下一格"><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+</span></div>
+      <p class="from-game">11 月 14 日那一盤</p>
+      <p class="neve-say">那盤棋裡有一手將殺，你當時走了別的。局面我留著，你自己找，找到就走出來。</p>
+      <div><a class="text-link on-deep" href="#">看答案</a></div>
+    </div>
+    
+  </main>
+</div></section>
+<ul class="frame-notes"><li><b>提案</b>頂列永遠寫你打開的這一盤。深青格的題目若來自別盤，格內多一行標出是哪一盤；同一盤就不出現。現況的做法是整頁都不說哪一盤。</li><li><b>沿用</b>深青格的段點是金，其餘是墨綠。</li></ul></figure>
+<figure class="frame"><figcaption><b>x-review-none</b>補畫・分析完沒有要看的手</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-extra="x-review-none"><div class="screen review-page">
+  <div class="band"><header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button><div class="top-titles"><h1 class="top-title">棋憶</h1><span class="top-sub">11 月 16 日 · 執白 · 對 初學</span></div><button class="top-action" type="button"><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>棋譜</button></header></div>
+  <main class="review-body">
+    <div class="wood wood-on-cream"><div class="cg" role="img" aria-label="棋盤"><i class="sq-last" style="left:205px;top:205px"></i><i class="sq-last" style="left:205px;top:41px"></i><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:0px;top:0px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:82px;top:0px"><img class="pc pc-b" src="/pieces/bQ.svg" alt="" style="left:123px;top:0px"><img class="pc pc-b" src="/pieces/bR.svg" alt="" style="left:287px;top:0px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:0px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:41px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:82px;top:41px"><img class="pc pc-b" src="/pieces/bK.svg" alt="" style="left:164px;top:41px"><img class="pc" src="/pieces/wQ.svg" alt="" style="left:205px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:246px;top:41px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:287px;top:41px"><img class="pc" src="/pieces/wN.svg" alt="" style="left:41px;top:82px"><img class="pc pc-b" src="/pieces/bB.svg" alt="" style="left:123px;top:82px"><img class="pc pc-b" src="/pieces/bP.svg" alt="" style="left:164px;top:123px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:82px;top:164px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:0px;top:205px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:41px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:123px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:205px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:246px;top:246px"><img class="pc" src="/pieces/wP.svg" alt="" style="left:287px;top:246px"><img class="pc pc-b" src="/pieces/bN.svg" alt="" style="left:0px;top:287px"><img class="pc" src="/pieces/wB.svg" alt="" style="left:82px;top:287px"><img class="pc" src="/pieces/wK.svg" alt="" style="left:123px;top:287px"><img class="pc" src="/pieces/wR.svg" alt="" style="left:287px;top:287px"></div><span class="coord" style="left:7.5px;top:35.5px">8</span><span class="coord" style="left:7.5px;top:76.5px">7</span><span class="coord" style="left:7.5px;top:117.5px">6</span><span class="coord" style="left:7.5px;top:158.5px">5</span><span class="coord" style="left:7.5px;top:199.5px">4</span><span class="coord" style="left:7.5px;top:240.5px">3</span><span class="coord" style="left:7.5px;top:281.5px">2</span><span class="coord" style="left:7.5px;top:322.5px">1</span><span class="coord" style="left:35.5px;top:350.5px">a</span><span class="coord" style="left:76.5px;top:350.5px">b</span><span class="coord" style="left:117.5px;top:350.5px">c</span><span class="coord" style="left:158.5px;top:350.5px">d</span><span class="coord" style="left:199.5px;top:350.5px">e</span><span class="coord" style="left:240.5px;top:350.5px">f</span><span class="coord" style="left:281.5px;top:350.5px">g</span><span class="coord" style="left:322.5px;top:350.5px">h</span></div>
+    <div class="dots" aria-hidden="true"></div>
+    <div class="neve-box is-light moment-box" aria-live="polite">
+      <div class="neve-head has-nav"><img class="neve-avatar neve-avatar-36 on-cream" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span class="neve-name">NEVE</span><span class="neve-nav is-hidden">
+  <button class="step-btn" type="button" aria-label="上一格"><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+  <button class="step-btn" type="button" aria-label="看下一個畫面"><svg class="lucide" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+  <button class="step-btn" type="button" aria-label="下一格"><svg class="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+</span></div>
+      <p class="neve-say">這盤你走得很穩，沒有需要特別停下來看的地方。</p>
+    </div>
+    <div class="end-actions"><button class="btn btn-primary" type="button">再下一盤</button><button class="btn btn-secondary" type="button">回首頁</button></div>
+  </main>
+</div></section>
+<ul class="frame-notes"><li><b>提案</b>現況會換成一段置中的文字，木盤與對話框整個消失。這裡留著同一個版面，只換成那句話，下面是兩顆出口。</li></ul></figure>
+</div>
+<section class="kit" data-kit>
+  <h2>語彙表：地基用到的全部零件</h2>
+  <p>七張畫面只用了這些。</p>
+  <div class="kit-grid">
+    <div class="kit-cell on-deep-bg">
+      <h3>返回鍵・一筆墨・深青上的按鈕</h3>
+      <div class="kit-stack">
+        <div class="kit-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button><div><span class="top-title">頂列標題 18 明朝</span><span class="top-sub">副標 13 黑體</span></div></div>
+        <div><p class="page-title">頁面標題 26 明朝</p><svg class="ink-brush" width="212" height="12" viewBox="0 0 212 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2.5,5.2 L7.0,5.1 L11.5,5.0 L16.0,4.9 L20.5,4.8 L25.0,4.7 L29.5,4.6 L34.0,4.5 L38.5,4.4 L43.0,4.3 L47.5,4.2 L52.0,4.1 L56.5,4.0 L61.0,3.9 L65.5,3.9 L70.0,3.8 L74.5,3.8 L79.0,3.7 L83.5,3.7 L88.0,3.7 L92.5,3.7 L97.0,3.8 L101.5,3.8 L106.0,3.8 L110.5,5.0 L115.0,4.8 L119.5,4.5 L124.0,4.3 L128.5,4.3 L133.0,4.5 L137.5,4.9 L142.0,5.2 L146.5,5.4 L151.0,5.5 L155.5,5.4 L160.0,5.3 L164.5,5.3 L169.0,5.4 L173.5,5.7 L178.0,6.0 L182.5,6.1 L187.0,6.2 L191.5,6.3 L196.0,6.4 L200.5,6.4 L205.0,6.5 L209.5,6.6 L209.5,7.2 L205.0,7.1 L200.5,7.0 L196.0,7.0 L191.5,6.9 L187.0,6.8 L182.5,6.7 L178.0,6.6 L173.5,6.7 L169.0,6.8 L164.5,6.7 L160.0,6.5 L155.5,6.3 L151.0,6.1 L146.5,6.0 L142.0,6.0 L137.5,6.2 L133.0,6.5 L128.5,6.6 L124.0,6.5 L119.5,6.2 L115.0,5.8 L110.5,5.6 L106.0,6.7 L101.5,6.8 L97.0,6.8 L92.5,6.9 L88.0,7.0 L83.5,7.0 L79.0,7.1 L74.5,7.2 L70.0,7.2 L65.5,7.3 L61.0,7.3 L56.5,7.4 L52.0,7.5 L47.5,7.5 L43.0,7.5 L38.5,7.6 L34.0,7.6 L29.5,7.6 L25.0,7.6 L20.5,7.6 L16.0,7.6 L11.5,7.6 L7.0,7.6 L2.5,7.5 Z"/></svg></div>
+        <div><p class="page-title">你贏了</p><svg class="ink-brush is-reward" width="84" height="12" viewBox="0 0 84 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2.5,5.2 L4.2,5.1 L5.9,5.0 L7.7,4.9 L9.4,4.8 L11.1,4.7 L12.8,4.6 L14.5,4.5 L16.2,4.4 L18.0,4.3 L19.7,4.2 L21.4,4.1 L23.1,4.0 L24.8,3.9 L26.5,3.9 L28.3,3.8 L30.0,3.8 L31.7,3.7 L33.4,3.7 L35.1,3.7 L36.8,3.7 L38.6,3.8 L40.3,3.8 L42.0,3.8 L43.7,5.0 L45.4,4.8 L47.2,4.5 L48.9,4.3 L50.6,4.3 L52.3,4.5 L54.0,4.9 L55.7,5.2 L57.5,5.4 L59.2,5.5 L60.9,5.4 L62.6,5.3 L64.3,5.3 L66.0,5.4 L67.8,5.7 L69.5,6.0 L71.2,6.1 L72.9,6.2 L74.6,6.3 L76.3,6.4 L78.1,6.4 L79.8,6.5 L81.5,6.6 L81.5,7.2 L79.8,7.1 L78.1,7.0 L76.3,7.0 L74.6,6.9 L72.9,6.8 L71.2,6.7 L69.5,6.6 L67.8,6.7 L66.0,6.8 L64.3,6.7 L62.6,6.5 L60.9,6.3 L59.2,6.1 L57.5,6.0 L55.7,6.0 L54.0,6.2 L52.3,6.5 L50.6,6.6 L48.9,6.5 L47.2,6.2 L45.4,5.8 L43.7,5.6 L42.0,6.7 L40.3,6.8 L38.6,6.8 L36.8,6.9 L35.1,7.0 L33.4,7.0 L31.7,7.1 L30.0,7.2 L28.3,7.2 L26.5,7.3 L24.8,7.3 L23.1,7.4 L21.4,7.5 L19.7,7.5 L18.0,7.5 L16.2,7.6 L14.5,7.6 L12.8,7.6 L11.1,7.6 L9.4,7.6 L7.7,7.6 L5.9,7.6 L4.2,7.6 L2.5,7.5 Z"/></svg></div>
+        <div class="kit-row"><span class="btn btn-gold btn-sm">開始對局</span><span class="btn btn-on-deep btn-sm">悔棋</span><span class="btn btn-on-deep btn-danger-on-deep btn-sm">投降</span></div>
+      </div>
+    </div>
+    <div class="kit-cell on-cream-bg">
+      <h3>Neve 對話框・淺卡（她在說明，沒有出口）</h3>
+      <div class="neve-box is-light">
+        <div class="neve-head"><img class="neve-avatar neve-avatar-36 on-cream" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span class="neve-name">NEVE</span></div>
+        <p class="neve-say">就是這一手。這個形狀記著，它會再出現。</p>
+      </div>
+      <h3 style="margin-top:20px">Neve 對話框・深青（她要你動手，必有出口）</h3>
+      <div class="neve-box is-deep">
+        <div class="neve-head"><img class="neve-avatar neve-avatar-36 on-deep" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span class="neve-name">NEVE</span></div>
+        <p class="neve-say">那盤棋裡有一手將殺，你當時走了別的。局面我留著，你自己找，找到就走出來。</p>
+        <span class="text-link on-deep">看答案</span>
+      </div>
+    </div>
+    <div class="kit-cell on-cream-bg">
+      <h3>五個字族各管一件事</h3>
+      <div class="type-list">
+        <div><span style="font:700 22px/1.3 var(--font-display)">明朝：標題與結果</span><small>BIZ UDPMincho 26／22／18</small></div>
+        <div><span style="font:16px/1.5 var(--font-sans)">黑體：按鈕、狀態、標籤、說明</span><small>Sarasa UI TC 16，標籤 13</small></div>
+        <div><span style="font:16px/1.8 var(--font-lesson)">文楷：只給 Neve 說的話</span><small>LXGW WenKai TC 16</small></div>
+        <div><span style="font:14px/1.4 var(--font-num)">1. g4 e5 2. Nh3 Nf6　2/21　NEVE</span><small>Cubic 11：棋譜 14、計數 12、座標與名牌 11</small></div>
+        <div><span style="font:900 18px/1.3 var(--font-brand);letter-spacing:.04em">GAMBIT</span><small>Cinzel：只有字標</small></div>
+      </div>
+      <h3 style="margin-top:20px">米白上的按鈕</h3>
+      <div class="kit-row"><span class="btn btn-primary btn-sm">再下一盤</span><span class="btn btn-secondary btn-sm">回首頁</span></div>
+    </div>
+  </div>
+</section>
+
+<p class="sheet-foot">字型：樣張的黑體是從本機的 Sarasa UI TC 1.0.39 原檔重切的子集（/fonts/sarasa-ui-tc-*.recut.woff2）。app 現在上線的子集只有 759 個漢字，缺「投、降、首、頁、譜、執、初、月」等字，實機會掉到系統黑體；要照這份樣張做，得先重切。其餘字型用的是 app 現有的檔案。</p>
+<script>
+// 完局：點一下重播進場（opacity + translate 280ms，墨筆 scaleX 220ms）
+document.querySelectorAll('[data-replay]').forEach(function (el) {
+  el.addEventListener('click', function () { el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter') })
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gambit 樣張 · 方向 C「木、紙、墨」</title>
+<style>
+/* ---------- 字型（與 src/assets/fonts.css 同名同檔） ---------- */
+@font-face{font-family:'Sarasa UI TC';font-weight:400;font-display:swap;src:url('/fonts/sarasa-ui-tc-400.woff2') format('woff2')}
+@font-face{font-family:'Sarasa UI TC';font-weight:700;font-display:swap;src:url('/fonts/sarasa-ui-tc-700.woff2') format('woff2')}
+@font-face{font-family:'BIZ UDPMincho';font-weight:600 700;font-display:swap;src:url('/fonts/biz-udpmincho-700.woff2') format('woff2')}
+@font-face{font-family:'Noto Serif TC';font-weight:600 700;font-display:swap;src:url('/fonts/noto-serif-tc-600.woff2') format('woff2')}
+@font-face{font-family:'LXGW WenKai TC';font-weight:400;font-display:swap;src:url('/fonts/lxgw-wenkai-tc-400.woff2') format('woff2')}
+@font-face{font-family:'Cubic 11';font-weight:400;font-display:swap;src:url('/fonts/cubic-11.woff2') format('woff2')}
+@font-face{font-family:'Cinzel';font-weight:400 900;font-display:swap;src:url('/fonts/cinzel-wordmark.woff2') format('woff2')}
+
+/* ---------- token：值取自 src/assets/main.css 的 @theme ---------- */
+:root{
+  --font-sans:'Sarasa UI TC','PingFang TC','Microsoft JhengHei',sans-serif;
+  --font-display:'BIZ UDPMincho','Noto Serif TC',serif;
+  --font-lesson:'LXGW WenKai TC','Noto Serif TC',serif;
+  --font-num:'Cubic 11','Sarasa UI TC',monospace;
+  --font-brand:'Cinzel','BIZ UDPMincho',serif;
+
+  --color-surface-base:#faf6f0;
+  --color-surface-card:#fcf9f3;
+  --color-surface-raised:#f4ead8;
+  --color-surface-deep:#103029;
+  --color-surface-deep-2:#18443a;
+  --color-surface-dungeon:#0b211b;
+  --color-line:#e0d3bd;
+  --color-line-subtle:#ece1cd;
+  --color-line-strong:#cdb999;
+  --color-ink:#3d2210;
+  --color-ink-muted:#7a5c44;
+  --color-ink-on-deep:#e7f1ec;
+  --color-ink-on-deep-dim:#9bbdb1;
+  --color-primary:#1c7059;
+  --color-primary-dark:#155747;
+  --color-danger-dark:#9a4330;
+  --color-gold:#f8b500;
+  --color-gold-ink:#3a2408;
+  --color-ink-brush:rgba(61,34,16,.68);
+  --piece-dark-brightness:1.2;
+
+  /* 這份樣張自己訂的三個尺寸：紙的圓角、按鈕圓角、頁邊 */
+  --r-paper:6px;
+  --r-btn:8px;
+  --gutter:16px;
+  --sq:41px;                 /* 棋盤格：328 ÷ 8，整數 px */
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#dedbd5;color:#33302b;font-family:var(--font-sans);-webkit-font-smoothing:antialiased}
+
+/* ---------- 樣張頁本身（不是 app 的一部分） ---------- */
+.sheet-head{padding:40px 48px 8px;max-width:1500px}
+.sheet-head h1{font:700 22px/1.4 var(--font-sans);margin:0 0 8px}
+.sheet-head p{font-size:14px;line-height:1.7;margin:0 0 4px;color:#55504a;max-width:980px}
+.wall{display:flex;gap:40px;padding:24px 48px 64px;width:max-content}
+.slot{margin:0}
+.slot figcaption{font-size:13px;line-height:1.5;color:#55504a;margin-bottom:10px;width:390px;min-height:58px}
+.slot figcaption b{display:block;font-size:14px;color:#33302b}
+
+/* ---------- 手機框 ---------- */
+.phone{
+  width:390px;height:844px;position:relative;overflow:hidden auto;scrollbar-width:none;
+  display:flex;flex-direction:column;
+  background:var(--color-surface-base);color:var(--color-ink);
+  font:400 16px/1.5 var(--font-sans);
+  box-shadow:0 18px 40px rgba(40,30,20,.22);
+}
+.phone::-webkit-scrollbar{display:none}
+.phone.is-board{background:var(--color-surface-deep)}
+:where(.phone) button,:where(.phone) a{font:inherit;color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent;cursor:pointer}
+.phone h1,.phone h2,.phone h3,.phone p{margin:0}
+.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* ============ 共用骨架（地基） ============ */
+
+/* 外框頁頂欄：品牌字標＋齒輪，永遠是 #103029 原色 */
+.appbar{height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;
+  padding:0 6px 0 20px;background:var(--color-surface-deep);color:var(--color-ink-on-deep)}
+.wordmark{font:500 21px/1 var(--font-brand);letter-spacing:.16em}
+.iconbtn{width:44px;height:44px;display:grid;place-items:center;background:none;border:0;border-radius:var(--r-btn);
+  transition:transform .15s ease,opacity .15s ease}
+.iconbtn:active{transform:scale(.94)}
+
+/* 底部導覽：兩個目的地都帶字，選中用金色短線（indicator） */
+.tabbar{height:64px;flex:none;margin-top:auto;display:flex;background:var(--color-surface-deep)}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;
+  color:var(--color-ink-on-deep-dim);font-size:12px;line-height:1}
+.tab.is-on{color:#fff;font-weight:700}
+.tab.is-on::before{content:"";position:absolute;top:0;left:50%;width:28px;height:3px;margin-left:-14px;background:var(--color-gold)}
+
+/* 棋盤頁／任務頁頂列：同一顆返回鍵＋明朝頁名 */
+.toprow{height:56px;flex:none;display:flex;align-items:center;gap:10px;padding:0 var(--gutter);color:var(--color-ink-on-deep)}
+.back{width:44px;height:44px;display:grid;place-items:center;border:0;border-radius:var(--r-btn);
+  background:rgba(231,241,236,.09);color:var(--color-ink-on-deep);transition:transform .15s ease}
+.back:active{transform:scale(.94)}
+.toprow h1{font:700 20px/1 var(--font-display);letter-spacing:.04em}
+
+/* 按鈕：一律黑體 */
+.btn{min-height:44px;padding:0 20px;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border-radius:var(--r-btn);border:1px solid transparent;background:none;
+  font:700 16px/1 var(--font-sans);transition:transform .15s ease,opacity .15s ease}
+.btn:active{transform:translateY(1px)}
+.btn .ico{width:18px;height:18px;stroke-width:2}
+.btn-gold{background:var(--color-gold);color:var(--color-gold-ink);min-height:48px;box-shadow:0 1px 2px rgba(61,34,16,.18)}
+.btn-jade{background:var(--color-primary);color:#fff;min-height:48px;box-shadow:0 1px 2px rgba(61,34,16,.14)}
+.btn-line{border-color:rgba(61,34,16,.5);color:var(--color-ink)}
+.btn-line.is-danger{border-color:rgba(154,67,48,.55);color:var(--color-danger-dark)}
+.btn-text{padding:0 8px;font-weight:400;color:var(--color-ink-muted);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--color-line-strong)}
+.btn-block{display:flex;width:100%}
+
+/* 木框棋盤：唯一一份（對局／棋憶共用），幾何照 PlayView 現況：358 框、328 盤、41px 格 */
+.woodframe{width:358px;height:358px;flex:none;margin:0 var(--gutter);position:relative;border-radius:12px;
+  background:linear-gradient(160deg,#6f4b30,#523722);
+  box-shadow:0 0 0 1px rgba(30,16,8,.5),0 12px 32px rgba(10,30,24,.45),inset 0 1px 0 rgba(255,228,194,.2),inset 0 -2px 6px rgba(0,0,0,.38)}
+.woodframe.on-paper{box-shadow:0 0 0 1px rgba(61,34,16,.4),0 3px 8px rgba(61,34,16,.2),0 16px 32px rgba(61,34,16,.26),inset 0 1px 0 rgba(255,228,194,.2),inset 0 -2px 6px rgba(0,0,0,.38)}
+.cg{position:absolute;left:15px;top:15px;width:calc(var(--sq)*8);height:calc(var(--sq)*8);
+  background:url('/board/wood12.jpg') 0 0/100% 100% no-repeat}
+.cg i{position:absolute;width:var(--sq);height:var(--sq);display:block}
+.cg .pc{background:center/100% 100% no-repeat}
+.cg .pc.is-black{filter:brightness(var(--piece-dark-brightness))}
+.cg .hl-lm{background:rgba(155,199,0,.41)}                       /* chessground last-move */
+.cg .hl-check{background:radial-gradient(ellipse at center,rgba(255,0,0,1) 0%,rgba(231,0,0,1) 25%,rgba(169,0,0,0) 89%,rgba(158,0,0,0) 100%)} /* chessground check */
+.cg .hl-played{background:rgba(136,136,136,.5)}                  /* playedMove #888888 */
+.cg .hl-best{background:rgba(196,136,42,.34);box-shadow:inset 0 0 0 3px #c4882a} /* bestMove #c4882a */
+.cg svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.coord{position:absolute;font:11px/1 var(--font-num);color:rgba(233,217,186,.6);text-shadow:0 1px 1px rgba(0,0,0,.28);transform:translate(-50%,-50%)}
+
+/* Neve 對話框：全站一種。頭像 32、黑體名牌、文楷內文 */
+.neve-box{background:var(--color-surface-card);border:1px solid var(--color-line);border-radius:var(--r-paper);padding:14px 16px}
+.neve-id{display:flex;align-items:center;gap:10px}
+.neve-av{width:32px;height:32px;border-radius:50%;flex:none;box-shadow:0 0 0 1px var(--color-line-strong);object-fit:cover}
+.neve-name{font-size:13px;line-height:1;color:var(--color-ink-muted);letter-spacing:.02em}
+.neve-say{font:400 16px/1.8 var(--font-lesson);color:var(--color-ink)}
+
+/* ============ 方向 C 的兩個招牌 ============ */
+
+/* 一、墨筆：InkBrush 放大。path 由頁尾 script 依 seed 產生（決定性，不抖動） */
+.ink{display:block;overflow:visible;filter:blur(.3px)}
+.ink path{fill:currentColor}
+
+/* 二、棋子印：ChapterBadge 放大。外環＝結果（金＝贏，墨＝輸或和，無環＝還沒下完），內有第二道細線 */
+.seal{--d:88px;--ring:transparent;width:var(--d);height:var(--d);flex:none;position:relative;border-radius:50%;
+  background:var(--color-surface-card);
+  box-shadow:0 0 0 3px var(--ring),0 6px 16px rgba(30,16,8,.3)}
+.seal::before{content:"";position:absolute;inset:6px;border-radius:50%;border:1px solid rgba(61,34,16,.34)}
+.seal svg{position:absolute;inset:0;margin:auto;width:60%;height:60%;color:var(--color-surface-deep);fill:currentColor;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.seal[data-ring="gold"]{--ring:var(--color-gold)}
+.seal[data-ring="ink"]{--ring:var(--color-ink)}
+.seal.is-fallen svg{transform:rotate(90deg)}
+/* 蓋在紙上的那一枚：沒有底盤，直接印在紙面 */
+.seal.is-stamped{background:none;box-shadow:0 0 0 3px var(--ring);transform:rotate(-7deg);animation:stamp .24s ease-out both}
+@keyframes stamp{from{opacity:0;transform:rotate(-7deg) scale(1.14)}to{opacity:1;transform:rotate(-7deg) scale(1)}}
+@media (prefers-reduced-motion:reduce){.seal.is-stamped{animation:none}}
+
+/* 冊頁：1px 暖線＋內側第二道細線。內容面維持平塗，不放紙紋 */
+.leaf{position:relative;background:var(--color-surface-card);border:1px solid var(--color-line-strong);border-radius:var(--r-paper);
+  box-shadow:0 1px 2px rgba(61,34,16,.05),0 6px 16px rgba(61,34,16,.07)}
+.leaf::before{content:"";position:absolute;inset:4px;border:1px solid var(--color-line);border-radius:3px;pointer-events:none}
+.leaf-title{font:700 22px/1.4 var(--font-display);letter-spacing:.02em}
+.label{font-size:13px;line-height:1.3;color:var(--color-ink-muted);letter-spacing:.04em}
+.folio{font:11px/1 var(--font-num);color:var(--color-ink-muted);letter-spacing:.06em}
+.pct{font-family:'Noto Serif TC',serif;font-style:normal}   /* 繁中置中標點：BIZ UDPMincho 是日文字型，句讀偏左下 */
+
+/* ============ 首頁 ============ */
+.titlepage{flex:none;position:relative;height:232px;padding:22px 20px 0;background:var(--jade);color:var(--color-ink-on-deep)}
+.titlepage[data-time="afternoon"]{--jade:var(--color-surface-deep-2);--ink-density:.94}
+.titlepage[data-time="night"]{--jade:var(--color-surface-deep);--ink-density:.8}
+.greet{display:flex;align-items:center;gap:10px;height:32px}
+.greet .neve-av{box-shadow:0 0 0 1px rgba(255,255,255,.25)}
+.greet span{font:400 16px/1 var(--font-lesson);color:var(--color-ink-on-deep)}
+.epigraph{margin-top:14px !important;font:700 32px/1.42 var(--font-display);letter-spacing:.02em;position:relative;z-index:1}
+.epigraph span{display:block;white-space:nowrap}
+.titlepage .ink{position:absolute;left:12px;top:150px;color:#f4efe2;opacity:var(--ink-density)}
+.titlepage .seal{position:absolute;right:20px;top:122px}
+
+.home-body{flex:none;padding:16px var(--gutter) 20px;display:flex;flex-direction:column;gap:10px}
+.play-leaf{padding:20px 20px 22px}
+.play-leaf .today{display:flex;align-items:center;gap:8px;height:18px;margin-bottom:8px}
+.play-leaf .today .ink{color:var(--color-ink-brush)}
+.play-leaf p.sub{color:var(--color-ink-muted);margin:2px 0 16px}
+.play-leaf .actions{display:flex;align-items:center;gap:4px}
+/* 貼在冊頁上的棋圖：正在下的那一盤現在的局面（真的 Wood12＋Gioco，12px 格，不可互動） */
+.diagram{position:absolute;right:20px;top:20px;width:104px;height:104px;border-radius:4px;
+  background:linear-gradient(160deg,#6f4b30,#523722);box-shadow:0 0 0 1px rgba(61,34,16,.4),0 4px 10px rgba(61,34,16,.2)}
+.diagram .cg{--sq:12px;left:4px;top:4px}
+
+.slip{position:relative;display:flex;align-items:center;gap:12px;min-height:52px;padding:0 10px 0 20px;
+  background:var(--color-surface-base);border-top:1px solid var(--color-line-strong);border-bottom:1px solid var(--color-line-strong);
+  transition:transform .15s ease}
+.slip:active{transform:translateY(1px)}
+.slip b{font:700 16px/1 var(--font-display);letter-spacing:.06em;white-space:nowrap}
+.slip .what{flex:1;font-size:13px;line-height:1.3;color:var(--color-ink-muted);white-space:nowrap;padding-left:12px;border-left:1px solid var(--color-line-strong)}
+.slip .what em{font-style:normal;color:var(--color-ink);font-weight:700}
+.slip .go{display:flex;align-items:center;gap:2px;font-size:13px;color:var(--color-primary-dark);font-weight:700;white-space:nowrap}
+.slip .go .ico{width:16px;height:16px}
+
+.learn-leaf{padding:18px 20px 20px}
+.learn-leaf .label{color:var(--color-primary-dark);font-weight:700}
+.learn-leaf .leaf-title{font-size:20px;margin:4px 0 14px}
+.learn-leaf .folio{position:absolute;right:20px;bottom:20px}
+
+/* ============ 對局 ============ */
+.paper{position:relative;flex:none;margin:14px var(--gutter) 0;padding:16px 18px 18px;background:var(--color-surface-card);border-radius:var(--r-paper);
+  box-shadow:0 0 0 1px rgba(30,16,8,.35),0 3px 8px rgba(40,22,8,.3),0 16px 32px rgba(40,22,8,.42)}
+.paper::before{content:"";position:absolute;inset:4px;border:1px solid var(--color-line);border-radius:3px;pointer-events:none}
+.paper-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px}
+.paper-head .who .label{display:block;margin-bottom:2px}
+.paper-head .who strong{font:700 24px/1.25 var(--font-display);letter-spacing:.06em}
+.turn{text-align:right}
+.turn .now{display:flex;align-items:center;justify-content:flex-end;gap:8px;font-weight:700;line-height:1.25}
+.turn .now::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--color-gold);box-shadow:0 0 0 3px rgba(248,181,0,.22)}
+.turn .label{display:block;margin-top:4px}
+
+/* 記譜紙：兩欄細線格。棋步 Cubic 22、手數 Cubic 11 */
+.score{border-top:1px solid var(--color-ink);border-bottom:1px solid var(--color-ink)}
+.score .r{display:grid;grid-template-columns:34px 1fr 1fr;align-items:center;height:36px;border-top:1px solid var(--color-line)}
+.score .r:first-child{border-top:0}
+.score .r.h{height:26px;border-bottom:1px solid var(--color-line-strong)}
+.score .r > *{height:100%;display:flex;align-items:center;padding-left:12px;border-left:1px solid var(--color-line)}
+.score .r > :first-child{border-left:0;padding-left:2px}
+.score .n{font:11px/1 var(--font-num);color:var(--color-ink-muted)}
+.score .m{font:22px/1 var(--font-num);color:var(--color-ink);gap:8px}
+.score .h > *{font-size:12px;line-height:1;color:var(--color-ink-muted);letter-spacing:.04em}
+.dot{width:8px;height:8px;flex:none}
+.dot path{fill:var(--color-ink)}
+.paper .actions{display:flex;gap:10px;margin-top:14px}
+.paper .actions .btn{flex:1}
+
+/* 完局：同一張紙，上面多一枚印 */
+.result h2{font:700 28px/1.3 var(--font-display);letter-spacing:.06em}
+.result .label{display:block;margin-top:2px}
+.paper .seal{--d:88px;position:absolute;right:24px;top:14px;z-index:2}
+.paper .neve-box{margin-top:12px;display:flex;align-items:center;gap:12px;padding:10px 14px}
+.paper .neve-box .neve-say{line-height:1.5}
+.paper .stack{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+
+/* ============ 棋憶 ============ */
+.pagehead{flex:none;position:relative;height:100px;background:var(--color-surface-deep);color:var(--color-ink-on-deep);padding:8px var(--gutter) 0}
+.pagehead .row{display:flex;align-items:center;gap:12px;height:48px;position:relative;z-index:1}
+.pagehead h1{font:700 28px/1 var(--font-display);letter-spacing:.1em}
+.pagehead .which{position:relative;z-index:1;margin:5px 0 0 56px;font-size:13px;line-height:1.3;color:var(--color-ink-on-deep-dim);letter-spacing:.02em}
+.pagehead .ink{position:absolute;left:142px;top:18px;color:#f4efe2;opacity:.9}
+.pagehead .seal{--d:72px;position:absolute;right:var(--gutter);top:14px}
+.review-body{flex:1;display:flex;flex-direction:column;padding:16px 0 0}
+.note{margin:16px var(--gutter) 0;height:228px;padding:14px 16px 16px;display:flex;flex-direction:column}
+.note-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.pager{display:flex;align-items:center;gap:2px}
+.pager .folio{padding:0 6px}
+.pager button{width:44px;height:44px;display:grid;place-items:center;background:none;border:1px solid var(--color-line);border-radius:var(--r-btn);color:var(--color-ink-muted)}
+.pager button[disabled]{opacity:.4}
+.note h3{font:700 18px/1.45 var(--font-display);letter-spacing:.02em}
+.note .played{color:var(--color-ink-muted);margin-top:4px}
+.note .better{font-weight:700}
+.note .neve-say{margin-top:8px}
+.note .progress{margin-top:auto;display:flex;align-items:center;gap:10px}
+.note .progress .bar{flex:1;height:4px;background:var(--color-line);position:relative}
+.note .progress .bar::after{content:"";position:absolute;inset:0;background:var(--color-primary);transform-origin:left;transform:scaleX(.67);transition:transform .3s ease}
+.closing{margin:12px var(--gutter) 0;height:82px}
+.closing .end{display:flex;align-items:center;gap:10px;height:26px;color:var(--color-ink-muted)}
+.closing .end .ink{color:var(--color-ink-brush)}
+.closing .end span{font-size:13px;letter-spacing:.04em}
+.closing .actions{display:flex;gap:10px;margin-top:8px}
+.closing .actions .btn-jade{flex:1}
+
+/* ============ 404 ============ */
+.lost-head{flex:none;position:relative;height:150px;padding:30px 20px 0;background:var(--color-surface-deep);color:var(--color-ink-on-deep)}
+.lost-head h1{font:700 28px/1.42 var(--font-display);letter-spacing:.02em;position:relative;z-index:1}
+.lost-head .ink{position:absolute;left:12px;top:70px;color:#f4efe2;opacity:.9}
+.lost-head .seal{position:absolute;right:20px;top:36px}
+.lost-body{flex:none;padding:20px var(--gutter);display:flex;flex-direction:column;gap:14px}
+.lost-body .neve-box{display:flex;gap:12px;align-items:center}
+.lost-body .actions{display:flex;align-items:center;gap:8px}
+.pagefolio{margin:auto auto 22px;display:flex;align-items:center;gap:14px;color:var(--color-ink-muted)}
+.pagefolio b{font:400 22px/1 var(--font-num);letter-spacing:.08em}
+.pagefolio i{width:28px;height:1px;background:var(--color-line-strong)}
+</style>
+</head>
+<body>
+
+<header class="sheet-head">
+  <h1>方向 C「木、紙、墨」— 390×844 樣張</h1>
+  <p>把 app 當成放在棋桌上的一本棋譜冊：木是物件、米白是紙、墨是筆跡。招牌只有兩樣，都是放大現有資產：頁首一筆大墨、一枚棋子印。字只剩三個聲音：明朝（題詞與標題）、黑體（UI 與按鈕）、文楷（只給 Neve）；Cubic 11 只排棋譜、座標、計數，且只用 11px 與 22px。</p>
+  <p>印的對象是「上一盤」或「正在下的那一盤」：金環＝你贏了，墨環＝輸或和，沒有外環＝還沒下完。每一屏只出現一枚。墨筆只出現在頁首，從標題拉到印底下收住；棋憶看完最後一手時另有一筆短的收頁。</p>
+  <p><b>方向描述裡沒有、我自己加的一樣：</b>首頁對局那張冊頁右邊貼了一張 104px 的小棋圖（真的 Wood12 與 Gioco 棋子，12px 一格，不能互動）。沒有對局時是擺好的棋盤，有對局時是現在的局面。不加的話首頁只剩印裡那顆國王在講西洋棋，讀起來偏筆記 app。不要的話整塊拿掉，版面不受影響。</p>
+  <p><b>看的時候請留意：</b>這是 Windows 版 WebKit 的截圖，字重與實機有落差；墨筆是程式產生的向量形狀，不是手寫掃描。</p>
+</header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- /pieces/silhouette/wK.svg（Gioco Wood 國王剪影，path 原樣；wK 與 bK 同形） -->
+    <symbol id="p-king" viewBox="0 0 50 50"><path fill-rule="evenodd" clip-rule="evenodd" d="M25.006 3.8679C23.2033 3.96766 21.7783 5.1017 21.7778 6.4863C21.7778 7.05148 22.0223 8.1302 22.4708 8.583H16.7053V13.6886H23.0109L20.4007 16.5217L23.0741 18.6886C17.4898 19.0513 11.0531 20.3315 9.92007 22.6861C8.65167 25.3237 16.1352 38.2851 16.1352 38.2851H33.8652C33.8652 38.2851 41.3487 25.3231 40.0803 22.6861C38.9466 20.3286 32.486 19.0461 26.9013 18.6871L29.6112 16.5217L27.001 13.6886H33.3066V8.583H27.5411C27.9895 8.13028 28.234 7.0515 28.234 6.4863C28.2335 5.1018 26.809 3.9676 25.0063 3.8679H25.006Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M13.242 38.286C11.8052 38.286 10.615 39.5025 10.615 40.9707V41.5156L10.6276 44.2003H39.3766L39.3891 41.5156V40.9707C39.3891 39.5025 38.1988 38.286 36.7621 38.286H25.0021H13.242Z"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-house" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-book-open" viewBox="0 0 24 24"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-share-2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></symbol>
+  </defs>
+</svg>
+
+<main class="wall">
+
+<!-- 1 ─────────────────────────────────────────── -->
+<figure class="slot">
+  <figcaption><b>1 · home-returning（15:00，下過 4 盤，沒有進行中的對局）</b>頂帶是扉頁：題詞 32px 明朝，一筆大墨收在上一盤的印上。「上一盤」是兩張冊頁之間的一張籤條。</figcaption>
+  <section class="phone" data-screen="home-returning">
+    <header class="appbar">
+      <span class="wordmark">GAMBIT</span>
+      <button class="iconbtn" aria-label="設定"><svg class="ico"><use href="#i-settings"/></svg></button>
+    </header>
+    <div class="titlepage" data-time="afternoon">
+      <div class="greet"><img class="neve-av" src="/avatars/neve-badge.png" alt=""><span>午安</span></div>
+      <h1 class="epigraph"><span>棋盤未曾離開<i class="pct">，</i></span><span>你來了<i class="pct">。</i></span></h1>
+      <svg class="ink" data-ink="312,64,3" aria-hidden="true"></svg>
+      <span class="seal" data-ring="gold" role="img" aria-label="上一盤：執白，你贏了"><svg viewBox="0 0 50 50"><use href="#p-king"/></svg></span>
+    </div>
+    <div class="home-body">
+      <div class="leaf play-leaf">
+        <div class="diagram" data-board data-sq="12" data-fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR" data-orient="white" role="img" aria-label="擺好的棋盤"></div>
+        <div class="today"><svg class="ink" data-ink="26,7,5,small" aria-hidden="true"></svg><span class="label">今日</span></div>
+        <h2 class="leaf-title">開始新對局</h2>
+        <p class="sub">自選強度與執子</p>
+        <div class="actions"><button class="btn btn-gold">開始對局<svg class="ico"><use href="#i-arrow-right"/></svg></button></div>
+      </div>
+      <a class="slip" href="#">
+        <b>上一盤</b>
+        <span class="what"><em>你贏了</em>　11 月 16 日 · 執白 · 對 初學</span>
+        <span class="go">棋憶<svg class="ico"><use href="#i-chevron-right"/></svg></span>
+      </a>
+      <div class="leaf learn-leaf">
+        <span class="label">基礎規則</span>
+        <h2 class="leaf-title">兵的走法與吃子</h2>
+        <button class="btn btn-jade" style="min-height:44px">開始 · 第 1 課<svg class="ico"><use href="#i-arrow-right"/></svg></button>
+        <span class="folio">0/21</span>
+      </div>
+    </div>
+    <nav class="tabbar" aria-label="主導覽">
+      <a class="tab is-on" href="#"><svg class="ico"><use href="#i-house"/></svg>首頁</a>
+      <a class="tab" href="#"><svg class="ico"><use href="#i-book-open"/></svg>學習</a>
+    </nav>
+  </section>
+</figure>
+
+<!-- 2 ─────────────────────────────────────────── -->
+<figure class="slot">
+  <figcaption><b>2 · home-resume（22:00，有一盤下到第 5 手）</b>時段只改深青的明度與墨的濃淡。印換成正在下的那一盤，沒有外環。三顆標籤收成一行字，右邊貼的是現在的局面。</figcaption>
+  <section class="phone" data-screen="home-resume">
+    <header class="appbar">
+      <span class="wordmark">GAMBIT</span>
+      <button class="iconbtn" aria-label="設定"><svg class="ico"><use href="#i-settings"/></svg></button>
+    </header>
+    <div class="titlepage" data-time="night">
+      <div class="greet"><img class="neve-av" src="/avatars/neve-badge.png" alt=""><span>晚安</span></div>
+      <h1 class="epigraph"><span>棋盤未曾離開<i class="pct">，</i></span><span>你來了<i class="pct">。</i></span></h1>
+      <svg class="ink" data-ink="312,64,3" aria-hidden="true"></svg>
+      <span class="seal" role="img" aria-label="進行中的對局：執黑"><svg viewBox="0 0 50 50"><use href="#p-king"/></svg></span>
+    </div>
+    <div class="home-body">
+      <div class="leaf play-leaf">
+        <div class="diagram" data-board data-sq="12" data-fen="rnbqk2r/pppp1ppp/8/2b1p3/6P1/7N/PPPPP2P/RNBQKBR1" data-orient="black" role="img" aria-label="目前的局面"></div>
+        <div class="today"><span class="label">進行中 · 第 5 手</span></div>
+        <h2 class="leaf-title">繼續對局</h2>
+        <p class="sub">執黑 · 對 初學</p>
+        <div class="actions"><button class="btn btn-gold">繼續<svg class="ico"><use href="#i-arrow-right"/></svg></button><button class="btn btn-text">另開新對局</button></div>
+      </div>
+      <a class="slip" href="#">
+        <b>上一盤</b>
+        <span class="what"><em>你贏了</em>　11 月 16 日 · 執白 · 對 初學</span>
+        <span class="go">棋憶<svg class="ico"><use href="#i-chevron-right"/></svg></span>
+      </a>
+      <div class="leaf learn-leaf">
+        <span class="label">基礎規則</span>
+        <h2 class="leaf-title">兵的走法與吃子</h2>
+        <button class="btn btn-jade" style="min-height:44px">開始 · 第 1 課<svg class="ico"><use href="#i-arrow-right"/></svg></button>
+        <span class="folio">0/21</span>
+      </div>
+    </div>
+    <nav class="tabbar" aria-label="主導覽">
+      <a class="tab is-on" href="#"><svg class="ico"><use href="#i-house"/></svg>首頁</a>
+      <a class="tab" href="#"><svg class="ico"><use href="#i-book-open"/></svg>學習</a>
+    </nav>
+  </section>
+</figure>
+
+<!-- 3 ─────────────────────────────────────────── -->
+<figure class="slot">
+  <figcaption><b>3 · play-midgame（執黑對 初學，輪到你）</b>側板是一張記譜紙放在深青上。對手用階名，不印 Lv.0。最新一手旁邊一個墨點。任務頁不顯示底部導覽。</figcaption>
+  <section class="phone is-board" data-screen="play-midgame">
+    <div class="toprow">
+      <button class="back" aria-label="返回"><svg class="ico"><use href="#i-arrow-left"/></svg></button>
+      <h1>對局</h1>
+    </div>
+    <div class="woodframe" data-fen="rnbqkb1r/pppp1ppp/5n2/4p3/6P1/7N/PPPPPP1P/RNBQKBR1" data-orient="black" data-hl="h1:lm,g1:lm"></div>
+    <div class="paper">
+      <div class="paper-head">
+        <div class="who"><span class="label">對手</span><strong>初學</strong></div>
+        <div class="turn"><span class="now">輪到你</span><span class="label">你執黑</span></div>
+      </div>
+      <div class="score" role="table" aria-label="棋譜">
+        <div class="r h"><span></span><span>白 · 初學</span><span>黑 · 你</span></div>
+        <div class="r"><span class="n">1</span><span class="m">g4</span><span class="m">e5</span></div>
+        <div class="r"><span class="n">2</span><span class="m">Nh3</span><span class="m">Nf6</span></div>
+        <div class="r"><span class="n">3</span><span class="m">Rg1<svg class="dot" viewBox="0 0 10 10" aria-label="最新一手"><path d="M5.2.6c2.3.1 4.2 1.9 4.2 4.3S7.6 9.5 5 9.4C2.500 9.300.5 7.600.6 5 .7 2.500 2.800.5 5.200.6z"/></svg></span><span class="m"></span></div>
+        <div class="r"><span class="n">4</span><span class="m"></span><span class="m"></span></div>
+        <div class="r"><span class="n">5</span><span class="m"></span><span class="m"></span></div>
+        <div class="r"><span class="n">6</span><span class="m"></span><span class="m"></span></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-line">悔棋</button>
+        <button class="btn btn-line is-danger">投降</button>
+      </div>
+    </div>
+  </section>
+</figure>
+
+<!-- 4 ─────────────────────────────────────────── -->
+<figure class="slot">
+  <figcaption><b>4 · play-gameover-win（同一盤，第 6 手將殺）</b>同一張記譜紙，上面蓋一枚印：贏是金環（indicator），標題用墨色、沒有驚嘆號。主按鈕通往棋憶。</figcaption>
+  <section class="phone is-board" data-screen="play-gameover-win">
+    <div class="toprow">
+      <button class="back" aria-label="返回"><svg class="ico"><use href="#i-arrow-left"/></svg></button>
+      <h1>對局</h1>
+    </div>
+    <div class="woodframe" data-fen="rnb1k2r/pppp1ppp/8/2b1p3/6P1/8/PPPPPq1P/RNBQKBR1" data-orient="black" data-hl="h4:lm,f2:lm,e1:check"></div>
+    <div class="paper">
+      <span class="seal is-stamped" data-ring="gold" role="img" aria-label="這一盤：執黑，你贏了"><svg viewBox="0 0 50 50"><use href="#p-king"/></svg></span>
+      <div class="result">
+        <h2>你贏了</h2>
+        <span class="label">將殺 · 第 6 手 · 對 初學</span>
+      </div>
+      <div class="score" role="table" aria-label="棋譜" style="margin-top:22px">
+        <div class="r"><span class="n">5</span><span class="m">fxg4</span><span class="m">Qh4+</span></div>
+        <div class="r"><span class="n">6</span><span class="m">Nf2</span><span class="m">Qxf2#<svg class="dot" viewBox="0 0 10 10" aria-hidden="true"><path d="M5.2.6c2.3.1 4.2 1.9 4.2 4.3S7.6 9.5 5 9.4C2.500 9.300.5 7.600.6 5 .7 2.500 2.800.5 5.200.6z"/></svg></span></div>
+      </div>
+      <div class="neve-box">
+        <img class="neve-av" src="/avatars/neve-badge.png" alt="">
+        <div><span class="neve-name">Neve</span><p class="neve-say">將殺成立了。</p></div>
+      </div>
+      <div class="stack">
+        <button class="btn btn-jade btn-block">我陪你看看剛剛那一步<svg class="ico"><use href="#i-arrow-right"/></svg></button>
+        <button class="btn btn-line btn-block">再下一盤</button>
+      </div>
+    </div>
+  </section>
+</figure>
+
+<!-- 5 ─────────────────────────────────────────── -->
+<figure class="slot">
+  <figcaption><b>5 · review-analysing（分析中，手機約 10 秒）</b>和看完後是同一頁：頁首、棋盤、Neve 的卡都已經在位置上，卡片裡先只有她那一句與進度。分析完不跳版面。</figcaption>
+  <section class="phone" data-screen="review-analysing">
+    <div class="pagehead">
+      <div class="row">
+        <button class="back" aria-label="返回"><svg class="ico"><use href="#i-arrow-left"/></svg></button>
+        <h1>棋憶</h1>
+      </div>
+      <p class="which">11 月 16 日 · 執白 · 對 初學</p>
+      <svg class="ink" data-ink="186,40,7" aria-hidden="true"></svg>
+      <span class="seal" data-ring="gold" role="img" aria-label="這一盤：執白，你贏了"><svg viewBox="0 0 50 50"><use href="#p-king"/></svg></span>
+    </div>
+    <div class="review-body">
+      <div class="woodframe on-paper" data-fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR" data-orient="white"></div>
+      <div class="neve-box note">
+        <div class="note-top">
+          <div class="neve-id"><img class="neve-av" src="/avatars/neve-badge.png" alt=""><span class="neve-name">Neve</span></div>
+          <div class="pager" aria-hidden="true">
+            <button disabled><svg class="ico"><use href="#i-chevron-left"/></svg></button>
+            <button disabled><svg class="ico"><use href="#i-chevron-right"/></svg></button>
+          </div>
+        </div>
+        <p class="neve-say">讓我順著你的每一步，慢慢看過這盤。</p>
+        <div class="progress" role="progressbar" aria-valuenow="67" aria-valuemin="0" aria-valuemax="100"><span class="bar"></span><span class="folio">67%</span></div>
+      </div>
+      <div class="closing"></div>
+    </div>
+  </section>
+</figure>
+
+<!-- 6 ─────────────────────────────────────────── -->
+<figure class="slot">
+  <figcaption><b>6 · review-moment（最後一手，3/3）</b>像翻開那一盤的那一頁：深青頁首寫明是哪一盤，木盤放在米白上，Neve 的眉批是一張淺卡。最後一手之後，一筆短墨收頁，接著是「再下一盤」。</figcaption>
+  <section class="phone" data-screen="review-moment">
+    <div class="pagehead">
+      <div class="row">
+        <button class="back" aria-label="返回"><svg class="ico"><use href="#i-arrow-left"/></svg></button>
+        <h1>棋憶</h1>
+      </div>
+      <p class="which">11 月 16 日 · 執白 · 對 初學</p>
+      <svg class="ink" data-ink="186,40,7" aria-hidden="true"></svg>
+      <span class="seal" data-ring="gold" role="img" aria-label="這一盤：執白，你贏了"><svg viewBox="0 0 50 50"><use href="#p-king"/></svg></span>
+    </div>
+    <div class="review-body">
+      <div class="woodframe on-paper" data-fen="r1bq1b1r/ppp3pp/4k3/3np3/1nB5/2N2Q2/PPPP1PPP/R1B1K2R" data-orient="white" data-hl="a3:played,b3:best" data-arrows="a2a3:#888888,c4b3:#c4882a"></div>
+      <div class="neve-box note">
+        <div class="note-top">
+          <div class="neve-id"><img class="neve-av" src="/avatars/neve-badge.png" alt=""><span class="neve-name">Neve</span></div>
+          <div class="pager">
+            <button aria-label="上一手"><svg class="ico"><use href="#i-chevron-left"/></svg></button>
+            <span class="folio">3/3</span>
+            <button disabled aria-label="下一手"><svg class="ico"><use href="#i-chevron-right"/></svg></button>
+          </div>
+        </div>
+        <h3>第 9 手・兵沒人守</h3>
+        <p class="played">你走了 把兵移到 a3</p>
+        <p class="better">更好的是 把主教移到 b3</p>
+        <p class="neve-say">你的兵留在 c2，沒人守著。與其把兵移到 a3，不如先把主教移到 b3。</p>
+      </div>
+      <div class="closing">
+        <div class="end"><svg class="ink" data-ink="92,22,11" aria-hidden="true"></svg><span>這盤看到這裡</span></div>
+        <div class="actions">
+          <button class="btn btn-jade">再下一盤<svg class="ico"><use href="#i-arrow-right"/></svg></button>
+          <button class="btn btn-line"><svg class="ico"><use href="#i-share-2"/></svg>棋譜</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</figure>
+
+<!-- 7 ─────────────────────────────────────────── -->
+<figure class="slot">
+  <figcaption><b>7 · empty-or-404（404）</b>和首頁同一種頁首：明朝標題、一筆墨、一枚印。印裡是倒下的國王（Gioco 剪影，不用 Unicode 棋子字元），墨環。404 排成頁碼。</figcaption>
+  <section class="phone" data-screen="empty-or-404">
+    <header class="appbar">
+      <span class="wordmark">GAMBIT</span>
+      <button class="iconbtn" aria-label="設定"><svg class="ico"><use href="#i-settings"/></svg></button>
+    </header>
+    <div class="lost-head">
+      <h1>找不到這個頁面</h1>
+      <svg class="ink" data-ink="312,60,9" aria-hidden="true"></svg>
+      <span class="seal is-fallen" data-ring="ink" role="img" aria-label="倒下的國王"><svg viewBox="0 0 50 50"><use href="#p-king"/></svg></span>
+    </div>
+    <div class="lost-body">
+      <div class="neve-box">
+        <img class="neve-av" src="/avatars/neve-badge.png" alt="">
+        <div><span class="neve-name">Neve</span><p class="neve-say">看來這一步走到了棋盤之外。</p></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-jade"><svg class="ico"><use href="#i-house"/></svg>返回首頁</button>
+        <button class="btn btn-text">繼續學習之路</button>
+      </div>
+    </div>
+    <div class="pagefolio" aria-hidden="true"><i></i><b>404</b><i></i></div>
+    <nav class="tabbar" aria-label="主導覽" style="margin-top:0">
+      <a class="tab" href="#"><svg class="ico"><use href="#i-house"/></svg>首頁</a>
+      <a class="tab" href="#"><svg class="ico"><use href="#i-book-open"/></svg>學習</a>
+    </nav>
+  </section>
+</figure>
+
+</main>
+
+<script>
+/* 棋盤：照 FEN 把 Gioco Wood 棋子排在 wood12.jpg 上；座標刻在木框。純展示，不可互動。 */
+(function(){
+  var SQ = 41, n = 0;
+  function xy(sq, orient){
+    var f = sq.charCodeAt(0) - 97, r = +sq[1];
+    return orient === 'black' ? [(7 - f) * SQ, (r - 1) * SQ] : [f * SQ, (8 - r) * SQ];
+  }
+  document.querySelectorAll('.woodframe,[data-board]').forEach(function(frame){
+    SQ = +(frame.dataset.sq || 41);
+    var orient = frame.dataset.orient || 'white', cg = document.createElement('div'), html = '';
+    cg.className = 'cg';
+    (frame.dataset.hl || '').split(',').filter(Boolean).forEach(function(h){
+      var p = h.split(':'), c = xy(p[0], orient);
+      html += '<i class="hl-' + p[1] + '" style="left:' + c[0] + 'px;top:' + c[1] + 'px"></i>';
+    });
+    frame.dataset.fen.split('/').forEach(function(row, ri){
+      var fi = 0;
+      row.split('').forEach(function(ch){
+        if (/\d/.test(ch)) { fi += +ch; return; }
+        var white = ch === ch.toUpperCase(), sq = String.fromCharCode(97 + fi) + (8 - ri), c = xy(sq, orient);
+        html += '<i class="pc' + (white ? '' : ' is-black') + '" style="left:' + c[0] + 'px;top:' + c[1] + 'px;background-image:url(/pieces/' + (white ? 'w' : 'b') + ch.toUpperCase() + '.svg)"></i>';
+        fi++;
+      });
+    });
+    var arrows = (frame.dataset.arrows || '').split(',').filter(Boolean);
+    if (arrows.length) {
+      var svg = '<svg viewBox="0 0 328 328">';
+      arrows.forEach(function(a){
+        var p = a.split(':'), from = xy(p[0].slice(0, 2), orient), to = xy(p[0].slice(2, 4), orient), id = 'ah' + (n++);
+        var x1 = from[0] + SQ / 2, y1 = from[1] + SQ / 2, x2 = to[0] + SQ / 2, y2 = to[1] + SQ / 2;
+        var len = Math.hypot(x2 - x1, y2 - y1), k = (len - 13) / len;
+        svg += '<defs><marker id="' + id + '" markerWidth="4" markerHeight="4" refX="0.4" refY="2" orient="auto"><path d="M0,0 V4 L3,2 Z" fill="' + p[1] + '"/></marker></defs>' +
+               '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + (x1 + (x2 - x1) * k) + '" y2="' + (y1 + (y2 - y1) * k) + '" stroke="' + p[1] + '" stroke-width="6.2" stroke-linecap="round" opacity=".85" marker-end="url(#' + id + ')"/>';
+      });
+      html += svg + '</svg>';
+    }
+    cg.innerHTML = html;
+    frame.appendChild(cg);
+    for (var i = 0; i < 8 && !frame.dataset.sq; i++) {
+      var rank = document.createElement('span'), file = document.createElement('span');
+      rank.className = file.className = 'coord';
+      rank.textContent = orient === 'black' ? i + 1 : 8 - i;
+      rank.style.cssText = 'left:8px;top:' + (15 + i * SQ + SQ / 2) + 'px';
+      file.textContent = String.fromCharCode(orient === 'black' ? 104 - i : 97 + i);
+      file.style.cssText = 'left:' + (15 + i * SQ + SQ / 2) + 'px;top:350px';
+      frame.appendChild(rank); frame.appendChild(file);
+    }
+  });
+})();
+
+/* 墨筆：ink-brush.vue 的 buildPath 放大版。原版是一條變寬的筆畫；放大到 40–64px 後補上
+   起筆的鈍頭、分岔的筆毛與尾端飛白，否則會變成一條光滑的梭形。同一個 seed 永遠同一筆。 */
+(function(){
+  function rng(seed){ var s = (seed * 7919 + 13) % 233280; return function(){ s = (s * 9301 + 49297) % 233280; return s / 233280; }; }
+  function small(w, h, seed){            /* 原版 buildPath，原封不動（12px 級的小墨痕用） */
+    var x0 = 2.5, x1 = w - 2.5, maxT = h * 0.42, K = 46, d = '', i, u, t;
+    function cy(u){ return h / 2 + Math.sin(u * 5.2 + seed) * (h * 0.06) + (u - 0.5) * (h * 0.05); }
+    function thick(u){
+      var peak = 0.5 * Math.exp(-Math.pow((u - 0.3) / 0.4, 2)) + 0.18;
+      var dry = u > 0.5 ? 0.62 + 0.38 * Math.sin(u * 34 + seed * 3) : 1;
+      var tip = u > 0.82 ? 0.4 + 0.6 * Math.max(0, 1 - (u - 0.82) / 0.18) : 1;
+      return Math.max(0.6, maxT * peak * dry * tip);
+    }
+    for (i = 0; i <= K; i++) { u = i / K; t = thick(u) / 2; d += (i ? 'L' : 'M') + (x0 + (x1 - x0) * u).toFixed(1) + ',' + (cy(u) - t).toFixed(1) + ' '; }
+    for (i = K; i >= 0; i--) { u = i / K; t = thick(u) / 2; d += 'L' + (x0 + (x1 - x0) * u).toFixed(1) + ',' + (cy(u) + t).toFixed(1) + ' '; }
+    return d + 'Z';
+  }
+  function big(w, h, seed){
+    var R = rng(seed), N = 72, B = 13, x0 = 3, L = w - 6, T = h * 0.52, DRY = 0.46, d = '';
+    function mix(a, b, t){ t = Math.max(0, Math.min(1, t)); t = t * t * (3 - 2 * t); return a + (b - a) * t; }
+    function cy(u){ return h * 0.6 - u * h * 0.16 - Math.sin(u * Math.PI) * h * 0.04; }
+    function env(u){                       /* 筆壓：起筆一頓 → 提筆 → 行筆 → 收尾漸乾 */
+      if (u < 0.05) return mix(0.62, 1, u / 0.05);
+      if (u < 0.42) return mix(1, 0.56, (u - 0.1) / 0.32);
+      if (u < 0.72) return mix(0.56, 0.62, (u - 0.42) / 0.3);
+      return mix(0.62, 0.34, (u - 0.72) / 0.28);
+    }
+    for (var b = 0; b < B; b++) {
+      var f = (b + 0.5) / B - 0.5, edge = Math.abs(f) * 2;
+      var s = (0.5 - f) * 0.018 + R() * 0.006;                                    /* 斜切的起筆 */
+      var e = 1 - R() * (0.04 + 0.26 * edge) - (R() < 0.3 ? 0.08 + R() * 0.14 : 0);
+      var ga = 0.56 + R() * 0.3, gl = R() < 0.55 ? 0.03 + R() * 0.07 : 0;        /* 飛白：筆毛中途斷開一小段 */
+      var wob = R() * 6.28, amp = h * 0.01 * (0.5 + R()), top = [], bot = [];
+      for (var i = 0; i <= N; i++) {
+        var u = s + (e - s) * i / N, th = T * env(u);
+        var fly = u > DRY ? 1 - 0.74 * ((u - DRY) / (1 - DRY)) * (0.55 + 0.45 * Math.sin(u * 27 + wob)) : 1;
+        if (gl && u > ga && u < ga + gl) fly *= Math.abs((u - ga) / gl - 0.5) * 2 * 0.25;
+        var half = th / B * 0.5 * mix(1.9, 1.22, (u - 0.12) / 0.34) * fly * (i === 0 ? 0.75 : i === N ? 0.25 : 1);
+        var y = cy(u) + f * th + Math.sin(u * 13 + wob) * amp, x = x0 + L * u;
+        top.push(x.toFixed(1) + ',' + (y - half).toFixed(1));
+        bot.push(x.toFixed(1) + ',' + (y + half).toFixed(1));
+      }
+      d += 'M' + top.join('L') + 'L' + bot.reverse().join('L') + 'Z';
+    }
+    return d;
+  }
+  document.querySelectorAll('svg[data-ink]').forEach(function(el){
+    var p = el.dataset.ink.split(','), w = +p[0], h = +p[1], seed = +p[2];
+    el.setAttribute('width', w); el.setAttribute('height', h); el.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    el.innerHTML = '<path d="' + (p[3] === 'small' ? small(w, h, seed) : big(w, h, seed)) + '"/>';
+  });
+})();
+</script>
+</body>
+</html>
