@@ -4,7 +4,7 @@
 ## Priority Context
 <!-- ALWAYS loaded. Keep under 500 chars. Critical discoveries only. -->
 Epic: 全站視覺重構（2026-11-17 起）。現況：審查報告完成＝`production/visual-review-2026-11-17.md`，`src/` 一行都還沒動。
-Task: 等 Eason 看樣張選方向（地基／B 棋境一景／C 木紙墨）＋拍板報告第 7 節 9 件事；之後才開第 1 波。報告第 6 節 13 項「順手修」可先做（含棋憶深青格走錯解不了的 bug）。細節在 MANUAL「視覺重構交接」。
+Task: 樣張在 `design/demos/visual-redesign-2026-11/`（`npm run dev` 開）。地基已修一輪，B 棋境一景、C 木紙墨是初版，審查評語在同目錄 `review-notes.md` 還沒處理。下一步＝Eason 看樣張講第一印象 → 修 B、C → 做並排比較頁 → 拍板報告第 7 節；之後才開第 1 波。細節與順序在 MANUAL「視覺重構交接」。
 判斷訓練釐清（Q3 起）暫停中，待辦在 MANUAL。
 ⚠️ 動 engine 解析層：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析共用，勿污染分析。
 定位 SoT＝`production/positioning-v2-2026-08-02.md`。
@@ -24,9 +24,11 @@ Task: 等 Eason 看樣張選方向（地基／B 棋境一景／C 木紙墨）＋
 樣張（第 0 波）
 - 三份：地基（只收齊骨架，不加新東西）、B 棋境一景（加一幅夜裡木棋桌一角的畫）、C 木、紙、墨（放大墨筆與棋子印章，做減法）。每份 7 個手機畫面。
 - 在 `design/demos/visual-redesign-2026-11/`。看法：`npm run dev` 後開 `http://localhost:5173/design/demos/visual-redesign-2026-11/`（直接開檔案會掉字型）。字型、棋子、木盤走 `public/`；`fonts/*.recut.woff2` 是樣張自己重切的黑體子集。
-- 版本：地基＝已照兩位審查的評語修過一輪；B、C＝初版（各自看圖修過 3 輪，但還沒吃審查評語）。初版評分完成度 5–6.5／10，主體感 B、C 比地基高 2–3 分。B、C 的修訂版若有再 push，看該目錄的 git log。
-- 做地基的 agent 回報：app 上線的 Sarasa 黑體子集只有 759 個漢字，缺「投、降」等字（所以樣張重切了子集）。**未查證**，若屬實是全站字型缺字的 bug，動工前先確認。
-- 截圖與各 agent 的補拍在桌機 `D:/Temp/claude/gambit-review-2026-11-17/`（暫存目錄，只在桌機，可能被清掉）；報告裡引用的 `work-*/…png` 路徑都指那裡，筆電上看不到。
+- 版本：地基＝已照兩位審查的評語修過一輪；B、C＝初版（各自看圖修過 3 輪，審查評語還沒處理）。初版評分完成度 5–6.5／10，主體感 B、C 比地基高 2–3 分。
+- **停在哪（2026-11-18 00:14 Eason 喊停）**：B、C 的修訂剛開始就停了，一個字都還沒改，repo 裡的三份就是最新版，桌機暫存目錄沒有更新的東西。並排比較頁（現況對三個方向）還沒做。跑樣張的 workflow 不能跨 session 續跑，要接就重新派工。
+- **接著做的順序**：① Eason 先看三份樣張，講第一印象（哪個方向、哪裡不對）；② 照 `design/demos/visual-redesign-2026-11/review-notes.md` 修 B、C——那份是兩個審查 agent 對每份樣張的評分、必修、違規清單，加上製作者自列的弱點，B、C 各 8 項必修都還沒動；Eason 若已經排除某個方向，那份就不用修；③ 做並排比較頁；④ 拍板報告第 7 節。樣張的資產路徑是 `/fonts/`、`/pieces/`、`/board/`、`/avatars/`（走 dev server 的 public），改樣張直接改 repo 那份。
+- **黑體字型缺字**：三個 agent 各自量到 app 上線的 Sarasa 黑體子集只有 759 個漢字，缺「初、執、首、頁、繼、投、降、譜」等十多個字，缺的字會用系統字型顯示。我自己沒驗。地基樣張用的是重切的子集（884 字，`fonts/*.recut.woff2`），B、C 樣張還在用上線的子集，所以也有缺字。repo 裡沒有切子集的腳本和原始字檔。報告的 13 項順手修沒列這條，要補進去，而且排在「對局側板回黑體」之前。
+- 截圖與各 agent 的補拍在桌機 `D:/Temp/claude/gambit-review-2026-11-17/`（暫存目錄，只在桌機，可能被清掉）；報告裡引用的 `work-*/…png` 路徑都指那裡，筆電上看不到。要重拍照 wiki `visual-capture-recipe`，腳本本身沒進 repo。
 
 還沒看、動工前要補
 - 已登入的畫面（48 張全是訪客）、失敗狀態、學習頁全部上完的樣子、判斷場完整流程、reduced-motion、實機（Windows 的 Playwright WebKit 字重不準）。
