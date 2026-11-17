@@ -3,17 +3,36 @@
 
 ## Priority Context
 <!-- ALWAYS loaded. Keep under 500 chars. Critical discoveries only. -->
-Epic: 棋憶（/review）文案準確度——hanging-piece 判定接線＋走法白話文補上吃子／升變／易位
-Feature: 已實作完畢，待 review→push
-Task: 下一步＝判斷訓練釐清 Q3 起（P2 仍卡在對局數個位數，樣本不足；待辦全文在 notepad MANUAL）
-⚠️ 動 engine 解析層時注意：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析路徑共用，勿污染分析。
-定位 SoT＝`production/positioning-v2-2026-08-02.md`，提功能／重構／UI 前先讀。歷史在 wiki 與 `production/session-state/archive-2026-07.md`。
+Epic: 全站視覺重構（2026-11-17 起）。現況：審查報告完成＝`production/visual-review-2026-11-17.md`，`src/` 一行都還沒動。
+Task: 等 Eason 看樣張選方向（地基／B 棋境一景／C 木紙墨）＋拍板報告第 7 節 9 件事；之後才開第 1 波。報告第 6 節 13 項「順手修」可先做（含棋憶深青格走錯解不了的 bug）。細節在 MANUAL「視覺重構交接」。
+判斷訓練釐清（Q3 起）暫停中，待辦在 MANUAL。
+⚠️ 動 engine 解析層：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析共用，勿污染分析。
+定位 SoT＝`production/positioning-v2-2026-08-02.md`。
 
 ## Working Memory
 <!-- Session notes. Auto-pruned after 7 days. -->
 
 ## MANUAL
 <!-- User content. Never auto-pruned. -->
+### 視覺重構交接（2026-11-18 凌晨，家用桌機 EasonLeePC 寫）
+起因：Eason 覺得 Gambit「不像作品，像半成品／prototype」，Tally 那次視覺重構效果好，想比照做全站 review＋視覺重構。走法照 Tally：先 review → 出樣張 → Eason 選 → 才施工。
+
+已完成
+- 審查報告 `production/visual-review-2026-11-17.md`：六個根本原因、逐頁重點、13 項順手修、五波重構範圍、9 件待拍板（第 7 節）、三個方向（第 8 節）。依據是 48 張真實截圖（訪客＋4 盤種子對局），8 個面向 147 條發現逐條驗過，再由一個 agent 找漏洞並改進報告。
+- `CONTEXT.md`：`markDeepened` 改成已拍板的結論、active.md 標成已退役。`.gitignore`：`.omc/wiki/environment.md` 不追蹤（OMC 開場自動產生，內容重複且有 bug）。
+
+樣張（第 0 波）
+- 三份：地基（只收齊骨架，不加新東西）、B 棋境一景（加一幅夜裡木棋桌一角的畫）、C 木、紙、墨（放大墨筆與棋子印章，做減法）。每份 7 個手機畫面。
+- 寫這段時初版已做完並各被審過一輪，正在修訂；初版評分完成度只有 5–6.5／10，主體感 B、C 比地基高 2–3 分。
+- 成品若已進 repo 會在 `design/demos/visual-redesign-2026-11/`（見該目錄與 git log）；沒有就還在桌機的 `D:/Temp/claude/gambit-review-2026-11-17/samples/`（暫存目錄，只在桌機，可能被清掉）。截圖與各 agent 的補拍也在那個暫存目錄，報告裡引用的 `work-*/…png` 路徑都指那裡，筆電上看不到。
+
+還沒看、動工前要補
+- 已登入的畫面（48 張全是訪客）、失敗狀態、學習頁全部上完的樣子、判斷場完整流程、reduced-motion、實機（Windows 的 Playwright WebKit 字重不準）。
+
+沒人拍板前不要做的
+- 不要直接開第 1 波：它依賴對局頁要不要全屏隱藏底部導覽、側板回黑體（推翻 2026-06-09）、練習頁去留、五處超標動效留哪些。
+- `CLAUDE.md` 的「UI 潤飾路由」指向 `~/.claude/rules/ui-design-flow.md`，該檔已不存在，路由是斷的；要不要改指 impeccable 待 Eason 決定。
+
 ### 2026-10-14 06:22
 待辦（本輪之外，2026-09-05 快照自 active.md 搬入）
 - 🔜 判斷訓練最小版——釐清階段拍板中途暫停：走子前強制答「有／沒有」、不給回饋、局後一次列對照表（約 150 行，chess.js 窮舉不開引擎）。已拍板：Q1 不可取代好處成立、Q1b v1 只用自己對局出題、Q2 這是主線。待續（Q3 起）：現在做值不值得（Jobs 視角）、Q12 驗收條件、Q10 難度/fallible 衝突、範圍（mate-only vs 強制贏子）、跟既有判斷場的關係。前置閘門已解除（P1，2026-08-13 跑完）：五盤紙筆實驗，rung 5（關 fallible），命中率約 1–2/5，遠低於 70% 門檻——v2 主軸（斷層卡在察覺階段）不被推翻，成立。

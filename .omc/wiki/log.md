@@ -20,3 +20,7 @@
 - **Pages:** guardrails-stockfish-supabase-keep-alive-maia-supabase-mcp.md
 - **Summary:** Created new page "guardrails 護欄備忘：Stockfish、Supabase keep-alive、Maia、Supabase MCP"
 
+## [2026-11-17T16:10:18.259Z] ingest
+- **Pages:** visual-capture-recipe-agent-2026-11-17.md
+- **Summary:** Created new page "visual-capture-recipe 全站截圖與多 agent 視覺審查的做法（2026-11-17）"
+

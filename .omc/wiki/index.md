@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 5 pages | Last updated: 2026-10-14T06:22:24.378Z
+> 6 pages | Last updated: 2026-11-17T16:10:18.392Z
 
 ## debugging
 
@@ -14,6 +14,10 @@
 ## environment
 
 - [guardrails 護欄備忘：Stockfish、Supabase keep-alive、Maia、Supabase MCP](guardrails-stockfish-supabase-keep-alive-maia-supabase-mcp.md) — # guardrails 護欄備忘：Stockfish、Supabase keep-alive、Maia、Supabase MCP
+
+## pattern
+
+- [visual-capture-recipe 全站截圖與多 agent 視覺審查的做法（2026-11-17）](visual-capture-recipe-agent-2026-11-17.md) — # visual-capture-recipe 全站截圖與多 agent 視覺審查的做法（2026-11-17）
 
 ## reference
 

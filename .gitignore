@@ -23,6 +23,8 @@ production/session-state/*
 !.omc/.gitignore
 !.omc/notepad.md
 !.omc/wiki/
+# OMC 開場自動偵測產生，內容與 CLAUDE.md 重複且有 [object Object] bug；留本機不追蹤
+.omc/wiki/environment.md
 
 # === Internal Planning (not for public) ===
 
