@@ -1,0 +1,1 @@
+import{c as e}from"./use-board-fit-Bm9kXYIu.js";var t=e(`chevron-right`,[[`path`,{d:`m9 18 6-6-6-6`,key:`mthhwq`}]]);export{t};
