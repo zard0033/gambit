@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 6 pages | Last updated: 2026-11-17T16:10:18.392Z
+> 7 pages | Last updated: 2026-11-18T12:09:33.381Z
 
 ## debugging
 
@@ -9,6 +9,7 @@
 
 ## decision
 
+- [visual-redesign-decisions 視覺重構方向與拍板（2026-11-18）](visual-redesign-decisions-2026-11-18.md) — # visual-redesign-decisions 視覺重構方向與拍板（2026-11-18）
 - [wave2-decisions 棋憶 wave 2 拍板與定位 v2 刪除期判決](wave2-decisions-wave-2-v2.md) — # wave2-decisions 棋憶 wave 2 拍板與定位 v2 刪除期判決
 
 ## environment

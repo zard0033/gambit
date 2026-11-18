@@ -137,7 +137,7 @@ See `~/interviews/chess-training-companion-brief.md` for the full concept brief.
   課程內文 `font-lesson`（LXGW WenKai）、數字 / 棋譜 `font-num`（Cubic 11, tabular）、品牌字標
   `font-brand`（Cinzel）。內文最小 16px（避免 iOS auto-zoom）。
 - **Icon**：Lucide line icons 單一字族；**絕不用 emoji 當功能 icon**。
-- **導覽**：底部 tab 為主導覽；頂部 header 只放品牌 + 設定齒輪。
+- **導覽**：分頁頁面（首頁、學習）以底部 tab 為主導覽；任務頁（對局、課程、棋憶）全屏、自畫返回、不顯示底部導覽（2026-11-18 拍板）。頂部 header 只放品牌 + 設定齒輪。
 - **動效**：150–300ms，只動 transform / opacity（box-shadow 動畫禁止）；尊重 `prefers-reduced-motion`。
 - **觸控目標 ≥ 44×44px**。
 - **棋盤 / 棋子**：全 app 統一 **Wood12 木紋盤 + Gioco Wood 棋子**（`src/assets/board-theme.css`，main.ts 全域載入）。

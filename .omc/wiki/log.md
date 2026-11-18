@@ -24,3 +24,7 @@
 - **Pages:** visual-capture-recipe-agent-2026-11-17.md
 - **Summary:** Created new page "visual-capture-recipe 全站截圖與多 agent 視覺審查的做法（2026-11-17）"
 
+## [2026-11-18T12:09:33.255Z] ingest
+- **Pages:** visual-redesign-decisions-2026-11-18.md
+- **Summary:** Created new page "visual-redesign-decisions 視覺重構方向與拍板（2026-11-18）"
+
