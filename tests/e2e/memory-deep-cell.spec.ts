@@ -50,8 +50,10 @@ type ProbeWindow = Window & { __pawns: () => string[]; __seen: Set<string> }
 
 /**
  * 在頁內裝一個探針：`__pawns()` 回盤上白兵目前所在的格子（由棋子的實際位置換算，動畫中途也算得出來），
- * 另外每個 animation frame 記下出現過的格子到 `__seen`。錯棋在 g3 只停留幾百毫秒，從 Playwright
- * 端輪詢在平行負載下會漏掉，所以「子確實走過去了」要靠頁內逐幀記錄來證明。
+ * 另外每次 DOM 變動（棋子 style／class、節點增減）記下出現過的格子到 `__seen`。錯棋在 g3 只停留一小段，
+ * 從 Playwright 端輪詢在平行負載下會漏掉，所以「子確實走過去了」要靠頁內記錄來證明。
+ * 記錄用 MutationObserver、不用 requestAnimationFrame：平行負載下 WebKit 的 rAF 會被餓到每秒幾格
+ * （實測 2 秒內只跑 12 個 frame、最長一個空檔 1.4 秒），g3 從出現到滑回可以整段落在兩個 frame 之間。
  */
 async function installPawnProbe(page: Page): Promise<void> {
   await page.evaluate(() => {
@@ -73,11 +75,13 @@ async function installPawnProbe(page: Page): Promise<void> {
         .sort()
     }
     w.__seen = new Set()
-    const tick = (): void => {
+    const record = (): void => {
       for (const s of w.__pawns()) w.__seen.add(s)
-      requestAnimationFrame(tick)
     }
-    tick()
+    new MutationObserver(record).observe(document.body, {
+      subtree: true, childList: true, attributes: true, attributeFilter: ['style', 'class'],
+    })
+    record()
   })
 }
 
@@ -105,9 +109,10 @@ for (const reducedMotion of ['no-preference', 'reduce'] as const) {
       await clickSquare(page, 'g2')
       await clickSquare(page, 'g3')
 
-      // Assert — 先確認子真的走過去了（否則下面的「回到原格」恆真），再確認它回來
-      await expect.poll(() => seenSquares(page), { timeout: 2000 }).toContain('g3')
-      await expect.poll(() => whitePawnSquares(page), { timeout: 2000 })
+      // Assert — 先確認子真的走過去了（否則下面的「回到原格」恆真），再確認它回來。
+      // 平行負載下「點擊 → 落子」本身就可能耗 1.5 秒、滑回再 1.5 秒；poll 一成立就返回，timeout 只是上限。
+      await expect.poll(() => seenSquares(page), { timeout: 10_000 }).toContain('g3')
+      await expect.poll(() => whitePawnSquares(page), { timeout: 10_000 })
         .toEqual(['f2', 'g2', 'h2'])
       await expect(page.getByTestId('deep-prompt')).toBeVisible()
 
@@ -116,7 +121,7 @@ for (const reducedMotion of ['no-preference', 'reduce'] as const) {
       await clickSquare(page, 'e8')
 
       // Assert
-      await expect(page.getByTestId('deep-solved')).toBeVisible({ timeout: 2000 })
+      await expect(page.getByTestId('deep-solved')).toBeVisible({ timeout: 10_000 })
     })
   })
 }

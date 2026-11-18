@@ -47,6 +47,15 @@ test('(b) 直接進 /play 再取消 → 回到 /', async ({ page }) => {
 })
 
 test('(c) 走一步後按返回 → 回到 /，「繼續對局」接得回原局', async ({ page }) => {
+  // 換掉真的 Stockfish：只回 uciok／readyok、不回 bestmove（AI 永遠在想）。這條測的是續玩快照，不是引擎；
+  // 真引擎的 WASM 在平行負載下載入＋編譯要 4 秒以上，超過 handshake 的 5 秒 uciok 上限就會 CRASHED，
+  // 玩家一走子 AI 就認輸、對局結束、續玩快照被清掉，卡片永遠不會出現。
+  await page.route('**/stockfish/stockfish-18-lite-single.js', (route) =>
+    route.fulfill({
+      contentType: 'text/javascript',
+      body: "onmessage=function(e){var d=String(e.data).trim();if(d==='uci')postMessage('uciok');else if(d==='isready')postMessage('readyok')}",
+    }),
+  )
   await page.goto('/play', { waitUntil: 'domcontentloaded' })
   // 預設執色可能是黑或白；這裡固定選白，才能用白方視角的座標走第一步
   await page.getByRole('button', { name: '執白' }).click()

@@ -17,14 +17,14 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/sarasa-ui-tc-400.woff2?v=45dfffda') format('woff2');
+  src: url('/fonts/sarasa-ui-tc-400.woff2?v=a7c04f16') format('woff2');
 }
 @font-face {
   font-family: 'Sarasa UI TC';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/fonts/sarasa-ui-tc-700.woff2?v=a9e58a9e') format('woff2');
+  src: url('/fonts/sarasa-ui-tc-700.woff2?v=1b025e36') format('woff2');
 }
 
 /* ---- BIZ UDPMincho (display 標題 — 殿堂/莊嚴 gravitas) ----

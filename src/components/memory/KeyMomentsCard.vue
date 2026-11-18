@@ -162,7 +162,9 @@ function reveal(): void {
 const deepSourceDay = computed<string | null>(() => {
   const cell = current.value
   if (cell?.kind !== 'deep' || cell.src.gameId === gameId.value) return null
-  return `${formatGameDay(Number(cell.src.gameId))}那一盤`
+  const ts = Number(cell.src.gameId)
+  // recognition-source 只保證 gameId 是字串；資料異常時不顯示這行，不讓整張卡掛掉。
+  return Number.isFinite(ts) ? `${formatGameDay(ts)}那一盤` : null
 })
 
 // ---- 步進：一顆鈕循環看這一格的後續畫面，看完繞回原局面 ----

@@ -667,4 +667,13 @@ describe('KeyMomentsCard — 深青格的日期那一行', () => {
     // Assert
     expect(w.find('[data-testid="deep-source-day"]').exists()).toBe(false)
   })
+
+  it('gameId 不是數字時不顯示日期，卡片照常渲染', async () => {
+    // Arrange / Act
+    const w = await mountThenComplete(() => seedPendingMate('not-a-timestamp', 0))
+
+    // Assert
+    expect(w.find('[data-testid="deep-source-day"]').exists()).toBe(false)
+    expect(w.find('[data-testid="key-moments"]').exists()).toBe(true)
+  })
 })

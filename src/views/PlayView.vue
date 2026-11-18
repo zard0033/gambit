@@ -271,7 +271,8 @@ const outcomeBlurb = computed(() => {
   return '這盤輸了。'
 })
 
-const blurbParts = computed(() => outcomeBlurb.value.split(/(?<=。)/))
+// 不用 lookbehind：Safari 16.4 才支援，在 16.0–16.3 會讓整個 PlayView chunk 解析失敗。
+const blurbParts = computed(() => outcomeBlurb.value.match(/[^。]+。?/g) ?? [])
 
 // Record a win at the chosen Skill Level so the setup modal can nudge to the next rung.
 watch(terminal, (t) => {
@@ -315,9 +316,9 @@ if (isDev) {
     <div class="flex flex-1 flex-col md:m-auto md:flex-none md:flex-row md:gap-6 md:p-6">
       <!-- 棋盤寬度只用寬度公式設上限：手機另扣掉「頂列＋紙的最小高度」(19.125rem)，矮螢幕盤跟著縮，
            但不小於 15rem——再矮就讓整頁捲動。≥sm 的下限是 23.5rem，因為 chess-board.vue 在 sm 以上
-           自帶 min-w 352px（加木框內距 24px），橫放手機走這條。不用 max-w 依高度硬縮（technical-preferences 棋盤護欄）。 -->
+           自帶 min-w 352px（加木框內距 24px），橫放手機走這條；md 的左右並排也要同一個下限，否則矮的橫放（如 844×390）盤會溢出木框。不用 max-w 依高度硬縮（technical-preferences 棋盤護欄）。 -->
       <div
-        class="mx-auto w-[max(15rem,min(100vw_-_2rem,28rem,100dvh_-_19.125rem))] shrink-0 sm:w-[max(23.5rem,min(100vw_-_2rem,28rem,100dvh_-_19.125rem))] md:mx-0 md:w-[min(74vh,100vw_-_26rem,56rem)]"
+        class="mx-auto w-[max(15rem,min(100vw_-_2rem,28rem,100dvh_-_19.125rem))] shrink-0 sm:w-[max(23.5rem,min(100vw_-_2rem,28rem,100dvh_-_19.125rem))] md:mx-0 md:w-[max(23.5rem,min(74vh,100vw_-_26rem,56rem))]"
       >
         <WoodFrame surface="deep">
           <ChessBoard
