@@ -32,6 +32,12 @@ Task: 方向已拍板＝混搭（`design/demos/visual-redesign-2026-11/mix.html`
 - 黑體缺字（commit 16edabd）：Sarasa 子集原本 759 個漢字，Vue 模板用到的 222 字缺 44 個。`scripts/subset-sarasa.py` 重切成 1219 字（各約 200KB），`tests/smoke/font-coverage.test.ts` 守門，新文案帶進缺字會紅，重跑腳本即可（原始 TTF 在 `%LOCALAPPDATA%\Microsoft\Windows\Fonts`）。腳本同時把 `fonts.css` 的網址改成 `?v=<hash>`，否則 service worker 的 CacheFirst 會讓舊裝置一直用舊字型（wiki `pwa-runtime-cache-trap`）。vitest 全量 71 檔 871 條綠、typecheck 0、像素回歸 40/40 綠。
 - 本機跑 vitest 要走 PowerShell 並設 `VITEST_CACHE_DIR=node_modules/.vite-manual`；Git Bash 下連既有 smoke 都假紅（`reading 'config'`）。
 
+待查的產品隱憂
+- Stockfish 握手 uciok 上限 5 秒包含 7MB WASM 下載與編譯；慢網路首次載入可能被判成引擎壞掉、AI 一走子就認輸。推論未實測，細節在 wiki `e2e-load-flaky`。
+
+1a 之後的後續（review 列的 LOW，排進 1b）
+- 「思考中」文字在呼吸動畫低點對比約 3.4:1（動畫只該作用在點上）；完局沒有讀屏播報；棋憶流式棋譜 11px；`buildAnimationDoneAt` 的 `.cg-board piece` 選擇器實際對不到（只靠 fallback 計時器）；score-sheet 捲到最新一手沒有 E2E；`index.html` 缺 `viewport-fit=cover`；對局中途離開後 `isGameInProgress` 不歸零；練習頁同型走錯 bug（頁面要退役，不修）。
+
 還沒看、動工前要補
 - 已登入的畫面（48 張全是訪客）、失敗狀態、學習頁全部上完的樣子、判斷場完整流程、reduced-motion、實機（Windows 的 Playwright WebKit 字重不準）。
 

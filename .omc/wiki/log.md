@@ -32,3 +32,7 @@
 - **Pages:** pwa-runtime-cache-trap-public-2026-11-18.md
 - **Summary:** Created new page "pwa-runtime-cache-trap 改 public/ 檔案內容卻不改網址，舊裝置永遠拿不到（2026-11-18）"
 
+## [2026-11-18T14:38:37.579Z] ingest
+- **Pages:** e2e-load-flaky-webkit-e2e-stockfish-5-2026-11-18.md
+- **Summary:** Created new page "e2e-load-flaky webkit E2E 在平行負載下的兩種假紅，與 Stockfish 握手 5 秒的隱憂（2026-11-18）"
+

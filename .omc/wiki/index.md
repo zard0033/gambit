@@ -1,9 +1,10 @@
 # Wiki Index
 
-> 8 pages | Last updated: 2026-11-18T12:17:37.660Z
+> 9 pages | Last updated: 2026-11-18T14:38:37.767Z
 
 ## debugging
 
+- [e2e-load-flaky webkit E2E 在平行負載下的兩種假紅，與 Stockfish 握手 5 秒的隱憂（2026-11-18）](e2e-load-flaky-webkit-e2e-stockfish-5-2026-11-18.md) — # e2e-load-flaky webkit E2E 在平行負載下的兩種假紅，與 Stockfish 握手 5 秒的隱憂（2026-11-18）
 - [pwa-runtime-cache-trap 改 public/ 檔案內容卻不改網址，舊裝置永遠拿不到（2026-11-18）](pwa-runtime-cache-trap-public-2026-11-18.md) — # pwa-runtime-cache-trap 改 public/ 檔案內容卻不改網址，舊裝置永遠拿不到（2026-11-18）
 - [review-traps 三個必須記住的陷阱（審查實測，別重新發現）](review-traps.md) — # review-traps 三個必須記住的陷阱（審查實測，別重新發現）
 - [wave2-lessons 已施工蒸餾：棋憶 wave 2、hanging-piece 判定接線、走法白話文](wave2-lessons-wave-2-hanging-piece.md) — # wave2-lessons 已施工蒸餾：棋憶 wave 2、hanging-piece 判定接線、走法白話文
