@@ -4,7 +4,7 @@
 ## Priority Context
 <!-- ALWAYS loaded. Keep under 500 chars. Critical discoveries only. -->
 Epic: 全站視覺重構（2026-11-17 起）。現況：審查報告完成＝`production/visual-review-2026-11-17.md`，`src/` 一行都還沒動。
-Task: 樣張在 `design/demos/visual-redesign-2026-11/`（`npm run dev` 開）。地基已修一輪，B 棋境一景、C 木紙墨是初版，審查評語在同目錄 `review-notes.md` 還沒處理。下一步＝Eason 看樣張講第一印象 → 修 B、C → 做並排比較頁 → 拍板報告第 7 節；之後才開第 1 波。細節與順序在 MANUAL「視覺重構交接」。
+Task: 樣張與並排比較頁已完成，等 Eason 看。開 `design/demos/visual-redesign-2026-11/compare.html`（雙擊即可），推薦的是最右欄「混搭」（`mix.html`）；要他決定的事在同目錄 `decisions.md`。他拍板前不動 src/ 的 UI。黑體缺字已修（16edabd）。細節在 MANUAL「視覺重構交接」。
 判斷訓練釐清（Q3 起）暫停中，待辦在 MANUAL。
 ⚠️ 動 engine 解析層：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析共用，勿污染分析。
 定位 SoT＝`production/positioning-v2-2026-08-02.md`。
@@ -21,14 +21,16 @@ Task: 樣張在 `design/demos/visual-redesign-2026-11/`（`npm run dev` 開）�
 - 審查報告 `production/visual-review-2026-11-17.md`：六個根本原因、逐頁重點、13 項順手修、五波重構範圍、9 件待拍板（第 7 節）、三個方向（第 8 節）。依據是 48 張真實截圖（訪客＋4 盤種子對局），8 個面向 147 條發現逐條驗過，再由一個 agent 找漏洞並改進報告。
 - `CONTEXT.md`：`markDeepened` 改成已拍板的結論、active.md 標成已退役。`.gitignore`：`.omc/wiki/environment.md` 不追蹤（OMC 開場自動產生，內容重複且有 bug）。
 
-樣張（第 0 波）
-- 三份：地基（只收齊骨架，不加新東西）、B 棋境一景（加一幅夜裡木棋桌一角的畫）、C 木、紙、墨（放大墨筆與棋子印章，做減法）。每份 7 個手機畫面。
-- 在 `design/demos/visual-redesign-2026-11/`。看法：`npm run dev` 後開 `http://localhost:5173/design/demos/visual-redesign-2026-11/`（直接開檔案會掉字型）。字型、棋子、木盤走 `public/`；`fonts/*.recut.woff2` 是樣張自己重切的黑體子集。
-- 版本：地基＝已照兩位審查的評語修過一輪；B、C＝初版（各自看圖修過 3 輪，審查評語還沒處理）。初版評分完成度 5–6.5／10，主體感 B、C 比地基高 2–3 分。
-- **停在哪（2026-11-18 00:14 Eason 喊停）**：B、C 的修訂剛開始就停了，一個字都還沒改，repo 裡的三份就是最新版，桌機暫存目錄沒有更新的東西。並排比較頁（現況對三個方向）還沒做。跑樣張的 workflow 不能跨 session 續跑，要接就重新派工。
-- **接著做的順序**：① Eason 先看三份樣張，講第一印象（哪個方向、哪裡不對）；② 照 `design/demos/visual-redesign-2026-11/review-notes.md` 修 B、C——那份是兩個審查 agent 對每份樣張的評分、必修、違規清單，加上製作者自列的弱點，B、C 各 8 項必修都還沒動；Eason 若已經排除某個方向，那份就不用修；③ 做並排比較頁；④ 拍板報告第 7 節。樣張的資產路徑是 `/fonts/`、`/pieces/`、`/board/`、`/avatars/`（走 dev server 的 public），改樣張直接改 repo 那份。
-- **黑體字型缺字**：三個 agent 各自量到 app 上線的 Sarasa 黑體子集只有 759 個漢字，缺「初、執、首、頁、繼、投、降、譜」等十多個字，缺的字會用系統字型顯示。我自己沒驗。地基樣張用的是重切的子集（884 字，`fonts/*.recut.woff2`），B、C 樣張還在用上線的子集，所以也有缺字。repo 裡沒有切子集的腳本和原始字檔。報告的 13 項順手修沒列這條，要補進去，而且排在「對局側板回黑體」之前。
-- 截圖與各 agent 的補拍在桌機 `D:/Temp/claude/gambit-review-2026-11-17/`（暫存目錄，只在桌機，可能被清掉）；報告裡引用的 `work-*/…png` 路徑都指那裡，筆電上看不到。要重拍照 wiki `visual-capture-recipe`，腳本本身沒進 repo。
+樣張（第 0 波）——已完成，等 Eason 看
+- 全在 `design/demos/visual-redesign-2026-11/`。**先開 `compare.html`**（雙擊就能開）：七個畫面，每列「現況｜地基｜B｜C」。要他決定的事在同目錄 `decisions.md`，各份修了什麼、還弱在哪在 `review-notes.md`（最上面「第二版結果」）。
+- 三份都是第二版：地基（只收齊骨架）、B 棋境一景（地基＋一幅木棋桌的畫，只用在首頁頂帶與 404）、C 木、紙、墨（米白扉頁＋大墨筆、記譜紙側板、棋子印）。
+- 獨立評審（沒參與製作）的結論：單一方向都不夠。B 有 3／7 張和地基同一張圖；C 的棋盤頁最強但首頁最弱。所以另做了 `mix.html`：骨架用地基、首頁頂帶與 404 用 B 的畫、對局側板與完局用 C 的記譜紙和印、棋憶用地基，全部畫面用同一份假資料，另加輸局、44 回合長局、Neve 頭像調色對照。這是推薦方案，但還沒經 Eason 看過。
+- 單獨開樣張要 `npm run dev` 後開 `http://localhost:5173/design/demos/visual-redesign-2026-11/`（字型、棋子、木盤走 `public/`）。樣張 HTML 就是正本，直接改；桌機暫存目錄裡的產生器不再同步。
+- 截圖與各 agent 的補拍在桌機 `D:/Temp/claude/gambit-review-2026-11-17/`（只在桌機，可能被清掉）；報告裡 `work-*/…png` 的路徑都指那裡。要重拍照 wiki `visual-capture-recipe`。
+
+已修的 bug
+- 黑體缺字（commit 16edabd）：Sarasa 子集原本 759 個漢字，Vue 模板用到的 222 字缺 44 個。`scripts/subset-sarasa.py` 重切成 1219 字（各約 200KB），`tests/smoke/font-coverage.test.ts` 守門，新文案帶進缺字會紅，重跑腳本即可（原始 TTF 在 `%LOCALAPPDATA%\Microsoft\Windows\Fonts`）。vitest 全量 71 檔 871 條綠、typecheck 0、像素回歸 40/40 綠。
+- 本機跑 vitest 要走 PowerShell 並設 `VITEST_CACHE_DIR=node_modules/.vite-manual`；Git Bash 下連既有 smoke 都假紅（`reading 'config'`）。
 
 還沒看、動工前要補
 - 已登入的畫面（48 張全是訪客）、失敗狀態、學習頁全部上完的樣子、判斷場完整流程、reduced-motion、實機（Windows 的 Playwright WebKit 字重不準）。

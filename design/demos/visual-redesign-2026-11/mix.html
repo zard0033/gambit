@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gambit 樣張 · 混搭（地基＋B 的畫＋C 的記譜紙與印）</title>
+<style>
+/* ---------- 字型：與 src/assets/fonts.css 同名。Sarasa 兩個檔是樣張重切的子集 ---------- */
+@font-face { font-family: 'Sarasa UI TC'; font-weight: 400; font-display: swap; src: url('./fonts/sarasa-ui-tc-400.recut.woff2') format('woff2'); }
+@font-face { font-family: 'Sarasa UI TC'; font-weight: 700; font-display: swap; src: url('./fonts/sarasa-ui-tc-700.recut.woff2') format('woff2'); }
+/* 明朝的句讀：BIZ UDPMincho 的，。、畫在左下，只把這三個字交給 Noto Serif TC（取自 C） */
+@font-face { font-family: 'Mincho Punct'; font-weight: 600 700; font-display: swap; src: url('/fonts/noto-serif-tc-600.woff2') format('woff2'); unicode-range: U+3001, U+3002, U+FF0C; }
+@font-face { font-family: 'BIZ UDPMincho'; font-weight: 600 700; font-display: swap; src: url('/fonts/biz-udpmincho-700.woff2') format('woff2'); }
+@font-face { font-family: 'Noto Serif TC'; font-weight: 600 700; font-display: swap; src: url('/fonts/noto-serif-tc-600.woff2') format('woff2'); }
+@font-face { font-family: 'LXGW WenKai TC'; font-weight: 400; font-display: swap; src: url('/fonts/lxgw-wenkai-tc-400.woff2') format('woff2'); }
+@font-face { font-family: 'Cubic 11'; font-weight: 400; font-display: swap; src: url('/fonts/cubic-11.woff2') format('woff2'); }
+@font-face { font-family: 'Cinzel'; font-weight: 400 900; font-display: swap; src: url('/fonts/cinzel-wordmark.woff2') format('woff2'); }
+
+:root {
+  /* ---- 照抄 src/assets/main.css 的 @theme ---- */
+  --font-sans: 'Sarasa UI TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  --font-display: 'Mincho Punct', 'BIZ UDPMincho', 'Noto Serif TC', 'Songti TC', serif;
+  --font-lesson: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+  --font-num: 'Cubic 11', 'Sarasa UI TC', ui-monospace, monospace;
+  --font-brand: 'Cinzel', 'BIZ UDPMincho', serif;
+  --color-surface-base: #faf6f0;
+  --color-surface-card: #fcf9f3;
+  --color-surface-raised: #f4ead8;
+  --color-surface-deep: #103029;
+  --color-surface-deep-2: #18443a;
+  --color-line: #e0d3bd;
+  --color-line-subtle: #ece1cd;
+  --color-line-strong: #cdb999;
+  --color-ink: #3d2210;
+  --color-ink-muted: #7a5c44;
+  --color-ink-on-deep: #e7f1ec;
+  --color-ink-on-deep-dim: #9bbdb1;
+  --color-primary: #1c7059;
+  --color-primary-dark: #155747;
+  --color-primary-fg: #ffffff;
+  --color-danger: #b8533a;
+  --color-danger-dark: #9a4330;
+  --color-gold: #f8b500;
+  --color-gold-ink: #3a2408;
+  --shadow-card: 0 1px 2px rgba(61, 34, 16, 0.04), 0 4px 14px rgba(61, 34, 16, 0.06);
+  --shadow-button: 0 1px 2px rgba(61, 34, 16, 0.1);
+  --radius-btn: 8px;
+  --radius-card: 12px;
+  --piece-dark-brightness: 1.2;
+
+  /* ---- 地基要補進 @theme 的 ---- */
+  --text-page: 26px;
+  --text-title: 22px;
+  --text-heading: 18px;
+  --text-body: 16px;
+  --text-label: 13px;
+  --text-caption: 12px;
+  --page-x: 16px;
+  --shadow-lift: 0 2px 6px rgba(61, 34, 16, 0.14), 0 10px 24px rgba(61, 34, 16, 0.2);
+  --shadow-on-deep: 0 12px 28px rgba(24, 12, 4, 0.55);
+  --wood-edge-on-deep: rgba(24, 12, 4, 0.5);
+  --wood-edge-on-cream: rgba(61, 34, 16, 0.4);
+  --wood-inset: rgba(36, 18, 6, 0.45);
+  --hairline-on-deep: rgba(231, 241, 236, 0.14);
+  --ink-brush-on-deep: rgba(236, 230, 218, 0.72);
+  --dur-fast: 150ms;
+  --dur: 220ms;
+  --dur-slow: 280ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* ---- C 帶進來的一個值 ---- */
+  --radius-paper: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; }
+body { padding: 40px 48px 72px; background: #dedcd8; color: var(--color-ink); font-family: var(--font-sans); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+ol, ul { list-style: none; padding: 0; }
+:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 2px; }
+
+/* ---------- 樣張頁本身 ---------- */
+.sheet-head { max-width: 820px; margin-bottom: 32px; color: #3b3a38; }
+.sheet-head h1 { margin: 2px 0 8px; font: 700 24px/1.4 var(--font-sans); }
+.sheet-head p { margin-top: 6px; font-size: 14px; line-height: 1.75; color: #55524d; }
+.sheet-kicker { font-size: 13px; letter-spacing: 0.04em; }
+.wall { display: grid; grid-template-columns: repeat(5, 390px); gap: 56px 56px; align-items: start; width: max-content; }
+.frame { position: relative; width: 390px; }
+.frame figcaption { height: 44px; font-size: 13px; line-height: 20px; color: #5d5b57; }
+.frame figcaption b { display: block; font: 700 13px/20px ui-monospace, Consolas, monospace; color: #3b3a38; }
+.frame-notes { margin-top: 12px; font-size: 13px; line-height: 21px; color: #5d5b57; }
+.frame-notes li { position: relative; padding-left: 44px; margin-bottom: 4px; }
+.frame-notes li b { position: absolute; left: 0; top: 2px; padding: 0 5px; border: 1px solid #a9a6a0; border-radius: 3px; font: 700 11px/1.5 var(--font-sans); color: #3b3a38; }
+.fold { position: absolute; left: 394px; width: 52px; border-top: 1px solid #a9a6a0; font: 11px/1.3 ui-monospace, Consolas, monospace; color: #77746f; padding: 2px 0 0 6px; white-space: nowrap; }
+.fold-664 { top: calc(44px + 664px); }
+.fold-763 { top: calc(44px + 763px); }
+.sheet-foot { max-width: 820px; margin-top: 48px; font-size: 13px; line-height: 1.75; color: #5d5b57; }
+.sheet-foot p + p { margin-top: 6px; }
+
+.phone { position: relative; width: 390px; height: 844px; overflow: hidden; background: var(--color-surface-base); container-type: size; }
+.screen { position: relative; display: flex; flex-direction: column; height: 100%; }
+
+/* ============================================================
+   共用零件（地基）
+   ============================================================ */
+.lucide { flex: none; display: block; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 0 20px; border: 1px solid transparent; border-radius: var(--radius-btn); background: none;
+  font: 700 var(--text-body)/1 var(--font-sans); white-space: nowrap;
+  transition: transform var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+}
+.btn:active { transform: translateY(1px); }
+.btn-sm { min-height: 44px; padding: 0 16px; }
+.btn-primary { background: var(--color-primary); color: var(--color-primary-fg); box-shadow: var(--shadow-button); }
+.btn-gold { background: var(--color-gold); color: var(--color-gold-ink); box-shadow: var(--shadow-button); } /* 待裁決：金底主按鈕 */
+.btn-secondary { background: var(--color-surface-card); border-color: var(--color-line-strong); color: var(--color-ink); }
+.btn-danger { background: var(--color-surface-card); border-color: rgba(154, 67, 48, 0.45); color: var(--color-danger-dark); }
+
+.back-btn { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 10px; background: rgba(255, 255, 255, 0.08); color: var(--color-ink-on-deep); transition: transform var(--dur-fast) var(--ease-out); }
+.back-btn:active { transform: scale(0.95); }
+
+/* 頁面標題底下的一筆細墨（地基，向量取自 ink-brush.vue） */
+.ink-brush { display: block; margin-top: 8px; color: var(--ink-brush-on-deep); filter: blur(0.35px); }
+.ink-brush path { fill: currentColor; }
+
+.section-label { margin: 20px 0 8px; font: 700 var(--text-label)/18px var(--font-sans); letter-spacing: 0.06em; color: var(--color-ink-muted); }
+.eyebrow { font: 700 var(--text-label)/18px var(--font-sans); letter-spacing: 0.06em; color: var(--color-ink-on-deep-dim); }
+.label { font: 700 var(--text-label)/18px var(--font-sans); letter-spacing: 0.06em; color: var(--color-ink-muted); }
+.count { font: 11px/1 var(--font-num); letter-spacing: 0.04em; color: var(--color-ink-muted); }
+
+.progress { display: flex; align-items: center; gap: 10px; }
+.progress-track { flex: 1; height: 6px; overflow: hidden; border-radius: 999px; background: var(--color-line-subtle); }
+.progress-track i { display: block; height: 100%; border-radius: 999px; background: var(--color-primary); transform-origin: left; }
+
+/* ---------- 木框（唯一一種）＋ Wood12 ＋ Gioco Wood；棋子由頁尾的小程式照 FEN 排 ---------- */
+.wood { position: relative; flex: none; width: 358px; height: 358px; border-radius: var(--radius-card); background: linear-gradient(160deg, #6f4b30, #523722); }
+.wood-on-deep { box-shadow: 0 0 0 1px var(--wood-edge-on-deep), var(--shadow-on-deep), inset 0 1px 0 rgba(255, 228, 194, 0.2), inset 0 -2px 6px var(--wood-inset); }
+.wood-on-cream { box-shadow: 0 0 0 1px var(--wood-edge-on-cream), var(--shadow-lift), inset 0 1px 0 rgba(255, 228, 194, 0.2), inset 0 -2px 6px var(--wood-inset); }
+.cg { position: absolute; left: 15px; top: 15px; width: 328px; height: 328px; background: url('/board/wood12.jpg') 0 0 / 100% 100% no-repeat; }
+.cg i { position: absolute; display: block; }
+.cg .pc { z-index: 2; background: center / 100% 100% no-repeat; }
+.cg .pc.is-black { filter: brightness(var(--piece-dark-brightness)); }
+.cg .hl-lm { background: rgba(155, 199, 0, 0.41); }
+.cg .hl-played { background: rgba(136, 136, 136, 0.5); }
+.cg .hl-best { background: rgba(196, 136, 42, 0.34); box-shadow: inset 0 0 0 3px #c4882a; }
+.cg .hl-check { z-index: 1; }
+.cg .hl-check::after { content: ""; position: absolute; inset: 1px; border-radius: 2px; background: rgba(184, 83, 58, 0.3); box-shadow: inset 0 0 0 3px var(--color-danger); } /* app 的 check ring（C） */
+.cg svg { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.coord { position: absolute; transform: translate(-50%, -50%); font: 11px/1 var(--font-num); color: rgba(233, 217, 186, 0.9); text-shadow: 0 1px 0 var(--wood-inset); }
+
+/* ---------- Neve 對話框（唯一一種）；名牌：黑體 13「Neve」（待拍板） ---------- */
+.neve-box { padding: 15px; border: 1px solid transparent; border-radius: var(--radius-card); }
+.neve-box.is-light { background: var(--color-surface-card); border-color: var(--color-line); color: var(--color-ink); box-shadow: var(--shadow-card); }
+.neve-box.is-deep { background: var(--color-surface-deep-2); color: var(--color-ink-on-deep); border-color: var(--hairline-on-deep); }
+.neve-head { display: flex; align-items: center; gap: 10px; min-height: 36px; margin-bottom: 6px; }
+.neve-head.has-nav { min-height: 46px; margin-bottom: 8px; }
+.neve-avatar { flex: none; width: 36px; height: 36px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1px var(--color-line); }
+.neve-name { font: 400 var(--text-label)/1 var(--font-sans); letter-spacing: 0.04em; color: var(--color-ink-muted); }
+.is-deep .neve-name { color: var(--color-ink-on-deep-dim); }
+.neve-say { font: 400 var(--text-body)/1.8 var(--font-lesson); }
+.neve-nav { display: flex; margin-left: auto; border: 1px solid var(--color-line); border-radius: var(--radius-btn); }
+.neve-nav.is-hidden { visibility: hidden; }
+.step-btn { display: grid; place-items: center; width: 44px; height: 44px; border: 0; background: transparent; color: var(--color-ink-muted); }
+.step-btn + .step-btn { border-left: 1px solid var(--color-line); }
+.step-btn:disabled .lucide { opacity: 0.35; }
+.text-link { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-body); text-decoration: underline; text-underline-offset: 4px; }
+.text-link.on-deep { color: var(--color-ink-on-deep); text-decoration-color: rgba(231, 241, 236, 0.4); }
+
+/* ============================================================
+   外框頁：深青頂帶＋米白內容＋底部導覽（地基）
+   ============================================================ */
+.shell { background: var(--color-surface-base); }
+.band { flex: none; overflow: hidden; background: var(--color-surface-deep); color: var(--color-ink-on-deep); }
+.brand-row { display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 6px 0 var(--page-x); }
+.brand { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+.brand-mark { width: auto; height: 18px; }
+.wordmark { transform: translateY(1px); font: 900 18px/1 var(--font-brand); letter-spacing: 0.04em; }
+.icon-btn { display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 10px; background: none; color: var(--color-ink-on-deep-dim); }
+.band-body { padding: 4px var(--page-x) 20px; }
+.greet { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; font-size: var(--text-body); color: var(--color-ink-on-deep-dim); }
+.page-title { font: 700 var(--text-page)/34px var(--font-display); color: var(--color-ink-on-deep); }
+
+.content { flex: 1; min-height: 0; padding: 0 var(--page-x) 96px; overflow-y: auto; scrollbar-width: none; }
+.content::-webkit-scrollbar { display: none; }
+
+.deep-card { margin: 0 var(--page-x) 20px; padding: 13px 15px 15px; border: 1px solid var(--hairline-on-deep); border-radius: var(--radius-card); background: var(--color-surface-deep-2); color: var(--color-ink-on-deep); box-shadow: var(--shadow-on-deep); }
+.deep-card-meta { font-size: var(--text-body); color: var(--color-ink-on-deep-dim); }
+.dc-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
+.dc-title { font: 700 var(--text-heading)/24px var(--font-sans); }
+.dc-meta-row { margin-top: 4px; }
+.dc-meta-row .text-link { margin: -10px 0 -12px; }
+
+.row-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 64px; padding: 9px 9px 9px 15px; border: 1px solid var(--color-line); border-radius: var(--radius-card); background: var(--color-surface-card); box-shadow: var(--shadow-card); transition: transform var(--dur-fast) var(--ease-out); }
+.row-link:active { transform: translateY(1px); }
+.row-main { display: grid; gap: 2px; }
+.row-title { font: 700 var(--text-body)/1.4 var(--font-sans); }
+.row-meta { font-size: var(--text-label); line-height: 1.4; color: var(--color-ink-muted); }
+.row-go { display: flex; align-items: center; gap: 2px; min-height: 44px; font: 700 var(--text-label)/1 var(--font-sans); color: var(--color-primary-dark); }
+
+.tabbar { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 var(--page-x) 14px; pointer-events: none; }
+.tabbar-pill { display: flex; gap: 4px; padding: 6px; border-radius: 999px; pointer-events: auto; background: var(--color-surface-deep); box-shadow: var(--shadow-lift); }
+.tab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px; border-radius: 999px; font: 700 var(--text-label)/1 var(--font-sans); color: var(--color-ink-on-deep-dim); }
+.tab.is-active { background: var(--color-surface-deep-2); color: #fff; }
+
+/* ---------- B 的畫：鋪滿頂帶，題詞與卡片疊在上面（畫裡的顏色是資產，不進 @theme） ---------- */
+.scene-band { position: relative; isolation: isolate; }
+.band-art { position: absolute; inset: 0 0 auto 0; z-index: -1; }
+.scene-band .band-body { padding: 10px var(--page-x) 0; }
+.scene-band .deep-card { margin-top: 88px; } /* 卡片頂落在畫裡桌子前緣以下 */
+
+/* 404：畫佔頂帶；淺卡與按鈕緊接在下面 */
+.lost-band { height: 296px; }
+.lost-band .band-body { padding-top: 12px; }
+.lost-content { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; padding-top: 20px; }
+.lost-content .neve-box { align-self: stretch; }
+
+/* ============================================================
+   棋盤頁：深青底、頂列、木盤、C 的記譜紙
+   ============================================================ */
+.board-page { background: var(--color-surface-deep); color: var(--color-ink-on-deep); }
+.top-row { flex: none; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 var(--page-x); }
+.top-titles { flex: 1; min-width: 0; }
+.top-title { font: 700 var(--text-heading)/22px var(--font-display); }
+.top-sub { display: block; font-size: var(--text-label); line-height: 18px; color: var(--color-ink-on-deep-dim); white-space: nowrap; }
+.top-action { display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 0 0 8px; border: 0; background: none; font-size: var(--text-body); color: var(--color-ink-on-deep); }
+.top-action.is-hidden { visibility: hidden; }
+.board-wrap { flex: none; padding: 0 var(--page-x); }
+
+/* 記譜紙：深青上唯一的一張紙，所以只有它用雙線 */
+.paper { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; margin: 12px var(--page-x); padding: 14px 16px;
+  background: var(--color-surface-card); color: var(--color-ink); border-radius: var(--radius-paper); box-shadow: 0 0 0 1px var(--wood-edge-on-deep), var(--shadow-on-deep); }
+.paper::before { content: ""; position: absolute; inset: 4px; border: 1px solid var(--color-line); border-radius: 5px; pointer-events: none; }
+.paper-head { flex: none; display: flex; align-items: center; justify-content: space-between; height: 24px; margin-bottom: 8px; }
+.paper-head .count { margin-left: 6px; letter-spacing: 0.02em; }
+.turn { display: flex; align-items: center; gap: 8px; width: 84px; font: 700 var(--text-body)/1 var(--font-sans); }
+.turn i { width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); }
+
+.score { flex: 1; min-height: 74px; overflow-y: auto; scrollbar-width: none; border-top: 1px solid var(--color-ink); border-bottom: 1px solid var(--color-ink); }
+.score::-webkit-scrollbar { display: none; }
+.score .r { display: grid; grid-template-columns: 34px 1fr 1fr; align-items: center; height: 36px; border-bottom: 1px solid var(--color-line); }
+.score .r:last-child { border-bottom: 0; }
+.score .r > * { display: flex; align-items: center; height: 100%; padding-left: 12px; border-left: 1px solid var(--color-line); }
+.score .r > :first-child { border-left: 0; padding-left: 2px; }
+.score .n { font: 11px/1 var(--font-num); color: var(--color-ink-muted); }
+.score .m { gap: 8px; font: 22px/1 var(--font-num); color: var(--color-ink); }
+.dot { flex: none; width: 8px; height: 8px; }
+.dot path { fill: var(--color-ink); }
+.paper .acts { flex: none; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; padding-top: 12px; }
+
+/* 完局：同一張紙，右上一枚 96px 的印（C） */
+.result { flex: none; position: relative; height: 96px; padding-top: 10px; }
+.result h2 { font: 700 28px/36px var(--font-display); letter-spacing: 0.06em; color: var(--color-ink); }
+.result .label { display: block; margin-top: 4px; font-weight: 400; letter-spacing: 0.02em; }
+.seal { display: block; flex: none; overflow: visible; transform: rotate(-5deg); }
+.seal .king { stroke-width: 2; stroke-linejoin: round; }
+.seal.on-paper .disc { fill: var(--color-surface-deep); }
+.seal.on-paper .gaps { fill: var(--color-surface-base); }
+.seal.on-paper.king-w .king { fill: var(--color-surface-raised); stroke: var(--color-surface-raised); }
+.seal.on-paper.king-b .king { fill: var(--color-surface-deep); stroke: var(--color-surface-raised); stroke-width: 2.6; }
+.seal.ring-gold .ring { fill: var(--color-gold); }
+.seal.ring-ink .ring { fill: var(--color-ink); }
+.result .seal { position: absolute; right: -4px; top: -2px; animation: stamp var(--dur) var(--ease-out) both; }
+@keyframes stamp { from { opacity: 0; transform: rotate(-5deg) scale(1.12); } to { opacity: 1; transform: rotate(-5deg) scale(1); } }
+.said { flex: none; display: flex; align-items: center; gap: 10px; margin-top: 6px; padding-top: 10px; border-top: 1px solid var(--color-line); }
+.said .neve-avatar { width: 32px; height: 32px; }
+.said .neve-name { display: block; margin-bottom: 3px; }
+.said .neve-say { line-height: 1.5; }
+.paper.is-over .score { flex: 1; min-height: 0; margin-top: 12px; }
+.paper.is-over .acts { grid-template-columns: 2fr 1fr; }
+.paper.is-over .acts .btn { padding: 0 12px; }
+@container (max-height: 720px) {
+  .paper.is-over { margin-bottom: 8px; padding-bottom: 10px; }
+  .paper.is-over .score { display: none; }
+  .paper.is-over .result { height: 74px; padding-top: 4px; }
+  .paper.is-over .result .seal { width: 72px; height: 72px; top: -4px; right: 0; }
+  .paper.is-over .said { margin-top: 4px; padding-top: 6px; }
+  .paper.is-over .acts { padding-top: 8px; }
+}
+
+/* ============================================================
+   棋憶：深青頂列＋米白內容（地基）
+   ============================================================ */
+.review-page { background: var(--color-surface-base); }
+.review-body { flex: 1; min-height: 0; padding: 12px var(--page-x) 16px; overflow-y: auto; scrollbar-width: none; }
+.review-body::-webkit-scrollbar { display: none; }
+.dots { display: flex; align-items: center; justify-content: center; gap: 6px; height: 24px; }
+.dots i { width: 6px; height: 6px; border-radius: 999px; background: var(--color-line-strong); }
+.dots i.is-on { width: 18px; background: var(--color-primary); }
+.moment-box { display: flex; flex-direction: column; height: 264px; }
+.moment-title { font: 700 var(--text-title)/30px var(--font-display); }
+.moves-said { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; margin: 4px 0 8px; font-size: var(--text-body); line-height: 24px; }
+.moves-said dt { color: var(--color-ink-muted); }
+.moves-said dd { margin: 0; font-weight: 700; }
+.moment-scroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
+.moment-scroll::-webkit-scrollbar { display: none; }
+.end-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+/* 分析中：進度條緊接在那句話底下，卡片其餘空間放這一盤的棋譜 */
+.moment-box .progress { margin-top: 6px; }
+.flow { flex: 1; min-height: 0; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--color-line); overflow: hidden; }
+.flow-moves { margin-top: 4px; font: 11px/22px var(--font-num); color: var(--color-ink); }
+.flow-moves .fl { white-space: nowrap; margin-right: 6px; }
+.flow-moves b { font-weight: 400; color: var(--color-ink-muted); }
+
+/* ============================================================
+   試色：Neve 頭像三種處理
+   ============================================================ */
+.trial { padding-top: 4px; }
+.trial-grid { display: grid; align-items: start; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 20px; text-align: center; }
+.trial-col { display: grid; justify-items: center; align-content: start; gap: 2px; }
+.trial-name { margin-top: 8px; font: 700 var(--text-body)/1.4 var(--font-sans); }
+.trial-desc { font-size: var(--text-caption); line-height: 1.5; color: var(--color-ink-muted); }
+.trial-deep { display: grid; grid-template-columns: repeat(3, 1fr); justify-items: center; padding: 16px 0; border-radius: var(--radius-card); background: var(--color-surface-deep); }
+.trial-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.trial-cell { padding: 11px; }
+.trial-cell .neve-head { margin: 0; }
+.av { position: relative; flex: none; display: block; width: 36px; height: 36px; overflow: hidden; border-radius: 50%; box-shadow: 0 0 0 1px var(--color-line); }
+.av.on-deep { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25); }
+.av-72 { width: 72px; height: 72px; }
+.av img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.av-duo img { filter: url(#f-duo); }
+.av-tint img { filter: grayscale(1) contrast(1.05); }
+.av-tint::after { content: ""; position: absolute; inset: 0; background: var(--color-surface-deep-2); mix-blend-mode: color; opacity: 0.85; }
+
+@media (prefers-reduced-motion: reduce) { .result .seal { animation: none; } .btn, .back-btn, .row-link { transition: none; } }
+</style>
+</head>
+<body>
+<header class="sheet-head">
+  <p class="sheet-kicker">Gambit 第 0 波樣張 · 2026-11-18 · 混搭</p>
+  <h1>混搭：地基的骨架，B 的一幅畫，C 的一張紙與一枚印</h1>
+  <p>美術指導的結論是三個方向單獨都不夠，這一版照他的分配混在一起。骨架全部來自地基：頂列、返回鍵、木框、Neve 的淺卡、底部導覽、字階，以及頁面標題底下那一筆細墨。B 只貢獻那張木棋桌的畫，出現在首頁頂帶（當唯一主角）與 404（倒下的國王）。C 只貢獻兩樣：對局頁盤下的記譜紙，以及完局時蓋在紙上的棋子印；C 的扉頁與大墨筆沒有帶進來。棋憶整段照地基，只借了 C 標將殺國王的紅框。</p>
+  <p>所有畫面共用一份假資料：上一盤是 11 月 16 日你執白、第 13 回合將殺贏了初學（棋憶看的就是這一盤）；進行中的是今天你執黑對初學的一盤，第 3 回合輪到你，贏的版本在第 6 回合將殺，輸的版本是下到第 76 回合投降。課程進度是「騎士與后」，已學 2/21。手數一律算回合，對手強度只有「初學」一個名字。</p>
+</header>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-house" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-book-open" viewBox="0 0 24 24"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></symbol>
+    <symbol id="i-share-2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></symbol>
+  </defs>
+</svg>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <filter id="f-duo" color-interpolation-filters="sRGB">
+    <feColorMatrix type="matrix" values=".2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  0 0 0 1 0"/>
+    <feComponentTransfer><feFuncR type="table" tableValues=".063 .957"/><feFuncG type="table" tableValues=".188 .918"/><feFuncB type="table" tableValues=".161 .847"/></feComponentTransfer>
+  </filter>
+</svg>
+<main class="wall">
+<figure class="frame"><figcaption><b>home-returning</b>首頁・回訪（15:00，沒有進行中的對局）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="home-returning"><div class="screen shell">
+  <header class="band scene-band">
+    <div class="band-art"><svg xmlns="http://www.w3.org/2000/svg" width="390" height="360" viewBox="0 0 390 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" style="display:block">
+<defs><clipPath id="sc6-top"><polygon points="150,206 924.9,337.3 1467.5,149.8 692.6,18.5" fill="#000"/></clipPath><clipPath id="sc6-foot"><polygon points="422.1,170.2 502.1,206.6 269,236.6 189,200.2" fill="#000"/></clipPath><clipPath id="sc6-sh"><polygon points="246.8,200.7 247.7,199.1 250.3,197.6 254.4,196.2 255.6,196 261.1,194.9 262.7,194.8 264.2,194.6 270.6,193.9 272.1,193.8 273.7,193.6 275.3,193.5 276.9,193.5 283.5,193.3 285,193.2 286.5,193.2 289.5,193.3 295.2,193.5 308.3,194.4 310.5,194.6 312.4,194.9 313.8,195.4 314.7,195.9 315,196.5 314.7,197 310.7,200 308.5,201.3 307.9,201.6 307.2,201.9 303.4,203.1 302.4,203.4 301.3,203.7 300.2,204 299,204.2 293.5,205.2 292.2,205.5 290.8,205.7 289.3,205.9 287.8,206.1 281.4,206.7 279.7,206.8 273,207.1 266.2,206.8 259.9,206.2 254.4,205.2 250.3,203.9 247.7,202.4" fill="#000"/><polygon points="290.6,196.2 291.2,195.1 292.9,194.1 293.7,193.8 296.6,192.9 297.9,192.6 301.7,191.9 303.2,191.7 304.7,191.6 309.2,191.1 310.8,191 315.5,190.9 317,190.9 321.5,191 325.6,191.5 329.2,192.1 331.9,193 333.6,194 334.2,195.1 333.6,196.1 331.9,197.1 331.2,197.4 328.3,198.3 327.1,198.6 323.3,199.3 321.8,199.5 320.3,199.7 315.8,200.2 314.2,200.3 309.5,200.4 308,200.4 303.5,200.3 299.3,199.9 295.7,199.2 292.9,198.3 291.2,197.3" fill="#000"/><polygon points="303.7,194.9 304.2,194 305.7,193.1 308,192.4 311.1,191.8 318.5,190.8 320.1,190.6 323.6,190.3 325.2,190.1 326.8,190.1 330.4,189.9 331.9,189.9 333.4,189.9 336.6,190.1 339.6,190.3 340.4,190.4 342.7,190.9 343.1,190.9 344.6,191.4 345.5,192 345.8,192.6 345.9,192.7 345.5,193.4 345.4,193.7 344.1,194.4 343.4,194.7 342.6,195 340.3,195.7 339.1,196 336.2,196.6 334.8,196.8 333.3,197 325.8,198 322.2,198.3 318.4,198.4 314.6,198.3 311.1,198 308,197.4 305.7,196.7 304.2,195.8" fill="#000"/><polygon points="295.1,178.9 296.5,176.3 300.6,173.9 307.2,171.9 308.7,171.5 317.3,169.9 319.3,169.6 321.4,169.4 323.4,169.1 325.4,168.8 327.5,168.6 337.6,167.6 339.7,167.4 350.4,167.1 352.4,167 362.9,167.4 372.6,168.4 381,169.9 381.5,170 387.6,171.9 391.4,174.2 392.7,176.6 392.8,176.8 391.4,179.3 387.4,181.7 381,183.7 379.6,184.1 377.9,184.5 369.2,186.1 367.3,186.4 363.2,186.9 359.1,187.4 349,188.4 346.8,188.5 336.2,188.8 325.6,188.5 315.7,187.5 307.2,185.9 300.6,183.9 296.5,181.5" fill="#000"/><polygon points="318.9,176.4 320.1,174.1 323.8,172 329.6,170.2 358.9,164.5 368,162.8 369.9,162.5 371.8,162.2 382.5,161.2 384.6,161 395.9,160.6 398,160.6 409,160.9 410.6,161.1 420.6,162.1 429.1,163.7 435.6,165.7 439.7,168.1 441.1,170.7 439.7,173.3 439.3,173.6 435.1,176.1 433.9,176.5 427,178.7 417.9,180.4 416,180.7 413.9,181 403.3,182 401.2,182.2 364.8,185 355.4,185.3 345.9,185 337.1,184.1 329.6,182.7 323.8,180.8 320.1,178.7" fill="#000"/><polygon points="384.5,169.8 385.3,168.4 387.5,167.1 391.1,165.9 395.8,165.1 401.2,164.5 407,164.3 412.8,164.5 418.3,165.1 422.9,165.9 425.4,166.6 427.2,167.1 428.2,167.7 428.8,168.4 429.5,169.8 428.8,171.2 426.5,172.5 422.9,173.6 418.3,174.5 412.8,175.1 407,175.2 401.2,175.1 395.8,174.5 391.1,173.6 387.5,172.5 385.3,171.2" fill="#000"/><polygon points="394.3,166.3 397.6,164.8 415.2,162.5 459.5,168.2 456.1,169.7 438.6,172" fill="#000"/><polygon points="412.8,166.1 413.6,164.6 415.9,163.2 419.6,162.1 424.4,161.2 430,160.6 436.1,160.4 442.1,160.6 447.7,161.2 452.5,162.1 456.2,163.2 458.6,164.6 459.4,166.1 458.6,167.5 456.2,168.9 452.5,170 447.7,170.9 442.1,171.5 436.1,171.7 430,171.5 424.4,170.9 419.6,170 415.9,168.9 413.6,167.5" fill="#000"/></clipPath><clipPath id="sc6-ao"><polygon points="296.1,204.8 298.1,204 299.6,203.2 300.6,202.3 301.2,201.4 301.3,200.5 300.9,199.6 300,198.7 298.6,197.8 296.8,197 294.6,196.3 292,195.6 289.1,195.1 285.8,194.6 282.4,194.2 278.8,194 275.1,193.8 271.3,193.8 267.6,193.9 263.9,194.1 260.4,194.5 257.1,194.9 254.1,195.4 251.4,196.1 249,196.8 247.1,197.6 245.5,198.4 244.5,199.3 243.9,200.2 243.8,201.1 244.2,202 245.1,202.9 246.5,203.7 248.3,204.5 250.5,205.2 253.1,205.9 256.1,206.5 259.3,206.9 262.7,207.3 266.3,207.6 270.1,207.7 273.8,207.7 277.6,207.6 281.2,207.4 284.7,207.1 288,206.6 291,206.1 293.8,205.5" fill="#000"/><polygon points="372.6,185.2 375.7,184 378.1,182.7 379.7,181.3 380.6,179.9 380.8,178.5 380.1,177.1 378.7,175.7 376.6,174.4 373.7,173.1 370.2,172 366.2,170.9 361.6,170 356.5,169.3 351.1,168.7 345.4,168.3 339.6,168.1 333.7,168.1 327.8,168.2 322.1,168.6 316.6,169.1 311.4,169.8 306.6,170.6 302.4,171.6 298.7,172.7 295.6,173.9 293.2,175.2 291.6,176.6 290.7,178 290.5,179.4 291.2,180.9 292.6,182.3 294.7,183.6 297.6,184.8 301.1,186 305.1,187 309.7,187.9 314.8,188.7 320.2,189.2 325.9,189.6 331.7,189.9 337.6,189.9 343.5,189.7 349.2,189.4 354.7,188.9 359.9,188.2 364.7,187.3 369,186.4" fill="#000"/></clipPath></defs><g><rect x="-10" y="-10" width="410" height="380" fill="#103029"/><polygon points="-150,-40 0,-40 709.7,400 559.7,400" fill="#193830"/><polygon points="-96,-40 20,-40 729.7,400 613.7,400" fill="#203d35"/><polygon points="-52,-40 30,-40 739.7,400 657.7,400" fill="#264239"/></g><g><polygon points="150,206 924.9,337.3 924.9,355.4 150,224.1" fill="#512f1b"/><polygon points="150,206 924.9,337.3 924.9,341.3 150,210" fill="#664632"/><polygon points="150,206 924.9,337.3 1467.5,149.8 692.6,18.5" fill="#432313"/><polygon points="196,204 916.8,326.1 1421.6,151.8 700.7,29.6" fill="#926843"/><path d="M196,204L286.1,219.3L349.2,197.5L259.1,182.2ZM322.1,160.4L412.3,175.7L475.3,153.9L385.2,138.6ZM349.2,197.5L439.3,212.8L502.4,191L412.3,175.7ZM376.2,234.6L466.3,249.8L529.4,228L439.3,212.8Z" fill="#68371f"/><g clip-path="url(#sc6-top)"><g clip-path="url(#sc6-foot)"><polygon points="150,206 924.9,337.3 1467.5,149.8 692.6,18.5" fill="#6a442b"/><polygon points="196,204 916.8,326.1 1421.6,151.8 700.7,29.6" fill="#e9c997"/><path d="M196,204L286.1,219.3L349.2,197.5L259.1,182.2ZM322.1,160.4L412.3,175.7L475.3,153.9L385.2,138.6ZM349.2,197.5L439.3,212.8L502.4,191L412.3,175.7ZM376.2,234.6L466.3,249.8L529.4,228L439.3,212.8Z" fill="#a56c45"/></g></g><polyline points="924.9,337.3 150,206 692.6,18.5" fill="none" stroke="#8f7058" stroke-width="1.2" stroke-linejoin="round" opacity="0.9"/></g><g clip-path="url(#sc6-top)"><g clip-path="url(#sc6-foot)"><g clip-path="url(#sc6-sh)"><polygon points="150,206 924.9,337.3 1467.5,149.8 692.6,18.5" fill="#432313"/><polygon points="196,204 916.8,326.1 1421.6,151.8 700.7,29.6" fill="#926843"/><path d="M196,204L286.1,219.3L349.2,197.5L259.1,182.2ZM322.1,160.4L412.3,175.7L475.3,153.9L385.2,138.6ZM349.2,197.5L439.3,212.8L502.4,191L412.3,175.7ZM376.2,234.6L466.3,249.8L529.4,228L439.3,212.8Z" fill="#68371f"/></g></g></g><g clip-path="url(#sc6-top)"><g clip-path="url(#sc6-ao)"><polygon points="150,206 924.9,337.3 1467.5,149.8 692.6,18.5" fill="#381b0e"/><polygon points="196,204 916.8,326.1 1421.6,151.8 700.7,29.6" fill="#795130"/><path d="M196,204L286.1,219.3L349.2,197.5L259.1,182.2ZM322.1,160.4L412.3,175.7L475.3,153.9L385.2,138.6ZM349.2,197.5L439.3,212.8L502.4,191L412.3,175.7ZM376.2,234.6L466.3,249.8L529.4,228L439.3,212.8Z" fill="#562b16"/></g></g><g><polygon points="335.7,188.4 346.5,188 356.7,187 365.7,185.2 369.2,184.2 372.6,182.8 375.3,181 377.1,178.6 377.4,177.2 377.5,167.7 377,164.2 375.5,160.7 372.8,157.9 367.7,155.1 362.1,153.4 354.7,152 343.7,150.9 335.7,150.7 335.7,150.7 327.6,150.9 316.7,152 309.2,153.4 303.6,155.1 298.5,157.9 295.8,160.7 294.3,164.2 293.8,167.7 293.9,177.2 294.2,178.6 296,181 298.7,182.8 302.1,184.2 305.7,185.2 314.6,187 324.8,188 335.7,188.4" fill="#936943"/><polygon points="335.7,188.4 324.8,188 314.6,187 305.7,185.2 302.1,184.2 298.7,182.8 296,181 294.2,178.6 293.9,177.2 293.8,167.7 294.3,164.2 295.8,160.7 298.5,157.9 303.6,155.1 309.2,153.4 316.7,152 327.6,150.9 335.7,150.7 335.7,150.7 343.7,150.9 350.8,151.6 351.6,154.1 352.4,154.4 353.1,155.1 353.2,165.3 355,173.7 355.3,180 355.2,183.8 354.6,184.5 353.6,184.9 352.8,187.3 346.5,188 335.7,188.4" fill="#eacb98"/><polygon points="372.9,159.7 372.7,160.5 372.3,161.3 371.6,162 370.6,162.8 369.4,163.5 367.9,164.2 366.1,164.9 364.2,165.5 362,166.1 359.6,166.6 357,167.1 354.3,167.5 351.4,167.9 348.4,168.2 345.3,168.4 342.1,168.6 338.9,168.7 335.7,168.7 332.4,168.7 329.2,168.6 326,168.4 322.9,168.2 319.9,167.9 317,167.5 314.3,167.1 311.7,166.6 309.3,166.1 307.1,165.5 305.2,164.9 303.4,164.2 301.9,163.5 300.7,162.8 299.7,162 299,161.3 298.6,160.5 298.4,159.7 298.6,158.9 299,158.2 299.7,157.4 300.7,156.6 301.9,155.9 303.4,155.2 305.2,154.6 307.1,153.9 309.3,153.3 311.7,152.8 314.3,152.3 317,151.9 319.9,151.6 322.9,151.3 326,151 329.2,150.8 332.4,150.7 335.7,150.7 338.9,150.7 342.1,150.8 345.3,151 348.4,151.3 351.4,151.6 354.3,151.9 357,152.3 359.6,152.8 362,153.3 364.2,153.9 366.1,154.6 367.9,155.2 369.4,155.9 370.6,156.6 371.6,157.4 372.3,158.2 372.7,158.9" fill="#eace9e"/><polygon points="335.7,168.3 349.9,167.6 359.3,166.2 366.7,164.1 369.6,162.7 371.4,161.3 372.1,159.5 371.5,157.8 369.9,156.4 366.5,154.6 371.8,145.2 376.2,135.7 378.7,128.7 379.6,124.5 379.8,121.4 379.3,118.2 378.5,116.5 377,114.4 375.3,112.6 372.9,110.9 367.5,108.1 360.2,105.6 351.7,103.9 345.8,103.2 335.7,102.8 335.7,102.8 325.6,103.2 319.7,103.9 311.1,105.6 303.8,108.1 298.4,110.9 296.1,112.6 294.3,114.4 292.8,116.5 292,118.2 291.5,121.4 291.7,124.5 292.6,128.7 295.1,135.7 299.6,145.2 304.8,154.6 301.4,156.4 299.8,157.8 299.2,159.5 299.9,161.3 301.7,162.7 304.6,164.1 312,166.2 321.4,167.6 335.7,168.3" fill="#936943"/><polygon points="335.7,168.3 321.4,167.6 312,166.2 304.6,164.1 301.7,162.7 299.9,161.3 299.2,159.5 299.8,157.8 301.4,156.4 304.8,154.6 299.6,145.2 295.1,135.7 292.6,128.7 291.7,124.5 291.5,121.4 292,118.2 292.8,116.5 294.3,114.4 296.1,112.6 298.4,110.9 303.8,108.1 311.1,105.6 319.7,103.9 325.6,103.2 335.7,102.8 335.7,102.8 345.4,103.2 346,106 346.9,106.7 347,110.9 347.4,112.6 348.6,115.1 352.4,120 354.5,123.5 355.8,127.3 356.3,131.5 356,135.7 355.2,141.3 353.4,149 350.1,160.9 350.3,164.1 349.4,164.8 349.3,167.6 335.7,168.3" fill="#eacb98"/><polygon points="379.8,122 379.6,122.9 379.1,123.9 378.3,124.8 377.2,125.7 375.7,126.5 373.9,127.3 371.8,128.1 369.5,128.9 366.9,129.6 364,130.2 361,130.8 357.7,131.3 354.3,131.7 350.8,132 347.1,132.3 343.3,132.5 339.5,132.6 335.7,132.7 331.8,132.6 328,132.5 324.2,132.3 320.5,132 317,131.7 313.6,131.3 310.3,130.8 307.3,130.2 304.4,129.6 301.8,128.9 299.5,128.1 297.4,127.3 295.6,126.5 294.2,125.7 293,124.8 292.2,123.9 291.7,122.9 291.5,122 291.7,121.1 292.2,120.1 293,119.2 294.2,118.3 295.6,117.5 297.4,116.7 299.5,115.9 301.8,115.1 304.4,114.4 307.3,113.8 310.3,113.3 313.6,112.8 317,112.3 320.5,112 324.2,111.7 328,111.5 331.8,111.4 335.7,111.3 339.5,111.4 343.3,111.5 347.1,111.7 350.8,112 354.3,112.3 357.7,112.8 361,113.3 364,113.8 366.9,114.4 369.5,115.1 371.8,115.9 373.9,116.7 375.7,117.5 377.2,118.3 378.3,119.2 379.1,120.1 379.6,121.1" fill="#eace9e"/><polygon points="335.7,113.8 343.6,113.5 352.2,112.1 356.7,110.3 357.9,109.3 358.2,108.2 357.6,107.2 356.2,106.1 350.2,104 350.5,102.3 350.1,101.2 345.6,96.7 342.3,95.6 335.7,95.1 335.7,95.1 329,95.6 325.7,96.7 321.3,101.2 320.8,102.3 321.1,104 315.1,106.1 313.7,107.2 313.1,108.2 313.4,109.3 314.6,110.3 319.1,112.1 327.7,113.5 335.7,113.8" fill="#936943"/><polygon points="335.7,113.8 327.7,113.5 319.1,112.1 314.6,110.3 313.4,109.3 313.1,108.2 313.7,107.2 315.1,106.1 321.1,104 320.8,102.3 321.3,101.2 325.7,96.7 329,95.6 335.7,95.1 335.7,95.1 339.8,95.3 340.3,95.6 340.5,98.4 340.8,98.8 342,104 342.1,107.2 343,109.6 342.7,110.3 342.8,111.7 343.4,113.5 335.7,113.8" fill="#eacb98"/><polygon points="315.2,76.4 359.5,82.1 356.1,83.6 311.8,77.9" fill="#eace9e"/><polygon points="359.5,99.5 356.1,101 356.1,83.6 359.5,82.1" fill="#936943"/><polygon points="311.8,95.3 356.1,101 356.1,83.6 311.8,77.9" fill="#eacb98"/><polygon points="335.7,85.2 343.7,84.9 352.5,83.5 357.2,81.7 358.5,80.7 358.9,79.6 358.3,78.2 355.9,76.8 352.8,75.8 346.6,74.4 346,71.9 345.2,70.5 342.7,68.1 339.3,66.7 335.7,66.3 335.7,66.3 332,66.7 328.6,68.1 326.1,70.5 325.3,71.9 324.7,74.4 318.5,75.8 315.4,76.8 313.1,78.2 312.4,79.6 312.8,80.7 314.1,81.7 318.8,83.5 327.6,84.9 335.7,85.2" fill="#936943"/><polygon points="335.7,85.2 327.6,84.9 318.8,83.5 314.1,81.7 312.8,80.7 312.4,79.6 313.1,78.2 315.4,76.8 318.5,75.8 324.7,74.4 325.3,71.9 326.1,70.5 328.6,68.1 332,66.7 335.7,66.3 335.7,66.3 336.7,66.3 337.4,66.7 338.3,69.5 339.6,71.9 340.4,74.4 340.9,78.6 342.4,81.4 342.1,81.7 342.2,82.4 343.1,84.9 335.7,85.2" fill="#eacb98"/><polygon points="272.6,206.7 284.5,206 290.6,205 294.3,203.9 296.7,202.9 298.4,201.5 299.1,199.7 299.2,196.9 298.9,193.8 298.1,190.6 296.9,187.5 295.7,185.4 293.6,182.2 291.7,180.1 284.4,173.5 282.5,170.7 281.3,167.2 278.8,166.1 272.6,165.5 272.6,165.5 266.4,166.1 263.8,167.2 262.6,170.7 260.7,173.5 253.4,180.1 251.6,182.2 249.4,185.4 248.2,187.5 247,190.6 246.2,193.8 245.9,196.9 246,199.7 246.8,201.5 248.5,202.9 250.8,203.9 254.5,205 260.6,206 272.6,206.7" fill="#582d17"/><polygon points="272.6,206.7 260.6,206 254.5,205 250.8,203.9 248.5,202.9 246.8,201.5 246,199.7 245.9,196.9 246.2,193.8 247,190.6 248.2,187.5 249.4,185.4 251.6,182.2 253.4,180.1 260.7,173.5 262.6,170.7 263.8,167.2 266.4,166.1 272.6,165.5 272.6,165.5 276.4,165.8 276.6,168.9 277.8,174.9 282.1,186.4 283.7,192 284.6,196.9 285,202.2 284.8,202.9 284.2,203.2 283.7,206 281.1,206.4 272.6,206.7" fill="#8c5734"/><polygon points="272.6,171 281.6,170.3 286.5,168.9 288.9,167.5 290.3,165.7 291.1,162.9 291.2,160.8 290.8,158.4 290.2,157 289,155.6 286.8,154.2 283.8,153.1 279.8,152.4 272.6,152 272.6,152 265.3,152.4 261.3,153.1 258.3,154.2 256.1,155.6 255,157 254.3,158.4 253.9,160.8 254,162.9 254.8,165.7 256.3,167.5 258.6,168.9 263.5,170.3 272.6,171" fill="#582d17"/><polygon points="272.6,171 263.5,170.3 258.6,168.9 256.3,167.5 254.8,165.7 254,162.9 253.9,160.8 254.3,158.4 255,157 256.1,155.6 258.3,154.2 261.3,153.1 265.3,152.4 272.6,152 272.6,152 279.1,152.4 279.4,155.2 280,155.9 281.2,165.4 281.1,166.8 280.6,167.5 280.2,170.3 279.1,170.6 272.6,171" fill="#8c5734"/><polygon points="288.4,155.8 288.3,156.1 288.1,156.5 287.8,156.8 287.4,157.1 286.9,157.4 286.2,157.7 285.5,158 284.7,158.3 283.7,158.5 282.7,158.7 281.6,158.9 280.5,159.1 279.2,159.3 278,159.4 276.7,159.5 275.3,159.6 273.9,159.6 272.6,159.6 271.2,159.6 269.8,159.6 268.5,159.5 267.2,159.4 265.9,159.3 264.7,159.1 263.5,158.9 262.4,158.7 261.4,158.5 260.5,158.3 259.6,158 258.9,157.7 258.2,157.4 257.7,157.1 257.3,156.8 257,156.5 256.8,156.1 256.8,155.8 256.8,155.5 257,155.1 257.3,154.8 257.7,154.5 258.2,154.2 258.9,153.9 259.6,153.6 260.5,153.3 261.4,153.1 262.4,152.9 263.5,152.7 264.7,152.5 265.9,152.3 267.2,152.2 268.5,152.1 269.8,152 271.2,152 272.6,152 273.9,152 275.3,152 276.7,152.1 278,152.2 279.2,152.3 280.5,152.5 281.6,152.7 282.7,152.9 283.7,153.1 284.7,153.3 285.5,153.6 286.2,153.9 286.9,154.2 287.4,154.5 287.8,154.8 288.1,155.1 288.3,155.5" fill="#8c5837"/><polygon points="272.6,159 281.3,158.3 284.3,157.6 286.5,156.5 287.2,155.8 287.2,155.1 286,153.7 287,151.3 287.3,148.5 287.1,145.3 286.1,142.2 284.8,140.1 282.8,138 279.9,135.9 277.5,134.8 272.6,134.1 272.6,134.1 267.6,134.8 265.2,135.9 262.3,138 260.3,140.1 259,142.2 258,145.3 257.8,148.5 258.2,151.3 259.1,153.7 257.9,155.1 257.9,155.8 258.6,156.5 260.9,157.6 263.8,158.3 272.6,159" fill="#582d17"/><polygon points="272.6,159 263.8,158.3 260.9,157.6 258.6,156.5 257.9,155.8 257.9,155.1 259.1,153.7 258.2,151.3 257.8,148.5 258,145.3 259,142.2 260.3,140.1 262.3,138 265.2,135.9 267.6,134.8 272.6,134.1 272.6,134.1 274.5,134.5 275.5,137.6 277.6,141.5 279,146 279.4,150.9 279.1,155.1 278.8,155.5 278.4,158.6 272.6,159" fill="#8c5734"/></g></svg></div>
+    <div class="brand-row"><a class="brand" href="#" aria-label="GAMBIT 首頁"><svg class="brand-mark" viewBox="423 143 406 919" aria-hidden="true"><g transform="translate(0,1254) scale(0.1,-0.1)" fill="#F8B500"><path d="M6205 11016 c-64 -29 -105 -94 -105 -167 0 -51 11 -73 67 -131 l46 -46 -12 -129 c-41 -430 -186 -833 -348 -961 -80 -63 -120 -77 -218 -77 -83 0 -96 3 -165 36 -118 57 -267 197 -423 398 l-41 53 22 39 c46 79 18 190 -58 229 -51 26 -125 26 -167 0 -98 -60 -94 -228 7 -280 21 -11 47 -20 58 -20 21 0 42 -18 42 -37 0 -8 28 -60 62 -116 83 -138 191 -364 233 -489 55 -168 68 -259 62 -438 -6 -155 -11 -186 -61 -375 -40 -150 -52 -285 -38 -416 35 -307 172 -558 425 -775 74 -65 65 -107 -34 -157 -42 -21 -49 -31 -65 -93 -1 -7 -55 -37 -119 -68 -120 -58 -155 -91 -155 -143 0 -43 64 -96 200 -167 76 -40 142 -82 157 -100 39 -46 79 -142 100 -237 25 -117 25 -474 -1 -638 -64 -419 -207 -816 -397 -1101 -83 -125 -214 -257 -297 -299 -114 -58 -128 -93 -63 -164 55 -60 71 -97 71 -164 -1 -108 -39 -161 -235 -329 -139 -118 -233 -214 -271 -279 -104 -178 -102 -390 4 -544 78 -112 76 -108 58 -136 -9 -14 -51 -49 -93 -78 -42 -28 -91 -65 -110 -81 l-33 -28 0 -150 c0 -83 5 -158 10 -169 124 -231 3224 -272 3812 -49 85 32 88 38 88 215 l0 151 -27 26 c-16 13 -67 53 -116 87 -111 80 -117 90 -80 143 65 94 77 115 96 168 28 79 33 209 12 290 -39 150 -118 254 -329 434 -179 152 -221 207 -233 304 -8 68 10 120 62 181 69 80 61 111 -43 166 -256 135 -510 573 -641 1105 -62 255 -75 361 -76 615 0 239 10 323 53 438 37 102 86 150 231 226 124 65 191 122 191 162 0 60 -47 102 -178 160 -71 31 -89 43 -96 66 -15 51 -22 58 -75 84 -104 51 -99 75 34 202 58 54 127 129 154 166 217 292 278 673 166 1028 -43 137 -58 252 -52 408 10 269 71 436 336 920 35 63 42 71 75 76 21 3 49 15 64 26 32 23 72 97 72 133 0 40 -42 113 -79 137 -24 17 -49 23 -86 23 -123 0 -200 -122 -146 -232 11 -25 21 -49 21 -56 0 -18 -155 -207 -241 -293 -98 -98 -181 -153 -272 -181 -176 -53 -329 22 -447 221 -115 195 -203 524 -234 877 l-5 61 39 32 c63 51 89 121 70 191 -27 101 -142 157 -235 116z"/></g></svg><span class="wordmark">GAMBIT</span></a><button class="icon-btn on-deep" type="button" aria-label="設定"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+    <div class="band-body">
+      <p class="greet"><span>午安</span></p>
+      <h1 class="page-title">棋盤未曾離開，<br>你來了。</h1>
+      <svg class="ink-brush" width="178" height="12" viewBox="0 0 290 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2.5,5.2 L8.7,5.1 L14.9,5.0 L21.1,4.9 L27.3,4.8 L33.5,4.7 L39.7,4.6 L45.9,4.5 L52.1,4.4 L58.3,4.3 L64.5,4.2 L70.7,4.1 L76.8,4.0 L83.0,3.9 L89.2,3.9 L95.4,3.8 L101.6,3.8 L107.8,3.7 L114.0,3.7 L120.2,3.7 L126.4,3.7 L132.6,3.8 L138.8,3.8 L145.0,3.8 L151.2,5.0 L157.4,4.8 L163.6,4.5 L169.8,4.3 L176.0,4.3 L182.2,4.5 L188.4,4.9 L194.6,5.2 L200.8,5.4 L207.0,5.5 L213.2,5.4 L219.3,5.3 L225.5,5.3 L231.7,5.4 L237.9,5.7 L244.1,6.0 L250.3,6.1 L256.5,6.2 L262.7,6.3 L268.9,6.4 L275.1,6.4 L281.3,6.5 L287.5,6.6 L287.5,7.2 L281.3,7.1 L275.1,7.0 L268.9,7.0 L262.7,6.9 L256.5,6.8 L250.3,6.7 L244.1,6.6 L237.9,6.7 L231.7,6.8 L225.5,6.7 L219.3,6.5 L213.2,6.3 L207.0,6.1 L200.8,6.0 L194.6,6.0 L188.4,6.2 L182.2,6.5 L176.0,6.6 L169.8,6.5 L163.6,6.2 L157.4,5.8 L151.2,5.6 L145.0,6.7 L138.8,6.8 L132.6,6.8 L126.4,6.9 L120.2,7.0 L114.0,7.0 L107.8,7.1 L101.6,7.2 L95.4,7.2 L89.2,7.3 L83.0,7.3 L76.8,7.4 L70.7,7.5 L64.5,7.5 L58.3,7.5 L52.1,7.6 L45.9,7.6 L39.7,7.6 L33.5,7.6 L27.3,7.6 L21.1,7.6 L14.9,7.6 L8.7,7.6 L2.5,7.5 Z"/></svg>
+    </div>
+    <div class="deep-card compact">
+      <p class="eyebrow">今日 · 自選強度與執子</p>
+      <div class="dc-row"><p class="dc-title">開始新對局</p><a class="btn btn-gold btn-sm" href="#">開始對局<svg class="lucide" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
+    </div>
+  </header>
+  <main class="content">
+    <h2 class="section-label">上一盤</h2>
+    <a class="row-link" href="#">
+      <span class="row-main"><span class="row-title">你贏了 · 對 初學</span><span class="row-meta">11 月 16 日 · 執白 · 13 回合</span></span>
+      <span class="row-go">棋憶<svg class="lucide" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-chevron-right"/></svg></span>
+    </a>
+    <h2 class="section-label">繼續學習</h2>
+    <a class="row-link" href="#">
+      <span class="row-main"><span class="row-title">騎士與后</span><span class="row-meta">基礎規則 · 第 3 課 · 已學 2/21</span></span>
+      <span class="row-go">繼續<svg class="lucide" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-chevron-right"/></svg></span>
+    </a>
+  </main>
+  <nav class="tabbar" aria-label="主要導覽"><div class="tabbar-pill">
+    <a href="#" class="tab is-active" aria-current="page"><svg class="lucide" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-house"/></svg><span>首頁</span></a>
+    <a href="#" class="tab"><svg class="lucide" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-book-open"/></svg><span>學習</span></a>
+  </div></nav>
+</div></section>
+<ul class="frame-notes"><li><b>B</b>頂帶的畫照搬 B（午後窗光），它是這一屏唯一的主角。</li><li><b>地基</b>題詞用明朝，底下一筆地基的細墨；卡片、列表、導覽是地基的。</li><li><b>排法</b>列表照 B 的順序：上一盤在前、繼續學習在後。兩組貼著頂帶往上排，空白只留在導覽上方。沒有 C 的墨，也沒有印。</li></ul></figure>
+
+<figure class="frame"><figcaption><b>home-resume</b>首頁・有一盤沒下完（22:00）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="home-resume"><div class="screen shell">
+  <header class="band scene-band is-resume">
+    <div class="band-art"><svg xmlns="http://www.w3.org/2000/svg" width="390" height="360" viewBox="0 0 390 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" style="display:block">
+<defs><clipPath id="sc7-halo"><polygon points="583.4,237.2 596.4,232.2 607.2,227 615.9,221.5 622.3,215.8 626.4,210 628.1,204.2 627.5,198.3 624.4,192.4 619.1,186.7 611.4,181.1 601.5,175.8 589.4,170.7 575.4,165.9 559.5,161.4 541.8,157.4 522.7,153.8 502.1,150.7 480.4,148 457.7,145.9 434.3,144.4 410.3,143.4 386.1,143 361.8,143.1 337.7,143.9 314,145.2 291,147 268.8,149.4 247.7,152.3 227.9,155.7 209.5,159.6 192.8,163.9 178,168.5 165,173.5 154.2,178.7 145.5,184.2 139.1,189.9 135,195.7 133.3,201.5 133.9,207.4 137,213.2 142.3,219 150,224.5 159.9,229.9 172,235 186,239.8 201.9,244.3 219.5,248.3 238.7,251.9 259.3,255 281,257.7 303.7,259.8 327.1,261.3 351.1,262.3 375.3,262.7 399.6,262.5 423.7,261.8 447.4,260.5 470.4,258.7 492.6,256.3 513.7,253.3 533.5,249.9 551.8,246.1 568.5,241.8" fill="#000"/></clipPath><clipPath id="sc7-top"><polygon points="150,206 924.9,337.3 1467.5,149.8 692.6,18.5" fill="#000"/></clipPath><clipPath id="sc7-foot"><polygon points="529.4,228 538.9,224.4 546.8,220.5 553.2,216.5 557.9,212.4 560.9,208.1 562.2,203.8 561.7,199.5 559.4,195.2 555.5,191 549.9,186.9 542.6,183 533.8,179.3 523.5,175.7 511.8,172.5 498.9,169.5 484.8,166.9 469.7,164.6 453.8,162.7 437.2,161.1 420,160 402.4,159.3 384.7,158.9 366.9,159.1 349.2,159.6 331.8,160.6 314.9,161.9 298.7,163.7 283.2,165.8 268.6,168.3 255.2,171.1 242.9,174.3 232,177.7 222.5,181.3 214.6,185.2 208.2,189.2 203.5,193.3 200.5,197.6 199.2,201.9 199.7,206.2 202,210.5 205.9,214.7 211.5,218.8 218.8,222.7 227.6,226.4 237.9,230 249.6,233.2 262.5,236.2 276.6,238.8 291.7,241.1 307.6,243 324.2,244.6 341.4,245.7 359,246.4 376.7,246.7 394.5,246.6 412.2,246.1 429.6,245.1 446.5,243.8 462.7,242 478.2,239.9 492.8,237.4 506.2,234.6 518.5,231.4" fill="#000"/></clipPath><clipPath id="sc7-sh"><polygon points="189.3,196.3 189.6,195.7 190.5,195.2 191.9,194.8 193.8,194.4 195.9,194.2 198.2,194.1 235,193.2 241.6,193.1 245,193.2 248.3,193.2 251.6,193.3 255,193.4 261.7,193.6 265.1,193.7 268.5,193.9 271.9,194.1 275.2,194.3 278.5,194.6 284.8,195.2 290.2,196.2 294.4,197.5 297,199.1 297.9,200.7 297,202.4 294.4,203.9 290.2,205.2 284.8,206.2 278.5,206.8 271.7,207.1 268.3,207 261.4,206.7 258.1,206.5 254.8,206.3 251.5,206.1 248.2,205.8 245,205.5 241.8,205.2 235.7,204.6 232.7,204.3 229.7,203.9 226.8,203.5 224,203.1 193.8,198.2 191.9,197.8 190.5,197.4 189.6,196.9" fill="#000"/><polygon points="155.7,194.7 156.3,193.7 157.9,192.8 160.4,192 163.6,191.4 165.2,191.2 169.3,190.8 173.8,190.7 177.1,190.6 180.4,190.7 185.2,190.9 188.6,191.1 191.9,191.3 195.2,191.5 199.6,192 202.5,192.4 206.1,193 208.1,193.6 210.6,194.3 212.2,195.2 212.7,196.2 212.2,197.2 210.6,198.1 208.1,198.9 204.9,199.5 201.2,199.9 198.3,200.1 193.8,200.2 190.5,200.2 185.7,200.1 182.3,200 179,199.8 175.6,199.5 172.4,199.2 168.1,198.8 165.2,198.4 161.6,197.8 160.4,197.4 157.9,196.6 156.3,195.7" fill="#000"/><polygon points="120.5,192 120.7,191.6 121.4,191.2 122.5,190.8 123.9,190.6 125.9,190.2 128.2,190 131.1,189.8 134.1,189.7 137.3,189.6 140.6,189.6 144,189.6 147.3,189.7 151,189.8 154.4,190 157.8,190.2 174.5,191.2 178,191.5 181.1,192.1 183.4,192.8 184.9,193.7 185.4,194.6 184.9,195.5 183.4,196.4 181.1,197.1 178,197.7 174.5,198.1 170.7,198.2 166.8,198.1 150.1,197.1 146.8,196.9 143.6,196.6 140.3,196.3 137,195.9 134,195.6 131.1,195.2 128.5,194.7 126.2,194.3 124,193.8 122.5,193.3 121.4,192.8 120.7,192.4" fill="#000"/><polygon points="255.2,176.4 256.5,174 260.2,171.9 266.1,170 273.8,168.6 274.8,168.4 284,167.5 287.9,167.3 298.4,167 302.9,167 313.6,167.3 318.2,167.5 322.8,167.8 331.8,168.3 340.8,168.9 350.8,169.9 355,170.3 363.5,171.9 370,173.9 374.1,176.3 375.5,178.9 374.1,181.5 370,183.9 363.5,185.9 355,187.5 345.1,188.5 334.5,188.8 329.9,188.7 319.1,188.4 310.1,187.9 305.6,187.6 301.1,187.3 296.6,187 292.2,186.6 282.3,185.6 278.2,185.2 269.8,183.6 266.8,183 260.8,181.1 260.2,180.9 256.5,178.7" fill="#000"/><polygon points="149.7,169.8 150.9,167.7 154.3,165.7 159.7,164 161.3,163.6 169.1,162.1 172.1,161.7 182,160.7 192.7,160.4 197.2,160.3 201.7,160.3 213,160.6 217.6,160.8 222.1,161.1 226.5,161.5 301.2,167.8 310,168.7 317.6,170.1 323.4,171.9 327.1,174 328.3,176.3 327.1,178.6 323.4,180.7 317.6,182.6 310,184 301.2,184.9 291.8,185.2 282.4,184.9 203.9,181.9 199.3,181.7 194.8,181.5 190.3,181.1 179.7,180.1 175.8,179.6 172.1,179 163.6,177.4 157.1,175.3 155.2,174.7 151.4,172.5 150.9,171.9" fill="#000"/><polygon points="142.2,168 142.6,167.3 143.7,166.7 145.4,166.1 147.6,165.7 150.2,165.4 171.2,164.1 177.1,164 182.9,164.1 188.3,164.7 193,165.6 196.6,166.7 198.8,168 199.6,169.4 198.8,170.8 196.6,172.1 193,173.3 188.3,174.1 182.9,174.7 177.1,174.9 171.2,174.7 165.8,174.1 161.1,173.3 145.4,169.8 143.7,169.3 142.6,168.6" fill="#000"/><polygon points="89.5,163.5 92.9,162 132,164.3 176.3,170 172.9,171.5 133.8,169.2" fill="#000"/><polygon points="80.3,163.9 80.4,163.6 81,163.3 81.8,163 82.9,162.8 85.7,162.4 100.8,160.6 106.4,160.1 112.5,159.9 118.5,160.1 124.1,160.6 128.9,161.5 132.6,162.7 135,164.1 135.8,165.5 135,167 132.6,168.3 128.9,169.5 124.1,170.4 118.5,171 112.5,171.1 106.4,171 100.8,170.4 96,169.5 92.3,168.3 82.5,165.2 81,164.5 80.4,164.2" fill="#000"/></clipPath><clipPath id="sc7-ao"><polygon points="296.1,204.8 298.1,204 299.6,203.2 300.6,202.3 301.2,201.4 301.3,200.5 300.9,199.6 300,198.7 298.6,197.8 296.8,197 294.6,196.3 292,195.6 289.1,195.1 285.8,194.6 282.4,194.2 278.8,194 275.1,193.8 271.3,193.8 267.6,193.9 263.9,194.1 260.4,194.5 257.1,194.9 254.1,195.4 251.4,196.1 249,196.8 247.1,197.6 245.5,198.4 244.5,199.3 243.9,200.2 243.8,201.1 244.2,202 245.1,202.9 246.5,203.7 248.3,204.5 250.5,205.2 253.1,205.9 256.1,206.5 259.3,206.9 262.7,207.3 266.3,207.6 270.1,207.7 273.8,207.7 277.6,207.6 281.2,207.4 284.7,207.1 288,206.6 291,206.1 293.8,205.5" fill="#000"/><polygon points="372.6,185.2 375.7,184 378.1,182.7 379.7,181.3 380.6,179.9 380.8,178.5 380.1,177.1 378.7,175.7 376.6,174.4 373.7,173.1 370.2,172 366.2,170.9 361.6,170 356.5,169.3 351.1,168.7 345.4,168.3 339.6,168.1 333.7,168.1 327.8,168.2 322.1,168.6 316.6,169.1 311.4,169.8 306.6,170.6 302.4,171.6 298.7,172.7 295.6,173.9 293.2,175.2 291.6,176.6 290.7,178 290.5,179.4 291.2,180.9 292.6,182.3 294.7,183.6 297.6,184.8 301.1,186 305.1,187 309.7,187.9 314.8,188.7 320.2,189.2 325.9,189.6 331.7,189.9 337.6,189.9 343.5,189.7 349.2,189.4 354.7,188.9 359.9,188.2 364.7,187.3 369,186.4" fill="#000"/></clipPath></defs><g><rect x="-10" y="-10" width="410" height="380" fill="#103029"/><circle cx="452" cy="150" r="214" fill="#1b372e"/><circle cx="452" cy="150" r="160" fill="#243d32"/><circle cx="452" cy="150" r="108" fill="#2f4336"/></g><g><polygon points="150,206 924.9,337.3 924.9,355.4 150,224.1" fill="#210f08"/><polygon points="150,206 924.9,337.3 924.9,341.3 150,210" fill="#3c2a21"/><polygon points="150,206 924.9,337.3 1467.5,149.8 692.6,18.5" fill="#2e170d"/><polygon points="196,204 916.8,326.1 1421.6,151.8 700.7,29.6" fill="#65452e"/><path d="M196,204L286.1,219.3L349.2,197.5L259.1,182.2ZM322.1,160.4L412.3,175.7L475.3,153.9L385.2,138.6ZM349.2,197.5L439.3,212.8L502.4,191L412.3,175.7ZM376.2,234.6L466.3,249.8L529.4,228L439.3,212.8Z" fill="#472515"/><g clip-path="url(#sc7-top)"><g clip-path="url(#sc7-halo)"><polygon points="150,206 924.9,337.3 1467.5,149.8 692.6,18.5" fill="#462716"/><polygon points="196,204 916.8,326.1 1421.6,151.8 700.7,29.6" fill="#9a734c"/><path d="M196,204L286.1,219.3L349.2,197.5L259.1,182.2ZM322.1,160.4L412.3,175.7L475.3,153.9L385.2,138.6ZM349.2,197.5L439.3,212.8L502.4,191L412.3,175.7ZM376.2,234.6L466.3,249.8L529.4,228L439.3,212.8Z" fill="#6c3e23"/></g></g><g clip-path="url(#sc7-top)"><g clip-path="url(#sc7-foot)"><polygon points="150,206 924.9,337.3 1467.5,149.8 692.6,18.5" fill="#673c22"/><polygon points="196,204 916.8,326.1 1421.6,151.8 700.7,29.6" fill="#e2b376"/><path d="M196,204L286.1,219.3L349.2,197.5L259.1,182.2ZM322.1,160.4L412.3,175.7L475.3,153.9L385.2,138.6ZM349.2,197.5L439.3,212.8L502.4,191L412.3,175.7ZM376.2,234.6L466.3,249.8L529.4,228L439.3,212.8Z" fill="#a06036"/></g></g><polyline points="924.9,337.3 150,206 692.6,18.5" fill="none" stroke="#8d6a52" stroke-width="1.2" stroke-linejoin="round" opacity="0.9"/></g><g clip-path="url(#sc7-top)"><g clip-path="url(#sc7-foot)"><g clip-path="url(#sc7-sh)"><polygon points="150,206 924.9,337.3 1467.5,149.8 692.6,18.5" fill="#2e170d"/><polygon points="196,204 916.8,326.1 1421.6,151.8 700.7,29.6" fill="#65452e"/><path d="M196,204L286.1,219.3L349.2,197.5L259.1,182.2ZM322.1,160.4L412.3,175.7L475.3,153.9L385.2,138.6ZM349.2,197.5L439.3,212.8L502.4,191L412.3,175.7ZM376.2,234.6L466.3,249.8L529.4,228L439.3,212.8Z" fill="#472515"/></g></g></g><g clip-path="url(#sc7-top)"><g clip-path="url(#sc7-ao)"><polygon points="150,206 924.9,337.3 1467.5,149.8 692.6,18.5" fill="#210f08"/><polygon points="196,204 916.8,326.1 1421.6,151.8 700.7,29.6" fill="#492e1c"/><path d="M196,204L286.1,219.3L349.2,197.5L259.1,182.2ZM322.1,160.4L412.3,175.7L475.3,153.9L385.2,138.6ZM349.2,197.5L439.3,212.8L502.4,191L412.3,175.7ZM376.2,234.6L466.3,249.8L529.4,228L439.3,212.8Z" fill="#34190d"/></g></g><g><polygon points="335.7,188.4 346.5,188 356.7,187 365.7,185.2 369.2,184.2 372.6,182.8 375.3,181 377.1,178.6 377.4,177.2 377.5,167.7 377,164.2 375.5,160.7 372.8,157.9 367.7,155.1 362.1,153.4 354.7,152 343.7,150.9 335.7,150.7 335.7,150.7 327.6,150.9 316.7,152 309.2,153.4 303.6,155.1 298.5,157.9 295.8,160.7 294.3,164.2 293.8,167.7 293.9,177.2 294.2,178.6 296,181 298.7,182.8 302.1,184.2 305.7,185.2 314.6,187 324.8,188 335.7,188.4" fill="#65462e"/><polygon points="335.7,188.4 346.5,188 356.7,187 365.7,185.2 369.2,184.2 372.6,182.8 375.3,181 377.1,178.6 377.4,177.2 377.5,167.7 377,164.2 375.5,160.7 372.8,157.9 367.7,155.1 362.1,153.4 354.7,152 343.7,150.9 335.7,150.7 335.7,150.7 327.6,150.9 327.4,151.3 327.1,154.1 326.7,154.8 326.6,166 325.7,174.4 325.5,180.7 325.6,184.5 326,184.9 326.4,188 335.7,188.4" fill="#e3b577"/><polygon points="372.9,159.7 372.7,160.5 372.3,161.3 371.6,162 370.6,162.8 369.4,163.5 367.9,164.2 366.1,164.9 364.2,165.5 362,166.1 359.6,166.6 357,167.1 354.3,167.5 351.4,167.9 348.4,168.2 345.3,168.4 342.1,168.6 338.9,168.7 335.7,168.7 332.4,168.7 329.2,168.6 326,168.4 322.9,168.2 319.9,167.9 317,167.5 314.3,167.1 311.7,166.6 309.3,166.1 307.1,165.5 305.2,164.9 303.4,164.2 301.9,163.5 300.7,162.8 299.7,162 299,161.3 298.6,160.5 298.4,159.7 298.6,158.9 299,158.2 299.7,157.4 300.7,156.6 301.9,155.9 303.4,155.2 305.2,154.6 307.1,153.9 309.3,153.3 311.7,152.8 314.3,152.3 317,151.9 319.9,151.6 322.9,151.3 326,151 329.2,150.8 332.4,150.7 335.7,150.7 338.9,150.7 342.1,150.8 345.3,151 348.4,151.3 351.4,151.6 354.3,151.9 357,152.3 359.6,152.8 362,153.3 364.2,153.9 366.1,154.6 367.9,155.2 369.4,155.9 370.6,156.6 371.6,157.4 372.3,158.2 372.7,158.9" fill="#d6aa6f"/><polygon points="335.7,168.3 349.9,167.6 359.3,166.2 366.7,164.1 369.6,162.7 371.4,161.3 372.1,159.5 371.5,157.8 369.9,156.4 366.5,154.6 371.8,145.2 376.2,135.7 378.7,128.7 379.6,124.5 379.8,121.4 379.3,118.2 378.5,116.5 377,114.4 375.3,112.6 372.9,110.9 367.5,108.1 360.2,105.6 351.7,103.9 345.8,103.2 335.7,102.8 335.7,102.8 325.6,103.2 319.7,103.9 311.1,105.6 303.8,108.1 298.4,110.9 296.1,112.6 294.3,114.4 292.8,116.5 292,118.2 291.5,121.4 291.7,124.5 292.6,128.7 295.1,135.7 299.6,145.2 304.8,154.6 301.4,156.4 299.8,157.8 299.2,159.5 299.9,161.3 301.7,162.7 304.6,164.1 312,166.2 321.4,167.6 335.7,168.3" fill="#65462e"/><polygon points="335.7,168.3 349.9,167.6 359.3,166.2 366.7,164.1 369.6,162.7 371.4,161.3 372.1,159.5 371.5,157.8 369.9,156.4 366.5,154.6 371.8,145.2 376.2,135.7 378.7,128.7 379.6,124.5 379.8,121.4 379.3,118.2 378.5,116.5 377,114.4 375.3,112.6 372.9,110.9 367.5,108.1 360.2,105.6 351.7,103.9 345.8,103.2 335.7,102.8 335.7,102.8 331.3,102.8 330.4,103.2 330.2,106 329.9,106.7 329.6,113.3 325.9,124.5 325.2,128.4 325,132.6 325.6,142 328.2,161.6 328.1,164.4 328.5,164.8 328.5,167.9 335.7,168.3" fill="#e3b577"/><polygon points="379.8,122 379.6,122.9 379.1,123.9 378.3,124.8 377.2,125.7 375.7,126.5 373.9,127.3 371.8,128.1 369.5,128.9 366.9,129.6 364,130.2 361,130.8 357.7,131.3 354.3,131.7 350.8,132 347.1,132.3 343.3,132.5 339.5,132.6 335.7,132.7 331.8,132.6 328,132.5 324.2,132.3 320.5,132 317,131.7 313.6,131.3 310.3,130.8 307.3,130.2 304.4,129.6 301.8,128.9 299.5,128.1 297.4,127.3 295.6,126.5 294.2,125.7 293,124.8 292.2,123.9 291.7,122.9 291.5,122 291.7,121.1 292.2,120.1 293,119.2 294.2,118.3 295.6,117.5 297.4,116.7 299.5,115.9 301.8,115.1 304.4,114.4 307.3,113.8 310.3,113.3 313.6,112.8 317,112.3 320.5,112 324.2,111.7 328,111.5 331.8,111.4 335.7,111.3 339.5,111.4 343.3,111.5 347.1,111.7 350.8,112 354.3,112.3 357.7,112.8 361,113.3 364,113.8 366.9,114.4 369.5,115.1 371.8,115.9 373.9,116.7 375.7,117.5 377.2,118.3 378.3,119.2 379.1,120.1 379.6,121.1" fill="#d6aa6f"/><polygon points="335.7,113.8 343.6,113.5 352.2,112.1 356.7,110.3 357.9,109.3 358.2,108.2 357.6,107.2 356.2,106.1 350.2,104 350.5,102.3 350.1,101.2 345.6,96.7 342.3,95.6 335.7,95.1 335.7,95.1 329,95.6 325.7,96.7 321.3,101.2 320.8,102.3 321.1,104 315.1,106.1 313.7,107.2 313.1,108.2 313.4,109.3 314.6,110.3 319.1,112.1 327.7,113.5 335.7,113.8" fill="#65462e"/><polygon points="335.7,113.8 343.6,113.5 352.2,112.1 356.7,110.3 357.9,109.3 358.2,108.2 357.6,107.2 356.2,106.1 350.2,104 350.5,102.3 350.1,101.2 345.6,96.7 342.3,95.6 335.7,95.1 335.7,95.1 333.3,95.3 331.8,113.5 335.7,113.8" fill="#e3b577"/><polygon points="315.2,76.4 359.5,82.1 356.1,83.6 311.8,77.9" fill="#d6aa6f"/><polygon points="359.5,99.5 356.1,101 356.1,83.6 359.5,82.1" fill="#e3b577"/><polygon points="311.8,95.3 356.1,101 356.1,83.6 311.8,77.9" fill="#65462e"/><polygon points="335.7,85.2 343.7,84.9 352.5,83.5 357.2,81.7 358.5,80.7 358.9,79.6 358.3,78.2 355.9,76.8 352.8,75.8 346.6,74.4 346,71.9 345.2,70.5 342.7,68.1 339.3,66.7 335.7,66.3 335.7,66.3 332,66.7 328.6,68.1 326.1,70.5 325.3,71.9 324.7,74.4 318.5,75.8 315.4,76.8 313.1,78.2 312.4,79.6 312.8,80.7 314.1,81.7 318.8,83.5 327.6,84.9 335.7,85.2" fill="#65462e"/><polygon points="335.7,85.2 343.7,84.9 352.5,83.5 357.2,81.7 358.5,80.7 358.9,79.6 358.3,78.2 355.9,76.8 352.8,75.8 346.6,74.4 346,71.9 345.2,70.5 342.7,68.1 339.3,66.7 335.7,66.3 335.7,66.3 334.9,66.3 333.6,72.3 332.9,78.9 332.3,81.4 332,84.9 335.7,85.2" fill="#e3b577"/><polygon points="272.6,206.7 284.5,206 290.6,205 294.3,203.9 296.7,202.9 298.4,201.5 299.1,199.7 299.2,196.9 298.9,193.8 298.1,190.6 296.9,187.5 295.7,185.4 293.6,182.2 291.7,180.1 284.4,173.5 282.5,170.7 281.3,167.2 278.8,166.1 272.6,165.5 272.6,165.5 266.4,166.1 263.8,167.2 262.6,170.7 260.7,173.5 253.4,180.1 251.6,182.2 249.4,185.4 248.2,187.5 247,190.6 246.2,193.8 245.9,196.9 246,199.7 246.8,201.5 248.5,202.9 250.8,203.9 254.5,205 260.6,206 272.6,206.7" fill="#3c1e10"/><polygon points="272.6,206.7 284.5,206 290.6,205 294.3,203.9 296.7,202.9 298.4,201.5 299.1,199.7 299.2,196.9 298.9,193.8 298.1,190.6 296.9,187.5 295.7,185.4 293.6,182.2 291.7,180.1 284.4,173.5 282.5,170.7 281.3,167.2 278.8,166.1 272.6,165.5 272.6,165.5 270.6,165.8 269.8,175.2 266.8,192.4 266.1,202.9 266.5,203.2 266.7,206.4 272.6,206.7" fill="#884e29"/><polygon points="272.6,171 281.6,170.3 286.5,168.9 288.9,167.5 290.3,165.7 291.1,162.9 291.2,160.8 290.8,158.4 290.2,157 289,155.6 286.8,154.2 283.8,153.1 279.8,152.4 272.6,152 272.6,152 265.3,152.4 261.3,153.1 258.3,154.2 256.1,155.6 255,157 254.3,158.4 253.9,160.8 254,162.9 254.8,165.7 256.3,167.5 258.6,168.9 263.5,170.3 272.6,171" fill="#3c1e10"/><polygon points="272.6,171 281.6,170.3 286.5,168.9 288.9,167.5 290.3,165.7 291.1,162.9 291.2,160.8 290.8,158.4 290.2,157 289,155.6 286.8,154.2 283.8,153.1 279.8,152.4 272.6,152 272.6,152 269.3,152.1 269.1,152.4 268.1,165.7 268.6,170.6 272.6,171" fill="#884e29"/><polygon points="288.4,155.8 288.3,156.1 288.1,156.5 287.8,156.8 287.4,157.1 286.9,157.4 286.2,157.7 285.5,158 284.7,158.3 283.7,158.5 282.7,158.7 281.6,158.9 280.5,159.1 279.2,159.3 278,159.4 276.7,159.5 275.3,159.6 273.9,159.6 272.6,159.6 271.2,159.6 269.8,159.6 268.5,159.5 267.2,159.4 265.9,159.3 264.7,159.1 263.5,158.9 262.4,158.7 261.4,158.5 260.5,158.3 259.6,158 258.9,157.7 258.2,157.4 257.7,157.1 257.3,156.8 257,156.5 256.8,156.1 256.8,155.8 256.8,155.5 257,155.1 257.3,154.8 257.7,154.5 258.2,154.2 258.9,153.9 259.6,153.6 260.5,153.3 261.4,153.1 262.4,152.9 263.5,152.7 264.7,152.5 265.9,152.3 267.2,152.2 268.5,152.1 269.8,152 271.2,152 272.6,152 273.9,152 275.3,152 276.7,152.1 278,152.2 279.2,152.3 280.5,152.5 281.6,152.7 282.7,152.9 283.7,153.1 284.7,153.3 285.5,153.6 286.2,153.9 286.9,154.2 287.4,154.5 287.8,154.8 288.1,155.1 288.3,155.5" fill="#804926"/><polygon points="272.6,159 281.3,158.3 284.3,157.6 286.5,156.5 287.2,155.8 287.2,155.1 286,153.7 287,151.3 287.3,148.5 287.1,145.3 286.1,142.2 284.8,140.1 282.8,138 279.9,135.9 277.5,134.8 272.6,134.1 272.6,134.1 267.6,134.8 265.2,135.9 262.3,138 260.3,140.1 259,142.2 258,145.3 257.8,148.5 258.2,151.3 259.1,153.7 257.9,155.1 257.9,155.8 258.6,156.5 260.9,157.6 263.8,158.3 272.6,159" fill="#3c1e10"/><polygon points="272.6,159 281.3,158.3 284.3,157.6 286.5,156.5 287.2,155.8 287.2,155.1 286,153.7 287,151.3 287.3,148.5 287.1,145.3 286.1,142.2 284.8,140.1 282.8,138 279.9,135.9 277.5,134.8 272.6,134.1 272.6,134.1 271.6,134.5 270,141.5 269.3,146.4 269,151.3 269.6,158.6 272.6,159" fill="#884e29"/></g></svg></div>
+    <div class="brand-row"><a class="brand" href="#" aria-label="GAMBIT 首頁"><svg class="brand-mark" viewBox="423 143 406 919" aria-hidden="true"><g transform="translate(0,1254) scale(0.1,-0.1)" fill="#F8B500"><path d="M6205 11016 c-64 -29 -105 -94 -105 -167 0 -51 11 -73 67 -131 l46 -46 -12 -129 c-41 -430 -186 -833 -348 -961 -80 -63 -120 -77 -218 -77 -83 0 -96 3 -165 36 -118 57 -267 197 -423 398 l-41 53 22 39 c46 79 18 190 -58 229 -51 26 -125 26 -167 0 -98 -60 -94 -228 7 -280 21 -11 47 -20 58 -20 21 0 42 -18 42 -37 0 -8 28 -60 62 -116 83 -138 191 -364 233 -489 55 -168 68 -259 62 -438 -6 -155 -11 -186 -61 -375 -40 -150 -52 -285 -38 -416 35 -307 172 -558 425 -775 74 -65 65 -107 -34 -157 -42 -21 -49 -31 -65 -93 -1 -7 -55 -37 -119 -68 -120 -58 -155 -91 -155 -143 0 -43 64 -96 200 -167 76 -40 142 -82 157 -100 39 -46 79 -142 100 -237 25 -117 25 -474 -1 -638 -64 -419 -207 -816 -397 -1101 -83 -125 -214 -257 -297 -299 -114 -58 -128 -93 -63 -164 55 -60 71 -97 71 -164 -1 -108 -39 -161 -235 -329 -139 -118 -233 -214 -271 -279 -104 -178 -102 -390 4 -544 78 -112 76 -108 58 -136 -9 -14 -51 -49 -93 -78 -42 -28 -91 -65 -110 -81 l-33 -28 0 -150 c0 -83 5 -158 10 -169 124 -231 3224 -272 3812 -49 85 32 88 38 88 215 l0 151 -27 26 c-16 13 -67 53 -116 87 -111 80 -117 90 -80 143 65 94 77 115 96 168 28 79 33 209 12 290 -39 150 -118 254 -329 434 -179 152 -221 207 -233 304 -8 68 10 120 62 181 69 80 61 111 -43 166 -256 135 -510 573 -641 1105 -62 255 -75 361 -76 615 0 239 10 323 53 438 37 102 86 150 231 226 124 65 191 122 191 162 0 60 -47 102 -178 160 -71 31 -89 43 -96 66 -15 51 -22 58 -75 84 -104 51 -99 75 34 202 58 54 127 129 154 166 217 292 278 673 166 1028 -43 137 -58 252 -52 408 10 269 71 436 336 920 35 63 42 71 75 76 21 3 49 15 64 26 32 23 72 97 72 133 0 40 -42 113 -79 137 -24 17 -49 23 -86 23 -123 0 -200 -122 -146 -232 11 -25 21 -49 21 -56 0 -18 -155 -207 -241 -293 -98 -98 -181 -153 -272 -181 -176 -53 -329 22 -447 221 -115 195 -203 524 -234 877 l-5 61 39 32 c63 51 89 121 70 191 -27 101 -142 157 -235 116z"/></g></svg><span class="wordmark">GAMBIT</span></a><button class="icon-btn on-deep" type="button" aria-label="設定"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+    <div class="band-body">
+      <p class="greet"><span>晚安</span></p>
+      <h1 class="page-title">棋盤未曾離開，<br>你來了。</h1>
+      <svg class="ink-brush" width="178" height="12" viewBox="0 0 290 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2.5,5.2 L8.7,5.1 L14.9,5.0 L21.1,4.9 L27.3,4.8 L33.5,4.7 L39.7,4.6 L45.9,4.5 L52.1,4.4 L58.3,4.3 L64.5,4.2 L70.7,4.1 L76.8,4.0 L83.0,3.9 L89.2,3.9 L95.4,3.8 L101.6,3.8 L107.8,3.7 L114.0,3.7 L120.2,3.7 L126.4,3.7 L132.6,3.8 L138.8,3.8 L145.0,3.8 L151.2,5.0 L157.4,4.8 L163.6,4.5 L169.8,4.3 L176.0,4.3 L182.2,4.5 L188.4,4.9 L194.6,5.2 L200.8,5.4 L207.0,5.5 L213.2,5.4 L219.3,5.3 L225.5,5.3 L231.7,5.4 L237.9,5.7 L244.1,6.0 L250.3,6.1 L256.5,6.2 L262.7,6.3 L268.9,6.4 L275.1,6.4 L281.3,6.5 L287.5,6.6 L287.5,7.2 L281.3,7.1 L275.1,7.0 L268.9,7.0 L262.7,6.9 L256.5,6.8 L250.3,6.7 L244.1,6.6 L237.9,6.7 L231.7,6.8 L225.5,6.7 L219.3,6.5 L213.2,6.3 L207.0,6.1 L200.8,6.0 L194.6,6.0 L188.4,6.2 L182.2,6.5 L176.0,6.6 L169.8,6.5 L163.6,6.2 L157.4,5.8 L151.2,5.6 L145.0,6.7 L138.8,6.8 L132.6,6.8 L126.4,6.9 L120.2,7.0 L114.0,7.0 L107.8,7.1 L101.6,7.2 L95.4,7.2 L89.2,7.3 L83.0,7.3 L76.8,7.4 L70.7,7.5 L64.5,7.5 L58.3,7.5 L52.1,7.6 L45.9,7.6 L39.7,7.6 L33.5,7.6 L27.3,7.6 L21.1,7.6 L14.9,7.6 L8.7,7.6 L2.5,7.5 Z"/></svg>
+    </div>
+    <div class="deep-card compact">
+      <p class="eyebrow">進行中</p>
+      <div class="dc-row"><p class="dc-title">繼續對局</p><a class="btn btn-gold btn-sm" href="#">繼續<svg class="lucide" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></div>
+      <div class="dc-row dc-meta-row"><p class="deep-card-meta">第 3 回合 · 執黑 · 對 初學</p><a class="text-link on-deep" href="#">另開新對局</a></div>
+    </div>
+  </header>
+  <main class="content">
+    <h2 class="section-label">上一盤</h2>
+    <a class="row-link" href="#">
+      <span class="row-main"><span class="row-title">你贏了 · 對 初學</span><span class="row-meta">11 月 16 日 · 執白 · 13 回合</span></span>
+      <span class="row-go">棋憶<svg class="lucide" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-chevron-right"/></svg></span>
+    </a>
+    <h2 class="section-label">繼續學習</h2>
+    <a class="row-link" href="#">
+      <span class="row-main"><span class="row-title">騎士與后</span><span class="row-meta">基礎規則 · 第 3 課 · 已學 2/21</span></span>
+      <span class="row-go">繼續<svg class="lucide" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-chevron-right"/></svg></span>
+    </a>
+  </main>
+  <nav class="tabbar" aria-label="主要導覽"><div class="tabbar-pill">
+    <a href="#" class="tab is-active" aria-current="page"><svg class="lucide" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-house"/></svg><span>首頁</span></a>
+    <a href="#" class="tab"><svg class="lucide" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-book-open"/></svg><span>學習</span></a>
+  </div></nav>
+</div></section>
+<ul class="frame-notes"><li><b>B</b>同一張桌子換成夜燈版，卡片是 B 的橫排三列。沒有小棋圖：畫裡已經有一張棋盤，再放一張會撞。</li><li><b>改</b>卡片往下移到桌子前緣以下，棋盤的邊不再壓在卡片上。B 原本卡片左邊的金邊拿掉（金只留給主按鈕），「進行中」靠眉標講。</li></ul></figure>
+
+<figure class="frame"><figcaption><b>play-midgame</b>對局・中局（你執黑，第 3 回合輪到你）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="play-midgame"><div class="screen board-page">
+  <header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow-left"/></svg></button><div class="top-titles"><h1 class="top-title">對 初學</h1><span class="top-sub">你執黑</span></div></header>
+  <div class="board-wrap"><div class="wood wood-on-deep" data-fen="rnbqkb1r/pppp1ppp/5n2/4p3/6P1/7N/PPPPPP1P/RNBQKBR1" data-orient="black" data-hl="h1:lm,g1:lm"></div></div>
+  <section class="paper">
+    <div class="paper-head"><h2 class="label">棋譜</h2><div class="turn" aria-live="polite"><i></i>輪到你</div></div>
+    <div class="score" role="table" aria-label="棋譜">
+<div class="r"><span class="n">1</span><span class="m">g4</span><span class="m">e5</span></div>
+<div class="r"><span class="n">2</span><span class="m">Nh3</span><span class="m">Nf6</span></div>
+<div class="r is-last"><span class="n">3</span><span class="m">Rg1<svg class="dot" viewBox="0 0 10 10" aria-label="最新一手"><path d="M5.2.6c2.3.1 4.2 1.9 4.2 4.3S7.6 9.5 5 9.4C2.5 9.3.5 7.6.6 5 .7 2.5 2.8.5 5.2.6z"/></svg></span><span class="m"></span></div>
+<div class="r is-blank" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="r is-blank" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="r is-blank" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="r is-blank" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="r is-blank" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="r is-blank" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <div class="acts"><button class="btn btn-secondary btn-sm" type="button">悔棋</button><button class="btn btn-danger btn-sm" type="button">投降</button></div>
+  </section>
+</div></section>
+<ul class="frame-notes"><li><b>地基</b>頂列只寫「對 初學」與「你執黑」：執色只講一次，主詞是「你」，不會再被讀成對手執白。</li><li><b>C</b>盤下是 C 的記譜紙；紙頭只剩「棋譜」與「輪到你」，對手名字不再重複。輪到你的指示點改成深青，不用金。</li></ul></figure>
+
+<figure class="frame"><figcaption><b>play-midgame-long</b>對局・長局（第 44 回合，捲到最新一手）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="play-midgame-long"><div class="screen board-page">
+  <header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow-left"/></svg></button><div class="top-titles"><h1 class="top-title">對 初學</h1><span class="top-sub">你執黑</span></div></header>
+  <div class="board-wrap"><div class="wood wood-on-deep" data-fen="8/2p5/kpR4P/8/7r/8/PK6/8" data-orient="black" data-hl="f6:lm,c6:lm"></div></div>
+  <section class="paper">
+    <div class="paper-head"><h2 class="label">棋譜 <span class="count">44 回合</span></h2><div class="turn" aria-live="polite"><i></i>輪到你</div></div>
+    <div class="score" role="table" aria-label="棋譜">
+<div class="r"><span class="n">1</span><span class="m">g4</span><span class="m">e5</span></div>
+<div class="r"><span class="n">2</span><span class="m">Nh3</span><span class="m">Nf6</span></div>
+<div class="r"><span class="n">3</span><span class="m">Rg1</span><span class="m">d6</span></div>
+<div class="r"><span class="n">4</span><span class="m">g5</span><span class="m">Nfd7</span></div>
+<div class="r"><span class="n">5</span><span class="m">d4</span><span class="m">d5</span></div>
+<div class="r"><span class="n">6</span><span class="m">Nc3</span><span class="m">Nb6</span></div>
+<div class="r"><span class="n">7</span><span class="m">dxe5</span><span class="m">Nc6</span></div>
+<div class="r"><span class="n">8</span><span class="m">e3</span><span class="m">Bf5</span></div>
+<div class="r"><span class="n">9</span><span class="m">f4</span><span class="m">d4</span></div>
+<div class="r"><span class="n">10</span><span class="m">Nb5</span><span class="m">Bc5</span></div>
+<div class="r"><span class="n">11</span><span class="m">Rg3</span><span class="m">Nb4</span></div>
+<div class="r"><span class="n">12</span><span class="m">Na3</span><span class="m">dxe3</span></div>
+<div class="r"><span class="n">13</span><span class="m">Qxd8+</span><span class="m">Rxd8</span></div>
+<div class="r"><span class="n">14</span><span class="m">Bxe3</span><span class="m">Be7</span></div>
+<div class="r"><span class="n">15</span><span class="m">c3</span><span class="m">N4d5</span></div>
+<div class="r"><span class="n">16</span><span class="m">Rd1</span><span class="m">Bxa3</span></div>
+<div class="r"><span class="n">17</span><span class="m">Bxb6</span><span class="m">Bxh3</span></div>
+<div class="r"><span class="n">18</span><span class="m">Bxh3</span><span class="m">Bxb2</span></div>
+<div class="r"><span class="n">19</span><span class="m">Bd4</span><span class="m">Nxf4</span></div>
+<div class="r"><span class="n">20</span><span class="m">Rb1</span><span class="m">Nxh3</span></div>
+<div class="r"><span class="n">21</span><span class="m">Rxh3</span><span class="m">Rxd4</span></div>
+<div class="r"><span class="n">22</span><span class="m">cxd4</span><span class="m">Bxd4</span></div>
+<div class="r"><span class="n">23</span><span class="m">Rxb7</span><span class="m">Kd7</span></div>
+<div class="r"><span class="n">24</span><span class="m">Kd1</span><span class="m">Bb6</span></div>
+<div class="r"><span class="n">25</span><span class="m">Rc3</span><span class="m">Kc8</span></div>
+<div class="r"><span class="n">26</span><span class="m">Rxb6</span><span class="m">axb6</span></div>
+<div class="r"><span class="n">27</span><span class="m">Rf3</span><span class="m">Rf8</span></div>
+<div class="r"><span class="n">28</span><span class="m">Rh3</span><span class="m">Kd7</span></div>
+<div class="r"><span class="n">29</span><span class="m">Rxh7</span><span class="m">Rg8</span></div>
+<div class="r"><span class="n">30</span><span class="m">Rh4</span><span class="m">Re8</span></div>
+<div class="r"><span class="n">31</span><span class="m">Rf4</span><span class="m">Re7</span></div>
+<div class="r"><span class="n">32</span><span class="m">h4</span><span class="m">Kc6</span></div>
+<div class="r"><span class="n">33</span><span class="m">e6</span><span class="m">f6</span></div>
+<div class="r"><span class="n">34</span><span class="m">Rf5</span><span class="m">Rxe6</span></div>
+<div class="r"><span class="n">35</span><span class="m">gxf6</span><span class="m">gxf6</span></div>
+<div class="r"><span class="n">36</span><span class="m">h5</span><span class="m">Re4</span></div>
+<div class="r"><span class="n">37</span><span class="m">Kc2</span><span class="m">Re2+</span></div>
+<div class="r"><span class="n">38</span><span class="m">Kb1</span><span class="m">Re1+</span></div>
+<div class="r"><span class="n">39</span><span class="m">Kc2</span><span class="m">Re4</span></div>
+<div class="r"><span class="n">40</span><span class="m">h6</span><span class="m">Rc4+</span></div>
+<div class="r"><span class="n">41</span><span class="m">Kb1</span><span class="m">Rh4</span></div>
+<div class="r"><span class="n">42</span><span class="m">Rxf6+</span><span class="m">Kb7</span></div>
+<div class="r"><span class="n">43</span><span class="m">Kb2</span><span class="m">Ka6</span></div>
+<div class="r is-last"><span class="n">44</span><span class="m">Rc6<svg class="dot" viewBox="0 0 10 10" aria-label="最新一手"><path d="M5.2.6c2.3.1 4.2 1.9 4.2 4.3S7.6 9.5 5 9.4C2.5 9.3.5 7.6.6 5 .7 2.5 2.8.5 5.2.6z"/></svg></span><span class="m"></span></div>
+    </div>
+    <div class="acts"><button class="btn btn-secondary btn-sm" type="button">悔棋</button><button class="btn btn-danger btn-sm" type="button">投降</button></div>
+  </section>
+</div></section>
+<ul class="frame-notes"><li><b>C</b>同一張紙裝 44 回合：紙內自己捲，打開時捲到最新一手剛好露在最下面一列，悔棋與投降不動。</li><li><b>資料</b>同一盤棋的另一條路：第 3 回合黑走 d6 沒有走進將殺，之後由引擎代下。</li></ul></figure>
+
+<figure class="frame"><figcaption><b>play-gameover-win</b>對局・贏了（第 6 回合將殺）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="play-gameover-win"><div class="screen board-page">
+  <header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow-left"/></svg></button><div class="top-titles"><h1 class="top-title">對 初學</h1><span class="top-sub">你執黑</span></div></header>
+  <div class="board-wrap"><div class="wood wood-on-deep" data-fen="rnb1k2r/pppp1ppp/8/2b1p3/6P1/8/PPPPPq1P/RNBQKBR1" data-orient="black" data-hl="h4:lm,f2:lm,e1:check"></div></div>
+  <section class="paper is-over">
+    <div class="result">
+      <h2>你贏了</h2>
+      <span class="label">將殺 · 第 6 回合</span>
+      <svg class="seal on-paper king-b ring-gold" width="96" height="96" viewBox="0 0 96 96" role="img" aria-label="這一盤：你執黑，贏了"><path class="ring" fill-rule="evenodd" d="M95.4 48L95.3 49.5L95.1 51L95 52.4L94.8 53.9L94.5 55.4L94.2 56.8L93.9 58.3L93.7 59.7L93.3 61.2L92.9 62.6L92.4 64L91.9 65.4L91.4 66.8L90.7 68.1L90.1 69.4L89.4 70.7L88.7 72.1L88 73.4L87.2 74.6L86.3 75.8L85.4 77L84.5 78.2L83.5 79.3L82.5 80.4L81.4 81.4L80.3 82.4L79.2 83.4L78.1 84.4L77 85.4L75.8 86.3L74.6 87.1L73.3 87.9L72.1 88.8L70.9 89.6L69.5 90.3L68.2 90.9L66.8 91.4L65.4 92L64 92.5L62.6 93L61.2 93.4L59.8 93.8L58.3 94.2L56.9 94.5L55.4 94.8L53.9 95L52.5 95.2L51 95.3L49.5 95.5L48 95.5L46.5 95.5L45 95.4L43.5 95.4L42 95.3L40.5 95.1L39.1 94.8L37.6 94.4L36.2 94.1L34.7 93.8L33.3 93.3L31.9 92.8L30.5 92.2L29.1 91.6L27.8 91L26.4 90.4L25.1 89.6L23.8 88.9L22.6 88L21.4 87.2L20.1 86.4L19 85.4L17.8 84.5L16.7 83.5L15.5 82.6L14.5 81.5L13.4 80.5L12.4 79.4L11.4 78.3L10.5 77.1L9.6 75.9L8.8 74.6L8.1 73.3L7.3 72.1L6.5 70.8L5.8 69.5L5.1 68.2L4.5 66.8L3.9 65.5L3.3 64.1L2.7 62.7L2.2 61.3L1.9 59.8L1.6 58.4L1.3 56.9L1.1 55.4L0.9 53.9L0.8 52.5L0.8 51L0.7 49.5L0.6 48L0.6 46.5L0.7 45L0.9 43.5L1 42.1L1.3 40.6L1.6 39.1L2 37.7L2.3 36.3L2.7 34.8L3.1 33.4L3.6 32L4.1 30.6L4.7 29.2L5.2 27.9L5.8 26.5L6.5 25.2L7.3 23.9L8.1 22.7L8.9 21.5L9.7 20.2L10.7 19L11.6 17.9L12.6 16.8L13.6 15.7L14.6 14.6L15.6 13.5L16.7 12.5L17.8 11.5L19 10.6L20.2 9.7L21.3 8.8L22.6 8L23.9 7.2L25.2 6.5L26.5 5.8L27.8 5.1L29.2 4.5L30.6 3.9L32 3.4L33.3 2.9L34.8 2.5L36.2 2.1L37.7 1.8L39.1 1.5L40.6 1.1L42 0.9L43.5 0.7L45 0.6L46.5 0.5L48 0.5L49.5 0.4L51 0.5L52.5 0.7L53.9 0.9L55.4 1.1L56.9 1.3L58.4 1.6L59.8 2L61.2 2.4L62.7 2.8L64.1 3.3L65.5 3.9L66.8 4.5L68.2 5.1L69.5 5.8L70.8 6.5L72.1 7.2L73.4 8L74.6 8.8L75.9 9.6L77.1 10.4L78.3 11.3L79.4 12.3L80.6 13.3L81.6 14.4L82.7 15.4L83.7 16.6L84.5 17.8L85.4 19L86.3 20.2L87.3 21.3L88.1 22.5L89 23.8L89.7 25.1L90.4 26.4L91.1 27.7L91.7 29.1L92.3 30.5L92.7 31.9L93.2 33.3L93.5 34.8L93.9 36.2L94.2 37.7L94.5 39.1L94.8 40.6L95 42.1L95.2 43.5L95.2 45L95.2 46.5ZM91.7 48L91.6 49.5L91.5 51L91.4 52.5L91.3 54L91.2 55.4L90.9 56.9L90.5 58.4L90.2 59.8L89.8 61.3L89.3 62.7L88.7 64.1L88.1 65.4L87.4 66.7L86.7 68.1L86 69.4L85.3 70.7L84.5 71.9L83.7 73.2L82.8 74.4L81.9 75.6L80.9 76.7L79.9 77.8L78.9 78.9L77.7 79.8L76.6 80.8L75.4 81.7L74.3 82.7L73.1 83.6L71.9 84.5L70.7 85.3L69.4 86L68.1 86.8L66.8 87.5L65.4 88.1L64 88.6L62.6 89.1L61.2 89.6L59.8 90.1L58.4 90.5L56.9 90.8L55.4 91.1L54 91.4L52.5 91.5L51 91.6L49.5 91.6L48 91.6L46.5 91.5L45 91.4L43.6 91.2L42.1 91.1L40.6 90.9L39.1 90.6L37.7 90.3L36.3 89.9L34.8 89.5L33.4 89.1L32 88.5L30.7 87.9L29.3 87.2L28 86.6L26.7 85.9L25.4 85.2L24.1 84.4L22.9 83.5L21.7 82.7L20.5 81.7L19.4 80.8L18.3 79.8L17.3 78.7L16.2 77.7L15.2 76.6L14.2 75.5L13.3 74.3L12.4 73.1L11.6 71.9L10.8 70.6L10 69.3L9.4 68L8.7 66.7L8.1 65.3L7.5 64L7 62.6L6.5 61.2L6 59.8L5.6 58.3L5.3 56.9L5.1 55.4L4.8 53.9L4.6 52.5L4.4 51L4.4 49.5L4.3 48L4.3 46.5L4.3 45L4.4 43.5L4.6 42L4.9 40.6L5.2 39.1L5.6 37.7L6 36.2L6.5 34.8L7 33.4L7.5 32L8 30.6L8.6 29.3L9.3 27.9L9.9 26.6L10.7 25.3L11.5 24.1L12.4 22.9L13.3 21.7L14.2 20.5L15.1 19.3L16.1 18.2L17.2 17.2L18.2 16.1L19.2 15L20.4 14.1L21.6 13.1L22.8 12.3L24 11.5L25.3 10.7L26.6 9.9L27.9 9.2L29.2 8.5L30.6 7.9L31.9 7.3L33.3 6.7L34.8 6.3L36.2 5.9L37.6 5.5L39.1 5.2L40.6 5L42.1 4.8L43.5 4.7L45 4.5L46.5 4.5L48 4.5L49.5 4.6L51 4.6L52.4 4.7L53.9 4.9L55.4 5.2L56.8 5.5L58.3 5.8L59.8 6.1L61.2 6.5L62.6 7L64 7.5L65.4 8L66.7 8.7L68 9.3L69.3 10.1L70.6 10.8L71.9 11.6L73.1 12.4L74.3 13.3L75.5 14.2L76.7 15.1L77.8 16.1L78.8 17.2L79.8 18.3L80.9 19.3L81.8 20.5L82.7 21.7L83.5 22.9L84.4 24.1L85.2 25.4L86 26.6L86.7 27.9L87.3 29.3L87.9 30.7L88.5 32L89 33.4L89.5 34.8L89.8 36.3L90.2 37.7L90.6 39.1L90.9 40.6L91.2 42.1L91.4 43.5L91.6 45L91.7 46.5Z"/><path class="disc" d="M89.2 48L89.3 49.5L89.3 51L88.9 52.5L88.8 54L88.4 55.5L88 56.9L87.1 58.2L86.1 59.5L85.2 60.7L84.9 62.1L84.7 63.6L84.8 65.2L84.6 66.8L84.1 68.2L83.1 69.4L82.2 70.6L81.4 71.9L80.6 73.2L79.6 74.3L78.5 75.3L77.6 76.5L76.7 77.8L75.7 78.9L74.5 79.8L73.2 80.6L71.9 81.4L70.7 82.3L69.3 82.9L68 83.6L66.6 84.1L65.3 85L64 85.7L62.7 86.4L61.2 86.7L59.7 87L58.2 86.9L56.7 86.9L55.1 86.6L53.7 86.7L52.3 86.7L50.9 86.9L49.4 87.1L48 87.6L46.5 88.1L45 88.4L43.6 88.1L42.1 88L40.7 87.8L39.1 87.8L37.7 87.3L36.3 86.9L34.9 86.4L33.4 86.2L32 85.7L30.6 85.1L29.3 84.3L28 83.6L26.8 82.8L25.5 82L24.4 81L23.1 80.2L22 79.2L20.9 78.3L19.8 77.2L18.8 76.2L17.7 75.1L16.8 73.9L16.1 72.7L15.2 71.4L14.2 70.3L13.4 69.1L12.7 67.8L12.2 66.4L11.4 65.2L10.7 63.9L10.1 62.5L9.8 61L9.3 59.6L8.8 58.2L8.1 56.9L7.7 55.4L7.2 54L6.9 52.5L6.5 51L6.5 49.5L6.5 48L6.8 46.5L6.9 45L7.3 43.5L7.5 42L7.8 40.6L7.7 39L8.1 37.6L8.5 36.1L9.1 34.7L9.4 33.2L10 31.9L10.7 30.5L11.7 29.3L12.4 28L13 26.7L13.6 25.3L14.5 24.1L15.4 22.8L16.3 21.7L17.2 20.4L18.4 19.4L19.6 18.5L20.8 17.7L22 16.7L23.1 15.8L24.3 14.9L25.5 14L26.8 13.3L28.2 12.8L29.8 12.5L31.2 12.2L32.6 11.8L34 11.3L35.4 10.9L36.7 10.3L38 9.6L39.2 8.7L40.7 8.2L42.1 8L43.6 7.9L45 7.5L46.5 7.4L48 7.3L49.5 7.5L51 7.4L52.5 7.5L54 7.4L55.4 7.8L56.9 8L58.3 8.5L59.8 8.9L61.1 9.6L62.5 10L63.8 10.7L65.2 11.3L66.5 12.1L67.8 12.8L69.1 13.5L70.4 14.2L71.5 15.2L72.5 16.2L73.6 17.2L74.8 18.1L75.8 19.1L76.7 20.3L77.5 21.5L78.6 22.6L79.6 23.6L80.6 24.7L81.4 25.9L82.2 27.1L83.1 28.3L84 29.5L84.7 30.8L85.4 32.1L86.2 33.4L86.9 34.7L87.6 36.1L88.2 37.5L88.7 38.9L89 40.4L89.1 42L88.9 43.5L89 45L89.1 46.5Z"/><path class="gaps" d="M25.5 77L24.3 76.3L23.2 75.4L22.1 74.5L21 73.5L20 72.5L19 71.4L18.1 70.3L17.2 69.1L16.4 67.9L15.7 66.7L15 65.4L14.4 64.1L13.8 62.7L13.3 61.4L12.9 60L12.6 58.6L12.3 57.2L12.1 55.7L12.1 55.7L12.6 57.1L13.1 58.4L13.6 59.8L14.1 61.1L14.7 62.3L15.4 63.6L16 64.8L16.7 66.1L17.5 67.3L18.2 68.4L19 69.6L19.8 70.7L20.7 71.8L21.6 72.9L22.5 74L23.5 75L24.5 76L25.5 77ZM69.8 72.3L69.6 72.8L69.3 73.3L68.7 73.2L68.3 72.8L68.3 72.3L68.4 71.9L68.7 71.5L69.3 71.5L69.7 71.9ZM34.9 16L34.8 16.4L34.6 16.7L34.1 16.6L33.8 16.4L33.9 16L33.8 15.6L34.1 15.4L34.6 15.3L34.7 15.7ZM36.9 78.1L37 78.5L36.7 78.7L36.2 78.8L36 78.4L35.9 78.1L36 77.8L36.2 77.4L36.7 77.5L36.9 77.8ZM81.3 30L81.3 30.3L81 30.6L80.6 30.6L80.5 30.2L80.3 30L80.4 29.7L80.6 29.3L81 29.5L81.2 29.7Z"/><path class="king" d="M48 26.4C46 26.5 44.4 27.8 44.4 29.3C44.4 29.9 44.7 31.1 45.2 31.6L38.8 31.6L38.8 37.3L45.8 37.3L42.9 40.5L45.9 42.9C39.6 43.3 32.5 44.7 31.2 47.3C29.8 50.3 38.1 64.7 38.1 64.7L57.9 64.7C57.9 64.7 66.2 50.3 64.8 47.3C63.5 44.7 56.3 43.3 50.1 42.9L53.1 40.5L50.2 37.3L57.2 37.3L57.2 31.6L50.8 31.6C51.3 31.1 51.6 29.9 51.6 29.3C51.6 27.8 50 26.5 48 26.4L48 26.4ZM34.9 64.7C33.3 64.7 32 66 32 67.7L32 68.3L32 71.3L64 71.3L64 68.3L64 67.7C64 66 62.7 64.7 61.1 64.7L48 64.7L34.9 64.7Z"/></svg>
+    </div>
+    <div class="said"><img class="neve-avatar" src="/avatars/neve-badge.png" width="32" height="32" alt=""><div><span class="neve-name">Neve</span><p class="neve-say">將殺成立了。</p></div></div>
+    <div class="score" role="table" aria-label="棋譜">
+<div class="r"><span class="n">3</span><span class="m">Rg1</span><span class="m">Bc5</span></div>
+<div class="r"><span class="n">4</span><span class="m">f3</span><span class="m">Nxg4</span></div>
+<div class="r"><span class="n">5</span><span class="m">fxg4</span><span class="m">Qh4+</span></div>
+<div class="r is-last"><span class="n">6</span><span class="m">Nf2</span><span class="m">Qxf2#<svg class="dot" viewBox="0 0 10 10" aria-label="最新一手"><path d="M5.2.6c2.3.1 4.2 1.9 4.2 4.3S7.6 9.5 5 9.4C2.5 9.3.5 7.6.6 5 .7 2.5 2.8.5 5.2.6z"/></svg></span></div>
+    </div>
+    <div class="acts"><button class="btn btn-primary" type="button">我陪你看看剛剛那一步</button><button class="btn btn-secondary" type="button">再下一盤</button></div>
+  </section>
+</div></section>
+<ul class="frame-notes"><li><b>C</b>整張是 C 的完局紙：標題墨色、96px 的印（金環＝贏）、Neve 一行、最後四回合、深青主按鈕。</li><li><b>拿掉</b>沒有 B 的國王徽章，沒有金墨筆。664 可視高時棋譜收起，按鈕在摺線內。</li></ul></figure>
+
+<figure class="frame"><figcaption><b>play-gameover-loss</b>對局・輸了（第 76 回合投降）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="play-gameover-loss"><div class="screen board-page">
+  <header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow-left"/></svg></button><div class="top-titles"><h1 class="top-title">對 初學</h1><span class="top-sub">你執黑</span></div></header>
+  <div class="board-wrap"><div class="wood wood-on-deep" data-fen="8/k7/8/1R6/P2K4/8/8/8" data-orient="black" data-hl="c5:lm,b5:lm"></div></div>
+  <section class="paper is-over">
+    <div class="result">
+      <h2>你輸了</h2>
+      <span class="label">投降 · 第 76 回合</span>
+      <svg class="seal on-paper king-b ring-ink" width="96" height="96" viewBox="0 0 96 96" role="img" aria-label="這一盤：你執黑，輸了"><path class="ring" fill-rule="evenodd" d="M95.5 48L95.4 49.5L95.3 51L95.2 52.5L95 53.9L94.8 55.4L94.5 56.9L94.2 58.3L93.8 59.8L93.4 61.2L93 62.6L92.5 64L92.1 65.5L91.5 66.8L90.9 68.2L90.1 69.5L89.4 70.8L88.7 72.1L88 73.4L87.2 74.6L86.2 75.8L85.4 77L84.4 78.1L83.5 79.3L82.5 80.4L81.4 81.4L80.3 82.4L79.2 83.4L78.1 84.4L76.9 85.3L75.8 86.2L74.6 87.1L73.4 88L72.1 88.7L70.8 89.5L69.5 90.2L68.1 90.8L66.8 91.4L65.4 92L64 92.5L62.6 92.8L61.2 93.3L59.7 93.7L58.3 94.2L56.9 94.5L55.4 94.8L53.9 95.1L52.5 95.2L51 95.5L49.5 95.6L48 95.6L46.5 95.5L45 95.4L43.5 95.3L42 95.1L40.6 94.9L39.1 94.6L37.6 94.4L36.2 94L34.7 93.7L33.3 93.2L31.9 92.6L30.6 92L29.3 91.3L28 90.6L26.7 89.8L25.5 89L24.2 88.2L22.9 87.5L21.7 86.8L20.4 85.9L19.2 85.2L18 84.3L16.7 83.5L15.5 82.6L14.4 81.6L13.4 80.5L12.5 79.3L11.5 78.2L10.5 77.1L9.5 75.9L8.7 74.7L7.9 73.5L7.1 72.2L6.3 70.9L5.5 69.6L4.9 68.3L4.3 66.9L3.7 65.5L3.2 64.1L2.7 62.7L2.3 61.3L1.9 59.8L1.6 58.4L1.3 56.9L1.1 55.4L0.9 53.9L0.8 52.5L0.7 51L0.7 49.5L0.7 48L0.8 46.5L0.9 45L0.9 43.5L1 42.1L1.2 40.6L1.5 39.1L1.9 37.7L2.2 36.3L2.6 34.8L3 33.4L3.5 32L4 30.6L4.6 29.2L5.2 27.8L5.8 26.5L6.5 25.2L7.2 23.9L8 22.6L8.8 21.4L9.7 20.2L10.6 19L11.6 17.9L12.6 16.8L13.6 15.7L14.6 14.6L15.6 13.5L16.7 12.5L17.8 11.5L18.9 10.5L20.1 9.6L21.4 8.8L22.6 8L23.9 7.3L25.2 6.6L26.5 5.9L27.9 5.3L29.3 4.7L30.6 4.1L32 3.5L33.4 3L34.8 2.5L36.2 2.1L37.7 1.8L39.1 1.4L40.6 1.2L42.1 0.9L43.5 0.8L45 0.7L46.5 0.7L48 0.6L49.5 0.6L51 0.7L52.5 0.7L53.9 0.9L55.4 1.1L56.9 1.4L58.3 1.8L59.8 2.2L61.2 2.6L62.6 3L64 3.5L65.4 4L66.8 4.6L68.2 5.1L69.5 5.7L70.9 6.3L72.2 7.1L73.4 7.9L74.7 8.7L75.9 9.6L77.2 10.4L78.3 11.4L79.5 12.3L80.5 13.4L81.6 14.4L82.7 15.4L83.7 16.5L84.7 17.7L85.6 18.9L86.5 20L87.3 21.3L88.2 22.5L88.9 23.8L89.7 25.1L90.5 26.4L91.1 27.7L91.7 29.1L92.2 30.5L92.7 31.9L93.2 33.3L93.6 34.8L93.9 36.2L94.1 37.7L94.4 39.1L94.6 40.6L95 42.1L95.1 43.5L95.2 45L95.2 46.5ZM91.7 48L91.7 49.5L91.6 51L91.5 52.5L91.3 54L91.1 55.4L90.8 56.9L90.4 58.3L90 59.8L89.6 61.2L89.1 62.6L88.5 64L88 65.4L87.4 66.7L86.7 68.1L86 69.4L85.2 70.6L84.4 71.9L83.6 73.2L82.7 74.3L81.8 75.5L80.8 76.6L79.9 77.8L78.9 78.9L77.8 79.9L76.7 80.9L75.5 81.8L74.3 82.7L73.2 83.7L72 84.5L70.7 85.3L69.4 86.1L68.1 86.8L66.8 87.5L65.4 88.2L64.1 88.7L62.7 89.2L61.2 89.7L59.8 90.1L58.4 90.5L56.9 90.8L55.4 91.1L54 91.3L52.5 91.5L51 91.5L49.5 91.6L48 91.6L46.5 91.6L45 91.4L43.6 91.3L42.1 91.1L40.6 90.9L39.1 90.7L37.7 90.4L36.2 90L34.8 89.6L33.4 89.1L32 88.6L30.6 88L29.3 87.3L28 86.6L26.7 85.9L25.4 85.1L24.2 84.3L22.9 83.5L21.7 82.7L20.5 81.8L19.4 80.8L18.3 79.8L17.2 78.8L16.2 77.7L15.2 76.6L14.3 75.4L13.4 74.2L12.5 73.1L11.6 71.9L10.8 70.6L10.1 69.3L9.3 68L8.6 66.7L8 65.4L7.5 64L7 62.6L6.6 61.1L6.1 59.7L5.7 58.3L5.4 56.9L5.1 55.4L4.8 53.9L4.6 52.5L4.4 51L4.3 49.5L4.4 48L4.4 46.5L4.5 45L4.6 43.5L4.9 42.1L5.1 40.6L5.4 39.1L5.7 37.7L6.1 36.3L6.5 34.8L7 33.4L7.5 32L8.1 30.7L8.7 29.3L9.3 28L10 26.6L10.7 25.3L11.5 24.1L12.3 22.8L13.2 21.6L14.1 20.4L15.1 19.3L16.1 18.2L17.1 17.1L18.2 16.1L19.3 15.1L20.4 14L21.5 13.1L22.7 12.2L24 11.4L25.2 10.6L26.6 9.9L27.9 9.2L29.2 8.5L30.6 7.9L32 7.3L33.4 6.8L34.8 6.4L36.2 5.9L37.6 5.5L39.1 5.2L40.6 5L42.1 4.9L43.5 4.7L45 4.6L46.5 4.5L48 4.6L49.5 4.6L51 4.6L52.5 4.6L53.9 4.8L55.4 5L56.9 5.3L58.3 5.6L59.8 6L61.2 6.5L62.6 7L64 7.5L65.4 8L66.7 8.7L68 9.3L69.4 10L70.7 10.7L71.9 11.5L73.1 12.4L74.3 13.3L75.5 14.2L76.6 15.2L77.7 16.2L78.8 17.2L79.8 18.3L80.8 19.4L81.8 20.5L82.7 21.7L83.6 22.9L84.4 24.2L85.2 25.4L85.9 26.7L86.6 28L87.2 29.3L87.8 30.7L88.4 32.1L89 33.4L89.5 34.8L89.9 36.3L90.3 37.7L90.6 39.1L90.9 40.6L91.1 42.1L91.4 43.5L91.5 45L91.6 46.5Z"/><path class="disc" d="M87.7 48L88.3 49.5L88.4 51L88.4 52.5L88.3 53.9L88.2 55.4L87.7 56.9L87.5 58.3L87.2 59.8L87 61.3L86.3 62.7L85.4 63.9L84.4 65.1L83.9 66.4L83.4 67.9L83.1 69.4L82.3 70.7L81.7 72.1L80.8 73.3L79.9 74.6L78.8 75.6L77.7 76.6L76.6 77.7L75.5 78.7L74.3 79.6L73.2 80.6L72 81.5L70.7 82.3L69.4 83L68.1 83.8L66.8 84.5L65.4 85.1L64 85.6L62.5 86L61.2 86.6L59.8 87.1L58.3 87.5L56.8 87.5L55.3 87.7L53.9 87.9L52.4 88.2L50.9 88.2L49.5 88.3L48 88.4L46.5 88.8L45 88.8L43.5 88.9L42 88.7L40.5 88.6L39.1 88.1L37.6 87.7L36.3 87L34.8 86.7L33.5 86L32.1 85.5L30.7 84.8L29.3 84.4L28 83.7L26.7 82.9L25.7 81.7L24.5 80.9L23.4 79.9L22.2 79L21.3 77.8L20.2 76.8L19.1 75.9L17.8 75L16.9 73.9L16 72.7L15.2 71.4L14.4 70.2L13.7 69L13 67.6L12.4 66.3L11.7 65L10.9 63.8L10.3 62.4L9.7 61.1L9.4 59.6L9 58.2L8.9 56.7L8.6 55.3L8.2 53.9L7.5 52.5L7.3 51L7.1 49.5L7.2 48L7 46.5L7 45L7.2 43.5L7.7 42.1L7.9 40.6L8.1 39.1L8.3 37.6L8.8 36.2L9.2 34.8L9.7 33.4L10 31.9L10.7 30.5L11.3 29.2L12.2 27.9L12.9 26.6L13.8 25.4L14.6 24.1L15.5 22.9L16.3 21.6L17.4 20.6L18.4 19.5L19.5 18.5L20.5 17.3L21.7 16.4L23 15.6L24.3 14.9L25.4 13.9L26.6 12.9L27.8 12.1L29.2 11.5L30.6 10.8L31.9 10.2L33.3 9.6L34.8 9.3L36.3 9.1L37.8 8.8L39.2 8.4L40.6 8L42.1 7.7L43.5 7.3L45 7L46.5 6.7L48 6.8L49.5 6.7L51 6.9L52.5 7.2L53.9 7.7L55.4 8L56.8 8.3L58.3 8.4L59.7 9L61.1 9.5L62.5 10.2L63.9 10.6L65.2 11.4L66.4 12.2L67.5 13.3L68.8 13.9L70.1 14.6L71.4 15.3L72.5 16.3L73.8 17L74.9 18L76.1 18.8L77.1 20L78.1 21L79 22.2L79.9 23.4L80.7 24.6L81.6 25.8L82.4 27L83.2 28.2L83.8 29.6L84.4 31L85.1 32.2L85.9 33.5L86.6 34.8L87 36.3L87.5 37.7L88.1 39.1L88.5 40.5L88.6 42L88.4 43.6L87.7 45.1L87.3 46.6Z"/><path class="gaps" d="M36.7 82.9L35.3 82.6L34 82.2L32.6 81.7L31.3 81.2L30 80.5L28.7 79.9L27.4 79.1L26.2 78.3L25.1 77.4L23.9 76.5L22.9 75.6L21.8 74.5L20.9 73.5L19.9 72.3L19.1 71.2L18.3 70L17.5 68.8L16.9 67.5L16.9 67.5L17.8 68.6L18.7 69.7L19.6 70.7L20.6 71.8L21.6 72.8L22.6 73.8L23.6 74.7L24.7 75.6L25.8 76.5L26.9 77.3L28.1 78.1L29.2 78.9L30.4 79.7L31.6 80.4L32.9 81.1L34.1 81.7L35.4 82.3L36.7 82.9ZM23.7 74.9L23.5 75.4L23.2 76L22.6 75.7L22.1 75.4L22.2 74.9L22.1 74.4L22.5 74L23.1 74L23.4 74.5ZM25.8 73.7L25.9 74.1L25.5 74.4L25 74.3L24.8 74L24.7 73.7L24.7 73.3L25 73.1L25.5 73L25.6 73.4ZM26.6 71.7L26.7 72.1L26.3 72.3L25.9 72.3L25.8 71.9L25.5 71.7L25.6 71.3L25.9 71L26.3 71.2L26.5 71.4ZM34.4 16.9L34.3 17.2L34 17.5L33.7 17.3L33.5 17.2L33.4 16.9L33.4 16.6L33.6 16.3L34 16.5L34.2 16.6Z"/><path class="king" d="M48 26.4C46 26.5 44.4 27.8 44.4 29.3C44.4 29.9 44.7 31.1 45.2 31.6L38.8 31.6L38.8 37.3L45.8 37.3L42.9 40.5L45.9 42.9C39.6 43.3 32.5 44.7 31.2 47.3C29.8 50.3 38.1 64.7 38.1 64.7L57.9 64.7C57.9 64.7 66.2 50.3 64.8 47.3C63.5 44.7 56.3 43.3 50.1 42.9L53.1 40.5L50.2 37.3L57.2 37.3L57.2 31.6L50.8 31.6C51.3 31.1 51.6 29.9 51.6 29.3C51.6 27.8 50 26.5 48 26.4L48 26.4ZM34.9 64.7C33.3 64.7 32 66 32 67.7L32 68.3L32 71.3L64 71.3L64 68.3L64 67.7C64 66 62.7 64.7 61.1 64.7L48 64.7L34.9 64.7Z"/></svg>
+    </div>
+    <div class="said"><img class="neve-avatar" src="/avatars/neve-badge.png" width="32" height="32" alt=""><div><span class="neve-name">Neve</span><p class="neve-say">這盤先投降了。<br>輸贏都是練習的一部分。</p></div></div>
+    <div class="score" role="table" aria-label="棋譜">
+<div class="r"><span class="n">73</span><span class="m">Rd7</span><span class="m">Rc7</span></div>
+<div class="r"><span class="n">74</span><span class="m">Rxc7</span><span class="m">b5</span></div>
+<div class="r"><span class="n">75</span><span class="m">Rc5</span><span class="m">Ka7</span></div>
+<div class="r is-last"><span class="n">76</span><span class="m">Rxb5<svg class="dot" viewBox="0 0 10 10" aria-label="最新一手"><path d="M5.2.6c2.3.1 4.2 1.9 4.2 4.3S7.6 9.5 5 9.4C2.5 9.3.5 7.6.6 5 .7 2.5 2.8.5 5.2.6z"/></svg></span><span class="m"></span></div>
+    </div>
+    <div class="acts"><button class="btn btn-primary" type="button">我陪你看看剛剛那一步</button><button class="btn btn-secondary" type="button">再下一盤</button></div>
+  </section>
+</div></section>
+<ul class="frame-notes"><li><b>C</b>同一張紙，印換成墨環。Neve 那句是 app 現有的投降文案，沒改字。</li></ul></figure>
+
+<figure class="frame"><figcaption><b>review-analysing</b>棋憶・分析中（手機約 10 秒）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="review-analysing"><div class="screen review-page">
+  <div class="band"><header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow-left"/></svg></button><div class="top-titles"><h1 class="top-title">棋憶</h1><span class="top-sub">11 月 16 日 · 執白 · 對 初學</span></div><button class="top-action is-hidden" type="button"><svg class="lucide" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-share-2"/></svg>棋譜</button></header></div>
+  <main class="review-body" aria-busy="true">
+    <div class="wood wood-on-cream" data-fen="r1bq3r/ppp1kQpp/1N1b4/4p3/2B5/P7/1P1P1PPP/n1BK3R" data-orient="white" data-hl="f3:lm,f7:lm,e7:check"></div>
+    <div class="dots" aria-hidden="true"></div>
+    <div class="neve-box is-light moment-box" aria-live="polite">
+      <div class="neve-head has-nav"><img class="neve-avatar" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span class="neve-name">Neve</span><span class="neve-nav is-hidden"><button class="step-btn" type="button" aria-label="上一格"><svg class="lucide" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-chevron-left"/></svg></button><button class="step-btn" type="button" aria-label="看下一個畫面"><svg class="lucide" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-play"/></svg></button><button class="step-btn" type="button" aria-label="下一格"><svg class="lucide" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-chevron-right"/></svg></button></span></div>
+      <p class="neve-say">讓我順著你的每一步，慢慢看過這盤。</p>
+      <div class="progress" role="progressbar" aria-valuenow="67" aria-valuemin="0" aria-valuemax="100"><div class="progress-track"><i style="transform:scaleX(.67)"></i></div><span class="count">67%</span></div>
+      <div class="flow"><p class="label">這一盤 · 13 回合</p><p class="flow-moves"><span class="fl"><b>1.</b> e4 e5</span> <span class="fl"><b>2.</b> Nf3 Nc6</span> <span class="fl"><b>3.</b> Bc4 Nf6</span> <span class="fl"><b>4.</b> Ng5 d5</span> <span class="fl"><b>5.</b> exd5 Nxd5</span> <span class="fl"><b>6.</b> Nxf7 Kxf7</span> <span class="fl"><b>7.</b> Qf3+ Ke6</span> <span class="fl"><b>8.</b> Nc3 Ncb4</span> <span class="fl"><b>9.</b> a3 Nxc2+</span> <span class="fl"><b>10.</b> Kd1 Nxa1</span> <span class="fl"><b>11.</b> Nxd5 Bd6</span> <span class="fl"><b>12.</b> Nb6+ Ke7</span> <span class="fl"><b>13.</b> Qf7#</span> </p></div>
+    </div>
+  </main>
+</div></section>
+<ul class="frame-notes"><li><b>地基</b>版面照地基，盤面是這一盤的終局，被將殺的黑王用 C 的紅框標出。</li><li><b>改</b>進度條緊接在 Neve 那句底下。原本卡片下半約 130px 的空白，改放這一盤的棋譜，等的時候有東西可看；卡片高度與分析完成後相同，不跳版面。</li></ul></figure>
+
+<figure class="frame"><figcaption><b>review-moment</b>棋憶・最後一格（第 9 回合）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="review-moment"><div class="screen review-page">
+  <div class="band"><header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow-left"/></svg></button><div class="top-titles"><h1 class="top-title">棋憶</h1><span class="top-sub">11 月 16 日 · 執白 · 對 初學</span></div><button class="top-action" type="button"><svg class="lucide" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-share-2"/></svg>棋譜</button></header></div>
+  <main class="review-body">
+    <div class="wood wood-on-cream" data-fen="r1bq1b1r/ppp3pp/4k3/3np3/1nB5/2N2Q2/PPPP1PPP/R1B1K2R" data-orient="white" data-hl="a3:played,b3:best" data-arrows="a2a3:#888888,c4b3:#c4882a"></div>
+    <div class="dots" aria-hidden="true"><i></i><i></i><i class="is-on"></i></div>
+    <div class="neve-box is-light moment-box" aria-live="polite">
+      <div class="neve-head has-nav"><img class="neve-avatar" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span class="neve-name">Neve</span><span class="neve-nav"><button class="step-btn" type="button" aria-label="上一格"><svg class="lucide" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-chevron-left"/></svg></button><button class="step-btn" type="button" aria-label="看下一個畫面"><svg class="lucide" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-play"/></svg></button><button class="step-btn" type="button" aria-label="下一格" disabled><svg class="lucide" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-chevron-right"/></svg></button></span></div>
+      <h2 class="moment-title">第 9 回合 · 兵沒人守</h2>
+      <dl class="moves-said"><dt>你走了</dt><dd>把兵移到 a3</dd><dt>更好的是</dt><dd>把主教移到 b3</dd></dl>
+      <div class="moment-scroll"><p class="neve-say">你的兵留在 c2，沒人守著。與其把兵移到 a3，不如先把主教移到 b3。</p></div>
+    </div>
+    <div class="end-actions"><button class="btn btn-primary" type="button">再下一盤</button><button class="btn btn-secondary" type="button">回首頁</button></div>
+  </main>
+</div></section>
+<ul class="frame-notes"><li><b>地基</b>照地基不動，頂列沒有印。手數改寫成「第 9 回合」，和全站同一種算法。</li></ul></figure>
+
+<figure class="frame"><figcaption><b>empty-or-404</b>邊界・404</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="empty-or-404"><div class="screen shell">
+  <header class="band scene-band lost-band">
+    <div class="band-art"><svg xmlns="http://www.w3.org/2000/svg" width="390" height="296" viewBox="0 0 390 296" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" style="display:block">
+<defs><clipPath id="sc1-top"><polygon points="105,238 879.9,369.3 1422.5,181.8 647.6,50.5" fill="#000"/></clipPath><clipPath id="sc1-foot"><polygon points="377.1,202.2 457.1,238.6 224,268.6 144,232.2" fill="#000"/></clipPath><clipPath id="sc1-sh"><polygon points="319.8,210.5 320.7,208.8 323.3,207.3 327.5,206 328.7,205.7 334.2,204.7 335.7,204.5 337.2,204.3 343.6,203.7 345.2,203.5 346.8,203.4 348.4,203.3 350,203.2 356.5,203 358,203 359.5,203 362.5,203 368.2,203.2 381.4,204.1 383.6,204.4 385.4,204.7 386.8,205.2 387.7,205.7 388,206.2 387.7,206.8 383.8,209.7 381.6,211 380.2,211.6 376.4,212.8 375.4,213.1 374.4,213.5 373.2,213.7 372,214 366.6,215 365.2,215.2 363.8,215.5 362.3,215.7 360.8,215.9 354.4,216.5 352.8,216.6 346,216.8 339.2,216.6 332.9,216 327.5,215 323.3,213.7 320.7,212.1" fill="#000"/><polygon points="363.6,206 364.2,204.9 366,203.9 366.7,203.6 369.6,202.7 370.9,202.4 374.8,201.7 376.3,201.5 377.8,201.3 382.3,200.9 383.9,200.8 388.6,200.6 390.1,200.7 394.5,200.8 398.7,201.2 402.2,201.9 405,202.7 406.7,203.7 407.3,204.8 406.7,205.9 405,206.9 404.3,207.2 401.4,208.1 400.2,208.4 396.3,209.1 394.9,209.3 393.4,209.5 388.9,209.9 387.3,210.1 382.6,210.2 381.1,210.2 376.6,210.1 372.3,209.6 368.7,209 366,208.1 364.2,207.1" fill="#000"/><polygon points="376.8,204.6 377.3,203.7 378.7,202.9 381.1,202.1 384.1,201.6 391.6,200.6 393.1,200.4 396.7,200 398.2,199.9 399.9,199.8 403.5,199.7 405,199.7 406.5,199.7 409.7,199.8 412.7,200.1 413.5,200.2 415.8,200.6 416.1,200.7 417.6,201.2 418.6,201.7 418.9,202.3 419,202.5 418.6,203.2 418.4,203.5 417.2,204.2 416.5,204.5 415.6,204.8 413.4,205.5 412.2,205.8 409.2,206.3 407.8,206.6 406.4,206.8 398.8,207.7 395.3,208.1 391.5,208.2 387.7,208.1 384.1,207.7 381.1,207.2 378.7,206.4 377.3,205.6" fill="#000"/><polygon points="204.2,228.9 204.5,226.2 207.7,223.4 213.6,220.9 221.7,218.7 223.2,218.4 233.3,216.7 235.2,216.5 237.1,216.3 239,216.1 240.9,216 252.1,214.9 254,214.8 256,214.7 267.3,214.3 269,214.4 279.7,214.8 289.1,215.8 296.7,217.5 302,219.7 304.6,222.2 304.3,224.9 301.1,227.6 295.3,230.1 287.3,232.2 285.9,232.6 276,234.2 274.2,234.5 272.3,234.7 268.5,235.1 257.4,236.1 253.5,236.5 242.1,236.8 240.3,236.8 229.5,236.5 219.9,235.4 212.1,233.7 206.8,231.5" fill="#000"/><polygon points="227.1,226.8 227.4,224.4 230.2,222 235.4,219.7 242.7,217.8 251.5,216.3 281.3,211.5 283.2,211.3 285,211 296.8,209.9 298.7,209.8 310.8,209.5 322.3,209.9 323.8,210 333.8,211.1 341.8,212.9 342.3,213 347.7,215.2 350.3,217.8 350,220.5 349.9,220.7 346.5,223.5 340.4,226.2 339.3,226.5 330.6,228.8 320,230.6 318.2,230.8 306.4,232 304.5,232.1 302.5,232.2 269.2,233.6 259.2,233.9 249.6,233.6 241.1,232.6 234.2,231.1 229.4,229.1" fill="#000"/><polygon points="290.5,221.2 290.7,219.7 292.4,218.2 295.6,216.8 300.1,215.6 305.6,214.7 311.6,214.1 317.7,213.9 323.6,214.2 328.9,214.7 333.1,215.7 336.1,216.9 337.5,218.3 337.4,219.8 335.6,221.3 332.4,222.7 327.9,223.9 322.5,224.8 316.5,225.3 310.3,225.5 304.4,225.3 299.1,224.7 294.9,223.8 291.9,222.6" fill="#000"/><polygon points="298.5,221.1 347.7,214.7 364.4,213.1 367,214.7 317.8,221.1 301.2,222.7" fill="#000"/><polygon points="317.2,218.5 317.3,217 319.2,215.4 322.5,214 327.1,212.8 332.7,211.8 338.9,211.2 345.3,211.1 351.4,211.3 356.9,211.9 361.3,212.9 364.3,214.1 365.8,215.6 365.6,217.1 363.8,218.7 360.5,220.1 355.8,221.3 350.2,222.3 344,222.9 337.6,223 331.5,222.8 326.1,222.2 321.7,221.2 318.6,220" fill="#000"/></clipPath><clipPath id="sc1-ao"><polygon points="369.2,214.5 371.1,213.8 372.6,212.9 373.7,212 374.3,211.1 374.4,210.2 373.9,209.3 373,208.4 371.7,207.6 369.9,206.8 367.7,206.1 365.1,205.4 362.1,204.8 358.9,204.4 355.5,204 351.8,203.7 348.1,203.6 344.4,203.6 340.6,203.7 337,203.9 333.5,204.2 330.2,204.7 327.1,205.2 324.4,205.8 322.1,206.5 320.1,207.3 318.6,208.2 317.5,209 317,209.9 316.9,210.8 317.3,211.7 318.2,212.6 319.6,213.5 321.4,214.3 323.6,215 326.2,215.7 329.1,216.2 332.3,216.7 335.8,217.1 339.4,217.3 343.1,217.5 346.9,217.5 350.6,217.4 354.3,217.2 357.8,216.8 361.1,216.4 364.1,215.9 366.8,215.2" fill="#000"/><polygon points="310.3,221.4 308.7,220.8 306.1,220.2 302.8,219.7 298.6,219.4 293.7,219.2 288.2,219.1 282.2,219.2 275.7,219.3 268.9,219.6 261.8,220 254.7,220.6 247.7,221.2 240.8,221.9 234.1,222.8 227.9,223.6 222.1,224.6 217,225.5 212.5,226.5 208.8,227.5 205.9,228.5 203.8,229.4 202.7,230.3 202.5,231.1 203.2,231.9 204.9,232.6 207.4,233.1 210.8,233.6 215,233.9 219.8,234.1 225.3,234.2 231.4,234.2 237.9,234 244.7,233.7 251.7,233.3 258.8,232.7 265.9,232.1 272.8,231.4 279.4,230.6 285.7,229.7 291.4,228.8 296.6,227.8 301.1,226.8 304.8,225.8 307.7,224.9 309.7,223.9 310.8,223 311,222.2" fill="#000"/></clipPath></defs><g><rect x="-10" y="-10" width="410" height="316" fill="#103029"/><polygon points="-150,-40 0,-40 606.5,336 456.5,336" fill="#193830"/><polygon points="-96,-40 20,-40 626.5,336 510.5,336" fill="#203d35"/><polygon points="-52,-40 30,-40 636.5,336 554.5,336" fill="#264239"/></g><g><polygon points="105,238 879.9,369.3 879.9,387.4 105,256.1" fill="#512f1b"/><polygon points="105,238 879.9,369.3 879.9,373.3 105,242" fill="#664632"/><polygon points="105,238 879.9,369.3 1422.5,181.8 647.6,50.5" fill="#432313"/><polygon points="151,236 871.8,358.1 1376.6,183.8 655.7,61.6" fill="#926843"/><path d="M151,236L241.1,251.3L304.2,229.5L214.1,214.2ZM277.1,192.4L367.3,207.7L430.3,185.9L340.2,170.6ZM304.2,229.5L394.3,244.8L457.4,223L367.3,207.7ZM331.2,266.6L421.3,281.8L484.4,260L394.3,244.8Z" fill="#68371f"/><g clip-path="url(#sc1-top)"><g clip-path="url(#sc1-foot)"><polygon points="105,238 879.9,369.3 1422.5,181.8 647.6,50.5" fill="#6a442b"/><polygon points="151,236 871.8,358.1 1376.6,183.8 655.7,61.6" fill="#e9c997"/><path d="M151,236L241.1,251.3L304.2,229.5L214.1,214.2ZM277.1,192.4L367.3,207.7L430.3,185.9L340.2,170.6ZM304.2,229.5L394.3,244.8L457.4,223L367.3,207.7ZM331.2,266.6L421.3,281.8L484.4,260L394.3,244.8Z" fill="#a56c45"/></g></g><polyline points="879.9,369.3 105,238 647.6,50.5" fill="none" stroke="#8f7058" stroke-width="1.2" stroke-linejoin="round" opacity="0.9"/></g><g clip-path="url(#sc1-top)"><g clip-path="url(#sc1-foot)"><g clip-path="url(#sc1-sh)"><polygon points="105,238 879.9,369.3 1422.5,181.8 647.6,50.5" fill="#432313"/><polygon points="151,236 871.8,358.1 1376.6,183.8 655.7,61.6" fill="#926843"/><path d="M151,236L241.1,251.3L304.2,229.5L214.1,214.2ZM277.1,192.4L367.3,207.7L430.3,185.9L340.2,170.6ZM304.2,229.5L394.3,244.8L457.4,223L367.3,207.7ZM331.2,266.6L421.3,281.8L484.4,260L394.3,244.8Z" fill="#68371f"/></g></g></g><g clip-path="url(#sc1-top)"><g clip-path="url(#sc1-ao)"><polygon points="105,238 879.9,369.3 1422.5,181.8 647.6,50.5" fill="#381b0e"/><polygon points="151,236 871.8,358.1 1376.6,183.8 655.7,61.6" fill="#795130"/><path d="M151,236L241.1,251.3L304.2,229.5L214.1,214.2ZM277.1,192.4L367.3,207.7L430.3,185.9L340.2,170.6ZM304.2,229.5L394.3,244.8L457.4,223L367.3,207.7ZM331.2,266.6L421.3,281.8L484.4,260L394.3,244.8Z" fill="#562b16"/></g></g><g><polygon points="345.6,216.5 357.6,215.8 363.7,214.7 367.4,213.7 369.7,212.6 371.4,211.2 372.2,209.5 372.3,206.7 372,203.5 371.2,200.4 369.9,197.2 368.8,195.1 366.6,192 364.8,189.9 357.5,183.2 355.6,180.4 354.3,176.9 351.8,175.9 345.6,175.3 345.6,175.3 339.4,175.9 336.9,176.9 335.7,180.4 333.8,183.2 326.5,189.9 324.6,192 322.5,195.1 321.3,197.2 320.1,200.4 319.3,203.5 319,206.7 319.1,209.5 319.8,211.2 321.5,212.6 323.9,213.7 327.5,214.7 333.7,215.8 345.6,216.5" fill="#582d17"/><polygon points="345.6,216.5 333.7,215.8 327.5,214.7 323.9,213.7 321.5,212.6 319.8,211.2 319.1,209.5 319,206.7 319.3,203.5 320.1,200.4 321.3,197.2 322.5,195.1 324.6,192 326.5,189.9 333.8,183.2 335.7,180.4 336.9,176.9 339.4,175.9 345.6,175.3 345.6,175.3 349.5,175.5 349.7,178.7 350.9,184.6 355.2,196.2 356.8,201.8 357.7,206.7 358.1,211.9 357.9,212.6 357.3,213 356.8,215.8 354.2,216.1 345.6,216.5" fill="#8c5734"/><polygon points="345.6,180.7 354.7,180 359.6,178.6 361.9,177.2 363.4,175.5 364.2,172.7 364.2,170.6 363.9,168.1 363.2,166.7 362,165.3 359.9,163.9 356.8,162.9 352.9,162.2 345.6,161.7 345.6,161.7 338.3,162.2 334.4,162.9 331.4,163.9 329.2,165.3 328,166.7 327.4,168.1 327,170.6 327.1,172.7 327.9,175.5 329.3,177.2 331.7,178.6 336.6,180 345.6,180.7" fill="#582d17"/><polygon points="345.6,180.7 336.6,180 331.7,178.6 329.3,177.2 327.9,175.5 327.1,172.7 327,170.6 327.4,168.1 328,166.7 329.2,165.3 331.4,163.9 334.4,162.9 338.3,162.2 345.6,161.7 345.6,161.7 352.1,162.2 352.5,165 353,165.7 354.3,175.1 354.2,176.5 353.7,177.2 353.2,180 352.2,180.4 345.6,180.7" fill="#8c5734"/><polygon points="361.4,165.6 361.4,165.9 361.2,166.2 360.9,166.6 360.5,166.9 359.9,167.2 359.3,167.5 358.6,167.8 357.7,168 356.8,168.3 355.8,168.5 354.7,168.7 353.5,168.9 352.3,169 351,169.2 349.7,169.3 348.4,169.3 347,169.4 345.6,169.4 344.2,169.4 342.9,169.3 341.5,169.3 340.2,169.2 338.9,169 337.7,168.9 336.6,168.7 335.5,168.5 334.4,168.3 333.5,168 332.7,167.8 331.9,167.5 331.3,167.2 330.8,166.9 330.4,166.6 330.1,166.2 329.9,165.9 329.8,165.6 329.9,165.2 330.1,164.9 330.4,164.6 330.8,164.3 331.3,163.9 331.9,163.7 332.7,163.4 333.5,163.1 334.4,162.9 335.5,162.6 336.6,162.4 337.7,162.3 338.9,162.1 340.2,162 341.5,161.9 342.9,161.8 344.2,161.8 345.6,161.7 347,161.8 348.4,161.8 349.7,161.9 351,162 352.3,162.1 353.5,162.3 354.7,162.4 355.8,162.6 356.8,162.9 357.7,163.1 358.6,163.4 359.3,163.7 359.9,163.9 360.5,164.3 360.9,164.6 361.2,164.9 361.4,165.2" fill="#8c5837"/><polygon points="345.6,168.7 354.4,168 357.3,167.3 359.6,166.3 360.2,165.6 360.3,164.9 359.1,163.5 360,161 360.4,158.2 360.2,155.1 359.1,151.9 357.8,149.8 355.9,147.7 353,145.6 350.6,144.6 345.6,143.9 345.6,143.9 340.7,144.6 338.3,145.6 335.3,147.7 333.4,149.8 332.1,151.9 331.1,155.1 330.8,158.2 331.2,161 332.2,163.5 331,164.9 331,165.6 331.6,166.3 333.9,167.3 336.9,168 345.6,168.7" fill="#582d17"/><polygon points="345.6,168.7 336.9,168 333.9,167.3 331.6,166.3 331,165.6 331,164.9 332.2,163.5 331.2,161 330.8,158.2 331.1,155.1 332.1,151.9 333.4,149.8 335.3,147.7 338.3,145.6 340.7,144.6 345.6,143.9 345.6,143.9 347.5,144.2 348.6,147.4 350.7,151.2 352,155.8 352.5,160.7 352.2,164.9 351.9,165.2 351.4,168.4 345.6,168.7" fill="#8c5734"/><polygon points="289.8,180.6 291.4,189.8 293.8,196.7 295.5,199.7 297.1,201.5 298.6,202.6 300.4,203 301.7,202.5 302.7,201.8 304.6,199 305.9,194.9 306.8,189.3 308.4,188.1 309.7,186.6 310.9,184.4 311.6,180.8 311.6,178.5 311.6,178.5 311.1,176.1 309.7,172.8 308.1,170.8 306.6,169.6 304.8,168.8 302.8,163.5 300.7,159.7 298.4,157.3 297.3,156.7 295.8,156.6 294.2,157.3 292.9,158.6 291.7,160.8 290.6,164 289.5,171.3 289.8,180.6" fill="#936943"/><polygon points="289.8,180.6 289.5,171.3 290.6,164 291.7,160.8 292.9,158.6 294.2,157.3 295.8,156.6 297.3,156.7 298.4,157.3 300.7,159.7 302.8,163.5 304.8,168.8 306.6,169.6 308.1,170.8 309.7,172.8 311.1,176.1 311.6,178.5 311.6,178.5 311.6,180.8 311.3,181.7 310.3,182.2 304.1,187.5 303.5,187.9 302.1,188 294.8,188.7 294,188.3 291.2,188.3 290.7,187.2 289.8,180.6" fill="#eacb98"/><polygon points="282.5,206.6 282.5,157.9 279.8,156.3 279.8,205" fill="#eacb98"/><polygon points="282.5,157.9 279.8,156.3 296.5,154.7 299.1,156.3" fill="#eacb98"/><polygon points="282.5,206.6 282.5,157.9 299.1,156.3 299.1,205" fill="#936943"/><polygon points="262.6,183.3 264.1,192.3 266.6,199 267.8,201.3 269.4,203.3 271,204.5 272.8,204.9 274.5,204.3 275.7,203 277.2,200.2 278.3,196.6 279.9,195.6 283.7,190.7 284.7,187.2 284.8,181.1 284.8,181.1 283.6,175.1 281.8,171.8 277.2,167.8 275.4,167.1 273.7,163.8 271.7,161.3 270.2,160.3 268.4,160.1 266.7,160.8 265.4,162.2 264.2,164.5 263.4,167 262.4,174.1 262.6,183.3" fill="#936943"/><polygon points="262.6,183.3 262.4,174.1 263.4,167 264.2,164.5 265.4,162.2 266.7,160.8 268.4,160.1 270.2,160.3 271.7,161.3 273.7,163.8 275.4,167.1 277.2,167.8 281.8,171.8 283.6,175.1 284.8,181.1 284.8,181.1 284.9,185.4 282.5,186.3 279.6,188.4 275.6,190.3 267.5,191.1 266.8,190.7 264,190.7 263.5,189.7 262.6,183.3" fill="#eacb98"/><polygon points="208.7,188.5 210.5,200.1 213.2,209.3 215,213.7 216.7,216.9 218.8,219.9 221.1,222.1 223.7,223.4 225.1,223.6 226.5,223.3 228.8,221.9 231.3,218.8 241.6,223.2 250,226.1 257.5,227.6 262.1,227.7 266.2,226.7 268.6,225.4 269.9,224.4 271.8,222.5 273.7,220.1 276.6,214.3 278.8,207.5 280.1,199.5 280.6,190.5 280.2,181.5 280.2,181.5 278.9,172.7 276.6,163.9 273.8,156.3 270.3,150 266.3,145 264,143 261.8,141.5 260.3,140.7 257.7,139.9 253.5,139.8 249,140.7 241.9,143.7 234.3,148.1 225,154.4 222,151.9 219.4,150.9 218,150.9 216.7,151.4 214.4,153.1 212.5,155.8 211.1,159.1 210,162.6 209.1,167.2 208.2,176.8 208.7,188.5" fill="#936943"/><polygon points="208.7,188.5 208.2,176.8 209.1,167.2 210,162.6 211.1,159.1 212.5,155.8 214.4,153.1 216.7,151.4 218,150.9 219.4,150.9 222,151.9 225,154.4 234.3,148.1 241.9,143.7 249,140.7 253.5,139.8 257.7,139.9 260.3,140.7 261.8,141.5 264,143 266.3,145 270.3,150 273.8,156.3 276.6,163.9 278.9,172.7 280.2,181.5 280.2,181.5 280.6,190.5 280.3,194.4 278.3,195.6 277.7,197 277.1,197.7 273.7,198.5 268.8,198.7 261,198.5 239.4,197.2 231.9,199.8 214.2,201.4 213.4,200.6 210.9,200.4 210.5,200.1 208.7,188.5" fill="#eacb98"/><polygon points="188.9,190.5 190.1,199.2 192.5,209.5 195.4,217.5 198.4,223.2 201.6,227.2 205.4,229.8 208.3,230.5 214.2,230 220.1,229.3 224.2,227.7 226.5,226.1 228.7,223.8 231.1,219.8 233.6,212.8 235,205.4 235.6,196.7 235.1,185.9 235.1,185.9 233.5,175.2 231.2,166.8 228.4,159.8 224.7,153.5 221.5,150 218.9,148.2 216.3,147 212,146.3 206.1,146.7 200.1,147.4 197.5,148.6 194.3,151.9 191.9,156.5 190,162.7 188.7,171.1 188.4,181.6 188.9,190.5" fill="#936943"/><polygon points="188.9,190.5 188.4,181.6 188.7,171.1 190,162.7 191.9,156.5 194.3,151.9 197.5,148.6 200.1,147.4 206.1,146.7 212,146.3 216.3,147 218.9,148.2 221.5,150 224.7,153.5 228.4,159.8 231.2,166.8 233.5,175.2 235.1,185.9 235.1,185.9 235.5,192.8 235.4,198.9 233.1,199.9 232.2,201.4 226.3,202.3 194.5,205 193.7,204.1 191.2,203.7 190.8,202.8 188.9,190.5" fill="#eacb98"/><polygon points="207.7,229.9 209,229.6 210.3,229 211.4,228.1 212.6,226.9 213.6,225.4 214.6,223.7 215.5,221.7 216.4,219.4 217.1,216.9 217.7,214.2 218.2,211.3 218.6,208.2 218.9,205 219.1,201.6 219.1,198.2 219.1,194.7 218.9,191.1 218.6,187.5 218.2,184 217.7,180.5 217.1,177 216.3,173.7 215.5,170.4 214.6,167.3 213.6,164.4 212.6,161.6 211.4,159.1 210.2,156.8 209,154.7 207.7,152.9 206.4,151.3 205.1,150.1 203.7,149.1 202.4,148.5 201.1,148.2 199.7,148.1 198.5,148.4 197.2,149 196,149.9 194.9,151.1 193.8,152.6 192.9,154.3 191.9,156.3 191.1,158.6 190.4,161.1 189.8,163.8 189.3,166.7 188.9,169.8 188.6,173 188.4,176.4 188.4,179.8 188.4,183.3 188.6,186.9 188.9,190.5 189.3,194 189.8,197.5 190.4,201 191.1,204.3 192,207.6 192.9,210.7 193.9,213.6 194.9,216.4 196.1,218.9 197.3,221.2 198.5,223.3 199.8,225.1 201.1,226.7 202.4,227.9 203.8,228.9 205.1,229.5 206.4,229.8" fill="#eace9e"/></g></svg></div>
+    <div class="brand-row"><a class="brand" href="#" aria-label="GAMBIT 首頁"><svg class="brand-mark" viewBox="423 143 406 919" aria-hidden="true"><g transform="translate(0,1254) scale(0.1,-0.1)" fill="#F8B500"><path d="M6205 11016 c-64 -29 -105 -94 -105 -167 0 -51 11 -73 67 -131 l46 -46 -12 -129 c-41 -430 -186 -833 -348 -961 -80 -63 -120 -77 -218 -77 -83 0 -96 3 -165 36 -118 57 -267 197 -423 398 l-41 53 22 39 c46 79 18 190 -58 229 -51 26 -125 26 -167 0 -98 -60 -94 -228 7 -280 21 -11 47 -20 58 -20 21 0 42 -18 42 -37 0 -8 28 -60 62 -116 83 -138 191 -364 233 -489 55 -168 68 -259 62 -438 -6 -155 -11 -186 -61 -375 -40 -150 -52 -285 -38 -416 35 -307 172 -558 425 -775 74 -65 65 -107 -34 -157 -42 -21 -49 -31 -65 -93 -1 -7 -55 -37 -119 -68 -120 -58 -155 -91 -155 -143 0 -43 64 -96 200 -167 76 -40 142 -82 157 -100 39 -46 79 -142 100 -237 25 -117 25 -474 -1 -638 -64 -419 -207 -816 -397 -1101 -83 -125 -214 -257 -297 -299 -114 -58 -128 -93 -63 -164 55 -60 71 -97 71 -164 -1 -108 -39 -161 -235 -329 -139 -118 -233 -214 -271 -279 -104 -178 -102 -390 4 -544 78 -112 76 -108 58 -136 -9 -14 -51 -49 -93 -78 -42 -28 -91 -65 -110 -81 l-33 -28 0 -150 c0 -83 5 -158 10 -169 124 -231 3224 -272 3812 -49 85 32 88 38 88 215 l0 151 -27 26 c-16 13 -67 53 -116 87 -111 80 -117 90 -80 143 65 94 77 115 96 168 28 79 33 209 12 290 -39 150 -118 254 -329 434 -179 152 -221 207 -233 304 -8 68 10 120 62 181 69 80 61 111 -43 166 -256 135 -510 573 -641 1105 -62 255 -75 361 -76 615 0 239 10 323 53 438 37 102 86 150 231 226 124 65 191 122 191 162 0 60 -47 102 -178 160 -71 31 -89 43 -96 66 -15 51 -22 58 -75 84 -104 51 -99 75 34 202 58 54 127 129 154 166 217 292 278 673 166 1028 -43 137 -58 252 -52 408 10 269 71 436 336 920 35 63 42 71 75 76 21 3 49 15 64 26 32 23 72 97 72 133 0 40 -42 113 -79 137 -24 17 -49 23 -86 23 -123 0 -200 -122 -146 -232 11 -25 21 -49 21 -56 0 -18 -155 -207 -241 -293 -98 -98 -181 -153 -272 -181 -176 -53 -329 22 -447 221 -115 195 -203 524 -234 877 l-5 61 39 32 c63 51 89 121 70 191 -27 101 -142 157 -235 116z"/></g></svg><span class="wordmark">GAMBIT</span></a><button class="icon-btn on-deep" type="button" aria-label="設定"><svg class="lucide" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+    <div class="band-body"><h1 class="page-title">找不到<br>這個頁面</h1><svg class="ink-brush" width="104" height="12" viewBox="0 0 290 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2.5,5.2 L8.7,5.1 L14.9,5.0 L21.1,4.9 L27.3,4.8 L33.5,4.7 L39.7,4.6 L45.9,4.5 L52.1,4.4 L58.3,4.3 L64.5,4.2 L70.7,4.1 L76.8,4.0 L83.0,3.9 L89.2,3.9 L95.4,3.8 L101.6,3.8 L107.8,3.7 L114.0,3.7 L120.2,3.7 L126.4,3.7 L132.6,3.8 L138.8,3.8 L145.0,3.8 L151.2,5.0 L157.4,4.8 L163.6,4.5 L169.8,4.3 L176.0,4.3 L182.2,4.5 L188.4,4.9 L194.6,5.2 L200.8,5.4 L207.0,5.5 L213.2,5.4 L219.3,5.3 L225.5,5.3 L231.7,5.4 L237.9,5.7 L244.1,6.0 L250.3,6.1 L256.5,6.2 L262.7,6.3 L268.9,6.4 L275.1,6.4 L281.3,6.5 L287.5,6.6 L287.5,7.2 L281.3,7.1 L275.1,7.0 L268.9,7.0 L262.7,6.9 L256.5,6.8 L250.3,6.7 L244.1,6.6 L237.9,6.7 L231.7,6.8 L225.5,6.7 L219.3,6.5 L213.2,6.3 L207.0,6.1 L200.8,6.0 L194.6,6.0 L188.4,6.2 L182.2,6.5 L176.0,6.6 L169.8,6.5 L163.6,6.2 L157.4,5.8 L151.2,5.6 L145.0,6.7 L138.8,6.8 L132.6,6.8 L126.4,6.9 L120.2,7.0 L114.0,7.0 L107.8,7.1 L101.6,7.2 L95.4,7.2 L89.2,7.3 L83.0,7.3 L76.8,7.4 L70.7,7.5 L64.5,7.5 L58.3,7.5 L52.1,7.6 L45.9,7.6 L39.7,7.6 L33.5,7.6 L27.3,7.6 L21.1,7.6 L14.9,7.6 L8.7,7.6 L2.5,7.5 Z"/></svg></div>
+  </header>
+  <main class="content lost-content">
+    <div class="neve-box is-light">
+      <div class="neve-head"><img class="neve-avatar" src="/avatars/neve-badge.png" width="36" height="36" alt=""><span class="neve-name">Neve</span></div>
+      <p class="neve-say">看來這一步走到了棋盤之外。</p>
+    </div>
+    <a class="btn btn-primary" href="#"><svg class="lucide" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-house"/></svg>回首頁</a>
+  </main>
+  <nav class="tabbar" aria-label="主要導覽"><div class="tabbar-pill">
+    <a href="#" class="tab"><svg class="lucide" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-house"/></svg><span>首頁</span></a>
+    <a href="#" class="tab"><svg class="lucide" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-book-open"/></svg><span>學習</span></a>
+  </div></nav>
+</div></section>
+<ul class="frame-notes"><li><b>B</b>倒下的國王照搬 B。</li><li><b>改</b>Neve 的淺卡與按鈕緊接在頂帶下面（間距 20px），B 原本兩者之間約 120px 的空帶拿掉。</li></ul></figure>
+
+<figure class="frame"><figcaption><b>neve-avatar-trial</b>試色・Neve 頭像（不套用到主屏）</figcaption>
+<span class="fold fold-664">664 Safari</span><span class="fold fold-763">763 PWA</span>
+<section class="phone" data-screen="neve-avatar-trial"><div class="screen shell">
+  <div class="band"><header class="top-row"><button class="back-btn" type="button" aria-label="返回"><svg class="lucide" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow-left"/></svg></button><div class="top-titles"><h1 class="top-title">Neve 頭像試色</h1><span class="top-sub">比較用，主畫面維持原圖</span></div></header></div>
+  <main class="content trial">
+    <div class="trial-grid">
+      <div class="trial-col"><span class="av av-orig av-72"><img src="/avatars/neve-badge.png" width="72" height="72" alt=""></span><p class="trial-name">原圖</p><p class="trial-desc">現況</p></div>
+      <div class="trial-col"><span class="av av-duo av-72"><img src="/avatars/neve-badge.png" width="72" height="72" alt=""></span><p class="trial-name">深青雙色調</p><p class="trial-desc">深處深青，亮處米白</p></div>
+      <div class="trial-col"><span class="av av-tint av-72"><img src="/avatars/neve-badge.png" width="72" height="72" alt=""></span><p class="trial-name">去色加深青</p><p class="trial-desc">去色後疊深青</p></div>
+    </div>
+    <h2 class="section-label">36px · 淺卡</h2>
+    <div class="trial-row">
+      <div class="neve-box is-light trial-cell"><div class="neve-head"><span class="av av-orig"><img src="/avatars/neve-badge.png" width="36" height="36" alt=""></span><span class="neve-name">Neve</span></div></div>
+      <div class="neve-box is-light trial-cell"><div class="neve-head"><span class="av av-duo"><img src="/avatars/neve-badge.png" width="36" height="36" alt=""></span><span class="neve-name">Neve</span></div></div>
+      <div class="neve-box is-light trial-cell"><div class="neve-head"><span class="av av-tint"><img src="/avatars/neve-badge.png" width="36" height="36" alt=""></span><span class="neve-name">Neve</span></div></div>
+    </div>
+    <h2 class="section-label">72px · 深青頂帶上</h2>
+    <div class="trial-deep">
+      <span class="av av-orig av-72 on-deep"><img src="/avatars/neve-badge.png" width="72" height="72" alt=""></span>
+      <span class="av av-duo av-72 on-deep"><img src="/avatars/neve-badge.png" width="72" height="72" alt=""></span>
+      <span class="av av-tint av-72 on-deep"><img src="/avatars/neve-badge.png" width="72" height="72" alt=""></span>
+    </div>
+    <h2 class="section-label">36px · 深青</h2>
+    <div class="trial-row">
+      <div class="neve-box is-deep trial-cell"><div class="neve-head"><span class="av av-orig on-deep"><img src="/avatars/neve-badge.png" width="36" height="36" alt=""></span><span class="neve-name">Neve</span></div></div>
+      <div class="neve-box is-deep trial-cell"><div class="neve-head"><span class="av av-duo on-deep"><img src="/avatars/neve-badge.png" width="36" height="36" alt=""></span><span class="neve-name">Neve</span></div></div>
+      <div class="neve-box is-deep trial-cell"><div class="neve-head"><span class="av av-tint on-deep"><img src="/avatars/neve-badge.png" width="36" height="36" alt=""></span><span class="neve-name">Neve</span></div></div>
+    </div>
+  </main>
+</div></section>
+<ul class="frame-notes"><li><b>待定</b>頭像是全站唯一不在色票裡的東西。三種並排供選；主屏一律用原圖。雙色調是 SVG feColorMatrix＋feComponentTransfer，灰階加深青是 CSS grayscale 加一層 mix-blend-mode: color。</li></ul></figure>
+
+</main>
+<div class="sheet-foot">
+  <p><b>還沒拍板、這版先選了一邊的：</b></p>
+  <p>1. Neve 名牌：全部用黑體 13「Neve」。理由是 C 把點陣字只留給棋譜與數字；人格檔原寫點陣「NEVE」，地基照人格檔。待 Eason 決定。</p>
+  <p>2. 主按鈕的金色填色：「開始對局」「繼續」照現況維持金底，除此之外金只出現在贏棋那枚印的外環（以及字標與鍵盤焦點框）。金底主按鈕算不算「reward／focus」待裁決；若不算，改成深青主按鈕即可，版面不動。</p>
+  <p>3. 印只出現在完局紙上，首頁「上一盤」不放印：首頁已經有一張畫著國王的畫，同一屏兩種國王會打架。</p>
+  <p>字型：黑體用重切的子集（./fonts/*.recut.woff2）；其餘字型、棋子、木盤、頭像走 dev server 上的 /fonts、/pieces、/board、/avatars。截圖是 Windows 版 WebKit，iPhone 實機沒驗。</p>
+</div>
+<script>
+/* 棋盤：照 FEN 把 Gioco Wood 棋子排在 wood12.jpg 上；座標刻在木框。純展示，不可互動。 */
+(function () {
+  var n = 0
+  document.querySelectorAll('.wood,[data-board]').forEach(function (frame) {
+    var SQ = +(frame.dataset.sq || 41), orient = frame.dataset.orient || 'white', cg = document.createElement('div'), html = ''
+    function xy(sq) {
+      var f = sq.charCodeAt(0) - 97, r = +sq[1]
+      return orient === 'black' ? [(7 - f) * SQ, (r - 1) * SQ] : [f * SQ, (8 - r) * SQ]
+    }
+    cg.className = 'cg'
+    ;(frame.dataset.hl || '').split(',').filter(Boolean).forEach(function (h) {
+      var p = h.split(':'), c = xy(p[0])
+      html += '<i class="hl-' + p[1] + '" style="left:' + c[0] + 'px;top:' + c[1] + 'px;width:' + SQ + 'px;height:' + SQ + 'px"></i>'
+    })
+    frame.dataset.fen.split('/').forEach(function (row, ri) {
+      var fi = 0
+      row.split('').forEach(function (ch) {
+        if (/\d/.test(ch)) { fi += +ch; return }
+        var white = ch === ch.toUpperCase(), c = xy(String.fromCharCode(97 + fi) + (8 - ri))
+        html += '<i class="pc' + (white ? '' : ' is-black') + '" style="left:' + c[0] + 'px;top:' + c[1] + 'px;width:' + SQ + 'px;height:' + SQ + 'px;background-image:url(/pieces/' + (white ? 'w' : 'b') + ch.toUpperCase() + '.svg)"></i>'
+        fi++
+      })
+    })
+    var arrows = (frame.dataset.arrows || '').split(',').filter(Boolean)
+    if (arrows.length) {
+      var svg = '<svg viewBox="0 0 328 328">'
+      arrows.forEach(function (a) {
+        var p = a.split(':'), from = xy(p[0].slice(0, 2)), to = xy(p[0].slice(2, 4)), id = 'ah' + (n++)
+        var x1 = from[0] + SQ / 2, y1 = from[1] + SQ / 2, x2 = to[0] + SQ / 2, y2 = to[1] + SQ / 2
+        var len = Math.hypot(x2 - x1, y2 - y1), k = (len - 13) / len
+        svg += '<defs><marker id="' + id + '" markerWidth="4" markerHeight="4" refX="0.4" refY="2" orient="auto"><path d="M0,0 V4 L3,2 Z" fill="' + p[1] + '"/></marker></defs>' +
+          '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + (x1 + (x2 - x1) * k) + '" y2="' + (y1 + (y2 - y1) * k) + '" stroke="' + p[1] + '" stroke-width="6.2" stroke-linecap="round" opacity=".85" marker-end="url(#' + id + ')"/>'
+      })
+      html += svg + '</svg>'
+    }
+    cg.innerHTML = html
+    frame.appendChild(cg)
+    if (frame.dataset.sq) return
+    for (var i = 0; i < 8; i++) {
+      var rank = document.createElement('span'), file = document.createElement('span')
+      rank.className = file.className = 'coord'
+      rank.textContent = orient === 'black' ? i + 1 : 8 - i
+      rank.style.cssText = 'left:7.5px;top:' + (15 + i * SQ + SQ / 2) + 'px'
+      file.textContent = String.fromCharCode(orient === 'black' ? 104 - i : 97 + i)
+      file.style.cssText = 'left:' + (15 + i * SQ + SQ / 2) + 'px;top:350.5px'
+      frame.appendChild(rank); frame.appendChild(file)
+    }
+  })
+})()
+
+/* 記譜紙：最新一手要往上捲才看得到時，高度收成整列（不切半列），再捲到它剛好露在最下面一列 */
+window.anchorScores = function () {
+  document.querySelectorAll('.score').forEach(function (s) {
+    s.style.height = ''; s.style.flex = ''
+    if (getComputedStyle(s).display === 'none') return
+    var last = s.querySelector('.is-last')
+    if (!last) return
+    var need = last.offsetTop - s.offsetTop + last.offsetHeight - s.clientHeight
+    if (need <= 0) { s.scrollTop = 0; return }          // 放得下：底下露出的是預畫的空列，不用收
+    var rows = Math.max(2, Math.floor((s.clientHeight + 1) / 36))
+    s.style.flex = 'none'; s.style.height = (rows * 36 + 1) + 'px'
+    s.scrollTop = Math.max(0, last.offsetTop - s.offsetTop + last.offsetHeight - s.clientHeight)
+  })
+}
+window.addEventListener('resize', window.anchorScores)
+window.anchorScores()
+</script>
+</body>
+</html>

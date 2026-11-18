@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gambit 視覺重構：現況與三個方向並排</title>
+<style>
+  :root { color-scheme: light; }
+  body { margin: 0; background: #e4e1db; color: #2a2a2e; font: 15px/1.7 system-ui, "Microsoft JhengHei", sans-serif; }
+  header { max-width: 1200px; margin: 0 auto; padding: 32px 24px 8px; }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  h2 { font-size: 17px; margin: 0 0 4px; }
+  p { margin: 0 0 12px; }
+  .dirs { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; max-width: 1200px; margin: 0 auto; padding: 8px 24px 24px; }
+  .dir { background: #faf6ee; border-radius: 10px; padding: 14px 16px; }
+  .dir a { color: #1b6e58; font-weight: 700; }
+  .dir dl { margin: 8px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font-size: 14px; }
+  .dir dt { color: #6b5a4c; white-space: nowrap; }
+  .dir dd { margin: 0; }
+  .row { padding: 16px 24px 28px; border-top: 1px solid #cfcac1; }
+  .row h3 { max-width: 1200px; margin: 0 auto 10px; font-size: 15px; }
+  .row h3 small { font-weight: 400; color: #6b5a4c; margin-left: 8px; }
+  .cols { display: flex; gap: 16px; overflow-x: auto; justify-content: center; }
+  figure { margin: 0; flex: 0 0 auto; }
+  figcaption { font-size: 13px; color: #6b5a4c; margin-bottom: 4px; }
+  img { width: 264px; height: auto; display: block; border-radius: 14px; box-shadow: 0 2px 10px rgba(60, 40, 20, .18); background: #fff; }
+  .note { max-width: 1200px; margin: 0 auto; padding: 0 24px 40px; font-size: 14px; color: #4a3d33; }
+</style>
+</head>
+<body>
+<header>
+  <h1>現況與三個方向並排</h1>
+  <p>每列是同一個畫面：最左是 app 現在的樣子（2026-11-17 截圖），右邊是樣張，最右一欄是推薦的混搭。圖是 iPhone 寬度（390）的截圖，這一頁雙擊就能開；要看細節點上方的方向名稱開樣張本身（樣張要 <code>npm run dev</code> 才載得到字型）。報告在 <code>production/visual-review-2026-11-17.md</code>，要你決定的事在同目錄的 <code>decisions.md</code>。</p>
+</header>
+
+<section class="dirs">
+  <div class="dir">
+    <h2><a href="./mix.html">混搭（推薦）</a></h2>
+    <p>骨架用地基；首頁頂帶與 404 用 B 的畫，對局側板與完局用 C 的記譜紙和印，棋憶用地基。所有畫面用同一份假資料。</p>
+    <dl>
+      <dt>為什麼</dt><dd>獨立評審逐張比過：單一方向都不夠，B 的畫和 C 的記譜紙各自在不同畫面最強。</dd>
+      <dt>不能同屏</dt><dd>B 的畫和 C 的大墨、C 的棋盤縮圖、B 的完局徽章。</dd>
+      <dt>還缺</dt><dd>B 的畫要有人手修；印只能留一種畫法。</dd>
+    </dl>
+  </div>
+  <div class="dir">
+    <h2><a href="./foundation.html">地基</a></h2>
+    <p>不加新東西，只把骨架收齊：兩種頁、一個 Neve 對話框、一個返回鍵、一個木框、一筆墨。</p>
+    <dl>
+      <dt>解決</dt><dd>五種長相的棋盤頁變成一種；對局側板不再是點陣字；首頁空帶拿掉。</dd>
+      <dt>沒解決</dt><dd>畫面上沒有主體。首頁還是深青頂帶加兩張卡。</dd>
+      <dt>定位</dt><dd>不是選項。B、C 都蓋在它上面。</dd>
+    </dl>
+  </div>
+  <div class="dir">
+    <h2><a href="./scene.html">B 棋境一景</a></h2>
+    <p>地基之上加一幅畫：夜裡一張木棋桌的一角。只出現在首頁頂帶、棋憶等待、空狀態與 404。</p>
+    <dl>
+      <dt>解決</dt><dd>首頁有主體，一眼認得是 Gambit。</dd>
+      <dt>代價</dt><dd>畫要畫得好；四個時段乘數種裁切，工作量最大。</dd>
+      <dt>脆弱處</dt><dd>平塗的畫貼著照片木紋的木盤，兩種畫法放在一起。</dd>
+    </dl>
+  </div>
+  <div class="dir">
+    <h2><a href="./material.html">C 木、紙、墨</a></h2>
+    <p>地基之上不加插圖：首頁是一張扉頁（大題詞加一筆墨），完局蓋一枚棋子印，對局側板是一張記譜紙。</p>
+    <dl>
+      <dt>解決</dt><dd>讀得出作者，又不依賴新素材；同時是一輪減法。</dd>
+      <dt>代價</dt><dd>要推翻幾個已拍板的裝飾決定；首頁的深青變少。</dd>
+      <dt>脆弱處</dt><dd>墨筆是程式算的形狀，正式做之前要一筆真的手寫。</dd>
+    </dl>
+  </div>
+</section>
+
+<div id="rows"></div>
+
+<p class="note">樣張是 Windows 上的 WebKit 截的，字重和 iPhone 實機有落差；選定方向後要在手機上再看一次。</p>
+
+<script>
+  const SCREENS = [
+    ['home-returning', '首頁・回訪', '下過 4 盤、沒有進行中的對局'],
+    ['home-resume', '首頁・繼續對局', '有一盤沒下完'],
+    ['play-midgame', '對局中', '執黑對初學'],
+    ['play-gameover-win', '完局・贏', '下完那一刻'],
+    ['review-analysing', '棋憶・分析中', '手機上約 10 秒'],
+    ['review-moment', '棋憶・說明一手', '第 9 手兵沒人守'],
+    ['empty-or-404', '空狀態或 404', '邊角狀態'],
+  ]
+  const COLS = [['current', '現況'], ['foundation', '地基'], ['scene', 'B 棋境一景'], ['material', 'C 木、紙、墨'], ['mix', '混搭（推薦）']]
+  const host = document.getElementById('rows')
+  for (const [key, title, sub] of SCREENS) {
+    const row = document.createElement('section')
+    row.className = 'row'
+    const h = document.createElement('h3')
+    h.textContent = title
+    const small = document.createElement('small')
+    small.textContent = sub
+    h.append(small)
+    const cols = document.createElement('div')
+    cols.className = 'cols'
+    for (const [dir, label] of COLS) {
+      const fig = document.createElement('figure')
+      const cap = document.createElement('figcaption')
+      cap.textContent = label
+      const img = document.createElement('img')
+      img.src = `./compare/${dir}-${key}.jpg`
+      img.alt = `${label}：${title}`
+      img.loading = 'lazy'
+      fig.append(cap, img)
+      cols.append(fig)
+    }
+    row.append(h, cols)
+    host.append(row)
+  }
+</script>
+</body>
+</html>
