@@ -46,7 +46,10 @@ const demoing = ref(false)
 
 const boardFit = ref<HTMLElement | null>(null)
 useBoardFit(boardFit)
-const boardCmp = ref<{ resetPosition: () => void; reapplyFen: () => void } | null>(null)
+const boardCmp = ref<{
+  rejectMove: (payload: MoveMadePayload, stillValid: () => boolean) => Promise<void>
+  reapplyFen: () => void
+} | null>(null)
 
 // Disabled unless this is the active, unsolved board and no demo is running.
 const disabled = computed(() => !props.active || props.locked || demoing.value)
@@ -102,18 +105,20 @@ async function playRefutation(): Promise<void> {
 function onMove(payload: MoveMadePayload): void {
   if (disabled.value) return
   const b = props.board
+  // Re-checked once the move lands: a「這裡沒有」press or a carousel swipe in the meantime wins.
+  const stillHere = () => props.board === b && !disabled.value
   if (b.kind === 'real') {
     if (payload.from === b.expectedMove.from && payload.to === b.expectedMove.to) {
       emit('judge', 'correct')
     } else {
-      boardCmp.value?.resetPosition() // wrong piece → slide home (silent, no penalty UI)
+      void boardCmp.value?.rejectMove(payload, stillHere) // wrong piece → slide home (silent, no penalty UI)
     }
   } else {
     if (payload.from === b.temptMove.from && payload.to === b.temptMove.to) {
       emit('judge', 'trap')
       void playRefutation()
     } else {
-      boardCmp.value?.resetPosition()
+      void boardCmp.value?.rejectMove(payload, stillHere)
     }
   }
 }

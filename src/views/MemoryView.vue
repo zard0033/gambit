@@ -183,9 +183,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- fullBleed：這頁自畫 header，全站 app bar 與底部 tab 都不在。背景與底部 safe-area 因此
-       由這裡自己負責（App.vue 只在非 fullBleed 時補）。 -->
   <div class="flex min-h-dvh flex-col items-center bg-surface-base px-4 pb-[calc(2rem+env(safe-area-inset-bottom))]">
+    <!-- fullBleed：這頁自畫 header，全站 app bar 與底部 tab 都不在。背景與底部 safe-area 因此
+         由這裡自己負責（App.vue 只在非 fullBleed 時補）。註解放在根 div 裡：放在外面 dev 會把
+         它算成第二個根節點，多根元件離場時整頁空白。 -->
     <header
       class="flex w-full max-w-md items-center gap-0.5 pb-3 pt-[calc(0.5rem+env(safe-area-inset-top))]"
     >

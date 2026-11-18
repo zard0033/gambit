@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 </script>
 
 <template>
-  <!-- 傾倒的國王：「這一盤結束了，找路回去」 -->
   <div class="flex min-h-[calc(100dvh-49px)] flex-col items-center justify-center px-8 py-12 text-center">
+    <!-- 傾倒的國王：「這一盤結束了，找路回去」 -->
     <div
       class="mb-7 flex h-[88px] w-[88px] rotate-90 items-center justify-center rounded-full bg-surface-raised border border-line shadow-card text-[50px] text-ink-faint"
       aria-hidden="true"

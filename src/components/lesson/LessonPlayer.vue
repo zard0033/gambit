@@ -89,7 +89,13 @@ watch(stepIndex, async () => {
 // piece entry animation (上一步/下一步換步棋盤 dash 修正).
 const boardDisabled = computed(() => !isInteractive.value || solved.value || !!wrongMove.value)
 
-const board = ref<{ boardRef: HTMLElement | null; squareToRect: (s: string) => Rect | null; resetPosition: () => void; reapplyFen: () => void } | null>(null)
+const board = ref<{
+  boardRef: HTMLElement | null
+  squareToRect: (s: string) => Rect | null
+  resetPosition: () => void
+  rejectMove: (payload: MoveMadePayload, stillValid: () => boolean) => Promise<void>
+  reapplyFen: () => void
+} | null>(null)
 const boardFit = ref<HTMLElement | null>(null)
 useBoardFit(boardFit)
 const geomTick = ref(0)
@@ -182,7 +188,9 @@ function handleMove(payload: MoveMadePayload): void {
   )
   if (soft) {
     gentleNote.value = soft.note
-    board.value?.resetPosition() // slide the piece home, board stays on the step's FEN
+    // slide the piece home, board stays on the step's FEN
+    const step = stepIndex.value
+    void board.value?.rejectMove(payload, () => stepIndex.value === step && !solved.value)
     return
   }
   wrongMove.value = { from: payload.from, to: payload.to }
@@ -249,9 +257,10 @@ function prev(): void {
 </script>
 
 <template>
-  <!-- 整頁錨進 deep-jade，棋盤浮在 jade 上聚焦；課文收進底部暖色教練氣泡。
-       固定視口高 flex column：header / 棋盤(shrink-0) / 氣泡(flex-1 自捲) / CTA(shrink-0 固定底)。 -->
   <div class="flex h-dvh flex-col bg-surface-deep text-ink-on-deep">
+    <!-- 整頁錨進 deep-jade，棋盤浮在 jade 上聚焦；課文收進底部暖色教練氣泡。
+         固定視口高 flex column：header / 棋盤(shrink-0) / 氣泡(flex-1 自捲) / CTA(shrink-0 固定底)。
+         註解放在根元素裡：放在 template 根層會讓元件變成多根節點，route 的 out-in Transition 在 dev 下整頁空白。 -->
 
     <!-- Header: back + title -->
     <header class="flex shrink-0 items-center gap-3 px-4 pb-2 pt-[calc(0.625rem+env(safe-area-inset-top))]">

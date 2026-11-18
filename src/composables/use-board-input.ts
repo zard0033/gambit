@@ -3,6 +3,7 @@ import type { Move, Square } from 'chess.js'
 import type { DrawShape, DrawBrushes } from 'chessground/draw'
 import type { Key } from 'chessground/types'
 import { PIECE_MOVE_ANIM_MS } from './use-board-renderer'
+import type { MoveMadePayload } from './use-chess-board'
 
 /** Chessground brush definitions — includes all required defaults plus custom overlays. */
 export const BOARD_BRUSHES: DrawBrushes = {
@@ -50,4 +51,19 @@ export function buildAnimationDoneAt(boardRef: HTMLElement | null): Promise<void
     }, PIECE_MOVE_ANIM_MS + 16)
     piece?.addEventListener('transitionend', handler)
   })
+}
+
+/**
+ * Undo a rejected player move — the body of chess-board's `rejectMove`, kept pure so component
+ * tests can bind it to a stub board. vue3-chessboard emits `move` BEFORE its own `board.move()`,
+ * so the reset has to wait for the move's `animationDoneAt`; `stillValid` then re-checks the
+ * caller's state, because the player may have switched cell/step or solved it during the wait.
+ */
+export async function rejectAfterMove(
+  payload: Pick<MoveMadePayload, 'animationDoneAt'>,
+  stillValid: () => boolean,
+  reset: () => void,
+): Promise<void> {
+  await payload.animationDoneAt
+  if (stillValid()) reset()
 }

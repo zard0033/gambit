@@ -15,10 +15,10 @@ function continueAsGuest() {
 </script>
 
 <template>
-  <!-- 全屏深青瓷沉浸：棋局即道場 -->
   <div
     class="signin-bg flex min-h-dvh flex-col"
   >
+    <!-- 全屏深青瓷沉浸：棋局即道場 -->
     <div class="flex flex-1 flex-col items-center justify-center px-9">
       <!-- 品牌字標：金色國王剪影（brand-mark），金色留給 CTA -->
       <img

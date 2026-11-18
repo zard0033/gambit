@@ -28,6 +28,7 @@ import { useBoardFit } from '@/composables/use-board-fit'
 import { useRecognitionSourceStore } from '@/stores/recognition-source'
 import type { MissedMateSource } from '@/modules/learning-loop/missed-mate'
 import type { Rect } from '@/utils/board-geometry'
+import type { MoveMadePayload } from '@/composables/use-chess-board'
 import { NeveAvatar } from '@/components/ui/gambit'
 import { COACH } from '@/types/lesson'
 import ChessBoard from '@/components/chess-board.vue'
@@ -108,7 +109,7 @@ function retire(cell: Extract<Cell, { kind: 'deep' }>): void {
   if (stepFens.value.length > 0) step.value = 1
 }
 
-function onMove(payload: { from: string; to: string }): void {
+function onMove(payload: MoveMadePayload): void {
   const cell = current.value
   if (!cell || cell.kind !== 'deep' || solved.value.has(cell.id)) return
   const uci = cell.src.mateMoveUci
@@ -116,7 +117,10 @@ function onMove(payload: { from: string; to: string }): void {
     retire(cell)
   } else {
     // 走錯＝棋子靜默滑回（沿用判斷場的作法）。不計次、不出懲罰 UI——她不責備。
-    boardCmp.value?.resetPosition()
+    void boardCmp.value?.rejectMove(
+      payload,
+      () => current.value?.id === cell.id && !solved.value.has(cell.id),
+    )
   }
 }
 
@@ -184,7 +188,7 @@ const navBtnClass = computed(() => [
 const boardCmp = ref<{
   boardRef: HTMLElement | null
   squareToRect: (s: string) => Rect | null
-  resetPosition: () => void
+  rejectMove: (payload: MoveMadePayload, stillValid: () => boolean) => Promise<void>
 } | null>(null)
 const boardFit = ref<HTMLElement | null>(null)
 useBoardFit(boardFit)

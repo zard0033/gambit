@@ -6,7 +6,7 @@ import type { Key, Elements } from 'chessground/types'
 import type { Move } from 'chess.js'
 import type { MoveMadePayload } from '../composables/use-chess-board'
 import { validateFen, useBoardRenderer, PIECE_MOVE_ANIM_MS } from '../composables/use-board-renderer'
-import { BOARD_BRUSHES, buildLegalMoveShapes, buildAnimationDoneAt } from '../composables/use-board-input'
+import { BOARD_BRUSHES, buildLegalMoveShapes, buildAnimationDoneAt, rejectAfterMove } from '../composables/use-board-input'
 import PromotionDialog from './promotion-dialog.vue'
 import { useReducedMotion } from '../composables/use-reduced-motion'
 import { useBoardKeyboard } from '../composables/use-board-keyboard'
@@ -191,17 +191,25 @@ watch(
 )
 
 /**
- * Snap the board back to the current `fen` prop (undo a rejected move). MUST be called AFTER the
- * player's move animation has settled — calling it mid-animation lets chessground's in-flight
- * animation overwrite it (the wrong piece stays put, which read as "no snap-back"). The dungeon
- * view delays this until WRONG_TINT_DURATION_MS so the snap lands cleanly; the lesson retry button
- * is a user click long after the move animation, so it's already safe.
+ * Snap the board back to the current `fen` prop. Safe only once the library has finished making the
+ * move: vue3-chessboard's `move()` emits `move` (→ our `onMove` → `move-made`) BEFORE it calls its
+ * own `board.move(from, to)`, so a reset run synchronously inside a `move-made` handler is undone by
+ * that very next line and the wrong piece stays on the wrong square. Inside a `move-made` handler use
+ * `rejectMove` instead; a user click long after the move (lesson「重試」) can call this directly.
  */
 function resetPosition(): void {
   boardApi.value?.setPosition(props.fen)
   // A rejected move leaves chessground's native last-move tint on the wrong squares; setPosition
   // doesn't clear it, so drop it explicitly (走錯滑回後殘留綠格修正，與 reapplyFen 同).
   boardApi.value?.setConfig({ lastMove: undefined }, false)
+}
+
+/**
+ * Undo a rejected move from inside a `move-made` handler: waits for the move to land, then resets
+ * only if `stillValid()` (same cell/step, not solved) still holds.
+ */
+function rejectMove(payload: MoveMadePayload, stillValid: () => boolean): Promise<void> {
+  return rejectAfterMove(payload, stillValid, resetPosition)
 }
 
 /**
@@ -253,7 +261,7 @@ const focusCellCol = computed(() => {
   return props.playerColor === 'white' ? file : 9 - file
 })
 
-defineExpose({ boardRef, squareToRect, resetPosition, reapplyFen })
+defineExpose({ boardRef, squareToRect, resetPosition, rejectMove, reapplyFen })
 </script>
 
 <template>

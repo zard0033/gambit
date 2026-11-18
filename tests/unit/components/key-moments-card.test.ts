@@ -8,9 +8,12 @@ import { MEMORY_CONTEXT, type MemoryContext } from '@/components/memory/memory-c
 import { useRecognitionSourceStore } from '@/stores/recognition-source'
 import type { StoredAnalysisEntry } from '@/modules/post-game-review/use-post-game-review'
 import type { Moment } from '@/types/memory'
+import { rejectAfterMove } from '@/composables/use-board-input'
+import type { MoveMadePayload } from '@/composables/use-chess-board'
 
-// chessground 在 happy-dom 起不來；這裡驗的是對話框與切換，棋盤只需接得住 props 與 resetPosition
-// （深青格走錯時元件會呼叫它把棋子滑回去）。
+// chessground 在 happy-dom 起不來；這裡驗的是對話框與切換，棋盤只需接得住 props 與 rejectMove
+// （深青格走錯時元件會呼叫它把棋子滑回去）。rejectMove 接的是真的 rejectAfterMove，只有最後那一下
+// resetPosition 是 mock——「等走子落地才重設」的時序是元件與 helper 合起來的行為，要一起驗。
 // `boardRef` 給一個真的 element：KeyMomentsCard 的 `v-if="boardEl"` 靠它，回 null 的話
 // MoveAnnotationDisplay 永不渲染，「盤面零標記」那條斷言就會恆真而驗不到東西。
 const resetPosition = vi.fn()
@@ -23,7 +26,8 @@ vi.mock('@/components/chess-board.vue', () => ({
       expose({
         boardRef: document.createElement('div'),
         squareToRect: () => ({ left: 0, top: 0, width: 40, height: 40 }),
-        resetPosition,
+        rejectMove: (payload: Pick<MoveMadePayload, 'animationDoneAt'>, stillValid: () => boolean) =>
+          rejectAfterMove(payload, stillValid, resetPosition),
       })
       return () => null
     },
@@ -70,6 +74,13 @@ function seedPendingMate(gameId = OTHER_GAME_ID, ply = 8): void {
   useRecognitionSourceStore().captureMate(gameId, 'white', [
     { ply, fen: MATE_FEN, mateMoveUci: MATE_UCI },
   ])
+}
+
+/** 手動 resolve 的 promise，當 `animationDoneAt` 用來控制「走子落地」的時間點。 */
+function deferred(): { promise: Promise<void>; resolve: () => void } {
+  let resolve!: () => void
+  const promise = new Promise<void>((r) => { resolve = r })
+  return { promise, resolve }
 }
 
 const nextBtn = (w: VueWrapper) => w.get('[aria-label="下一格"]')
@@ -301,6 +312,70 @@ describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
     expect(resetPosition).toHaveBeenCalledTimes(1)
     expect(w.find('[data-testid="deep-solved"]').exists()).toBe(false)
     expect(useRecognitionSourceStore().pendingFor('mate')).toHaveLength(1)
+  })
+
+  it('走錯時等走子落地（animationDoneAt）才重設，不在 move 事件當下同步重設', async () => {
+    // Arrange — vue3-chessboard 先 emit move 才 board.move，同步重設會被它蓋掉
+    seedPendingMate()
+    const w = mountCard()
+    const landed = deferred()
+
+    // Act
+    await board(w).vm.$emit('move-made', { from: 'g2', to: 'g3', animationDoneAt: landed.promise })
+    await flushPromises()
+
+    // Assert — 落地前不動，落地後重設一次
+    expect(resetPosition).not.toHaveBeenCalled()
+    landed.resolve()
+    await flushPromises()
+    expect(resetPosition).toHaveBeenCalledTimes(1)
+  })
+
+  it('等待走子落地期間換了格，就不重設（不把新格的盤拉回舊題）', async () => {
+    // Arrange
+    seedPendingMate()
+    const w = mountCard()
+    const landed = deferred()
+    await board(w).vm.$emit('move-made', { from: 'g2', to: 'g3', animationDoneAt: landed.promise })
+
+    // Act — 落地前切到下一格
+    await nextBtn(w).trigger('click')
+    landed.resolve()
+    await flushPromises()
+
+    // Assert
+    expect(resetPosition).not.toHaveBeenCalled()
+  })
+
+  it('等待走子落地期間按了看答案，就不重設（盤要停在答案那一手）', async () => {
+    // Arrange
+    seedPendingMate()
+    const w = mountCard()
+    const landed = deferred()
+    await board(w).vm.$emit('move-made', { from: 'g2', to: 'g3', animationDoneAt: landed.promise })
+
+    // Act
+    await w.get('[data-testid="deep-reveal"]').trigger('click')
+    landed.resolve()
+    await flushPromises()
+
+    // Assert
+    expect(resetPosition).not.toHaveBeenCalled()
+  })
+
+  it('走對時即使走子落地也永遠不重設', async () => {
+    // Arrange
+    seedPendingMate()
+    const w = mountCard()
+    const landed = deferred()
+
+    // Act
+    await board(w).vm.$emit('move-made', { from: 'e1', to: 'e8', animationDoneAt: landed.promise })
+    landed.resolve()
+    await flushPromises()
+
+    // Assert
+    expect(resetPosition).not.toHaveBeenCalled()
   })
 
   it('看答案同樣把局面退休掉——找不到的人不該每次進來都撞同一題', async () => {
