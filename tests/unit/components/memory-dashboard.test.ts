@@ -1,71 +1,80 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { defineComponent, computed, nextTick } from 'vue'
+import { defineComponent, computed, inject, ref, nextTick } from 'vue'
 import { setActivePinia, createPinia } from 'pinia'
 import MemoryDashboard from '@/components/memory/MemoryDashboard.vue'
 import { MEMORY_CONTEXT, type MemoryContext } from '@/components/memory/memory-context'
-import { useRecognitionSourceStore } from '@/stores/recognition-source'
-import type { Moment } from '@/types/memory'
+import type { CompletedGame } from '@/stores/game-store'
 
-// 這裡驗的是「哪張卡該出現」，不是卡的內容——棋盤那一層由 key-moments-card.test.ts 守。
+// 這裡驗的是「卡有沒有掛、拿到的 context 對不對」，不是卡的內容——分析中／完成／零狀態都由
+// key-moments-card.test.ts 守。stub 把它注入到的 context 記下來，斷言卡看到的就是 dashboard 收到的那一份。
+let seenCtx: MemoryContext | undefined
 vi.mock('@/components/memory/KeyMomentsCard.vue', () => ({
-  default: defineComponent({ name: 'KeyMomentsCard', setup: () => () => null }),
+  default: defineComponent({
+    name: 'KeyMomentsCard',
+    setup: () => {
+      seenCtx = inject(MEMORY_CONTEXT)
+      return () => null
+    },
+  }),
 }))
 
-const MATE_FEN = '6k1/5ppp/8/8/8/8/5PPP/4Q1K1 w - - 0 1'
+const GAME = { moves: ['e2e4'], playerColor: 'white', completedAt: 1700000000000 } as unknown as CompletedGame
 
-function mountDashboard(moments: Moment[]) {
+function makeCtx(game: CompletedGame | null, phase = 'COMPLETE') {
+  const gameRef = ref<CompletedGame | null>(game)
   const ctx: MemoryContext = {
-    review: { phase: computed(() => 'COMPLETE') } as unknown as MemoryContext['review'],
-    game: computed(() => null) as unknown as MemoryContext['game'],
-    moments: computed(() => moments),
+    review: { phase: computed(() => phase) } as unknown as MemoryContext['review'],
+    game: computed(() => gameRef.value),
+    moments: computed(() => []),
     opening: computed(() => null),
   }
-  return mount(MemoryDashboard, { global: { provide: { [MEMORY_CONTEXT as symbol]: ctx } } })
+  return { ctx, gameRef }
 }
 
 beforeEach(() => {
   setActivePinia(createPinia())
   localStorage.clear()
+  seenCtx = undefined
 })
 
-describe('MemoryDashboard — 該出哪張卡', () => {
-  it('沒有 moment 也沒有待解的將殺 → 空狀態', () => {
-    // Arrange / Act
-    const w = mountDashboard([])
-
-    // Assert
-    expect(w.findComponent({ name: 'EmptyMemory' }).exists()).toBe(true)
-    expect(w.findComponent({ name: 'KeyMomentsCard' }).exists()).toBe(false)
-  })
-
-  it('沒有 moment 但有待解的將殺 → 仍要出卡（那一格是 KeyMomentsCard 畫的）', () => {
+describe('MemoryDashboard — 只負責把卡放上去', () => {
+  it('game 有值就掛卡，而且分析中也掛（同一個版面從分析中一路用到看完）', () => {
     // Arrange
-    useRecognitionSourceStore().captureMate('g1', 'white', [
-      { ply: 8, fen: MATE_FEN, mateMoveUci: 'e1e8' },
-    ])
+    const { ctx } = makeCtx(GAME, 'ANALYZING')
 
     // Act
-    const w = mountDashboard([])
+    const w = mount(MemoryDashboard, { global: { provide: { [MEMORY_CONTEXT as symbol]: ctx } } })
+
+    // Assert
+    expect(w.findComponent({ name: 'KeyMomentsCard' }).exists()).toBe(true)
+    expect(seenCtx).toBe(ctx)
+  })
+
+  it('沒有 moment 的 steady game 一樣掛卡——零狀態由卡自己決定，不再換成 EmptyMemory', () => {
+    // Arrange
+    const { ctx } = makeCtx(GAME, 'COMPLETE')
+
+    // Act
+    const w = mount(MemoryDashboard, { global: { provide: { [MEMORY_CONTEXT as symbol]: ctx } } })
 
     // Assert
     expect(w.findComponent({ name: 'KeyMomentsCard' }).exists()).toBe(true)
     expect(w.findComponent({ name: 'EmptyMemory' }).exists()).toBe(false)
   })
 
-  it('通關把題目消費掉之後，卡不會在成功的當下被空狀態換掉', async () => {
-    // Arrange — steady game（零 moment），卡完全靠那題將殺撐著
-    const source = useRecognitionSourceStore()
-    source.captureMate('g1', 'white', [{ ply: 8, fen: MATE_FEN, mateMoveUci: 'e1e8' }])
-    const w = mountDashboard([])
+  it('game 還是 null（等 fetchHistory）時不掛卡，也就不會先建一個棋盤；載到之後才掛', async () => {
+    // Arrange
+    const { ctx, gameRef } = makeCtx(null, 'LOADING')
+    const w = mount(MemoryDashboard, { global: { provide: { [MEMORY_CONTEXT as symbol]: ctx } } })
+    expect(w.findComponent({ name: 'KeyMomentsCard' }).exists()).toBe(false)
 
-    // Act — 深青格通關時 KeyMomentsCard 會這樣做
-    source.markConsumed(['g1:8'])
+    // Act
+    gameRef.value = GAME
     await nextTick()
 
-    // Assert — 亮出來就不收回，否則玩家走對的瞬間整張卡消失，通關那句話永遠來不及顯示
+    // Assert
     expect(w.findComponent({ name: 'KeyMomentsCard' }).exists()).toBe(true)
-    expect(w.findComponent({ name: 'EmptyMemory' }).exists()).toBe(false)
   })
 })

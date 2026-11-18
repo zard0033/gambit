@@ -11,34 +11,44 @@
  * 兩種格子共用同一個 ChessBoard 實例（換 fen／朝向／可動與否），所以不吃 carousel 那套
  * 「建立時不在最終位置」的 stale-bounds 修法（那是多盤 translateX 才有的問題）。
  *
- * 文案守 GDD Rule 11/12 與 Pillar 3：只講「你走了 / 更好的是」這種中性事實，不出現任何評價詞
- * （失誤、好棋、blunder）。走法一律白話文，不用 SAN——目標讀者看不懂棋譜記號。
- * 品牌金只用在 focus ring 與 indicator，永不當內文色（`text-gold-dark` 才是可當文字的金）。
+ * wave 1a（2026-11）：分析中、完成、完成但沒有格子，三種狀態用同一個版面（木盤＋段點＋固定高度的
+ * 對話框），所以這張卡從分析中就掛著，盤只建一次；MemoryView 保證 `game` 有值才掛它。
  *
- * 幾何沿用舊 MemorySlideshow 的做法：chessground 的 bounds 要從真實 cg-board 讀，且盤面尺寸變動
- * 時 overlay 要跟著重算（geomTick + ResizeObserver），詳見 technical-preferences 的 board gotchas。
+ * 文案守 GDD Rule 11/12 與 Pillar 3：只講「你走了 / 更好的是」這種中性事實，不出現任何評價詞
+ * （失誤、好棋、blunder）。走法一律白話文，不用 SAN——目標讀者看不懂棋譜記號（分析中那段流式棋譜
+ * 是等待時的背景，不是講解）。品牌金只用在 focus ring 與 indicator，永不當內文色。
+ *
+ * 幾何：chessground 的 bounds 要從真實 cg-board 讀，且盤面尺寸變動時 overlay 要跟著重算
+ * （geomTick + ResizeObserver），詳見 technical-preferences 的 board gotchas。
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { ChevronLeft, ChevronRight, Play } from 'lucide-vue-next'
 import { buildFenSequence } from '@/modules/post-game-review/use-post-game-review'
 import { buildMomentDisplays, type MomentDisplay } from '@/modules/memory/moment-display'
 import { applyUci } from '@/modules/memory/choreography'
 import { movePhrase } from '@/modules/memory/describe'
-import { useBoardFit } from '@/composables/use-board-fit'
+import { replaySan } from '@/modules/memory/san-replay'
+import { formatGameDay } from '@/utils/game-day'
+import { MEMORY_ANALYZING_COPY, MEMORY_ZERO_STATE_COPY } from '@/config/memory-config'
 import { useRecognitionSourceStore } from '@/stores/recognition-source'
+import { useUiStore } from '@/stores/ui-store'
 import type { MissedMateSource } from '@/modules/learning-loop/missed-mate'
 import type { Rect } from '@/utils/board-geometry'
 import type { MoveMadePayload } from '@/composables/use-chess-board'
-import { NeveAvatar } from '@/components/ui/gambit'
-import { COACH } from '@/types/lesson'
+import { WoodFrame, NeveDialog, ProgressBar } from '@/components/ui/gambit'
+import { Button } from '@/components/ui/button'
 import ChessBoard from '@/components/chess-board.vue'
 import MoveAnnotationDisplay from '@/components/move-annotation-display.vue'
 import { useMemoryContext } from './memory-context'
 
 const ctx = useMemoryContext()
 const recognitionSource = useRecognitionSourceStore()
+const uiStore = useUiStore()
+const router = useRouter()
 
 const orientation = computed<'white' | 'black'>(() => ctx.game.value?.playerColor ?? 'white')
+const isComplete = computed(() => ctx.review.phase.value === 'COMPLETE')
 
 // 只跟著棋局本身重建：整局 FEN replay 不該掛在 analysisResults 上，否則分析每回寫一格就重跑一次。
 const fens = computed(() => (ctx.game.value ? buildFenSequence(ctx.game.value.moves) : []))
@@ -66,11 +76,26 @@ type Cell =
 const idOf = (gameId: string, ply: number): string => `${gameId}:${ply}`
 const gameId = computed(() => ctx.game.value?.completedAt.toString() ?? '')
 
-// **開場快照，不是 reactive 讀取**：通關會 markConsumed，若跟著 store 走，玩家走對的那一刻格子
+// **快照，不是 reactive 讀取**：通關會 markConsumed，若跟著 store 走，玩家走對的那一刻格子
 // 就從腳下消失。這一輪看到的格子固定，消失發生在下次進頁。
-const deepSources = ref<MissedMateSource[]>(recognitionSource.pendingFor('mate'))
+// 快照取在**第一次看到 COMPLETE** 時：本局漏看的將殺是 MemoryView 在 COMPLETE 才寫進 store 的
+// （它的 watch 是 pre flush，這裡用 post，保證讀得到）。掛上時已經是 COMPLETE（分析快取命中、
+// init 同步完成）就由 immediate 當場取。
+const deepSources = ref<MissedMateSource[]>([])
+let snapshotTaken = false
+watch(
+  () => ctx.review.phase.value,
+  (phase) => {
+    if (phase !== 'COMPLETE' || snapshotTaken) return
+    snapshotTaken = true
+    deepSources.value = recognitionSource.pendingFor('mate')
+  },
+  { immediate: true, flush: 'post' },
+)
 
+// 分析完成前一格都不給：說明格要靠完整分析，半途亮出來的格子會在完成時被換掉（EC-3）。
 const cells = computed<Cell[]>(() => {
+  if (!isComplete.value) return []
   const deep = deepSources.value.map(
     (src): Cell => ({ kind: 'deep', id: idOf(src.gameId, src.ply), src }),
   )
@@ -81,6 +106,9 @@ const cells = computed<Cell[]>(() => {
     .map((d): Cell => ({ kind: 'explain', id: idOf(gameId.value, d.ply), display: d }))
   return [...deep, ...explain]
 })
+
+/** 分析完、卻沒有任何一格可看（steady game）：版面不變，只換 Neve 那句話。 */
+const isZero = computed(() => isComplete.value && cells.value.length === 0)
 
 const index = ref(0)
 // 清單重算後回到第一格：越界會渲染 undefined，而換了一盤棋（第一格換人）卻停在原位，等於在看
@@ -130,6 +158,13 @@ function reveal(): void {
   if (cell?.kind === 'deep') retire(cell)
 }
 
+/** 深青格的題目來自別盤時，說出是哪一天那盤（從 /history 翻舊局進來時，題目未必是眼前這盤）。 */
+const deepSourceDay = computed<string | null>(() => {
+  const cell = current.value
+  if (cell?.kind !== 'deep' || cell.src.gameId === gameId.value) return null
+  return `${formatGameDay(Number(cell.src.gameId))}那一盤`
+})
+
 // ---- 步進：一顆鈕循環看這一格的後續畫面，看完繞回原局面 ----
 // 換格才重來，**但已通關的深青格要落在 1**（走完那一手的畫面）：它的對話框寫著「就是這一手」，
 // 落回 0 會顯示走子前的盤面——文字說這一手，畫面上卻沒有那一手，而且通關後盤是鎖的，玩家連
@@ -150,9 +185,17 @@ const stepFens = computed<readonly string[]>(() => {
 const stepCount = computed(() => stepFens.value.length + 1)
 function advanceStep(): void { step.value = (step.value + 1) % stepCount.value }
 
+// ---- 沒有格子時（分析中／零狀態）：盤擺這一盤的終局，標出最後一手（將殺時 chess-board 自己畫 check ring） ----
+const finalFen = computed(() => fens.value[fens.value.length - 1] ?? '')
+const finalLastMove = computed<readonly [string, string] | null>(() => {
+  // fens 碰到壞 UCI 會提早停，所以用 fens 的長度回推「盤面上真正的最後一手」，而不是 moves 的尾巴。
+  const uci = ctx.game.value?.moves[fens.value.length - 2]
+  return uci ? [uci.slice(0, 2), uci.slice(2, 4)] : null
+})
+
 const boardFen = computed(() => {
   const cell = current.value
-  if (!cell) return ''
+  if (!cell) return finalFen.value
   const base = cell.kind === 'deep' ? cell.src.fen : cell.display.fen
   return step.value === 0 ? base : stepFens.value[step.value - 1] ?? base
 })
@@ -165,24 +208,55 @@ const boardDisabled = computed(() => !(current.value?.kind === 'deep' && !isSolv
 const annotations = computed(() =>
   current.value?.kind === 'explain' && step.value === 0 ? current.value.display.annotations : [],
 )
-// chessground 原生的 last-move 底色：**通關後**標出那一手（看答案的人本來就該看到它是哪一手），
-// 其餘一律 null。null 不只是「不標」——玩家自己走出正解時 chessground 會留下它自己畫的高亮，
+// chessground 原生的 last-move 底色：深青格**通關後**標出那一手（看答案的人本來就該看到它是哪一手），
+// 說明格一律 null。null 不只是「不標」——玩家自己走出正解時 chessground 會留下它自己畫的高亮，
 // 而 setPosition 不清高亮，不主動傳 null 的話那層底色會跟著切到下一格去。
 const boardLastMove = computed<readonly [string, string] | null>(() => {
   const cell = current.value
-  if (cell?.kind !== 'deep' || !isSolved.value) return null
+  if (!cell) return finalLastMove.value
+  if (cell.kind !== 'deep' || !isSolved.value) return null
   return [cell.src.mateMoveUci.slice(0, 2), cell.src.mateMoveUci.slice(2, 4)]
 })
 
-// 深青態＝這一格還要玩家做事；通關後回到淺卡（她從出題轉成說明）。
+// ---- 分析中：進度與這一盤的流式棋譜 ----
+// 兩段分析（preview 再 deep）：preview 跑完就填滿每一格，只算非 null 會在 preview 結束時停在 100%、
+// 撐過更長的 deep。兩段都算進去。
+const progressTotal = computed(() => ctx.review.totalPositions.value * 2)
+const progressDone = computed(() =>
+  (ctx.review.progressPass.value === 'deep' ? ctx.review.totalPositions.value : 0) +
+  ctx.review.progressCount.value,
+)
+const sanRows = computed(() => (ctx.game.value ? replaySan(ctx.game.value.moves).rows : []))
+
+// ---- 對話框：深青態＝這一格還要玩家做事；通關後回到淺卡（她從出題轉成說明） ----
 const onDeep = computed(() => current.value?.kind === 'deep' && !isSolved.value)
-// 三顆鈕共用，只有底色隨深青／淺卡換。
-const navBtnClass = computed(() => [
-  'flex size-11 items-center justify-center rounded-btn border transition-colors duration-150 disabled:opacity-35 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold motion-reduce:transition-none',
-  onDeep.value
-    ? 'border-white/15 bg-white/10 text-ink-on-deep hover:bg-white/20'
-    : 'border-line bg-surface-base text-ink hover:bg-surface-hover',
-])
+const tone = computed<'light' | 'deep'>(() => (onDeep.value ? 'deep' : 'light'))
+
+// 三顆鈕是一組分段鈕（mix 樣張），只有框線與字色隨深青／淺卡換。class 走整串字面值，不拼接。
+// 框線畫在各鈕自己身上（不畫在外框）：只有一格時 ‹ › 隱藏，外框會剩兩段空格子；畫在鈕上就只剩步進鈕一顆。
+const NAV_BTN_CLASS = {
+  light: 'border-line text-ink-muted hover:bg-surface-hover',
+  deep: 'border-hairline-on-deep text-ink-on-deep hover:bg-white/8',
+} as const
+const DAY_CLASS = {
+  light: 'text-ink-muted',
+  deep: 'text-ink-on-deep-dim',
+} as const
+
+// ---- 出口：看完了（最後一格，或根本沒有格子）才出現。最後一格是還沒解的深青格時不出現——
+// 那一格的出口就是在盤上走出那一步（persona-neve.md 深青＝必有就地互動的出口），旁邊再擺兩顆
+// 離開鈕等於叫他跳過。 ----
+const showExits = computed(() => {
+  if (isZero.value) return true
+  if (!current.value || !atLast.value) return false
+  return !(current.value.kind === 'deep' && !isSolved.value)
+})
+function playAgain(): void {
+  uiStore.openPlaySetup()
+}
+function goHome(): void {
+  void router.replace('/')
+}
 
 // ---- 標註 overlay 的幾何：從真實 cg-board 讀，尺寸變動時 tick 一次逼所有 computed 重算 ----
 const boardCmp = ref<{
@@ -190,8 +264,6 @@ const boardCmp = ref<{
   squareToRect: (s: string) => Rect | null
   rejectMove: (payload: MoveMadePayload, stillValid: () => boolean) => Promise<void>
 } | null>(null)
-const boardFit = ref<HTMLElement | null>(null)
-useBoardFit(boardFit)
 
 const geomTick = ref(0)
 const boardEl = computed<HTMLElement | null>(() => {
@@ -224,154 +296,184 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section v-if="current" class="flex flex-col" data-testid="key-moments">
-    <!-- 標題不宣稱局次：`pendingFor` 給的是最近一局的題目，未必是眼前這盤（A 局漏了將殺沒解、
-         接著下 B 局，B 局的棋憶第一格就是 A 局的題目）。寫「這盤」會跟第一格自打嘴巴。 -->
-    <h2 class="mb-2.5 font-sans text-[13px] font-medium tracking-[0.02em] text-ink-muted">
-      值得回頭看的幾手
-    </h2>
+  <section class="flex flex-col" data-testid="key-moments" :aria-busy="!isComplete">
+    <!-- 共用棋盤：與課程／試煉／對局同款木盤。分析中到看完都是這一個實例。 -->
+    <WoodFrame surface="cream">
+      <ChessBoard
+        ref="boardCmp"
+        :fen="boardFen"
+        :player-color="boardColor"
+        :disabled="boardDisabled"
+        :coordinates="true"
+        :last-move="boardLastMove"
+        @move-made="onMove"
+      />
+      <MoveAnnotationDisplay
+        v-if="boardEl"
+        :annotations="annotations"
+        :evaluation="null"
+        :square-to-rect="squareToRect"
+        :board-ref="boardEl"
+        :board-size-px="boardSizePx"
+        :shaft-scale="0.5"
+      />
+    </WoodFrame>
 
-    <!-- 共用棋盤：與課程／試煉／對局同款木盤 -->
-    <div
-      class="w-full rounded-[12px] bg-[linear-gradient(160deg,#6f4b30,#523722)] p-3 ring-1 ring-black/30 shadow-[0_12px_32px_rgba(10,30,24,0.45),inset_0_1px_0_rgba(255,228,194,0.20),inset_0_-2px_6px_rgba(0,0,0,0.38)]"
-    >
-      <div ref="boardFit" class="relative board-fit">
-        <ChessBoard
-          ref="boardCmp"
-          :fen="boardFen"
-          :player-color="boardColor"
-          :disabled="boardDisabled"
-          :coordinates="true"
-          :last-move="boardLastMove"
-          @move-made="onMove"
-        />
-        <MoveAnnotationDisplay
-          v-if="boardEl"
-          :annotations="annotations"
-          :evaluation="null"
-          :square-to-rect="squareToRect"
-          :board-ref="boardEl"
-          :board-size-px="boardSizePx"
-          :shaft-scale="0.5"
-        />
-      </div>
-    </div>
-
-    <!-- 段點條：走到第幾格。深青格是金點（它要你做一件事）。純指示，讀屏靠對話框裡的 sr-only。 -->
-    <div class="flex items-center justify-center gap-1.5 py-3" aria-hidden="true" data-testid="moment-dots">
+    <!-- 段點條：走到第幾格。深青格是金點（它要你做一件事）。純指示，讀屏靠對話框裡的 sr-only。
+         沒有格子時仍佔住高度，分析完成那一刻版面不跳。 -->
+    <div class="flex h-6 items-center justify-center gap-1.5" aria-hidden="true" data-testid="moment-dots">
       <span
         v-for="(c, i) in cells"
         :key="c.id"
         class="h-1.5 rounded-full transition-[width,background-color] duration-150 motion-reduce:transition-none"
         :class="[
           i === index ? 'w-4.5' : 'w-1.5',
-          c.kind === 'deep' ? (i === index ? 'bg-gold' : 'bg-gold/40') : (i === index ? 'bg-primary' : 'bg-line'),
+          c.kind === 'deep' ? (i === index ? 'bg-gold' : 'bg-gold/40') : (i === index ? 'bg-primary' : 'bg-line-strong'),
         ]"
       />
     </div>
 
-    <!-- Neve 對話框。淺卡＝她在說明；深青＝她要你做一件事，而且就在這一格做。
-         aria-live：切換格子只換這一塊的字，沒有它讀屏使用者按了 ‹ › 不會知道內容變了。 -->
-    <div
-      class="rounded-card px-4 py-3.5"
-      :class="onDeep
-        ? 'bg-surface-deep shadow-[0_1px_2px_rgba(8,24,20,0.18),0_10px_24px_rgba(8,24,20,0.28)]'
-        : 'border border-line bg-surface-card'"
-      aria-live="polite"
-    >
-      <div class="mb-2.5 flex items-center gap-2">
-        <NeveAvatar size="lg" :surface="onDeep ? 'deep' : 'cream'" />
-        <span
-          class="font-num text-[11px] tracking-[0.08em]"
-          :class="onDeep ? 'text-ink-on-deep-dim' : 'text-ink-muted'"
-        >
-          {{ COACH.name.toUpperCase() }}
-        </span>
-        <span class="sr-only">第 {{ index + 1 }} 格，共 {{ cells.length }} 格</span>
-        <span class="ml-auto flex gap-0.5">
+    <!-- Neve 對話框。淺卡＝她在說明；深青＝她要你做一件事，而且就在這一格做。固定高度：三種狀態、
+         每一格都同高，說明太長就在框內捲動。aria-live 在 NeveDialog 根上。 -->
+    <NeveDialog :tone="tone" class="flex h-66 flex-col">
+      <template #nav>
+        <!-- 分析中／零狀態：整組隱藏但保留位置；只有一格時只藏 ‹ ›，步進鈕照樣能用。 -->
+        <span class="flex" :class="{ invisible: !current }" data-testid="moment-nav">
           <button
             type="button"
-            :class="navBtnClass"
+            class="grid size-11 place-items-center rounded-l-btn border-y border-l transition-colors duration-150 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold motion-reduce:transition-none"
+            :class="[NAV_BTN_CLASS[tone], { invisible: cells.length <= 1 }]"
             :disabled="atFirst"
             aria-label="上一格"
             @click="index--"
           >
-            <ChevronLeft :size="18" :stroke-width="1.8" aria-hidden="true" />
+            <ChevronLeft :size="18" :stroke-width="1.8" :class="{ 'opacity-35': atFirst }" aria-hidden="true" />
           </button>
           <!-- 步進：一顆鈕循環「原局面 → 你走了 → 更好的是 → 回原局面」。深青格通關前沒得看，
                所以是 disabled 而不是消失——鈕的位置不該在切格時跳動。 -->
           <button
             type="button"
-            :class="navBtnClass"
+            class="grid size-11 place-items-center border transition-colors duration-150 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold motion-reduce:transition-none"
+            :class="[NAV_BTN_CLASS[tone], { 'rounded-btn': cells.length <= 1 }]"
             :disabled="stepCount === 1"
             :aria-label="stepCount === 1 ? '沒有可看的後續畫面' : `看下一個畫面（第 ${step + 1} / ${stepCount} 個）`"
             data-testid="moment-step"
             @click="advanceStep"
           >
-            <Play :size="16" :stroke-width="1.8" aria-hidden="true" />
+            <Play :size="16" :stroke-width="1.8" :class="{ 'opacity-35': stepCount === 1 }" aria-hidden="true" />
           </button>
           <button
             type="button"
-            :class="navBtnClass"
+            class="grid size-11 place-items-center rounded-r-btn border-y border-r transition-colors duration-150 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold motion-reduce:transition-none"
+            :class="[NAV_BTN_CLASS[tone], { invisible: cells.length <= 1 }]"
             :disabled="atLast"
             aria-label="下一格"
             @click="index++"
           >
-            <ChevronRight :size="18" :stroke-width="1.8" aria-hidden="true" />
+            <ChevronRight :size="18" :stroke-width="1.8" :class="{ 'opacity-35': atLast }" aria-hidden="true" />
           </button>
         </span>
-      </div>
+      </template>
 
       <!-- 深青互動格：她要你在這個盤上走出那一手。**不給任何提示**——說出在哪一區就等於送分。 -->
-      <template v-if="current.kind === 'deep'">
-        <!-- 「那盤棋」不是「這一盤」：`pendingFor` 給的是**最近一局**的題目，從 /history 翻舊局
-             進來時它未必是眼前這盤。中性講法兩種情況都成立。 -->
-        <p
-          v-if="!isSolved"
-          class="font-lesson text-[17px] leading-[1.9] not-italic text-ink-on-deep"
-          data-testid="deep-prompt"
-        >
-          那盤棋裡有一手將殺，你當時走了別的。局面我留著，你自己找，找到就走出來。
-        </p>
-        <p v-else class="font-lesson text-[15px] leading-[1.85] not-italic text-ink" data-testid="deep-solved">
-          就是這一手。這個形狀記著，它會再出現。
-        </p>
-        <!-- 觸控目標 ≥44px（CLAUDE.md 鐵則）：底線文字鈕也要撐開，不能只有字高。 -->
-        <button
-          v-if="!isSolved"
-          type="button"
-          class="mt-2 inline-flex min-h-11 items-center font-sans text-[15px] text-ink-on-deep-dim underline underline-offset-4 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
-          data-testid="deep-reveal"
-          @click="reveal"
-        >
-          看答案
-        </button>
+      <template v-if="current?.kind === 'deep'">
+        <span class="sr-only">第 {{ index + 1 }} 格，共 {{ cells.length }} 格</span>
+        <div class="min-h-0 flex-1 overflow-y-auto">
+          <p
+            v-if="deepSourceDay"
+            class="font-lesson text-base leading-[1.8]"
+            :class="DAY_CLASS[tone]"
+            data-testid="deep-source-day"
+          >
+            {{ deepSourceDay }}
+          </p>
+          <!-- 「那盤棋」不是「這一盤」：`pendingFor` 給的是**最近一局**的題目，從 /history 翻舊局
+               進來時它未必是眼前這盤。中性講法兩種情況都成立。 -->
+          <p
+            v-if="!isSolved"
+            class="font-lesson text-base leading-[1.8] not-italic text-ink-on-deep"
+            data-testid="deep-prompt"
+          >
+            那盤棋裡有一手將殺，你當時走了別的。局面我留著，你自己找，找到就走出來。
+          </p>
+          <p v-else class="font-lesson text-base leading-[1.8] not-italic text-ink" data-testid="deep-solved">
+            就是這一手。這個形狀記著，它會再出現。
+          </p>
+          <!-- 觸控目標 ≥44px（CLAUDE.md 鐵則）：底線文字鈕也要撐開，不能只有字高。 -->
+          <button
+            v-if="!isSolved"
+            type="button"
+            class="inline-flex min-h-11 items-center font-sans text-base text-ink-on-deep underline decoration-ink-on-deep/40 underline-offset-4 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
+            data-testid="deep-reveal"
+            @click="reveal"
+          >
+            看答案
+          </button>
+        </div>
       </template>
 
-      <!-- 說明格：兩手並排的白話文。 -->
-      <template v-else>
-        <p class="mb-2 font-sans text-[15px] text-ink">
-          第 {{ current.display.moveNumber }} 手 · {{ current.display.shortName }}
-        </p>
-
-        <!-- 兩手同字級，靠明度＋粗細＋領頭詞區分。**不用金色**：`text-gold-dark` 是設計系統
-             明文的 large-copy-only（在 15px 上對比不足），金一律留給 focus / reward。 -->
-        <p class="font-sans text-[15px] text-ink-muted" data-testid="moment-played">
-          你走了 {{ movePhrase(current.display.played) }}
-        </p>
-        <p
-          v-if="current.display.best"
-          class="font-sans text-[15px] font-bold text-ink"
-          data-testid="moment-best"
-        >
-          更好的是 {{ movePhrase(current.display.best) }}
-        </p>
-
+      <!-- 說明格：標題、兩手並排的白話文、Neve 的解釋（說明過長就在框內捲動）。 -->
+      <template v-else-if="current?.kind === 'explain'">
+        <span class="sr-only">第 {{ index + 1 }} 格，共 {{ cells.length }} 格</span>
+        <h2 class="font-display text-title font-bold text-ink">
+          第 {{ current.display.moveNumber }} 回合 · {{ current.display.shortName }}
+        </h2>
+        <!-- 兩手同字級，靠領頭詞的明度區分。**不用金色**：`text-gold-dark` 是設計系統明文的
+             large-copy-only，金一律留給 focus / reward。 -->
+        <dl class="mt-1 mb-2 grid shrink-0 grid-cols-[auto_1fr] gap-x-3 font-sans text-base leading-6">
+          <dt class="text-ink-muted">你走了</dt>
+          <dd class="font-bold text-ink" data-testid="moment-played">{{ movePhrase(current.display.played) }}</dd>
+          <template v-if="current.display.best">
+            <dt class="text-ink-muted">更好的是</dt>
+            <dd class="font-bold text-ink" data-testid="moment-best">{{ movePhrase(current.display.best) }}</dd>
+          </template>
+        </dl>
         <!-- Neve 的解釋（回顧態，文楷）。CJK 不可斜體——假斜會扭曲字形。 -->
-        <p class="mt-3 font-lesson text-[15px] leading-[1.85] not-italic text-ink" data-testid="moment-reason">
-          {{ current.display.reason }}
-        </p>
+        <div class="min-h-0 flex-1 overflow-y-auto">
+          <p class="font-lesson text-base leading-[1.8] not-italic text-ink" data-testid="moment-reason">
+            {{ current.display.reason }}
+          </p>
+        </div>
       </template>
+
+      <!-- 沒有格子：分析中（那句話＋進度＋這一盤的棋譜），或分析完沒有可看的手（只換那句話）。 -->
+      <template v-else>
+        <p
+          v-if="isZero"
+          class="font-lesson text-base leading-[1.8] not-italic text-ink"
+          data-testid="memory-zero-state"
+        >
+          {{ MEMORY_ZERO_STATE_COPY }}
+        </p>
+        <template v-else>
+          <p class="font-lesson text-base leading-[1.8] not-italic text-ink" data-testid="memory-analyzing">
+            {{ MEMORY_ANALYZING_COPY }}
+          </p>
+          <!-- 百分比一直跳，關掉這一小塊的 live 播報，不然讀屏會一直念數字。 -->
+          <ProgressBar
+            :value="progressDone"
+            :total="progressTotal"
+            mode="percent"
+            aria-live="off"
+            class="mt-1.5 shrink-0"
+          />
+        </template>
+        <div class="mt-3.5 min-h-0 flex-1 overflow-y-auto border-t border-line pt-2.5" data-testid="memory-flow">
+          <p class="font-sans text-label font-bold tracking-[0.06em] text-ink-muted">這一盤 · {{ sanRows.length }} 回合</p>
+          <p class="mt-1 font-num text-[11px] leading-[22px] text-ink">
+            <!-- inline-block：每回合一塊、塊內不斷行，塊與塊之間可以換行 -->
+            <span v-for="row in sanRows" :key="row.n" class="mr-1.5 inline-block whitespace-nowrap">
+              <span class="text-ink-muted">{{ row.n }}.</span> {{ row.black ? `${row.white} ${row.black}` : row.white }}
+            </span>
+          </p>
+        </div>
+      </template>
+    </NeveDialog>
+
+    <!-- 看完後的出口 -->
+    <div v-if="showExits" class="mt-3 grid grid-cols-2 gap-3" data-testid="memory-exits">
+      <Button class="text-base font-bold" @click="playAgain">再下一盤</Button>
+      <Button variant="secondary" class="border-line-strong text-base font-bold" @click="goHome">回首頁</Button>
     </div>
   </section>
 </template>

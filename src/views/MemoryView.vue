@@ -7,7 +7,6 @@
  */
 import { ref, computed, onMounted, onUnmounted, provide, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ArrowLeft } from 'lucide-vue-next'
 import { useGameStore, type CompletedGame } from '@/stores/game-store'
 import { useGameHistoryStore } from '@/stores/game-history'
 import { historyEntryToCompletedGame } from '@/modules/memory/history-game'
@@ -26,6 +25,9 @@ import { MEMORY_SUMMARY_SCHEMA_VERSION } from '@/config/memory-config'
 import { MEMORY_CONTEXT, type MemoryContext } from '@/components/memory/memory-context'
 import MemoryDashboard from '@/components/memory/MemoryDashboard.vue'
 import GameExportCard from '@/components/memory/GameExportCard.vue'
+import { TaskTopRow } from '@/components/ui/gambit'
+import { formatGameDay } from '@/utils/game-day'
+import { rungForSkillLevel } from '@/config/difficulty-tuning'
 
 const router = useRouter()
 const route = useRoute()
@@ -144,6 +146,14 @@ function onHeaderBack(): void {
 /** 匯出鈕只在分析跑完後出現（EC-3：不給半成品的可點物）。 */
 const isComplete = computed(() => review.phase.value === 'COMPLETE')
 
+/** 頂列副標：是哪一盤。`game` 還沒載到（等 fetchHistory）時不顯示，只留標題。 */
+const topSubtitle = computed(() => {
+  const g = game.value
+  if (!g) return undefined
+  const side = g.playerColor === 'white' ? '執白' : '執黑'
+  return `${formatGameDay(g.completedAt)} · ${side} · 對 ${rungForSkillLevel(g.aiSkillLevel).name}`
+})
+
 /** Export/PGN-tag shape of the identified opening. Null unless BOTH name and ECO are known —
  *  a half-filled `Opening "…" ECO ""` tag pair is worse than omitting them (GDD §3 omission rule). */
 const opening = computed<{ openingName: string; eco: string } | null>(() => {
@@ -183,34 +193,27 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex min-h-dvh flex-col items-center bg-surface-base px-4 pb-[calc(2rem+env(safe-area-inset-bottom))]">
-    <!-- fullBleed：這頁自畫 header，全站 app bar 與底部 tab 都不在。背景與底部 safe-area 因此
+  <div class="flex min-h-dvh flex-col bg-surface-base pb-[calc(1rem+env(safe-area-inset-bottom))]">
+    <!-- fullBleed：這頁自畫頂列，全站 app bar 與底部 tab 都不在。背景與底部 safe-area 因此
          由這裡自己負責（App.vue 只在非 fullBleed 時補）。註解放在根 div 裡：放在外面 dev 會把
          它算成第二個根節點，多根元件離場時整頁空白。 -->
-    <header
-      class="flex w-full max-w-md items-center gap-0.5 pb-3 pt-[calc(0.5rem+env(safe-area-inset-top))]"
-    >
-      <button
-        type="button"
-        class="flex size-11 items-center justify-center rounded-btn text-ink-muted transition-colors duration-150 hover:bg-surface-hover hover:text-ink focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold motion-reduce:transition-none"
-        aria-label="返回"
-        @click="onHeaderBack"
-      >
-        <ArrowLeft :size="20" :stroke-width="1.8" aria-hidden="true" />
-      </button>
-      <h1 class="font-display text-xl font-bold text-ink" tabindex="-1">棋憶</h1>
+    <TaskTopRow title="棋憶" :subtitle="topSubtitle" @back="onHeaderBack">
+      <!-- 帶走整盤棋譜。分析中先 invisible 佔住位置（不給半成品的可點物、頂列也不跳）；完成時
+           換 key 重掛，匯出內容才讀得到最終的 moments（它在 setup 只讀一次）。 -->
+      <template v-if="game" #action>
+        <GameExportCard
+          :key="`${game.completedAt}:${isComplete}`"
+          :class="{ invisible: !isComplete }"
+          tone="deep"
+          :game="game"
+          :moments="moments"
+          :opening="opening"
+        />
+      </template>
+    </TaskTopRow>
 
-      <!-- 帶走整盤棋譜。原本住在對話框正下方，看起來像在複製當下那一手（2026-08-08 搬上來）。 -->
-      <GameExportCard
-        v-if="isComplete && game"
-        :key="game.completedAt"
-        class="ml-auto"
-        :game="game"
-        :moments="moments"
-        :opening="opening"
-      />
-    </header>
-
-    <MemoryDashboard />
+    <div class="mx-auto flex w-full max-w-md flex-col px-4 pt-3">
+      <MemoryDashboard />
+    </div>
   </div>
 </template>

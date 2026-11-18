@@ -1,12 +1,16 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises, type VueWrapper } from '@vue/test-utils'
-import { defineComponent, computed, ref } from 'vue'
+import { defineComponent, computed, ref, type Ref } from 'vue'
 import { setActivePinia, createPinia } from 'pinia'
 import KeyMomentsCard from '@/components/memory/KeyMomentsCard.vue'
 import { MEMORY_CONTEXT, type MemoryContext } from '@/components/memory/memory-context'
 import { useRecognitionSourceStore } from '@/stores/recognition-source'
-import type { StoredAnalysisEntry } from '@/modules/post-game-review/use-post-game-review'
+import { useUiStore } from '@/stores/ui-store'
+import type { ReviewPhase, StoredAnalysisEntry } from '@/modules/post-game-review/use-post-game-review'
+import { MEMORY_ZERO_STATE_COPY } from '@/config/memory-config'
+import { lintNeve } from '@/modules/memory/persona-lint'
+import { formatGameDay } from '@/utils/game-day'
 import type { Moment } from '@/types/memory'
 import { rejectAfterMove } from '@/composables/use-board-input'
 import type { MoveMadePayload } from '@/composables/use-chess-board'
@@ -34,6 +38,10 @@ vi.mock('@/components/chess-board.vue', () => ({
   }),
 }))
 
+// 出口「回首頁」走 router.replace；這裡只驗呼叫，不需要真的路由表。
+const routerReplace = vi.fn()
+vi.mock('vue-router', () => ({ useRouter: () => ({ replace: routerReplace }) }))
+
 // game 的 fixture 只給 moves／playerColor —— 元件讀得到的就這兩個欄位，補齊 CompletedGame 其餘
 // 六欄只是替斷言加噪音，所以走 unknown 轉型（同 KeyMomentsCard 對 analysisResults 的作法）。
 function entry(bestMove: string): StoredAnalysisEntry {
@@ -43,21 +51,47 @@ function moment(ply: number): Moment {
   return { ply, kind: 'plain', anchor: false, concept: 'none', cp: 100, fav: -Infinity }
 }
 
+/** 目前掛著的卡的 review.phase；測試用它把分析推進到 COMPLETE。 */
+let phase: Ref<ReviewPhase>
+
 /** 白方對局：ply0 玩家走 a2a3 但引擎要 e2e4（engine）；ply2 玩家走的就是最佳手（own）。 */
 function mountCard(
   moves = ['a2a3', 'e7e5', 'g1f3'],
   bests = ['e2e4', 'd2d4', 'g1f3'],
   playerColor: 'white' | 'black' = 'white',
+  opts: { phase?: ReviewPhase; moments?: Moment[] } = {},
 ): VueWrapper {
+  phase = ref<ReviewPhase>(opts.phase ?? 'COMPLETE')
+  const moments = opts.moments ?? [moment(0), moment(2)]
   const ctx: MemoryContext = {
     review: {
+      phase,
       analysisResults: computed(() => bests.map(entry)),
+      totalPositions: computed(() => moves.length),
+      progressPass: ref('preview'),
+      progressCount: ref(1),
     } as unknown as MemoryContext['review'],
     game: computed(() => ({ moves, playerColor, completedAt: GAME_ID })) as unknown as MemoryContext['game'],
-    moments: computed(() => [moment(0), moment(2)]),
+    moments: computed(() => moments),
     opening: computed(() => null),
   }
   return mount(KeyMomentsCard, { global: { provide: { [MEMORY_CONTEXT as symbol]: ctx } } })
+}
+
+/**
+ * 真實時序：卡從分析中就掛著，MemoryView 到 COMPLETE 才把漏看的將殺寫進 store。所以深青格的測試
+ * 一律先在 ANALYZING 掛上，再推到 COMPLETE（`seed` 在兩者之間跑，模擬 captureMissedMates）。
+ */
+async function mountThenComplete(
+  seed: () => void = () => {},
+  ...args: Parameters<typeof mountCard>
+): Promise<VueWrapper> {
+  const [moves, bests, color, opts = {}] = args
+  const w = mountCard(moves, bests, color, { ...opts, phase: 'ANALYZING' })
+  seed()
+  phase.value = 'COMPLETE'
+  await flushPromises()
+  return w
 }
 
 /**
@@ -92,6 +126,7 @@ beforeEach(() => {
   setActivePinia(createPinia())
   localStorage.clear()
   resetPosition.mockClear()
+  routerReplace.mockClear()
 })
 
 describe('KeyMomentsCard', () => {
@@ -101,8 +136,8 @@ describe('KeyMomentsCard', () => {
 
     // Assert
     expect(w.get('[data-testid="moment-dots"]').findAll('span')).toHaveLength(2)
-    expect(w.text()).toContain('第 1 手')
-    expect(w.text()).not.toContain('第 2 手')
+    expect(w.text()).toContain('第 1 回合')
+    expect(w.text()).not.toContain('第 2 回合')
   })
 
   it('走法用白話文並排兩手，不出現 SAN 記號', () => {
@@ -110,8 +145,8 @@ describe('KeyMomentsCard', () => {
     const w = mountCard()
 
     // Assert
-    expect(w.get('[data-testid="moment-played"]').text()).toBe('你走了 把兵移到 a3')
-    expect(w.get('[data-testid="moment-best"]').text()).toBe('更好的是 把兵移到 e4')
+    expect(w.get('[data-testid="moment-played"]').text()).toBe('把兵移到 a3')
+    expect(w.get('[data-testid="moment-best"]').text()).toBe('把兵移到 e4')
   })
 
   it('吃子的一手不會被說成單純的移動，且卡片與 Neve 那句用同一組字', async () => {
@@ -124,8 +159,8 @@ describe('KeyMomentsCard', () => {
     await nextBtn(w).trigger('click')
 
     // Assert
-    expect(w.get('[data-testid="moment-played"]').text()).toBe('你走了 用兵吃掉 d5 的兵')
-    expect(w.get('[data-testid="moment-best"]').text()).toBe('更好的是 把騎士移到 f3')
+    expect(w.get('[data-testid="moment-played"]').text()).toBe('用兵吃掉 d5 的兵')
+    expect(w.get('[data-testid="moment-best"]').text()).toBe('把騎士移到 f3')
     expect(w.get('[data-testid="moment-reason"]').text()).toContain('用兵吃掉 d5 的兵')
   })
 
@@ -137,7 +172,7 @@ describe('KeyMomentsCard', () => {
     await nextBtn(w).trigger('click')
 
     // Assert
-    expect(w.text()).toContain('第 2 手')
+    expect(w.text()).toContain('第 2 回合')
     expect(w.find('[data-testid="moment-best"]').exists()).toBe(false)
   })
 
@@ -205,11 +240,17 @@ describe('KeyMomentsCard', () => {
     }
   })
 
-  it('沒有可顯示的項目時整塊不渲染', () => {
-    // Arrange — moments 指向缺分析的 ply
+  it('分析完沒有可看的項目時：木盤與對話框都還在，只換成零狀態那句話', () => {
+    // Arrange — moments 指向缺分析的 ply（buildMomentDisplays 會把它濾掉）
     const ctx: MemoryContext = {
-      review: { analysisResults: computed(() => [null, null, null]) } as unknown as MemoryContext['review'],
-      game: computed(() => ({ moves: ['a2a3'], playerColor: 'white' })) as unknown as MemoryContext['game'],
+      review: {
+        phase: ref('COMPLETE'),
+        analysisResults: computed(() => [null, null, null]),
+        totalPositions: computed(() => 1),
+        progressPass: ref('deep'),
+        progressCount: ref(1),
+      } as unknown as MemoryContext['review'],
+      game: computed(() => ({ moves: ['a2a3'], playerColor: 'white', completedAt: GAME_ID })) as unknown as MemoryContext['game'],
       moments: computed(() => [moment(0)]),
       opening: computed(() => null),
     }
@@ -218,7 +259,11 @@ describe('KeyMomentsCard', () => {
     const w = mount(KeyMomentsCard, { global: { provide: { [MEMORY_CONTEXT as symbol]: ctx } } })
 
     // Assert
-    expect(w.find('[data-testid="key-moments"]').exists()).toBe(false)
+    expect(board(w).exists()).toBe(true)
+    expect(w.get('[data-testid="memory-zero-state"]').text()).toBe(MEMORY_ZERO_STATE_COPY)
+    expect(w.find('[data-testid="memory-analyzing"]').exists()).toBe(false)
+    expect(w.get('[data-testid="moment-nav"]').classes()).toContain('invisible')
+    expect(w.find('[data-testid="memory-exits"]').exists()).toBe(true)
   })
 
   it('清單縮短後越界的位置落回第一格，不渲染空殼', async () => {
@@ -226,6 +271,7 @@ describe('KeyMomentsCard', () => {
     const moments = ref<Moment[]>([moment(0), moment(2)])
     const ctx: MemoryContext = {
       review: {
+        phase: ref('COMPLETE'),
         analysisResults: computed(() => ['e2e4', 'd2d4', 'g1f3'].map(entry)),
       } as unknown as MemoryContext['review'],
       game: computed(() => ({ moves: ['a2a3', 'e7e5', 'g1f3'], playerColor: 'white', completedAt: GAME_ID })) as unknown as MemoryContext['game'],
@@ -241,18 +287,15 @@ describe('KeyMomentsCard', () => {
 
     // Assert
     expect(w.get('[data-testid="moment-dots"]').findAll('span')).toHaveLength(1)
-    expect(w.text()).toContain('第 1 手')
+    expect(w.text()).toContain('第 1 回合')
   })
 })
 
 describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
   it('有待解的將殺時，第一格是可動的深青格且盤面零標記', async () => {
     // Arrange
-    seedPendingMate()
-
-    // Act — flushPromises 等 overlay 掛上；少了它「零標記」會恆真（見上面那條的對照組）
-    const w = mountCard()
-    await flushPromises()
+    // Act — mountThenComplete 內含 flushPromises，等 overlay 掛上；少了它「零標記」會恆真（見下一條的對照組）
+    const w = await mountThenComplete(seedPendingMate)
 
     // Assert — 深青格排在兩個說明格之前，共三格
     expect(w.get('[data-testid="moment-dots"]').findAll('span')).toHaveLength(3)
@@ -275,12 +318,11 @@ describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
     expect(w.findComponent({ name: 'MoveAnnotationDisplay' }).props('annotations')).not.toHaveLength(0)
   })
 
-  it('深青格用該局面自己的執子色，不用本局的', () => {
+  it('深青格用該局面自己的執子色，不用本局的', async () => {
     // Arrange — pending 是白方的題目，本局玩家執黑
-    seedPendingMate()
 
     // Act
-    const w = mountCard(['a2a3', 'e7e5', 'g1f3'], ['e2e4', 'd2d4', 'g1f3'], 'black')
+    const w = await mountThenComplete(seedPendingMate, ['a2a3', 'e7e5', 'g1f3'], ['e2e4', 'd2d4', 'g1f3'], 'black')
 
     // Assert
     expect(board(w).props('playerColor')).toBe('white')
@@ -288,8 +330,7 @@ describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
 
   it('走出那一手就通關，並把局面退休掉不再冒出來', async () => {
     // Arrange
-    seedPendingMate()
-    const w = mountCard()
+    const w = await mountThenComplete(seedPendingMate)
 
     // Act
     await board(w).vm.$emit('move-made', { from: 'e1', to: 'e8' })
@@ -302,8 +343,7 @@ describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
 
   it('走錯的手棋子靜默滑回，不通關也不退休', async () => {
     // Arrange
-    seedPendingMate()
-    const w = mountCard()
+    const w = await mountThenComplete(seedPendingMate)
 
     // Act
     await board(w).vm.$emit('move-made', { from: 'g2', to: 'g3' })
@@ -316,8 +356,7 @@ describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
 
   it('走錯時等走子落地（animationDoneAt）才重設，不在 move 事件當下同步重設', async () => {
     // Arrange — vue3-chessboard 先 emit move 才 board.move，同步重設會被它蓋掉
-    seedPendingMate()
-    const w = mountCard()
+    const w = await mountThenComplete(seedPendingMate)
     const landed = deferred()
 
     // Act
@@ -333,8 +372,7 @@ describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
 
   it('等待走子落地期間換了格，就不重設（不把新格的盤拉回舊題）', async () => {
     // Arrange
-    seedPendingMate()
-    const w = mountCard()
+    const w = await mountThenComplete(seedPendingMate)
     const landed = deferred()
     await board(w).vm.$emit('move-made', { from: 'g2', to: 'g3', animationDoneAt: landed.promise })
 
@@ -349,8 +387,7 @@ describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
 
   it('等待走子落地期間按了看答案，就不重設（盤要停在答案那一手）', async () => {
     // Arrange
-    seedPendingMate()
-    const w = mountCard()
+    const w = await mountThenComplete(seedPendingMate)
     const landed = deferred()
     await board(w).vm.$emit('move-made', { from: 'g2', to: 'g3', animationDoneAt: landed.promise })
 
@@ -365,8 +402,7 @@ describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
 
   it('走對時即使走子落地也永遠不重設', async () => {
     // Arrange
-    seedPendingMate()
-    const w = mountCard()
+    const w = await mountThenComplete(seedPendingMate)
     const landed = deferred()
 
     // Act
@@ -380,8 +416,7 @@ describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
 
   it('看答案同樣把局面退休掉——找不到的人不該每次進來都撞同一題', async () => {
     // Arrange
-    seedPendingMate()
-    const w = mountCard()
+    const w = await mountThenComplete(seedPendingMate)
 
     // Act
     await w.get('[data-testid="deep-reveal"]').trigger('click')
@@ -392,12 +427,11 @@ describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
     expect(board(w).props('fen')).not.toBe(MATE_FEN) // 已經走出那一手
   })
 
-  it('本局漏看的將殺只出現一次——深青格講過就不再有說明格', () => {
+  it('本局漏看的將殺只出現一次——深青格講過就不再有說明格', async () => {
     // Arrange — pending 掛在本局的 ply 0，與第一個 moment 同一手
-    seedPendingMate(String(GAME_ID), 0)
 
     // Act
-    const w = mountCard()
+    const w = await mountThenComplete(() => seedPendingMate(String(GAME_ID), 0))
 
     // Assert — 原本兩格說明，ply0 被深青格吸收，總數仍是 2（1 深青 + 1 說明）
     expect(w.get('[data-testid="moment-dots"]').findAll('span')).toHaveLength(2)
@@ -406,8 +440,7 @@ describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
 
   it('通關後切走再切回，盤面停在走完那一手，不退回走子前', async () => {
     // Arrange — 通關（此時盤面＝將殺後）
-    seedPendingMate()
-    const w = mountCard()
+    const w = await mountThenComplete(seedPendingMate)
     await board(w).vm.$emit('move-made', { from: 'e1', to: 'e8' })
     const solvedFen = board(w).props('fen')
     expect(solvedFen).not.toBe(MATE_FEN)
@@ -425,8 +458,7 @@ describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
 
   it('切離已通關的深青格時，它的 last-move 高亮不跟著跑到下一格', async () => {
     // Arrange — 通關後 chessground 自己畫的高亮還在盤上（setPosition 不清它）
-    seedPendingMate()
-    const w = mountCard()
+    const w = await mountThenComplete(seedPendingMate)
     await board(w).vm.$emit('move-made', { from: 'e1', to: 'e8' })
     expect(board(w).props('lastMove')).toEqual(['e1', 'e8'])
 
@@ -439,8 +471,7 @@ describe('KeyMomentsCard — 深青互動格（wave 2）', () => {
 
   it('通關前步進鈕是停用的——步進正解等於直接給答案', async () => {
     // Arrange
-    seedPendingMate()
-    const w = mountCard()
+    const w = await mountThenComplete(seedPendingMate)
 
     // Assert
     expect(stepBtn(w).attributes('disabled')).toBeDefined()
@@ -497,5 +528,143 @@ describe('KeyMomentsCard — 步進鈕', () => {
 
     // Assert
     expect(stepBtn(w).attributes('disabled')).toBeDefined()
+  })
+})
+
+describe('KeyMomentsCard — 掛載時機與分析中（wave 1a R1）', () => {
+  it('分析中掛上、轉成 COMPLETE 時才寫進的本局將殺，仍是第一格', async () => {
+    // Arrange / Act — store 在 mount 之後、COMPLETE 之前才有題目（同 MemoryView 的 captureMissedMates）
+    const w = await mountThenComplete(() => seedPendingMate(String(GAME_ID), 0))
+
+    // Assert
+    expect(w.find('[data-testid="deep-prompt"]').exists()).toBe(true)
+    expect(board(w).props('fen')).toBe(MATE_FEN)
+  })
+
+  it('掛上時 phase 已經是 COMPLETE（分析快取命中）→ 深青格仍是第一格', async () => {
+    // Arrange — 題目先寫好、phase 一開始就是 COMPLETE
+    seedPendingMate()
+
+    // Act
+    const w = mountCard()
+    await flushPromises()
+
+    // Assert
+    expect(w.find('[data-testid="deep-prompt"]').exists()).toBe(true)
+    expect(w.get('[data-testid="moment-dots"]').findAll('span')).toHaveLength(3)
+  })
+
+  it('分析中：盤是這一盤的終局、唯讀、標出最後一手；有棋譜、沒有骨架，也還沒有格子', async () => {
+    // Arrange / Act
+    const w = mountCard(undefined, undefined, undefined, { phase: 'ANALYZING' })
+    await flushPromises()
+
+    // Assert — 終局：a3 e5 Nf3 走完
+    expect(board(w).props('fen')).toBe('rnbqkbnr/pppp1ppp/8/4p3/8/P4N2/1PPPPPPP/RNBQKB1R b KQkq - 1 2')
+    expect(board(w).props('disabled')).toBe(true)
+    expect(board(w).props('lastMove')).toEqual(['g1', 'f3'])
+    expect(w.find('[data-testid="memory-analyzing"]').exists()).toBe(true)
+    const flow = w.get('[data-testid="memory-flow"]').text()
+    expect(flow).toContain('這一盤 · 2 回合')
+    expect(flow).toContain('1. a3 e5')
+    expect(flow).toContain('2. Nf3')
+    expect(w.find('.animate-pulse').exists()).toBe(false)
+    expect(w.get('[data-testid="moment-dots"]').findAll('span')).toHaveLength(0)
+    expect(w.get('[data-testid="moment-nav"]').classes()).toContain('invisible')
+    expect(w.find('[data-testid="memory-exits"]').exists()).toBe(false)
+  })
+
+  it('分析中：百分比在 live 播報之外（讀屏不會一直念數字），那句話仍在 polite 區內', () => {
+    // Arrange / Act
+    const w = mountCard(undefined, undefined, undefined, { phase: 'ANALYZING' })
+
+    // Assert — 3 手 × 2 段，preview 跑完 1 格 → 1/6
+    const readout = w.get('[data-testid="progress-readout"]')
+    expect(readout.text()).toBe('17%')
+    expect(readout.element.closest('[aria-live]')?.getAttribute('aria-live')).toBe('off')
+    expect(w.get('[data-testid="memory-analyzing"]').element.closest('[aria-live]')?.getAttribute('aria-live')).toBe('polite')
+  })
+})
+
+describe('KeyMomentsCard — 出口與單格', () => {
+  it('最後一格是說明格時才出現出口；第一格時沒有', async () => {
+    // Arrange
+    const w = mountCard()
+    expect(w.find('[data-testid="memory-exits"]').exists()).toBe(false)
+
+    // Act
+    await nextBtn(w).trigger('click')
+
+    // Assert
+    expect(w.find('[data-testid="memory-exits"]').exists()).toBe(true)
+  })
+
+  it('最後一格是還沒解的深青格時不出現出口；解完之後出現，且不會被換成零狀態', async () => {
+    // Arrange — steady game：沒有說明格，只有一格深青
+    const w = await mountThenComplete(seedPendingMate, undefined, undefined, undefined, { moments: [] })
+    expect(w.find('[data-testid="deep-prompt"]').exists()).toBe(true)
+    expect(w.find('[data-testid="memory-exits"]').exists()).toBe(false)
+
+    // Act
+    await board(w).vm.$emit('move-made', { from: 'e1', to: 'e8' })
+
+    // Assert
+    expect(w.find('[data-testid="deep-solved"]').exists()).toBe(true)
+    expect(w.find('[data-testid="memory-zero-state"]').exists()).toBe(false)
+    expect(w.find('[data-testid="memory-exits"]').exists()).toBe(true)
+  })
+
+  it('出口：再下一盤打開設定彈窗，回首頁 replace 到 /', async () => {
+    // Arrange
+    const w = mountCard(undefined, undefined, undefined, { moments: [moment(0)] })
+    const [again, home] = w.get('[data-testid="memory-exits"]').findAll('button')
+
+    // Act
+    await again.trigger('click')
+    await home.trigger('click')
+
+    // Assert
+    expect(useUiStore().showPlaySetup).toBe(true)
+    expect(routerReplace).toHaveBeenCalledWith('/')
+  })
+
+  it('只有一格時 ‹ › 看不見（位置保留），步進鈕照樣在', () => {
+    // Arrange / Act
+    const w = mountCard(undefined, undefined, undefined, { moments: [moment(0)] })
+
+    // Assert
+    expect(prevBtn(w).classes()).toContain('invisible')
+    expect(nextBtn(w).classes()).toContain('invisible')
+    expect(stepBtn(w).classes()).not.toContain('invisible')
+    expect(w.get('[data-testid="moment-nav"]').classes()).not.toContain('invisible')
+  })
+
+  it('多格時 ‹ › 看得見', () => {
+    // Arrange / Act
+    const w = mountCard()
+
+    // Assert
+    expect(prevBtn(w).classes()).not.toContain('invisible')
+    expect(nextBtn(w).classes()).not.toContain('invisible')
+  })
+})
+
+describe('KeyMomentsCard — 深青格的日期那一行', () => {
+  it('題目來自別盤時，加一行「{M} 月 {D} 日那一盤」，且過 lintNeve', async () => {
+    // Arrange / Act — OTHER_GAME_ID 是另一盤的 completedAt
+    const w = await mountThenComplete(seedPendingMate)
+
+    // Assert
+    const line = w.get('[data-testid="deep-source-day"]').text()
+    expect(line).toBe(`${formatGameDay(Number(OTHER_GAME_ID))}那一盤`)
+    expect(lintNeve(line)).toEqual([])
+  })
+
+  it('題目就是這一盤時不加日期', async () => {
+    // Arrange / Act
+    const w = await mountThenComplete(() => seedPendingMate(String(GAME_ID), 0))
+
+    // Assert
+    expect(w.find('[data-testid="deep-source-day"]').exists()).toBe(false)
   })
 })

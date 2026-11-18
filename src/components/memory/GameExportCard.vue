@@ -8,8 +8,8 @@
  * just-finished game and any past game opened from 對局紀錄 — one mount covers both, and
  * "export the game I played last night" only works from the history side.
  *
- * GDD scope guard: only ever rendered inside the dashboard's `isComplete` branch, so an
- * unfinished game has no export affordance.
+ * GDD scope guard: MemoryView keeps it `invisible` until analysis is COMPLETE (and remounts it
+ * then, so the export context sees the final moments), so an unfinished game has no export affordance.
  */
 import { computed, ref, watch } from 'vue'
 import { Copy, Check, Share2 } from 'lucide-vue-next'
@@ -18,11 +18,21 @@ import { useGameExport } from '@/modules/game-export/use-game-export'
 import type { CompletedGame } from '@/stores/game-store'
 import type { Moment } from '@/types/memory'
 
-const props = defineProps<{
-  game: CompletedGame
-  moments: readonly Moment[]
-  opening: { openingName: string; eco: string } | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    game: CompletedGame
+    moments: readonly Moment[]
+    opening: { openingName: string; eco: string } | null
+    /** 鈕放在哪種底上：棋憶的深青頂列用 deep。只影響鈕的字色與 hover 底。 */
+    tone?: 'cream' | 'deep'
+  }>(),
+  { tone: 'cream' },
+)
+
+const TONE_CLASS = {
+  cream: 'text-ink-muted hover:bg-surface-hover hover:text-ink',
+  deep: 'text-ink-on-deep hover:bg-white/8',
+} as const
 
 /** Ply index → the move number a player reads off a board (1-based pairs). */
 function plyToMoveNumber(ply: number): number {
@@ -98,7 +108,8 @@ const icon = computed(() => (isTouch ? Share2 : Copy))
   <div>
     <button
       type="button"
-      class="flex min-h-11 items-center gap-1.5 rounded-btn px-2.5 font-sans text-sm text-ink-muted transition-colors duration-150 hover:bg-surface-hover hover:text-ink disabled:opacity-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold motion-reduce:transition-none"
+      class="flex min-h-11 items-center gap-1.5 rounded-btn px-2.5 font-sans text-base transition-colors duration-150 disabled:opacity-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold motion-reduce:transition-none"
+      :class="TONE_CLASS[tone]"
       :disabled="busy"
       :aria-label="done ? label : `${isTouch ? '分享' : '複製'}整盤棋譜，貼給 AI 一起看`"
       @click="onExportTap"
