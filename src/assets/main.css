@@ -70,6 +70,11 @@
   /* 墨韻 (ink garnish) — 墨筆底線/乾筆分隔的墨色。cream 亮底＝深棕墨（暖白墨會消失）*/
   --color-ink-brush: rgba(61, 34, 16, 0.68);
 
+  /* 木框漸層（WoodFrame）與深青面上的髮線（只當裝飾，不承載文字） */
+  --color-wood-light: #6f4b30;
+  --color-wood-dark: #523722;
+  --color-hairline-on-deep: rgba(231, 241, 236, 0.14);
+
   --color-nav-bg: #103029;
   --color-nav-text: #e7f1ec;
   --color-nav-dim: #9bbdb1;
@@ -106,6 +111,18 @@
   --shadow-card-hover:
     0 2px 4px rgba(61, 34, 16, 0.06), 0 10px 24px rgba(61, 34, 16, 0.1);
   --shadow-button: 0 1px 2px rgba(61, 34, 16, 0.1);
+  /* 任務頁（visual-redesign-2026-11/mix.html）。全是暖棕；組合值逐字展開而不寫 var()，
+     因為 Tailwind 會解析 shadow 值改寫顏色，巢狀 var() 不保證被正確處理。 */
+  --shadow-lift: 0 2px 6px rgba(61, 34, 16, 0.14), 0 10px 24px rgba(61, 34, 16, 0.2);
+  --shadow-on-deep: 0 12px 28px rgba(24, 12, 4, 0.55);
+  --shadow-wood-on-deep:
+    0 0 0 1px rgba(24, 12, 4, 0.5), 0 12px 28px rgba(24, 12, 4, 0.55),
+    inset 0 1px 0 rgba(255, 228, 194, 0.2), inset 0 -2px 6px rgba(36, 18, 6, 0.45);
+  --shadow-wood-on-cream:
+    0 0 0 1px rgba(61, 34, 16, 0.4), 0 2px 6px rgba(61, 34, 16, 0.14),
+    0 10px 24px rgba(61, 34, 16, 0.2), inset 0 1px 0 rgba(255, 228, 194, 0.2),
+    inset 0 -2px 6px rgba(36, 18, 6, 0.45);
+  --shadow-paper: 0 0 0 1px rgba(24, 12, 4, 0.5), 0 12px 28px rgba(24, 12, 4, 0.55);
 
   --radius-btn: 0.5rem;
   --radius-card: 0.75rem;
@@ -120,6 +137,37 @@
   --text-display-sm: 2rem;
   --text-display-sm--line-height: 1.2;
   --text-display-sm--letter-spacing: -0.01em;
+  --text-title: 1.375rem;
+  --text-title--line-height: 1.875rem;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.125rem;
+
+  /* 進場曲線。不覆寫 Tailwind 內建的 --ease-out。 */
+  --ease-settle: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* 只動 opacity／transform；使用端一律加 motion-reduce:animate-none。 */
+  --animate-paper-in: paper-in 250ms var(--ease-settle) both;
+  --animate-seal-in: seal-in 220ms var(--ease-settle) both;
+
+  @keyframes paper-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes seal-in {
+    from {
+      opacity: 0;
+      transform: rotate(-5deg) scale(1.12);
+    }
+    to {
+      opacity: 1;
+      transform: rotate(-5deg) scale(1);
+    }
+  }
 }
 
 /* App is cream-only (noir removed 2026-08-06) — tell the UA so form controls, scrollbars,

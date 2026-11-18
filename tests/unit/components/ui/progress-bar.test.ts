@@ -14,4 +14,16 @@ describe('ProgressBar', () => {
     const fill = wrapper.find('.bg-primary')
     expect(fill.attributes('style')).toContain('scaleX(1)')
   })
+
+  it('test_count_mode_is_default_and_shows_value_over_total', () => {
+    const wrapper = mount(ProgressBar, { props: { value: 3, total: 12 } })
+    expect(wrapper.get('[data-testid="progress-readout"]').text()).toBe('3/12')
+  })
+
+  it('test_percent_mode_shows_rounded_percentage', () => {
+    const wrapper = mount(ProgressBar, { props: { value: 2, total: 3, mode: 'percent' } })
+    expect(wrapper.get('[data-testid="progress-readout"]').text()).toBe('67%')
+    expect(wrapper.get('[role="progressbar"]').attributes('aria-label')).toBe('進度 67%')
+    expect(wrapper.get('.bg-primary').attributes('style')).toContain('scaleX(0.67)')
+  })
 })
