@@ -52,7 +52,7 @@ describe('MemoryDashboard — 只負責把卡放上去', () => {
     expect(seenCtx).toBe(ctx)
   })
 
-  it('沒有 moment 的 steady game 一樣掛卡——零狀態由卡自己決定，不再換成 EmptyMemory', () => {
+  it('沒有 moment 的 steady game 一樣掛卡——零狀態由卡自己決定', () => {
     // Arrange
     const { ctx } = makeCtx(GAME, 'COMPLETE')
 
@@ -61,7 +61,6 @@ describe('MemoryDashboard — 只負責把卡放上去', () => {
 
     // Assert
     expect(w.findComponent({ name: 'KeyMomentsCard' }).exists()).toBe(true)
-    expect(w.findComponent({ name: 'EmptyMemory' }).exists()).toBe(false)
   })
 
   it('game 還是 null（等 fetchHistory）時不掛卡，也就不會先建一個棋盤；載到之後才掛', async () => {

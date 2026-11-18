@@ -80,14 +80,14 @@ Gambit 是一座亙古就存在的棋盤。**Neve 是它的化身**——以銀�
 
 - **Neve 第一人稱的話一律用 `font-lesson`（LXGW WenKai 文楷）**：課程、棋憶、棋誌、任何她對你說的話都用它。文楷溫暖好讀，與 UI 的 `font-sans`（Sarasa 黑體）明顯區隔，本身就是「Neve 嗓音」的字體標記。
 - **固定容器**：Neve 的話配她的頭像 ＋ 一致的框／底色（深青 note 或「頭像＋文楷段落」），讓「她在場」可辨。
-- **`font-num`（Cubic 11 點陣字）只當小「NEVE」名牌／區塊標籤的像素識別**（如「NEVE 的長期觀察」這種小標）；**內文絕不排 Cubic 11**——它是數字／棋譜字（≥11px、短資料），長中文會鋸齒難讀，且 8-bit 復古感與 Neve 的平靜／殿堂人格相悖（對標 Calm，非 chess.com）。
+- **名牌用黑體「Neve」**（`NeveNameTag` 共用元件：頭像＋`font-sans` 13px，2026-11-18 Eason 拍板，取代原本的點陣「NEVE」）。**`font-num`（Cubic 11 點陣字）只排棋譜、座標、計數**，不排任何中文或名牌——長中文會鋸齒難讀，且 8-bit 復古感與 Neve 的平靜／殿堂人格相悖（對標 Calm，非 chess.com）。課程與判斷場在第 1 波 1b 換成共用元件之前，暫時還是點陣「NEVE」。
 - 中性文字（概念定義、UI 標籤）維持 `font-sans` 與既有字型規則，**不套** Neve 嗓音。
 
 ### 對話框的深淺分工（2026-08-08 Eason 拍板，全站適用）
 
 **Neve 說的話一律裝在對話框裡；淺卡＝她在說明，深青＝她要你去做一件事。**
 
-| | 淺卡（`surface-card` ＋ `line` 邊） | 深青（`surface-deep`） |
+| | 淺卡（`surface-card` ＋ `line` 邊） | 深青（`surface-deep-2` ＋ `hairline-on-deep` 邊；`NeveDialog tone="deep"`） |
 | --- | --- | --- |
 | 語態 | 陳述、回顧、解釋 | 召喚行動 |
 | 底部 | 沒有行動出口 | **必有**一個明確的行動出口（CTA 或就地互動） |
