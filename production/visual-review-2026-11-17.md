@@ -204,6 +204,7 @@ persona-neve.md 寫了「亙古的棋盤」「棋靈」，README 寫了「精緻
 
 ### 順手修（真 bug，和方向無關，可以先做）
 
+0. **黑體字型缺字（排第一）**。`public/fonts/sarasa-ui-tc-{400,700}.woff2` 是只有 759 個漢字的子集。2026-11-18 用 fontTools 量：Vue 模板裡的漢字共 222 個，44 個不在字型裡（享今份共史城執堡客導尚帳影復投按敗曾歷登稍章紀繼考藝號裝覽訪設評話譜貼載錄降陪雲電響頁首），`.ts` 裡的字串（「初學」「午安」等）另有缺。缺的字由系統字型畫出，所以「首頁」「繼續」「投降」「棋譜」「對局紀錄」這些最常見的字，字形和旁邊的字不同。這也是畫面「不精緻」的來源之一。**2026-11-18 已修**：`scripts/subset-sarasa.py` 重切兩個檔（舊子集 ∪ `src/` 用到的全部非 ASCII 字，1219 個漢字，各約 200KB，原本 134KB），覆蓋清單寫進 `scripts/sarasa-ui-tc.chars.txt`，`tests/smoke/font-coverage.test.ts` 在新文案帶進缺字時會紅。Chromium 實測首頁的「首頁」「繼續」「開始對局」已全部由 Sarasa 畫出。原始字檔來自本機安裝的 Sarasa（`%LOCALAPPDATA%\Microsoft\Windows\Fonts`）。
 1. 「Lv.0」改顯示階名並標明是對手（PlayView.vue:406，rungForSkillLevel 已 import）。
 2. 對局紀錄主標換成一定有的資訊（日期、結果、對手階名），開局名拿掉（history-row.vue:61、data-sync.ts:71-72）。日期格式固定 zh-TW（game-history-mappers.ts:57）。
 3. 棋憶深青格走錯後的還原等走子動畫結束再做（KeyMomentsCard.vue:119）；同型寫法 RecognitionBoard.vue:109、116 與 LessonPlayer.vue:185 一起驗。修完用部署站再驗一次。

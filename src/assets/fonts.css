@@ -6,7 +6,8 @@
  *   - 課程內文:       LXGW WenKai TC（霞鶩文楷，溫暖楷體）400
  *   - 數字 / 棋譜:     Cubic 11（11px 點陣像素字）
  *   - 品牌字標:       Cinzel（GAMBIT wordmark）
- * CJK 字型一律自架並 subset（繁中常用區 + ASCII + 數字 + 標點全形符號，不靠掃描文案）。
+ * CJK 字型一律自架並 subset。Sarasa 的子集由 scripts/subset-sarasa.py 掃 src/ 文案產生，
+ * 新文案帶進缺字時 tests/smoke/font-coverage.test.ts 會紅，重跑腳本即可（缺字會由系統字型畫出）。
  * 全部 font-display: swap（避免 FOIT）。
  */
 
