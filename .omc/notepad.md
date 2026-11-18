@@ -4,7 +4,7 @@
 ## Priority Context
 <!-- ALWAYS loaded. Keep under 500 chars. Critical discoveries only. -->
 Epic: 全站視覺重構（2026-11-17 起）。現況：審查報告完成＝`production/visual-review-2026-11-17.md`，`src/` 一行都還沒動。
-Task: 方向已拍板＝混搭（`design/demos/visual-redesign-2026-11/mix.html`）。對局頁全屏、側板中文回黑體、練習頁退役外殼也已拍板；五處超標動效要逐項做對照給 Eason 看。拍板紀錄在同目錄 `decisions.md` 最上面。第 1 波 1a（對局全屏＋記譜紙＋完局印、棋憶深青頂列＋分析中同版面、走錯不滑回三處修正）已完成。待 Eason 選：`design/demos/visual-redesign-2026-11/motion-compare.html`（三組循環動畫）。下一步＝1b（課程、深化、判斷場換共用骨架）。他拍板前不動 src/ 的 UI。黑體缺字已修（16edabd）。細節在 MANUAL「視覺重構交接」。
+Task: 方向已拍板＝混搭（`design/demos/visual-redesign-2026-11/mix.html`）。對局頁全屏、側板中文回黑體、練習頁退役外殼也已拍板；五處超標動效要逐項做對照給 Eason 看。拍板紀錄在同目錄 `decisions.md` 最上面。第 1 波 1a（對局全屏＋記譜紙＋完局印、棋憶深青頂列＋分析中同版面、走錯不滑回三處修正）已完成。對局頁三組循環動畫拍板保留現況。下一步＝1b（課程、深化、判斷場換共用骨架）。他拍板前不動 src/ 的 UI。黑體缺字已修（16edabd）。細節在 MANUAL「視覺重構交接」。
 判斷訓練釐清（Q3 起）暫停中，待辦在 MANUAL。
 ⚠️ 動 engine 解析層：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析共用，勿污染分析。
 定位 SoT＝`production/positioning-v2-2026-08-02.md`。
