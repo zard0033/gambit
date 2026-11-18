@@ -103,10 +103,14 @@ runtimeCaching: [
 ```
 
 `CacheFirst` is correct because both are immutable per-deploy: neither is content-hashed by Vite
-(they are static `public/` pass-through files, not asset-pipeline outputs), so their URLs only
-change if a future commit renames the file — a scenario the browser's own HTTP cache and the
-`autoUpdate` service worker cycle (which reinstalls a fresh SW, and therefore a fresh set of
-runtime caches keyed by the same `cacheName`s, on every deploy) already handle. `maxEntries: 4`
+(they are static `public/` pass-through files, not asset-pipeline outputs). **Amendment
+2026-11-18:** the original text claimed each `autoUpdate` deploy gives a fresh set of runtime
+caches. It does not — Workbox only cleans up *precache* entries on activation; a runtime cache
+like `fonts` survives SW updates for its full `maxAgeSeconds`. So **changing the bytes of a file
+under `public/fonts/` or `public/stockfish/` without changing its URL never reaches devices that
+already have it cached.** Any such change must change the URL; the Sarasa subset does this with a
+`?v=<content hash>` query that `scripts/subset-sarasa.py` writes into `src/assets/fonts.css`
+(guarded by `tests/smoke/font-coverage.test.ts`). `maxEntries: 4`
 on `stockfish-engine` covers today's 2 files (`.js` + `.wasm`) with headroom for a future
 second build variant, without unbounded growth. `maxAgeSeconds` one year on `fonts` is a
 long-lived cap that still self-heals if the cache is ever evicted by the browser under storage
