@@ -1,9 +1,10 @@
 # Wiki Index
 
-> 7 pages | Last updated: 2026-11-18T12:09:33.381Z
+> 8 pages | Last updated: 2026-11-18T12:17:37.660Z
 
 ## debugging
 
+- [pwa-runtime-cache-trap 改 public/ 檔案內容卻不改網址，舊裝置永遠拿不到（2026-11-18）](pwa-runtime-cache-trap-public-2026-11-18.md) — # pwa-runtime-cache-trap 改 public/ 檔案內容卻不改網址，舊裝置永遠拿不到（2026-11-18）
 - [review-traps 三個必須記住的陷阱（審查實測，別重新發現）](review-traps.md) — # review-traps 三個必須記住的陷阱（審查實測，別重新發現）
 - [wave2-lessons 已施工蒸餾：棋憶 wave 2、hanging-piece 判定接線、走法白話文](wave2-lessons-wave-2-hanging-piece.md) — # wave2-lessons 已施工蒸餾：棋憶 wave 2、hanging-piece 判定接線、走法白話文
 

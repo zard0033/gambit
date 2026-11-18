@@ -4,7 +4,7 @@
 ## Priority Context
 <!-- ALWAYS loaded. Keep under 500 chars. Critical discoveries only. -->
 Epic: 全站視覺重構（2026-11-17 起）。現況：審查報告完成＝`production/visual-review-2026-11-17.md`，`src/` 一行都還沒動。
-Task: 方向已拍板＝混搭（`design/demos/visual-redesign-2026-11/mix.html`）。對局頁全屏、側板中文回黑體、練習頁退役外殼也已拍板；五處超標動效要逐項做對照給 Eason 看。拍板紀錄在同目錄 `decisions.md` 最上面。下一步＝第 1 波。他拍板前不動 src/ 的 UI。黑體缺字已修（16edabd）。細節在 MANUAL「視覺重構交接」。
+Task: 方向已拍板＝混搭（`design/demos/visual-redesign-2026-11/mix.html`）。對局頁全屏、側板中文回黑體、練習頁退役外殼也已拍板；五處超標動效要逐項做對照給 Eason 看。拍板紀錄在同目錄 `decisions.md` 最上面。下一步＝第 1 波 1a（對局＋棋憶），計畫在 `.omc/plans/wave-1a-play-memory.md`（本機），先審再動工。他拍板前不動 src/ 的 UI。黑體缺字已修（16edabd）。細節在 MANUAL「視覺重構交接」。
 判斷訓練釐清（Q3 起）暫停中，待辦在 MANUAL。
 ⚠️ 動 engine 解析層：`handshake.ts` 寫死 `MultiPV 1` 且與 review 分析共用，勿污染分析。
 定位 SoT＝`production/positioning-v2-2026-08-02.md`。
@@ -29,7 +29,7 @@ Task: 方向已拍板＝混搭（`design/demos/visual-redesign-2026-11/mix.html`
 - 截圖與各 agent 的補拍在桌機 `D:/Temp/claude/gambit-review-2026-11-17/`（只在桌機，可能被清掉）；報告裡 `work-*/…png` 的路徑都指那裡。要重拍照 wiki `visual-capture-recipe`。
 
 已修的 bug
-- 黑體缺字（commit 16edabd）：Sarasa 子集原本 759 個漢字，Vue 模板用到的 222 字缺 44 個。`scripts/subset-sarasa.py` 重切成 1219 字（各約 200KB），`tests/smoke/font-coverage.test.ts` 守門，新文案帶進缺字會紅，重跑腳本即可（原始 TTF 在 `%LOCALAPPDATA%\Microsoft\Windows\Fonts`）。vitest 全量 71 檔 871 條綠、typecheck 0、像素回歸 40/40 綠。
+- 黑體缺字（commit 16edabd）：Sarasa 子集原本 759 個漢字，Vue 模板用到的 222 字缺 44 個。`scripts/subset-sarasa.py` 重切成 1219 字（各約 200KB），`tests/smoke/font-coverage.test.ts` 守門，新文案帶進缺字會紅，重跑腳本即可（原始 TTF 在 `%LOCALAPPDATA%\Microsoft\Windows\Fonts`）。腳本同時把 `fonts.css` 的網址改成 `?v=<hash>`，否則 service worker 的 CacheFirst 會讓舊裝置一直用舊字型（wiki `pwa-runtime-cache-trap`）。vitest 全量 71 檔 871 條綠、typecheck 0、像素回歸 40/40 綠。
 - 本機跑 vitest 要走 PowerShell 並設 `VITEST_CACHE_DIR=node_modules/.vite-manual`；Git Bash 下連既有 smoke 都假紅（`reading 'config'`）。
 
 還沒看、動工前要補

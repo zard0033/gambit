@@ -28,3 +28,7 @@
 - **Pages:** visual-redesign-decisions-2026-11-18.md
 - **Summary:** Created new page "visual-redesign-decisions 視覺重構方向與拍板（2026-11-18）"
 
+## [2026-11-18T12:17:37.450Z] ingest
+- **Pages:** pwa-runtime-cache-trap-public-2026-11-18.md
+- **Summary:** Created new page "pwa-runtime-cache-trap 改 public/ 檔案內容卻不改網址，舊裝置永遠拿不到（2026-11-18）"
+
