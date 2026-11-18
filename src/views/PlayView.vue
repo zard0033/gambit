@@ -4,10 +4,12 @@ import { useRouter } from 'vue-router'
 import ChessBoard from '@/components/chess-board.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { DarkPanel, NeveAvatar } from '@/components/ui/gambit'
-import { COACH } from '@/types/lesson'
+import { TaskTopRow, WoodFrame, NeveNameTag } from '@/components/ui/gambit'
+import ScoreSheet from '@/components/play/score-sheet.vue'
+import ResultSeal from '@/components/play/result-seal.vue'
 import type { MoveMadePayload } from '@/composables/use-chess-board'
 import { useGameLifecycle } from '@/modules/game-lifecycle/use-game-lifecycle'
+import { gameOverDisplay } from '@/modules/game-lifecycle/game-over-display'
 import { usePlayEngine } from '@/modules/chess-engine/play-engine'
 import { useGameStore } from '@/stores/game-store'
 import { useUiStore } from '@/stores/ui-store'
@@ -26,14 +28,7 @@ const resumeStore = useResumeGameStore()
 const lifecycle = useGameLifecycle()
 const { phase, playerColor, fen, terminal, moveHistory, lastMove } = lifecycle
 
-// In-game move record — SAN grouped into numbered pairs (white, black) for display.
-const movePairs = computed(() => {
-  const pairs: { n: number; w: string; b?: string }[] = []
-  for (let i = 0; i < moveHistory.value.length; i += 2) {
-    pairs.push({ n: i / 2 + 1, w: moveHistory.value[i], b: moveHistory.value[i + 1] })
-  }
-  return pairs
-})
+const moveCount = computed(() => Math.ceil(moveHistory.value.length / 2))
 const canUndo = computed(() => phase.value === 'PLAYER_TURN' && moveHistory.value.length >= 2)
 const canResign = computed(() => phase.value === 'PLAYER_TURN' || phase.value === 'AI_THINKING')
 
@@ -44,12 +39,6 @@ const CONFIRM_COPY = {
   undo: { title: '確定要悔棋嗎？', body: '這會收回你和對手的上一步。', cta: '確定悔棋', danger: false },
   resign: { title: '確定要投降嗎？', body: '這盤棋會以投降結束，無法復原。', cta: '確定投降', danger: true },
 } as const
-// Move-record scroll container — auto-scrolled to the latest move.
-const moveScroll = ref<HTMLElement | null>(null)
-
-// Player-side identity row — real pawn piece icon (BASE_URL prefix avoids 404 on Pages subpath).
-const pieceBase = import.meta.env.BASE_URL
-const playerPawnSrc = computed(() => `${pieceBase}pieces/${playerColor.value === 'white' ? 'wP' : 'bP'}.svg`)
 const sideLabel = computed(() => (playerColor.value === 'white' ? '你執白' : '你執黑'))
 
 function runConfirm(): void {
@@ -66,14 +55,6 @@ watch(confirmAction, async (v) => {
   }
 })
 
-watch(
-  () => moveHistory.value.length,
-  async () => {
-    await nextTick()
-    if (moveScroll.value) moveScroll.value.scrollTop = moveScroll.value.scrollHeight
-  },
-)
-
 const engine = usePlayEngine()
 
 // Skill Level chosen for the current game — used for engine.play and win-recording.
@@ -81,6 +62,12 @@ const engine = usePlayEngine()
 // and game_sessions.ai_difficulty all keep working untouched; the ladder is resolved from it
 // at request time via rungForSkillLevel.
 const chosenLevel = ref(DIFFICULTY_LADDER[0].skillLevel)
+
+// 頂列：開局前只寫「對局」；開局後寫對手是哪一階，副標講你執哪一色（不再顯示 Lv.N）。
+const topTitle = computed(() =>
+  phase.value === 'SETUP' ? '對局' : `對 ${rungForSkillLevel(chosenLevel.value).name}`,
+)
+const topSubtitle = computed(() => (phase.value === 'SETUP' ? undefined : sideLabel.value))
 
 // Board is playable only on the player's turn (disabled while AI thinks, game over, or no game).
 const boardDisabled = computed(() => phase.value !== 'PLAYER_TURN')
@@ -247,8 +234,11 @@ function handleReview(): void {
   router.push('/review')
 }
 
-function goHome(): void {
-  router.push('/')
+// 返回一律 replace('/')：堆疊變成 [/, /]，瀏覽器上一頁不會再回到已離開的對局，也不依賴
+// iOS standalone 空堆疊時靜默失效的 history.back()（同 MemoryView.onHeaderBack）。
+// 對局中離開不跳確認——onBeforeUnmount 照原流程把續玩快照推上雲端。
+function goBack(): void {
+  void router.replace('/')
 }
 
 // ---- Result display helpers ----
@@ -261,10 +251,10 @@ const playerWon = computed(() => {
 
 const isDraw = computed(() => terminal.value?.result === '1/2-1/2')
 
-const resultLabel = computed(() => {
-  if (!terminal.value) return ''
-  return isDraw.value ? '和局' : playerWon.value ? '你贏了！' : '你輸了'
-})
+// 完局紙的標題／副標／印（純函式算，元件只負責排版）。
+const overDisplay = computed(() =>
+  terminal.value ? gameOverDisplay(terminal.value, playerColor.value, moveHistory.value.length) : null,
+)
 
 // 完局一句話講評（Gambit 平靜語氣，稱呼你；不長）。依結果＋結束原因給不同句子。
 const outcomeBlurb = computed(() => {
@@ -280,6 +270,8 @@ const outcomeBlurb = computed(() => {
   if (reason === 'resignation') return '這盤先投降了。輸贏都是練習的一部分。'
   return '這盤輸了。'
 })
+
+const blurbParts = computed(() => outcomeBlurb.value.split(/(?<=。)/))
 
 // Record a win at the chosen Skill Level so the setup modal can nudge to the next rung.
 watch(terminal, (t) => {
@@ -314,136 +306,118 @@ if (isDev) {
 </script>
 
 <template>
-  <div class="flex min-h-full flex-col items-center overflow-x-hidden bg-surface-deep p-4">
-    <h1 class="sr-only" tabindex="-1">對局</h1>
+  <div class="flex min-h-dvh flex-col bg-surface-deep pb-[env(safe-area-inset-bottom)]">
+    <!-- 任務頁：全屏（router meta.fullBleed）、自畫返回，不顯示底部導覽。
+         手機：頂列 → 木盤 → 記譜紙（填滿剩下的高度）；桌機（≥md）：左盤右紙，紙與盤等高。
+         這段註解要留在根元素裡面：放在 template 根層會讓元件變成多根節點，離開頁面時 out-in 換頁卡住、整頁空白。 -->
+    <TaskTopRow :title="topTitle" :subtitle="topSubtitle" @back="goBack" />
 
-    <!-- Desktop: board + panel as a centred two-column group; board scales with viewport height,
-         panel stays adjacent to its right (no floating gap). Stacked + centred on mobile. -->
-    <div
-      class="flex w-full flex-col items-center gap-4 md:flex-row md:items-start md:justify-center md:gap-6"
-    >
-      <!-- framed board (wooden tray) + GAME_OVER overlay; scales by viewport height, capped so the
-           adjacent panel still fits (no overlap / overflow). -->
+    <div class="flex flex-1 flex-col md:m-auto md:flex-none md:flex-row md:gap-6 md:p-6">
+      <!-- 棋盤寬度只用寬度公式設上限：手機另扣掉「頂列＋紙的最小高度」(19.125rem)，矮螢幕盤跟著縮，
+           但不小於 15rem——再矮就讓整頁捲動。≥sm 的下限是 23.5rem，因為 chess-board.vue 在 sm 以上
+           自帶 min-w 352px（加木框內距 24px），橫放手機走這條。不用 max-w 依高度硬縮（technical-preferences 棋盤護欄）。 -->
       <div
-        class="relative w-full shrink-0 max-w-[min(92vw,28rem)] rounded-[12px] bg-[linear-gradient(160deg,#6f4b30,#523722)] p-3 ring-1 ring-black/30 shadow-[0_12px_32px_rgba(10,30,24,0.45),inset_0_1px_0_rgba(255,228,194,0.20),inset_0_-2px_6px_rgba(0,0,0,0.38)] md:w-[min(74vh,calc(100vw-26rem),56rem)] md:max-w-none"
+        class="mx-auto w-[max(15rem,min(100vw_-_2rem,28rem,100dvh_-_19.125rem))] shrink-0 sm:w-[max(23.5rem,min(100vw_-_2rem,28rem,100dvh_-_19.125rem))] md:mx-0 md:w-[min(74vh,100vw_-_26rem,56rem)]"
       >
-        <ChessBoard
-          :fen="fen"
-          :playerColor="playerColor"
-          :disabled="boardDisabled"
-          :coordinates="true"
-          :last-move="lastMove"
-          @move-made="handleMoveMade"
-        />
+        <WoodFrame surface="deep">
+          <ChessBoard
+            :fen="fen"
+            :playerColor="playerColor"
+            :disabled="boardDisabled"
+            :coordinates="true"
+            :last-move="lastMove"
+            @move-made="handleMoveMade"
+          />
+        </WoodFrame>
       </div>
 
-      <!-- Right column: info panel (結果／對手 + 棋譜 + 悔棋/投降), below the board on mobile,
-           adjacent on desktop. Shown during play AND game-over (完局結果 inline，不蓋棋盤彈窗). -->
+      <!-- 記譜紙（開局後才出現）。手機：最小高度＝紙頭＋三列棋譜＋按鈕列，放不下就整頁捲動，紙不被壓扁。
+           桌機：紙絕對定位在這一欄裡，欄高跟著棋盤，紙就與盤等高、棋譜在紙內捲動。 -->
       <div
         v-if="phase !== 'SETUP'"
-        class="w-full max-w-[min(92vw,28rem)] md:w-[20rem] md:max-w-none"
+        class="relative flex min-h-[15.625rem] flex-1 basis-0 flex-col px-4 py-3 md:min-h-0 md:w-80 md:flex-none md:self-stretch md:p-0 [@media(max-height:720px)]:pb-2"
       >
-        <DarkPanel>
-          <!-- 側板文字統一 Cubic 11（font-num），與 eval 一致 -->
-          <div class="font-num">
-          <!-- 完局結果（inline，取代蓋棋盤彈窗）：結果 + 原因 + 再來一局／複盤 -->
-          <div
-            v-if="phase === 'GAME_OVER'"
-            class="mb-3 rounded-[10px] border border-white/10 bg-white/5 p-3.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
-          >
-            <p class="font-display text-xl font-bold" :class="playerWon ? 'text-gold' : 'text-ink-on-deep'">{{ resultLabel }}</p>
-            <!-- 講評歸屬給 Neve（頭像＋署名＋font-lesson＝persona-neve「視覺嗓音」），
-                 否則這句會被讀成系統訊息而不是教練在跟你說話。 -->
-            <div class="mt-3 flex items-center justify-center gap-2">
-              <NeveAvatar size="md" surface="deep" />
-              <span class="font-num text-[11px] tracking-[0.08em] text-ink-on-deep-dim">{{ COACH.name.toUpperCase() }}</span>
-            </div>
-            <p class="mt-1.5 font-lesson text-[15px] leading-[1.9] text-ink-on-deep">{{ outcomeBlurb }}</p>
-            <!-- 主按鈕＝賽後檢討：完局那幾秒是學習遷移最可能發生的時刻，版面權重跟著走。
-                 深青底上 secondary（米白實心）才是最高對比，jade 的 default 反而糊在底色裡。 -->
-            <Button variant="secondary" size="sm" class="mt-3.5 w-full" @click="handleReview">我陪你看看剛剛那一步</Button>
-            <button
-              type="button"
-              class="mt-2 min-h-[44px] w-full rounded-btn border border-white/10 bg-white/6 text-sm font-semibold text-ink-on-deep transition-colors hover:bg-white/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
-              @click="handleNewGame"
-            >再來一局</button>
-            <button
-              type="button"
-              class="mt-2 min-h-[44px] px-2 font-sans text-xs text-ink-on-deep-dim underline-offset-2 transition-colors hover:text-ink-on-deep hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold"
-              @click="goHome"
-            >返回首頁</button>
-          </div>
-
-          <!-- 密度列：回合狀態 ｜ 身分（執子 + 對手等級）合併成一條，省垂直空間，手機一屏可見。
-               輪到你以金色 indicator 強調（Gambit 金＝focus/reward）；AI 思考時左段換成呼吸點。 -->
-          <div
-            v-if="phase !== 'GAME_OVER'"
-            class="mb-3 flex items-center gap-1.5 whitespace-nowrap rounded-[10px] border border-white/10 bg-white/5 px-3 py-2 text-[14px] tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
-          >
-            <template v-if="phase === 'PLAYER_TURN'">
-              <span
-                class="turn-dot h-2.5 w-2.5 shrink-0 rounded-full bg-gold shadow-[0_0_8px_rgba(248,181,0,0.85)]"
-                aria-hidden="true"
-              />
-              <span class="id-text shrink-0 font-bold text-ink-on-deep">輪到你</span>
-            </template>
-            <template v-else>
-              <span class="id-text ai-breathe shrink-0 text-ink-on-deep-dim">思考中</span>
-              <span class="thinking-dots shrink-0 tracking-[2px] text-ink-on-deep-dim" aria-hidden="true">●●●</span>
-            </template>
-
-            <span class="mx-0.5 h-3.5 w-px shrink-0 bg-white/15" aria-hidden="true" />
-
-            <span
-              class="inline-block h-5 w-5 shrink-0 bg-contain bg-center bg-no-repeat"
-              :style="{
-                backgroundImage: `url(${playerPawnSrc})`,
-                ...(playerColor === 'black' ? { filter: 'brightness(var(--piece-dark-brightness))' } : {}),
-              }"
-              aria-hidden="true"
-            />
-            <span class="id-text shrink-0 font-bold text-ink-on-deep">{{ sideLabel }}</span>
-            <span class="id-text min-w-0 shrink-0 truncate text-ink-on-deep-dim">· Lv.{{ chosenLevel }}</span>
-          </div>
-
-          <!-- 棋譜表：標題列收進框內（代碼區塊感）；下方序號 | 白 | 黑。
-               面板貼合內容高度；棋譜捲動區加上限（手機 9rem、桌機 12rem），超出內捲、不撐大側板。 -->
-          <div class="rounded-lg border border-white/10 bg-black/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-            <p class="border-b border-white/10 px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-wider text-ink-on-deep-dim">棋譜</p>
-            <div
-              ref="moveScroll"
-              class="max-h-36 overflow-y-auto p-2.5 font-num text-[14px] leading-relaxed tabular-nums text-ink-on-deep md:max-h-48"
-            >
-              <p v-if="!movePairs.length" class="text-ink-on-deep-dim">尚無棋步</p>
-              <div
-                v-for="p in movePairs"
-                :key="p.n"
-                class="grid grid-cols-[2.5rem_1fr_1fr] gap-1 px-1 py-0.5"
-              >
-                <span class="text-ink-on-deep-dim">{{ p.n }}.</span>
-                <span>{{ p.w }}</span>
-                <span>{{ p.b }}</span>
-              </div>
+        <!-- 對局中 -->
+        <section
+          v-if="phase !== 'GAME_OVER'"
+          class="relative flex min-h-0 flex-1 flex-col rounded-btn bg-surface-card px-4 py-3.5 font-sans text-ink shadow-paper md:absolute md:inset-0"
+          aria-label="記譜紙"
+          data-testid="score-paper"
+        >
+          <div class="pointer-events-none absolute inset-1 rounded-sm border border-line" aria-hidden="true" />
+          <div class="mb-2 flex h-6 shrink-0 items-center justify-between">
+            <h2 class="text-label font-bold tracking-[0.06em] text-ink-muted">
+              棋譜<span v-if="moveCount > 0" class="ml-1.5 font-num text-xs font-normal tracking-[0.02em]">{{ moveCount }} 回合</span>
+            </h2>
+            <!-- 固定寬的狀態槽：輪到你／思考中切換時紙頭不跳。循環動畫維持原樣，等 Eason 看完
+                 motion-compare.html 再決定（wave-1a 步驟 3b）。 -->
+            <div class="flex w-24 shrink-0 items-center justify-end gap-2 text-base leading-none" aria-live="polite" data-testid="turn-status">
+              <template v-if="phase === 'PLAYER_TURN'">
+                <span class="turn-dot size-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+                <span class="font-bold">輪到你</span>
+              </template>
+              <template v-else>
+                <span class="ai-breathe text-ink-muted">思考中</span>
+                <span class="thinking-dots text-xs tracking-[2px] text-ink-muted" aria-hidden="true">●●●</span>
+              </template>
             </div>
           </div>
 
-          <!-- 控制：悔棋（中性）/ 投降（紅色 destructive）；兩者皆彈窗二次確認，防誤觸。完局後隱藏。 -->
-          <div v-if="phase !== 'GAME_OVER'" class="mt-3 flex gap-2">
-            <button
-              type="button"
-              class="min-h-[44px] flex-1 rounded-btn border border-white/10 bg-white/6 text-sm font-semibold text-ink-on-deep transition-colors hover:bg-white/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold disabled:pointer-events-none disabled:opacity-40"
+          <ScoreSheet :moves="moveHistory" :min-rows="16" class="min-h-[6.875rem] flex-1" />
+
+          <!-- 悔棋 / 投降：兩者皆彈窗二次確認，防誤觸。 -->
+          <div class="mt-auto grid shrink-0 grid-cols-2 gap-2.5 pt-3">
+            <Button
+              variant="secondary"
+              size="sm"
+              class="border-line-strong text-base font-bold"
               :disabled="!canUndo"
               @click="confirmAction = 'undo'"
-            >悔棋</button>
-            <button
-              type="button"
-              class="min-h-[44px] flex-1 rounded-btn border border-danger/50 bg-danger/15 text-sm font-semibold text-[#EC9C84] transition-colors hover:bg-danger/25 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-gold disabled:pointer-events-none disabled:opacity-40"
+            >悔棋</Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              class="border-danger-dark/45 text-base font-bold text-danger-dark"
               :disabled="!canResign"
               @click="confirmAction = 'resign'"
-            >投降</button>
+            >投降</Button>
           </div>
+        </section>
+
+        <!-- 完局：同一張紙換內容，右上角蓋印。標題永遠墨色——金只當印的外環（indicator）。
+             可視高 ≤720 時收起棋譜列、印縮成 72px，讓兩顆按鈕留在摺線內。 -->
+        <section
+          v-else-if="overDisplay"
+          class="relative flex min-h-0 flex-1 flex-col rounded-btn bg-surface-card px-4 py-3.5 font-sans text-ink shadow-paper animate-paper-in motion-reduce:animate-none md:absolute md:inset-0 [@media(max-height:720px)]:pb-2.5"
+          aria-labelledby="game-over-title"
+          data-testid="game-over-paper"
+        >
+          <div class="pointer-events-none absolute inset-1 rounded-sm border border-line" aria-hidden="true" />
+          <div class="relative h-24 shrink-0 pt-2.5 [@media(max-height:720px)]:h-[4.625rem] [@media(max-height:720px)]:pt-1">
+            <h2 id="game-over-title" class="font-display text-[1.75rem] leading-9 font-bold tracking-[0.06em] text-ink">{{ overDisplay.title }}</h2>
+            <span class="mt-1 block text-label tracking-[0.02em] text-ink-muted">{{ overDisplay.subtitle }}</span>
+            <ResultSeal
+              :outcome="overDisplay.outcome"
+              :player-color="playerColor"
+              class="absolute -top-0.5 -right-1 size-24 [transform:rotate(-5deg)] animate-seal-in motion-reduce:animate-none [@media(max-height:720px)]:-top-1 [@media(max-height:720px)]:right-0 [@media(max-height:720px)]:size-18"
+            />
           </div>
-        </DarkPanel>
+          <!-- 講評歸屬給 Neve（名牌＋文楷＝persona-neve「視覺嗓音」），否則會被讀成系統訊息。 -->
+          <div class="mt-1.5 shrink-0 border-t border-line pt-2.5 [@media(max-height:720px)]:mt-1 [@media(max-height:720px)]:pt-1.5">
+            <NeveNameTag size="md">
+              <!-- 一句一段 inline-block：窄螢幕換行落在句號後，不會把「一部／分。」拆開 -->
+              <p class="font-lesson text-base leading-normal text-ink">
+                <span v-for="(part, i) in blurbParts" :key="i" class="inline-block">{{ part }}</span>
+              </p>
+            </NeveNameTag>
+          </div>
+          <ScoreSheet :moves="moveHistory" :max-rows="4" :min-rows="16" class="mt-3 min-h-0 flex-1 [@media(max-height:720px)]:hidden" />
+          <!-- 主按鈕＝賽後檢討：完局那幾秒是學習遷移最可能發生的時刻，版面權重跟著走。 -->
+          <div class="mt-auto grid shrink-0 grid-cols-[2fr_1fr] gap-2.5 pt-3 [@media(max-height:720px)]:pt-2">
+            <Button class="px-3 text-base font-bold" @click="handleReview">我陪你看看剛剛那一步</Button>
+            <Button variant="secondary" class="border-line-strong px-3 text-base font-bold" @click="handleNewGame">再下一盤</Button>
+          </div>
+        </section>
       </div>
     </div>
 
@@ -473,10 +447,10 @@ if (isDev) {
       </div>
     </div>
 
-    <!-- DEV ONLY: FEN injection tool — hidden by default, toggle with Ctrl+Shift+F -->
+    <!-- DEV ONLY: FEN injection tool — hidden by default, toggle with Ctrl+Shift+F. 浮在底部，不擠版面。 -->
     <div
       v-if="isDev && devToolsOpen"
-      class="mt-4 flex w-full max-w-[min(92vw,28rem)] flex-wrap items-center gap-2 rounded border border-yellow-400 bg-yellow-100 p-3 text-sm"
+      class="fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-md flex-wrap items-center gap-2 rounded border border-yellow-400 bg-yellow-100 p-3 text-sm"
     >
       <span class="font-mono font-bold text-yellow-800">DEV</span>
       <Input
@@ -497,6 +471,8 @@ if (isDev) {
 </template>
 
 <style scoped>
+/* 三組無限循環（輪到你的點、思考中呼吸、思考點）是 decisions.md 列出的超時動效，暫時原樣保留；
+   要不要換成 150–300ms 單次版本見 design/demos/visual-redesign-2026-11/motion-compare.html。 */
 @keyframes thinking-pulse {
   0%, 100% { opacity: 0.45; }
   50% { opacity: 1; }
@@ -519,25 +495,6 @@ if (isDev) {
 }
 .ai-breathe {
   animation: ai-breathe 2s ease-in-out infinite;
-}
-
-/* vue3-chessboard 預設用 70vh（視窗高）決定棋盤大小、無視容器寬，在固定寬的木框內會橫向溢出
-   蓋住側板。覆寫成填滿木框寬、用 aspect-ratio 維持正方，讓棋盤跟著木框寬度走。 */
-:deep(.main-wrap),
-:deep(.main-board) {
-  width: 100% !important;
-  height: auto !important;
-  max-width: none !important;
-}
-:deep(.cg-wrap) {
-  width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 1 / 1;
-}
-
-/* Cubic 11 像素字 glyph 在字框內偏上，與棋子圖示並排時看起來偏高；微幅下推對齊棋子視覺中心。 */
-.id-text {
-  transform: translateY(1.5px);
 }
 
 @keyframes game-over-in {

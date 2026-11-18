@@ -41,7 +41,7 @@ function focusRouteHeading(): void {
   })
 }
 
-// 沉浸式全屏頁（登入）不套 app chrome：無頂部品牌列、無底部 tab。
+// 沉浸式全屏頁（登入、對局／課程／棋憶等任務頁）不套 app chrome：無頂部品牌列、無底部 tab。
 const fullBleed = computed(() => route.meta.fullBleed === true)
 
 // 學習 pager（/learn、/learn/concepts）自管高度與內部捲動，main 不可再加底部 nav padding，否則高度溢位。
@@ -57,8 +57,7 @@ const routeKey = computed(() => {
   return n
 })
 
-// 頁面底色套在 <main> 上：深色頁的底部 nav 留白區若無底色會露出 body 的 cream。
-// 套在 main 讓 padding 區與內容同色。
+// 頁面底色套在 <main> 上：深色頁（對局）的 main 若無底色，換頁淡入淡出的空檔會露出 body 的 cream。
 const pageBg = computed(() => {
   switch (route.name) {
     case 'play':

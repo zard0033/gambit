@@ -7,7 +7,8 @@ import { useAuthStore } from '@/stores/auth'
 
 export const routes = [
   { path: '/',                name: 'home',      component: HomeView },
-  { path: '/play',            name: 'play',      component: () => import('@/views/PlayView.vue') },
+  // fullBleed: 對局是任務頁——全屏、自畫返回（TaskTopRow），不顯示底部導覽（CLAUDE.md 導覽鐵則）。
+  { path: '/play',            name: 'play',      component: () => import('@/views/PlayView.vue'), meta: { fullBleed: true } },
   // /learn 與 /learn/concepts 都渲染 LearnPager（同一元件 → 切子頁籤時 pager 實例不重繪，indicator 才能跟手滑動）。
   { path: '/learn',           name: 'learn',     component: () => import('@/views/LearnPager.vue') },
   { path: '/learn/concepts',  name: 'concepts',  component: () => import('@/views/LearnPager.vue') },

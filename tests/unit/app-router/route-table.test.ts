@@ -18,6 +18,12 @@ describe('route-table', () => {
     expect(typeof play.component).toBe('function')
   })
 
+  it('test_routeTable_playRoute_isFullBleed', () => {
+    // 對局是任務頁：全屏、不顯示底部導覽（CLAUDE.md 導覽鐵則，wave-1a 步驟 3）
+    const play = routes.find((r) => r.path === '/play')!
+    expect(play.meta?.fullBleed).toBe(true)
+  })
+
   it('test_routeTable_reviewRoute_componentIsFunction', () => {
     const review = routes.find((r) => r.path === '/review')!
     expect(typeof review.component).toBe('function')

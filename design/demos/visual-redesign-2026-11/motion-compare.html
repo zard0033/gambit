@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gambit 動效對照 · 對局記譜紙紙頭的三組循環</title>
+<style>
+@font-face { font-family: 'Sarasa UI TC'; font-weight: 400; font-display: swap; src: url('./fonts/sarasa-ui-tc-400.recut.woff2') format('woff2'); }
+@font-face { font-family: 'Sarasa UI TC'; font-weight: 700; font-display: swap; src: url('./fonts/sarasa-ui-tc-700.recut.woff2') format('woff2'); }
+
+:root {
+  /* 照抄 src/assets/main.css 的 @theme */
+  --font-sans: 'Sarasa UI TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  --color-surface-card: #fcf9f3;
+  --color-surface-deep: #103029;
+  --color-line: #e0d3bd;
+  --color-ink: #3d2210;
+  --color-ink-muted: #7a5c44;
+  --color-ink-on-deep: #e7f1ec;
+  --color-ink-on-deep-dim: #9bbdb1;
+  --color-primary: #1c7059;
+  --shadow-paper: 0 0 0 1px rgba(24, 12, 4, 0.5), 0 12px 28px rgba(24, 12, 4, 0.55);
+  --ease-settle: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+* { box-sizing: border-box; margin: 0; }
+body { padding: 32px 24px 64px; background: #dedcd8; color: #3b3a38; font-family: var(--font-sans); font-size: 16px; line-height: 1.5; }
+h1 { font-size: 22px; line-height: 1.4; }
+.lead { max-width: 760px; margin-top: 8px; font-size: 14px; line-height: 1.75; color: #55524d; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 20px 0 28px; font-size: 14px; }
+.controls button { min-height: 44px; padding: 0 16px; border: 1px solid #a9a6a0; border-radius: 8px; background: #fff; font: inherit; cursor: pointer; }
+.controls label { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; }
+
+.grid { display: grid; grid-template-columns: 180px repeat(2, 390px); gap: 16px 24px; align-items: center; width: max-content; }
+.colhead { font: 700 13px/1.4 var(--font-sans); letter-spacing: 0.04em; color: #3b3a38; }
+.rowhead b { display: block; font-size: 15px; }
+.rowhead span { display: block; font-size: 13px; line-height: 1.6; color: #5d5b57; }
+
+/* 一小段深青底＋紙頭，跟 PlayView 記譜紙同尺寸 */
+.stage { padding: 16px; background: var(--color-surface-deep); border-radius: 4px; }
+.paper { position: relative; padding: 14px 16px; border-radius: 8px; background: var(--color-surface-card); color: var(--color-ink); box-shadow: var(--shadow-paper); }
+.paper::before { content: ""; position: absolute; inset: 4px; border: 1px solid var(--color-line); border-radius: 4px; pointer-events: none; }
+.head { display: flex; align-items: center; justify-content: space-between; height: 24px; }
+.label { font: 700 13px/18px var(--font-sans); letter-spacing: 0.06em; color: var(--color-ink-muted); }
+.slot { display: flex; align-items: center; justify-content: flex-end; gap: 8px; width: 96px; font-size: 16px; line-height: 1; }
+.slot > * { flex: none; white-space: nowrap; }
+.slot .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); }
+.slot .you { font-weight: 700; }
+.slot .think { color: var(--color-ink-muted); }
+.slot .dots { font-size: 12px; letter-spacing: 2px; color: var(--color-ink-muted); }
+.slot .dots i { font-style: normal; display: inline-block; }
+
+/* ---------- 現況：PlayView.vue 的三組無限循環（時長與曲線原樣） ---------- */
+@keyframes turn-dot-breathe { 0%, 100% { opacity: 0.6; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } }
+@keyframes ai-breathe { 0%, 100% { opacity: 0.72; } 50% { opacity: 1; } }
+@keyframes thinking-pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+.now .dot { animation: turn-dot-breathe 2s ease-in-out infinite; }
+.now .think { animation: ai-breathe 2s ease-in-out infinite; }
+.now .dots { animation: thinking-pulse 1.2s ease-in-out infinite; }
+
+/* ---------- 提案：輪替時播一次，150–300ms，播完就停 ---------- */
+@keyframes once-dot { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
+@keyframes once-fade { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes once-dots { from { opacity: 0; } to { opacity: 1; } }
+.alt .dot { animation: once-dot 220ms var(--ease-settle) both; }
+.alt .you, .alt .think { animation: once-fade 200ms var(--ease-settle) both; }
+.alt .dots i { animation: once-dots 150ms var(--ease-settle) both; }
+.alt .dots i:nth-child(2) { animation-delay: 60ms; }
+.alt .dots i:nth-child(3) { animation-delay: 120ms; } /* 最後一點在 270ms 停 */
+
+@media (prefers-reduced-motion: reduce) {
+  .now .dot, .now .think, .now .dots, .alt .dot, .alt .you, .alt .think, .alt .dots i { animation: none; }
+}
+
+.notes { max-width: 760px; margin-top: 32px; font-size: 13px; line-height: 1.75; color: #5d5b57; }
+.notes li { margin-left: 18px; }
+</style>
+</head>
+<body>
+<h1>動效對照：對局記譜紙紙頭的三組循環</h1>
+<p class="lead">
+  第 1 波 1a 步驟 3b。對局頁的「輪到你」小點、「思考中」呼吸、思考點三組動畫目前都是無限循環（2s／2s／1.2s），
+  是 decisions.md 列的「五處超過 300ms」其中三處。左欄是現在 app 裡的樣子（只搬到記譜紙、點改深青），
+  右欄是提案：每次輪替時播一次、150–300ms 內停住。你選了才改，app 目前維持左欄。
+</p>
+
+<div class="controls">
+  <button type="button" id="toggle">換手（輪到你 ⇄ 思考中）</button>
+  <label><input type="checkbox" id="auto" checked> 每 2.5 秒自動換手（模擬一盤棋：你走、電腦想、回到你）</label>
+</div>
+
+<div class="grid">
+  <span></span>
+  <span class="colhead">現況（無限循環）</span>
+  <span class="colhead">提案（輪替時播一次，≤300ms）</span>
+
+  <div class="rowhead"><b>紙頭狀態槽</b><span>三組動畫實際同時出現的樣子：輪到你時小點呼吸；電腦想的時候字與點一起明暗。</span></div>
+  <div class="stage now"><div class="paper"><div class="head"><span class="label">棋譜</span><div class="slot" data-slot></div></div></div></div>
+  <div class="stage alt"><div class="paper"><div class="head"><span class="label">棋譜</span><div class="slot" data-slot></div></div></div></div>
+
+  <div class="rowhead"><b>1 · 輪到你的點</b><span>現況：2s 一個呼吸（scale 0.9↔1.1）。<br>提案：出現時 220ms 由小長到定位，之後不動。</span></div>
+  <div class="stage now"><div class="paper"><div class="head"><span class="label">只看點</span><div class="slot"><span class="dot"></span><span class="you">輪到你</span></div></div></div></div>
+  <div class="stage alt"><div class="paper"><div class="head"><span class="label">只看點</span><div class="slot" data-only="you"></div></div></div></div>
+
+  <div class="rowhead"><b>2 · 思考中</b><span>現況：2s 一次明暗（0.72↔1）。<br>提案：出現時 200ms 淡入、上移 2px，之後不動。</span></div>
+  <div class="stage now"><div class="paper"><div class="head"><span class="label">只看字</span><div class="slot"><span class="think">思考中</span></div></div></div></div>
+  <div class="stage alt"><div class="paper"><div class="head"><span class="label">只看字</span><div class="slot" data-only="think"></div></div></div></div>
+
+  <div class="rowhead"><b>3 · 思考點</b><span>現況：1.2s 一次明暗（0.45↔1）。<br>提案：三點依序亮起，每點 150ms、間隔 60ms，270ms 停在全亮。</span></div>
+  <div class="stage now"><div class="paper"><div class="head"><span class="label">只看點</span><div class="slot"><span class="dots">●●●</span></div></div></div></div>
+  <div class="stage alt"><div class="paper"><div class="head"><span class="label">只看點</span><div class="slot" data-only="dots"></div></div></div></div>
+</div>
+
+<ul class="notes">
+  <li>提案只動 opacity／transform，尊重 prefers-reduced-motion（開了就直接顯示，左右兩欄都不動）。</li>
+  <li>提案的代價：電腦想得久的時候，畫面上沒有任何東西在動，靠「思考中」三個字本身告訴你它還在想。電腦每一手要想 0.9–1.5 秒（<code>difficulty-tuning.ts</code> 的 MIN_THINK_MS 900 加最多 600 的隨機量；手機上搜尋本身可能更久）。</li>
+  <li>也可以混搭：例如只留思考點循環（等待感），輪到你的點改播一次。</li>
+</ul>
+
+<script>
+// 狀態槽依 turn 重畫；重畫＝重新掛上元素，提案欄的單次動畫因此每次換手都會重播一次。
+var turn = 'you'
+var SLOT = {
+  you: '<span class="dot"></span><span class="you">輪到你</span>',
+  think: '<span class="think">思考中</span><span class="dots"><i>●</i><i>●</i><i>●</i></span>',
+}
+var ONLY = {
+  you: { you: '<span class="dot"></span><span class="you">輪到你</span>', think: '' },
+  think: { you: '', think: '<span class="think">思考中</span>' },
+  dots: { you: '', think: '<span class="dots"><i>●</i><i>●</i><i>●</i></span>' },
+}
+function render() {
+  document.querySelectorAll('[data-slot]').forEach(function (el) { el.innerHTML = SLOT[turn] })
+  document.querySelectorAll('[data-only]').forEach(function (el) {
+    var html = ONLY[el.dataset.only][turn]
+    // 單項列：該項不在這個狀態時，保持上一輪的樣子不重播（只在它出現的那一刻播）
+    if (html) el.innerHTML = html
+  })
+}
+function flip() { turn = turn === 'you' ? 'think' : 'you'; render() }
+document.getElementById('toggle').addEventListener('click', flip)
+var timer = setInterval(flip, 2500)
+document.getElementById('auto').addEventListener('change', function (e) {
+  clearInterval(timer)
+  if (e.target.checked) timer = setInterval(flip, 2500)
+})
+// 首次：單項列先各自畫出來
+document.querySelectorAll('[data-only]').forEach(function (el) {
+  var o = ONLY[el.dataset.only]
+  el.innerHTML = o.you || o.think
+})
+render()
+</script>
+</body>
+</html>
